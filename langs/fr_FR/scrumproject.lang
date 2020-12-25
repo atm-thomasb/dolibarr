@@ -1,0 +1,69 @@
+# Copyright (C) 2020 Maxime Kohlhaas <maxime@m-development.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Générique
+#
+
+# Module label 'ModuleScrumProjectName'
+ModuleScrumProjectName = Projet Scrum
+# Module description 'ModuleScrumProjectDesc'
+ModuleScrumProjectDesc = Ajoute des fonctionnalités au module projet pour de la gestion avec la méthode Scrum
+
+#
+# Page d'administration
+#
+ScrumProjectSetup = Configuration du module Projet Scrum
+Settings = Réglages
+ScrumProjectSetupPage = Page de configuration du module Projet Scrum
+
+#
+# Page À propos
+#
+About = À propos
+ScrumProjectAbout = À propos de Projet Scrum
+ScrumProjectAboutPage = Page à propos de Projet Scrum
+
+#
+# Page d'exemple
+#
+MyPageName = Nom de ma page
+
+#
+# Box d'exemple
+#
+MyWidget = Mon widget
+MyWidgetDescription = Description de mon widget
+
+#
+# Sprint
+#
+SprintLabel = Titre
+SprintTeam = Équipe scrum
+QtyVelocity = Vélocité
+QtyPlanned = Quantité planifiée
+QtyProduced = Quantité produite
+
+#
+# Liste
+#
+ScrumSprint = Sprints scrum
+ScrumSprints = sprints scrum
+NewScrumSprint = Nouveau sprint
+StatusScrumSprintDraft = Brouillon
+StatusScrumSprintValid = Validé
+StatusScrumSprintPending = En cours
+StatusScrumSprintDone = Terminé
+StatusScrumSprintCancelled = Annulé
