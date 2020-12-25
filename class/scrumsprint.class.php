@@ -105,7 +105,7 @@ class ScrumSprint extends CommonObject
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'comment'=>"Reference of object"),
 		'fk_team' => array('type'=>'integer:UserGroup:user/class/usergroup.class.php', 'label'=>'SprintTeam', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'usergroup.rowid',),
-		'label' => array('type'=>'varchar(255)', 'label'=>'SprintLabel', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'help'=>"Help text", 'showoncombobox'=>'1',),
+		'label' => array('type'=>'varchar(255)', 'label'=>'SprintLabel', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
 		'date_start' => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>35, 'notnull'=>1, 'visible'=>1,),
 		'date_end' => array('type'=>'date', 'label'=>'DateEnd', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>1,),
 		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
@@ -119,7 +119,7 @@ class ScrumSprint extends CommonObject
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Valider', '2'=>'Pending', '3'=>'Done', '9'=>'Cancelled'),),
+		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2, 'default'=>0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Valider', '2'=>'Pending', '3'=>'Done', '9'=>'Cancelled'),),
 	);
 	public $rowid;
 	public $ref;
@@ -232,7 +232,14 @@ class ScrumSprint extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-		return $this->createCommon($user, $notrigger);
+		$res = $this->createCommon($user, $notrigger);
+		if($res > 0) {
+			$res2 = $this->addTeamMembers();
+			/*if($res2 > 0 ) {
+				$res = $this->calculateVelocity($user);
+			}*/
+		}
+		return $res;
 	}
 
 	/**
@@ -455,7 +462,11 @@ class ScrumSprint extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
-		return $this->deleteCommon($user, $notrigger);
+		$res = $this->deleteCommon($user, $notrigger);
+		if($res > 0) {
+			$res2 = $this->delete_linked_contact();
+		}
+		return $res;
 		//return $this->deleteCommon($user, $notrigger, 1);
 	}
 
@@ -885,7 +896,7 @@ class ScrumSprint extends CommonObject
 	 *
 	 * 	@return array|int		array of lines if OK, <0 if KO
 	 */
-	public function getLinesArray()
+	/*public function getLinesArray()
 	{
 		$this->lines = array();
 
@@ -901,7 +912,7 @@ class ScrumSprint extends CommonObject
 			$this->lines = $result;
 			return $this->lines;
 		}
-	}
+	}*/
 
 	/**
 	 *  Returns the reference to the following non used object depending on the active numbering module.
@@ -1030,31 +1041,48 @@ class ScrumSprint extends CommonObject
 
 		return $error;
 	}
-}
-
-
-require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
-
-/**
- * Class ScrumSprintLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class ScrumSprintLine extends CommonObjectLine
-{
-	// To complete with content of an object ScrumSprintLine
-	// We should have a field rowid, fk_scrumsprint and position
 
 	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
+	 * Link all users from the team to the sprint
+	 * @return int Nb of users linked to the scrum sprint
+	 * @todo use a user extrafield to define the default contact type (DEV or PO)
+	 * @todo call this in trigger create or in user specific action
 	 */
-	public $isextrafieldmanaged = 0;
+	public function addTeamMembers() {
+		$grp = new UserGroup($this->db);
+		$grp->fetch($this->fk_team);
+		if(!empty($grp->members)) {
+			$nbAdd = 0;
+			foreach ($grp->members as $usr) {
+				$res = $this->add_contact($usr->id, 'DEV', 'internal');
+				if($res > 0) $nbAdd++;
+			}
+
+			return $nbAdd;
+		}
+
+		return -1;
+	}
 
 	/**
-	 * Constructor
-	 *
-	 * @param DoliDb $db Database handler
+	 * Calculates the sprint velocity based on the default velocity of each DEV user linked to the sprint
+	 * @return int 1 if OK -1 if KO
+	 * @todo use a user extrafield to define the default velocity
+	 * @todo call this in trigger create or in user specific action
 	 */
-	public function __construct(DoliDB $db)
-	{
-		$this->db = $db;
+	public function calculateVelocity() {
+		if($this->status != self::STATUS_DRAFT) return -1;
+
+		$devs = $this->liste_contact(-1, 'internal', 0, 'DEV');
+
+		$velocity = 0;
+		foreach($devs as $dev) {
+			$usr = new User($this->db);
+			$usr->fetch($dev["id"]);
+			$velocity += $usr->weeklyhours;
+		}
+
+		$this->qty_velocity = $velocity;
+		return 1;
 	}
 }

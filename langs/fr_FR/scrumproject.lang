@@ -54,7 +54,7 @@ SprintLabel = Titre
 SprintTeam = Équipe scrum
 QtyVelocity = Vélocité
 QtyPlanned = Quantité planifiée
-QtyProduced = Quantité produite
+QtyProduced = Quantité réalisée
 
 #
 # Liste
