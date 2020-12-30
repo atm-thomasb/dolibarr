@@ -201,12 +201,12 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'tools');
 
 // Configuration header
 $head = scrumprojectAdminPrepareHead();
-print dol_get_fiche_head($head, 'settings', '', -1, "object_scrumproject@scrumproject");
+print dol_get_fiche_head($head, 'settings', 'Setup', -1, "scrumproject@scrumproject");
 
 // Setup page goes here
 echo '<span class="opacitymedium">'.$langs->trans("ScrumProjectSetupPage").'</span><br><br>';
 
-
+/*
 if ($action == 'edit')
 {
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
@@ -256,11 +256,12 @@ if ($action == 'edit')
 		print '<br>'.$langs->trans("NothingToSetup");
 	}
 }
-
+*/
 
 $moduledir = 'scrumproject';
 $myTmpObjects = array();
 $myTmpObjects['ScrumSprint'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
+$myTmpObjects['ScrumCard'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
 
 
 foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {

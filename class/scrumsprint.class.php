@@ -51,7 +51,7 @@ class ScrumSprint extends CommonObject
 	 * @var int  Does this object support multicompany module ?
 	 * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
 	 */
-	public $ismultientitymanaged = 0;
+	public $ismultientitymanaged = 1;
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes
@@ -68,7 +68,6 @@ class ScrumSprint extends CommonObject
 	const STATUS_VALIDATED = 1;
 	const STATUS_PENDING = 2;
 	const STATUS_DONE = 3;
-	const STATUS_CANCELED = 9;
 
 
 	/**
@@ -104,6 +103,7 @@ class ScrumSprint extends CommonObject
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'comment'=>"Reference of object"),
+		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'fk_team' => array('type'=>'integer:UserGroup:user/class/usergroup.class.php', 'label'=>'SprintTeam', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'usergroup.rowid',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'SprintLabel', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
 		'date_start' => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>35, 'notnull'=>1, 'visible'=>1,),
@@ -119,10 +119,11 @@ class ScrumSprint extends CommonObject
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2, 'default'=>0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Valider', '2'=>'Pending', '3'=>'Done', '9'=>'Cancelled'),),
+		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2, 'index'=>1, 'arrayofkeyval'=>array('0'=>'StatusScrumSprintDraft', '1'=>'StatusScrumSprintValid', '2'=>'StatusScrumSprintPending', '3'=>'StatusScrumSprintDone'),),
 	);
 	public $rowid;
 	public $ref;
+	public $entity;
 	public $fk_team;
 	public $label;
 	public $date_start;
@@ -190,7 +191,7 @@ class ScrumSprint extends CommonObject
 		$this->db = $db;
 
 		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) $this->fields['rowid']['visible'] = 0;
-		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) $this->fields['entity']['enabled'] = 0;
+		//if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) $this->fields['entity']['enabled'] = 0;
 
 		// Example to show how to set values of fields definition dynamically
 		/*if ($user->rights->scrumproject->scrumsprint->read) {
@@ -221,6 +222,8 @@ class ScrumSprint extends CommonObject
 				}
 			}
 		}
+
+		$this->status = self::STATUS_DRAFT;
 	}
 
 	/**
@@ -633,39 +636,7 @@ class ScrumSprint extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
 		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SCRUMSPRINT_UNVALIDATE');
-	}
-
-	/**
-	 *	Set cancel status
-	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
-	 */
-	public function cancel($user, $notrigger = 0)
-	{
-		// Protection
-		if ($this->status != self::STATUS_VALIDATED)
-		{
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
-		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SCRUMSPRINT_CLOSE');
 	}
 
 	/**
@@ -677,19 +648,6 @@ class ScrumSprint extends CommonObject
 	 */
 	public function reopen($user, $notrigger = 0)
 	{
-		// Protection
-		if ($this->status != self::STATUS_CANCELED)
-		{
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
 		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SCRUMSPRINT_REOPEN');
 	}
 
@@ -814,17 +772,18 @@ class ScrumSprint extends CommonObject
 		{
 			global $langs;
 			//$langs->load("scrumproject@scrumproject");
-			$this->labelStatus[self::STATUS_DRAFT] = $langs->trans('Draft');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->trans('Enabled');
-			$this->labelStatus[self::STATUS_CANCELED] = $langs->trans('Disabled');
-			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->trans('Draft');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->trans('Enabled');
-			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->trans('Disabled');
+			$this->labelStatus[self::STATUS_DRAFT] = $langs->trans('StatusScrumSprintDraft');
+			$this->labelStatus[self::STATUS_VALIDATED] = $langs->trans('StatusScrumSprintValid');
+			$this->labelStatus[self::STATUS_PENDING] = $langs->trans('StatusScrumSprintPending');
+			$this->labelStatus[self::STATUS_DONE] = $langs->trans('StatusScrumSprintDone');
+			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->trans('StatusScrumSprintDraft');
+			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->trans('StatusScrumSprintValid');
+			$this->labelStatusShort[self::STATUS_PENDING] = $langs->trans('StatusScrumSprintPending');
+			$this->labelStatusShort[self::STATUS_DONE] = $langs->trans('StatusScrumSprintDone');
 		}
 
 		$statusType = 'status'.$status;
 		//if ($status == self::STATUS_VALIDATED) $statusType = 'status1';
-		if ($status == self::STATUS_CANCELED) $statusType = 'status6';
 
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
 	}

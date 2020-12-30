@@ -83,7 +83,7 @@ print load_fiche_titre($langs->trans("ScrumProjectSetup"), $linkback, 'title_set
 
 $head = scrumprojectAdminPrepareHead();
 
-print dol_get_fiche_head($head, 'scrumsprint_extrafields', $langs->trans("ScrumSprintExtraFields"), -1, 'account');
+print dol_get_fiche_head($head, 'scrumsprint_extrafields', $langs->trans("ScrumSprintExtraFields"), -1, 'scrumproject@scrumproject');
 
 require DOL_DOCUMENT_ROOT.'/core/tpl/admin_extrafields_view.tpl.php';
 

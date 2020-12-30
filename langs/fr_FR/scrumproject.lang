@@ -28,6 +28,9 @@ ModuleScrumProjectDesc = Ajoute des fonctionnalités au module projet pour de la
 ScrumProjectSetup = Configuration du module Projet Scrum
 Settings = Réglages
 ScrumProjectSetupPage = Page de configuration du module Projet Scrum
+ScrumSprintExtraFields = Attributs supplémentaires sprints
+ScrumCardExtraFields = Attributs supplémentaires cartes
+NumberingModules = Modèles de numérotation pour %s
 
 #
 # Page À propos
@@ -47,8 +50,8 @@ MyPageName = Nom de ma page
 MyWidget = Mon widget
 MyWidgetDescription = Description de mon widget
 
-#
-# Sprint
+#####################################################
+# ScrumSprint
 #
 SprintLabel = Titre
 SprintTeam = Équipe scrum
@@ -67,3 +70,21 @@ StatusScrumSprintValid = Validé
 StatusScrumSprintPending = En cours
 StatusScrumSprintDone = Terminé
 StatusScrumSprintCancelled = Annulé
+
+#####################################################
+# ScrumCard
+#
+Points = Points
+UserPO = Product Owner
+UserDEV = Développeur
+
+
+#
+# Liste
+#
+ScrumCard = Cartes scrum
+ScrumCards = cartes scrum
+NewScrumCard = Nouvelle carte
+StatusScrumCardDraft = Brouillon
+StatusScrumCardReady = Prête
+StatusScrumCardDone = Terminée

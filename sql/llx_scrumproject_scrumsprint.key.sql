@@ -17,6 +17,7 @@
 -- BEGIN MODULEBUILDER INDEXES
 ALTER TABLE llx_scrumproject_scrumsprint ADD INDEX idx_scrumproject_scrumsprint_rowid (rowid);
 ALTER TABLE llx_scrumproject_scrumsprint ADD INDEX idx_scrumproject_scrumsprint_ref (ref);
+ALTER TABLE llx_scrumproject_scrumsprint ADD INDEX idx_scrumproject_scrumsprint_entity (entity);
 ALTER TABLE llx_scrumproject_scrumsprint ADD CONSTRAINT llx_scrumproject_scrumsprint_fk_team FOREIGN KEY (fk_team) REFERENCES llx_usergroup(rowid);
 ALTER TABLE llx_scrumproject_scrumsprint ADD CONSTRAINT llx_scrumproject_scrumsprint_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
 ALTER TABLE llx_scrumproject_scrumsprint ADD CONSTRAINT llx_scrumproject_scrumsprint_fk_user_modif FOREIGN KEY (fk_user_modif) REFERENCES llx_user(rowid);
