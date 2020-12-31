@@ -14,26 +14,13 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 
-CREATE TABLE llx_scrumproject_scrumsprint(
-	-- BEGIN MODULEBUILDER FIELDS
-	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
-	entity integer DEFAULT 1 NOT NULL, 
-	fk_team integer NOT NULL, 
-	label varchar(255), 
-	date_start date NOT NULL, 
-	date_end date NOT NULL, 
-	qty_velocity real, 
-	qty_planned real, 
-	qty_produced real, 
-	description text, 
-	note_public text, 
-	note_private text, 
-	date_creation datetime NOT NULL,
+CREATE TABLE llx_c_scrumcard_stage(
+	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
     tms	timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	fk_user_creat integer NOT NULL, 
-	fk_user_modif integer, 
-	import_key varchar(14), 
-	status smallint NOT NULL
-	-- END MODULEBUILDER FIELDS
+    entity integer	DEFAULT 1 NOT NULL,
+    code varchar(16),
+    label varchar(255),
+    picto varchar(32),
+    position smallint,
+    active tinyint DEFAULT 1
 ) ENGINE=innodb;

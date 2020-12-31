@@ -14,23 +14,23 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 
-CREATE TABLE llx_scrumproject_scrumsprint(
+CREATE TABLE llx_scrumproject_scrumcard(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
 	entity integer DEFAULT 1 NOT NULL, 
-	fk_team integer NOT NULL, 
 	label varchar(255), 
-	date_start date NOT NULL, 
-	date_end date NOT NULL, 
-	qty_velocity real, 
-	qty_planned real, 
-	qty_produced real, 
+	points real, 
+	fk_user_po integer NOT NULL, 
+	fk_user_dev integer, 
+	fk_task integer NOT NULL, 
+	fk_scrumsprint integer, 
+	fk_stage integer, 
 	description text, 
 	note_public text, 
 	note_private text, 
-	date_creation datetime NOT NULL,
-    tms	timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	date_creation datetime NOT NULL, 
+	tms timestamp, 
 	fk_user_creat integer NOT NULL, 
 	fk_user_modif integer, 
 	import_key varchar(14), 

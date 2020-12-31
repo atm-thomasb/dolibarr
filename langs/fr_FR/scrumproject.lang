@@ -31,6 +31,7 @@ ScrumProjectSetupPage = Page de configuration du module Projet Scrum
 ScrumSprintExtraFields = Attributs supplémentaires sprints
 ScrumCardExtraFields = Attributs supplémentaires cartes
 NumberingModules = Modèles de numérotation pour %s
+ScrumCardStage = Projet Scrum - Étapes des cartes
 
 #
 # Page À propos
@@ -62,7 +63,7 @@ QtyProduced = Quantité réalisée
 #
 # Liste
 #
-ScrumSprint = Sprints scrum
+ScrumSprint = Sprint scrum
 ScrumSprints = sprints scrum
 NewScrumSprint = Nouveau sprint
 StatusScrumSprintDraft = Brouillon
@@ -75,6 +76,7 @@ StatusScrumSprintCancelled = Annulé
 # ScrumCard
 #
 Points = Points
+Stage = Étape
 UserPO = Product Owner
 UserDEV = Développeur
 
@@ -82,7 +84,7 @@ UserDEV = Développeur
 #
 # Liste
 #
-ScrumCard = Cartes scrum
+ScrumCard = Carte scrum
 ScrumCards = cartes scrum
 NewScrumCard = Nouvelle carte
 StatusScrumCardDraft = Brouillon
