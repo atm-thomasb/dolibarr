@@ -57,8 +57,12 @@ MyWidgetDescription = Description de mon widget
 SprintLabel = Titre
 SprintTeam = Équipe scrum
 QtyVelocity = Vélocité
-QtyPlanned = Quantité planifiée
-QtyProduced = Quantité réalisée
+QtyPlanned = Qté planifiée
+QtyProduced = Qté réalisée
+SetToPending = Démarrer
+SetToDone = Terminer
+SetBackToPending = Retour à en cours
+SetBackToValid = Retour à validé
 
 #
 # Liste
