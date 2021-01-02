@@ -83,6 +83,7 @@ Points = Points
 Stage = Étape
 UserPO = Product Owner
 UserDEV = Développeur
+SetBackToReady = Retour en prête
 
 
 #
