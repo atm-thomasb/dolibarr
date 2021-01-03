@@ -235,14 +235,7 @@ class ScrumSprint extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-		$res = $this->createCommon($user, $notrigger);
-		if($res > 0) {
-			$res2 = $this->addTeamMembers();
-			/*if($res2 > 0 ) {
-				$res = $this->calculateVelocity($user);
-			}*/
-		}
-		return $res;
+		return $this->createCommon($user, $notrigger);
 	}
 
 	/**
@@ -1015,7 +1008,8 @@ class ScrumSprint extends CommonObject
 		if(!empty($grp->members)) {
 			$nbAdd = 0;
 			foreach ($grp->members as $usr) {
-				$res = $this->add_contact($usr->id, 'DEV', 'internal');
+				if(empty($usr->array_options['options_scrumproject_role'])) continue;
+				$res = $this->add_contact($usr->id, $usr->array_options['options_scrumproject_role'], 'internal');
 				if($res > 0) $nbAdd++;
 			}
 
@@ -1031,7 +1025,7 @@ class ScrumSprint extends CommonObject
 	 * @todo use a user extrafield to define the default velocity
 	 * @todo call this in trigger create or in user specific action
 	 */
-	public function calculateVelocity() {
+	public function calculateVelocity(User $user) {
 		if($this->status != self::STATUS_DRAFT) return -1;
 
 		$devs = $this->liste_contact(-1, 'internal', 0, 'DEV');
@@ -1040,10 +1034,10 @@ class ScrumSprint extends CommonObject
 		foreach($devs as $dev) {
 			$usr = new User($this->db);
 			$usr->fetch($dev["id"]);
-			$velocity += $usr->weeklyhours;
+			$velocity += $usr->array_options['options_scrumproject_velocity'];
 		}
 
 		$this->qty_velocity = $velocity;
-		return 1;
+		return $this->update($user);
 	}
 }

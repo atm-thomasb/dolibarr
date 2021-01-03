@@ -13,8 +13,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042151,'scrumsprint','internal','PO','Product Owner','1',null);
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042152,'scrumsprint','internal','DEV','Developer','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042151,'scrumsprint','internal','PO','ScrumProjectUserRolePO','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042152,'scrumsprint','internal','DEV','ScrumProjectUserRoleDEV','1',null);
 
 INSERT INTO llx_c_scrumcard_stage(code, label, position, picto, active) VALUES ('BKLO','Backlog',10,'fa fa-lightbulb',1);
 INSERT INTO llx_c_scrumcard_stage(code, label, position, picto, active) VALUES ('TODO','Todo',20,'fas fa-list',1);

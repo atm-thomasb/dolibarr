@@ -25,6 +25,7 @@ ModuleScrumProjectDesc = Ajoute des fonctionnalités au module projet pour de la
 #
 # Page d'administration
 #
+ScrumProject = Projet scrum
 ScrumProjectSetup = Configuration du module Projet Scrum
 Settings = Réglages
 ScrumProjectSetupPage = Page de configuration du module Projet Scrum
@@ -63,6 +64,10 @@ SetToPending = Démarrer
 SetToDone = Terminer
 SetBackToPending = Retour à en cours
 SetBackToValid = Retour à validé
+ScrumProjectUserVelocity = Vélocité par sprint scrum
+ScrumProjectUserRole = Rôle scrum
+ScrumProjectUserRolePO = Product Owner
+ScrumProjectUserRoleDEV = Developer
 
 #
 # Liste

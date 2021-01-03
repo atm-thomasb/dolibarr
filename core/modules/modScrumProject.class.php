@@ -112,6 +112,7 @@ class modScrumProject extends DolibarrModules
 			),
 			// Set this to 1 if features of module are opened to external users
 			'moduleforexternal' => 0,
+			'contactelement' => array('scrumsprint' => "ScrumSprint")
 		);
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/scrumproject/temp","/scrumproject/subdir");
@@ -670,10 +671,10 @@ class modScrumProject extends DolibarrModules
 		if ($result < 0) return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 
 		// Create extrafields during init
-		//include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-		//$extrafields = new ExtraFields($this->db);
-		//$result1=$extrafields->addExtraField('scrumproject_myattr1', "New Attr 1 label", 'boolean', 1,  3, 'thirdparty',   0, 0, '', '', 1, '', 0, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
-		//$result2=$extrafields->addExtraField('scrumproject_myattr2', "New Attr 2 label", 'varchar', 1, 10, 'project',      0, 0, '', '', 1, '', 0, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
+		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+		$extrafields = new ExtraFields($this->db);
+		$result1=$extrafields->addExtraField('scrumproject_velocity', "ScrumProjectUserVelocity", 'double', 1000,  '24,8', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
+		$result2=$extrafields->addExtraField('scrumproject_role', "ScrumProjectUserRole", 'sellist', 1010, '', 'user',      0, 0, '', array('options' => array("c_type_contact:libelle:rowid::active=1 AND element='scrumproject' AND source='internal'" => null)), 1, '', 1, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
 		//$result3=$extrafields->addExtraField('scrumproject_myattr3', "New Attr 3 label", 'varchar', 1, 10, 'bank_account', 0, 0, '', '', 1, '', 0, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
 		//$result4=$extrafields->addExtraField('scrumproject_myattr4', "New Attr 4 label", 'select',  1,  3, 'thirdparty',   0, 1, '', array('options'=>array('code1'=>'Val1','code2'=>'Val2','code3'=>'Val3')), 1,'', 0, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
 		//$result5=$extrafields->addExtraField('scrumproject_myattr5', "New Attr 5 label", 'text',    1, 10, 'user',         0, 0, '', '', 1, '', 0, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
@@ -682,40 +683,6 @@ class modScrumProject extends DolibarrModules
 		$this->remove($options);
 
 		$sql = array();
-
-		// Document templates
-		$moduledir = 'scrumproject';
-		$myTmpObjects = array();
-		$myTmpObjects['ScrumSprint'] = array('includerefgeneration'=>0, 'includedocgeneration'=>0);
-
-		foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
-			if ($myTmpObjectKey == 'ScrumSprint') continue;
-			if ($myTmpObjectArray['includerefgeneration']) {
-				$src = DOL_DOCUMENT_ROOT.'/install/doctemplates/scrumproject/template_scrumsprints.odt';
-				$dirodt = DOL_DATA_ROOT.'/doctemplates/scrumproject';
-				$dest = $dirodt.'/template_scrumsprints.odt';
-
-				if (file_exists($src) && !file_exists($dest))
-				{
-					require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-					dol_mkdir($dirodt);
-					$result = dol_copy($src, $dest, 0, 0);
-					if ($result < 0)
-					{
-						$langs->load("errors");
-						$this->error = $langs->trans('ErrorFailToCopyFile', $src, $dest);
-						return 0;
-					}
-				}
-
-				$sql = array_merge($sql, array(
-					"DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = 'standard_".strtolower($myTmpObjectKey)."' AND type = '".strtolower($myTmpObjectKey)."' AND entity = ".$conf->entity,
-					"INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type, entity) VALUES('standard_".strtolower($myTmpObjectKey)."','".strtolower($myTmpObjectKey)."',".$conf->entity.")",
-					"DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = 'generic_".strtolower($myTmpObjectKey)."_odt' AND type = '".strtolower($myTmpObjectKey)."' AND entity = ".$conf->entity,
-					"INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type, entity) VALUES('generic_".strtolower($myTmpObjectKey)."_odt', '".strtolower($myTmpObjectKey)."', ".$conf->entity.")"
-				));
-			}
-		}
 
 		return $this->_init($sql, $options);
 	}
