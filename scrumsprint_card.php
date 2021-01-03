@@ -382,35 +382,35 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 
 			// Modify
-			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit', $permissiontoadd);
+			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit', '', $permissiontoadd);
 
 			// When draft
 			if ($object->status == $object::STATUS_DRAFT) {
-				print dolGetButtonAction($langs->trans('Validate'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate&confirm=yes', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('Validate'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate&confirm=yes', '', $permissiontoadd);
 			}
 
 			// When valid
 			if ($object->status == $object::STATUS_VALIDATED) {
-				print dolGetButtonAction($langs->trans('SetToDraft'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes', $permissiontoadd);
-				print dolGetButtonAction($langs->trans('SetToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetToDraft'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes', '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes', '', $permissiontoadd);
 			}
 
 			// When pending
 			if($object->status == $object::STATUS_PENDING) {
-				print dolGetButtonAction($langs->trans('SetBackToValid'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_reopen&confirm=yes', $permissiontoadd);
-				print dolGetButtonAction($langs->trans('SetToDone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdone&confirm=yes', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetBackToValid'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_reopen&confirm=yes', '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetToDone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdone&confirm=yes', '', $permissiontoadd);
 			}
 
 			// When done
 			if($object->status == $object::STATUS_DONE) {
-				print dolGetButtonAction($langs->trans('SetBackToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetBackToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes', '', $permissiontoadd);
 			}
 
 			// Clone
-			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&socid='.$object->socid.'&action=clone&object=scrumsprint', $permissiontoadd);
+			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&socid='.$object->socid.'&action=clone&object=scrumsprint', '', $permissiontoadd);
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
-			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
+			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete', '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
 		}
 		print '</div>'."\n";
 	}
