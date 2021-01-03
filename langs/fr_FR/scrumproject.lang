@@ -96,6 +96,7 @@ SetBackToReady = Retour en prête
 #
 ScrumCard = Carte scrum
 ScrumCards = cartes scrum
+ScrumCardTab = Cartes
 NewScrumCard = Nouvelle carte
 StatusScrumCardDraft = Brouillon
 StatusScrumCardReady = Prête

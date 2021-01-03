@@ -82,6 +82,14 @@ $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss  = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
 
 $id = GETPOST('id', 'int');
+$scrumsprintid = GETPOST('scrumsprintid', 'int');
+
+if($scrumsprintid > 0) {
+	dol_include_once('/scrumproject/class/scrumsprint.class.php');
+	dol_include_once('/scrumproject/lib/scrumproject_scrumsprint.lib.php');
+	$scrumsprint = new ScrumSprint($db);
+	$scrumsprint->fetch($scrumsprintid);
+}
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -239,6 +247,9 @@ $reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object
 $sql .= $hookmanager->resPrint;
 if ($object->ismultientitymanaged == 1) $sql .= " WHERE t.entity IN (".getEntity($object->element).")";
 else $sql .= " WHERE 1 = 1";
+
+if($scrumsprint->id > 0) $sql .= " AND t.fk_scrumsprint = ".$scrumsprint->id;
+
 foreach ($search as $key => $val)
 {
 	if ($key == 'status' && $search[$key] == -1) continue;
@@ -331,6 +342,26 @@ jQuery(document).ready(function() {
 	});
 });
 </script>';
+
+if($scrumsprint->id > 0) {
+	$head = scrumsprintPrepareHead($scrumsprint);
+	print dol_get_fiche_head($head, 'scrumcardlist', $langs->trans("ScrumSprint"), -1, $scrumsprint->picto);
+
+	$linkback = '<a href="'.dol_buildpath('/scrumproject/scrumsprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+
+	$morehtmlref = '<div class="refidno">';
+	if(!empty($scrumsprint->label)) $morehtmlref.= $scrumsprint->label . '<br>';
+	$morehtmlref.= $scrumsprint->showOutputField($scrumsprint->fields['fk_team'], 'fk_team', $scrumsprint->fk_team);
+	$morehtmlref .= '</div>';
+
+	dol_banner_tab($scrumsprint, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+
+	print '<div class="fichecenter">';
+	print '<div class="underbanner clearboth"></div>';
+	print '</div>';
+
+	print dol_get_fiche_end();
+}
 
 $arrayofselected = is_array($toselect) ? $toselect : array();
 
