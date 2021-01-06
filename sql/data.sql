@@ -16,8 +16,8 @@
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042151,'scrumsprint','internal','PO','ScrumProjectUserRolePO','1',null);
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042152,'scrumsprint','internal','DEV','ScrumProjectUserRoleDEV','1',null);
 
-INSERT INTO llx_c_scrumcard_stage(code, label, position, picto, active) VALUES ('BKLO','Backlog',10,'fa fa-lightbulb',1);
-INSERT INTO llx_c_scrumcard_stage(code, label, position, picto, active) VALUES ('TODO','Todo',20,'fas fa-list',1);
-INSERT INTO llx_c_scrumcard_stage(code, label, position, picto, active) VALUES ('INPR','In progress',30,'fa fa-spinner',1);
-INSERT INTO llx_c_scrumcard_stage(code, label, position, picto, active) VALUES ('TEST','Testing',40,'fas fa-check',1);
-INSERT INTO llx_c_scrumcard_stage(code, label, position, picto, active) VALUES ('DONE','Done',50,'fas fa-check-double',1);
+INSERT INTO llx_c_scrumcard_stage(rowid, code, label, position, picto, active) VALUES (1, 'BKLO','Backlog',10,'fa fa-lightbulb',1);
+INSERT INTO llx_c_scrumcard_stage(rowid, code, label, position, picto, active) VALUES (2, 'TODO','Todo',20,'fas fa-list',1);
+INSERT INTO llx_c_scrumcard_stage(rowid, code, label, position, picto, active) VALUES (3, 'INPR','In progress',30,'fa fa-spinner',1);
+INSERT INTO llx_c_scrumcard_stage(rowid, code, label, position, picto, active) VALUES (4, 'TEST','Testing',40,'fas fa-check',1);
+INSERT INTO llx_c_scrumcard_stage(rowid, code, label, position, picto, active) VALUES (5, 'DONE','Done',50,'fas fa-check-double',1);
