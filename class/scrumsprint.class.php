@@ -112,8 +112,8 @@ class ScrumSprint extends CommonObject
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0,),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>0,),
 		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>105, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'qty_produced' => array('type'=>'real', 'label'=>'QtyProduced', 'enabled'=>'1', 'position'=>110, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'noteditable'=>1,),
+		'qty_done' => array('type'=>'real', 'label'=>'QtyDone', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'noteditable'=>1,),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
@@ -130,7 +130,7 @@ class ScrumSprint extends CommonObject
 	public $date_end;
 	public $qty_velocity;
 	public $qty_planned;
-	public $qty_produced;
+	public $qty_done;
 	public $description;
 	public $note_public;
 	public $note_private;
@@ -999,8 +999,6 @@ class ScrumSprint extends CommonObject
 	/**
 	 * Link all users from the team to the sprint
 	 * @return int Nb of users linked to the scrum sprint
-	 * @todo use a user extrafield to define the default contact type (DEV or PO)
-	 * @todo call this in trigger create or in user specific action
 	 */
 	public function addTeamMembers() {
 		$grp = new UserGroup($this->db);
@@ -1022,8 +1020,6 @@ class ScrumSprint extends CommonObject
 	/**
 	 * Calculates the sprint velocity based on the default velocity of each DEV user linked to the sprint
 	 * @return int 1 if OK -1 if KO
-	 * @todo use a user extrafield to define the default velocity
-	 * @todo call this in trigger create or in user specific action
 	 */
 	public function calculateVelocity(User $user) {
 		if($this->status != self::STATUS_DRAFT) return -1;
@@ -1039,5 +1035,30 @@ class ScrumSprint extends CommonObject
 
 		$this->qty_velocity = $velocity;
 		return $this->update($user);
+	}
+
+	/**
+	 * Calculates the sprint quantities : planned and done
+	 * Planned is the sum of points of all cards linked to the sprint
+	 * Done is the same but only for done cards
+	 * @return int 1 if OK -1 if KO
+	 */
+	public function calculateQuantities(User $user) {
+		$sql = "SELECT SUM(c.points) as qty_planned, SUM(CASE WHEN c.status = ".ScrumCard::STATUS_DONE." THEN c.points ELSE 0 END) as qty_done";
+		$sql.= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumcard c";
+		$sql.= " WHERE c.fk_scrumsprint = ".$this->id;
+
+		$resql = $this->db->query($sql);
+		if($resql) {
+			$obj = $this->db->fetch_object($resql);
+			$this->qty_planned = $obj->qty_planned;
+			$this->qty_done = $obj->qty_done;
+
+			return $this->update($user);
+		} else {
+			dol_print_error($this->db);
+			$this->error = $this->db->lasterror();
+			return -1;
+		}
 	}
 }

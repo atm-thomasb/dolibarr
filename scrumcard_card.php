@@ -451,7 +451,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// When done
 			if($object->status == $object::STATUS_DONE) {
-				print dolGetButtonAction($langs->trans('SetBackToReady'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate&confirm=yes', '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetBackToReady'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_reopen&confirm=yes', '', $permissiontoadd);
 			}
 
 

@@ -346,4 +346,34 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 
 		return 0;
 	}
+
+	public function scrumCardCreate($action, $object, User $user, Translate $langs, Conf $conf) {
+		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
+	}
+
+	public function scrumCardModify($action, $object, User $user, Translate $langs, Conf $conf) {
+		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
+	}
+
+	public function scrumCardDone($action, $object, User $user, Translate $langs, Conf $conf) {
+		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
+	}
+
+	public function scrumCardReopen($action, $object, User $user, Translate $langs, Conf $conf) {
+		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
+	}
+
+	public function _updateSprintQuantities($action, $object, User $user, Translate $langs, Conf $conf) {
+		dol_include_once('/scrumproject/class/scrumsprint.class.php');
+		$sprint = new ScrumSprint($this->db);
+		$sprint->fetch($object->fk_scrumsprint);
+		$res = $sprint->calculateQuantities($user);
+
+		if($res < 0) {
+			setEventMessages($langs->trans('ScrumSprintQuantitiesCalculatedError'), $sprint->errors, 'errors');
+			return -1;
+		}
+
+		return 0;
+	}
 }
