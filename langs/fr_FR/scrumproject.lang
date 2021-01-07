@@ -64,10 +64,15 @@ SetToPending = Démarrer
 SetToDone = Terminer
 SetBackToPending = Retour à en cours
 SetBackToValid = Retour à validé
+ScrumSprintUserAdded = %s utilisateurs associés au sprint
+ScrumSprintUserAddedError = Erreur lors de l'association des utilisateurs au sprint
+ScrumSprintVelocityCalculated = Vélocité calculée du sprint : %s
+ScrumSprintVelocityCalculatedError = Erreur lors du calcul de la vélocité du sprint : %s
 ScrumProjectUserVelocity = Vélocité par sprint scrum
 ScrumProjectUserRole = Rôle scrum
 ScrumProjectUserRolePO = Product Owner
 ScrumProjectUserRoleDEV = Developer
+
 
 #
 # Liste
