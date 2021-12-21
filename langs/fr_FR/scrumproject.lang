@@ -35,6 +35,16 @@ NumberingModules = Modèles de numérotation pour %s
 ScrumCardStage = Projet Scrum - Étapes des cartes
 
 #
+# MENU
+#
+
+
+ScrumUserStory = User story
+NewScrumUserStory = Nouvelle User story
+ScrumUserStorySprint = User story plannifiés
+NewScrumUserStorySprint = Nouvelle plannification
+
+#
 # Page À propos
 #
 About = À propos
@@ -108,3 +118,14 @@ StatusScrumCardDraft = Brouillon
 StatusScrumCardReady = Prête
 StatusScrumCardDone = Terminée
 GoToScrumCards = Voir les cartes
+
+
+
+StatusScrumUserStoryDraft = Brouillon
+StatusScrumUserStoryReady = Prête
+StatusScrumUserStoryDone = Terminée
+
+
+StatusScrumUserStorySprintDraft = Brouillon
+StatusScrumUserStorySprintReady = Prête
+StatusScrumUserStorySprintDone = Terminée

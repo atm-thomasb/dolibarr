@@ -17,9 +17,9 @@
  */
 
 /**
- *  \file       scumuserstorysprint_document.php
+ *  \file       scrumuserstorysprint_document.php
  *  \ingroup    scrumproject
- *  \brief      Tab for documents linked to ScumUserStorySprint
+ *  \brief      Tab for documents linked to ScrumUserStorySprint
  */
 
 //if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');				// Do not create database handler $db
@@ -78,8 +78,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
-dol_include_once('/scrumproject/class/scumuserstorysprint.class.php');
-dol_include_once('/scrumproject/lib/scrumproject_scumuserstorysprint.lib.php');
+dol_include_once('/scrumproject/class/scrumuserstorysprint.class.php');
+dol_include_once('/scrumproject/lib/scrumproject_scrumuserstorysprint.lib.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "companies", "other", "mails"));
@@ -110,10 +110,10 @@ if (!$sortfield) {
 //if (! $sortfield) $sortfield="position_name";
 
 // Initialize technical objects
-$object = new ScumUserStorySprint($db);
+$object = new ScrumUserStorySprint($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
-$hookmanager->initHooks(array('scumuserstorysprintdocument', 'globalcard')); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks(array('scrumuserstorysprintdocument', 'globalcard')); // Note that conf->hooks_modules contains array
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 
@@ -121,10 +121,10 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once  // Must be include, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 
 if ($id > 0 || !empty($ref)) {
-	$upload_dir = $conf->scrumproject->multidir_output[$object->entity ? $object->entity : $conf->entity]."/scumuserstorysprint/".get_exdir(0, 0, 0, 1, $object);
+	$upload_dir = $conf->scrumproject->multidir_output[$object->entity ? $object->entity : $conf->entity]."/scrumuserstorysprint/".get_exdir(0, 0, 0, 1, $object);
 }
 
-$permissiontoadd = $user->rights->scrumproject->scumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
+$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();
@@ -148,7 +148,7 @@ include DOL_DOCUMENT_ROOT.'/core/actions_linkedfiles.inc.php';
 
 $form = new Form($db);
 
-$title = $langs->trans("ScumUserStorySprint").' - '.$langs->trans("Files");
+$title = $langs->trans("ScrumUserStorySprint").' - '.$langs->trans("Files");
 $help_url = '';
 //$help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
 llxHeader('', $title, $help_url);
@@ -157,7 +157,7 @@ if ($object->id) {
 	/*
 	 * Show tabs
 	 */
-	$head = scumuserstorysprintPrepareHead($object);
+	$head = scrumuserstorysprintPrepareHead($object);
 
 	print dol_get_fiche_head($head, 'document', '', -1, $object->picto);
 
@@ -171,7 +171,7 @@ if ($object->id) {
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/scrumproject/scumuserstorysprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.dol_buildpath('/scrumproject/scrumuserstorysprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	/*
@@ -233,14 +233,14 @@ if ($object->id) {
 	print dol_get_fiche_end();
 
 	$modulepart = 'scrumproject';
-	//$permissiontoadd = $user->rights->scrumproject->scumuserstorysprint->write;
+	//$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write;
 	$permissiontoadd = 1;
-	//$permtoedit = $user->rights->scrumproject->scumuserstorysprint->write;
+	//$permtoedit = $user->rights->scrumproject->scrumuserstorysprint->write;
 	$permtoedit = 1;
 	$param = '&id='.$object->id;
 
-	//$relativepathwithnofile='scumuserstorysprint/' . dol_sanitizeFileName($object->id).'/';
-	$relativepathwithnofile = 'scumuserstorysprint/'.dol_sanitizeFileName($object->ref).'/';
+	//$relativepathwithnofile='scrumuserstorysprint/' . dol_sanitizeFileName($object->id).'/';
+	$relativepathwithnofile = 'scrumuserstorysprint/'.dol_sanitizeFileName($object->ref).'/';
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
 } else {

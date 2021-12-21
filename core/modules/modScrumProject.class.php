@@ -110,7 +110,9 @@ class modScrumProject extends DolibarrModules
 			),
 			// Set this to 1 if features of module are opened to external users
 			'moduleforexternal' => 0,
-			'contactelement' => array('scrumsprint' => "ScrumSprint")
+			'contactelement' => array(
+				'scrumsprint' => "ScrumSprint"
+			)
 		);
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/scrumproject/temp","/scrumproject/subdir");
@@ -241,7 +243,11 @@ class modScrumProject extends DolibarrModules
 		$this->rights = array();
 		$r = 0;
 		// Add here entries to declare new permissions
-		/* BEGIN MODULEBUILDER PERMISSIONS */
+
+		/**
+		 * DROIT POUR SCRUM CARDS
+		 */
+
 		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read scrum sprints'; // Permission label
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
@@ -257,6 +263,11 @@ class modScrumProject extends DolibarrModules
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
+
+		/**
+		 * DROIT POUR SCRUM CARDS
+		 */
+
 		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read scrum cards'; // Permission label
 		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
@@ -272,72 +283,52 @@ class modScrumProject extends DolibarrModules
 		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		/* END MODULEBUILDER PERMISSIONS */
+
+		/**
+		 * DROIT POUR SCRUM USER STORY
+		 */
+
+		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Read scrum user story'; // Permission label
+		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Create/Update scrum  user story'; // Permission label
+		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Delete scrum  user story'; // Permission label
+		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+
+
+		/**
+		 * DROIT POUR SCRUM USER STORY SPRINT
+		 */
+
+		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Read scrum user story affected yo sprint'; // Permission label
+		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Affect scrum  user story on sprint'; // Permission label
+		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Delete scrum user story from sprint'; // Permission label
+		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
 
 		// Main menu entries to add
 		$this->menu = array();
 		$r = 0;
-		// Add here entries to declare new menus
-		/* BEGIN MODULEBUILDER TOPMENU */
-		/*$this->menu[$r++] = array(
-			'fk_menu'=>'', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'top', // This is a Top menu entry
-			'titre'=>'ModuleScrumProjectName',
-			'mainmenu'=>'scrumproject',
-			'leftmenu'=>'',
-			'url'=>'/scrumproject/scrumprojectindex.php',
-			'langs'=>'scrumproject@scrumproject', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000 + $r,
-			'enabled'=>'$conf->scrumproject->enabled', // Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled.
-			'perms'=>'1', // Use 'perms'=>'$user->rights->scrumproject->scrumsprint->read' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
-		);*/
-		/* END MODULEBUILDER TOPMENU */
-		/* BEGIN MODULEBUILDER LEFTMENU SCRUMSPRINT
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=scrumproject',      // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',                          // This is a Top menu entry
-			'titre'=>'ScrumSprint',
-			'mainmenu'=>'scrumproject',
-			'leftmenu'=>'scrumsprint',
-			'url'=>'/scrumproject/scrumprojectindex.php',
-			'langs'=>'scrumproject@scrumproject',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'$conf->scrumproject->enabled',  // Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->scrumproject->scrumsprint->read',			                // Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=scrumproject,fk_leftmenu=scrumsprint',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'List_ScrumSprint',
-			'mainmenu'=>'scrumproject',
-			'leftmenu'=>'scrumproject_scrumsprint_list',
-			'url'=>'/scrumproject/scrumsprint_list.php',
-			'langs'=>'scrumproject@scrumproject',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'$conf->scrumproject->enabled',  // Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=>'$user->rights->scrumproject->scrumsprint->read',			                // Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=scrumproject,fk_leftmenu=scrumsprint',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'New_ScrumSprint',
-			'mainmenu'=>'scrumproject',
-			'leftmenu'=>'scrumproject_scrumsprint_new',
-			'url'=>'/scrumproject/scrumsprint_card.php?action=create',
-			'langs'=>'scrumproject@scrumproject',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'$conf->scrumproject->enabled',  // Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=>'$user->rights->scrumproject->scrumsprint->write',			                // Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
-		*/
+
 
         $this->menu[$r++]=array(
             // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -346,7 +337,7 @@ class modScrumProject extends DolibarrModules
             'type'=>'left',
             'titre'=>'ScrumSprint',
             'mainmenu'=>'project',
-            'leftmenu'=>'scrumproject_scrumsprint',
+            'leftmenu'=>'scrumsprint',
             'url'=>'/scrumproject/scrumsprint_list.php',
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'scrumproject@scrumproject',
@@ -361,12 +352,12 @@ class modScrumProject extends DolibarrModules
         );
         $this->menu[$r++]=array(
             // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-            'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumsprint',
+            'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumsprint',
             // This is a Left menu entry
             'type'=>'left',
             'titre'=>'NewScrumSprint',
             'mainmenu'=>'project',
-            'leftmenu'=>'scrumproject_scrumsprintnew',
+            'leftmenu'=>'scrumsprintnew',
             'url'=>'/scrumproject/scrumsprint_card.php?action=create',
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'scrumproject@scrumproject',
@@ -381,12 +372,12 @@ class modScrumProject extends DolibarrModules
         );
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumsprint',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumsprint',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'List',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumsprintlist',
+			'leftmenu'=>'scrumsprintlist',
 			'url'=>'/scrumproject/scrumsprint_list.php',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -401,12 +392,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumsprintlist',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumsprintlist',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'StatusScrumSprintDraft',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumsprintlist0',
+			'leftmenu'=>'scrumsprintlist0',
 			'url'=>'/scrumproject/scrumsprint_list.php?search_status=0',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -421,12 +412,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumsprintlist',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumsprintlist',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'StatusScrumSprintValid',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumsprintlist1',
+			'leftmenu'=>'scrumsprintlist1',
 			'url'=>'/scrumproject/scrumsprint_list.php?search_status=1',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -441,12 +432,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumsprintlist',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumsprintlist',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'StatusScrumSprintPending',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumsprintlist2',
+			'leftmenu'=>'scrumsprintlist2',
 			'url'=>'/scrumproject/scrumsprint_list.php?search_status=2',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -461,12 +452,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumsprintlist',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumsprintlist',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'StatusScrumSprintDone',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumsprintlist3',
+			'leftmenu'=>'scrumsprintlist3',
 			'url'=>'/scrumproject/scrumsprint_list.php?search_status=3',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -487,7 +478,7 @@ class modScrumProject extends DolibarrModules
 			'type'=>'left',
 			'titre'=>'ScrumCard',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumcard',
+			'leftmenu'=>'scrumcard',
 			'url'=>'/scrumproject/scrumcard_list.php',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -502,12 +493,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumcard',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumcard',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'NewScrumCard',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumcardnew',
+			'leftmenu'=>'scrumcardnew',
 			'url'=>'/scrumproject/scrumcard_card.php?action=create',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -522,12 +513,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumcard',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumcard',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'List',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumcardlist',
+			'leftmenu'=>'scrumcardlist',
 			'url'=>'/scrumproject/scrumcard_list.php',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -542,12 +533,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumcardlist',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumcardlist',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'StatusScrumCardDraft',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumcardlist0',
+			'leftmenu'=>'scrumcardlist0',
 			'url'=>'/scrumproject/scrumcard_list.php?search_status=0',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -562,12 +553,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumcardlist',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumcardlist',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'StatusScrumCardReady',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumcardlist1',
+			'leftmenu'=>'scrumcardlist1',
 			'url'=>'/scrumproject/scrumcard_list.php?search_status=1',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -582,12 +573,12 @@ class modScrumProject extends DolibarrModules
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumproject_scrumcardlist',
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumcardlist',
 			// This is a Left menu entry
 			'type'=>'left',
 			'titre'=>'StatusScrumCardDone',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumproject_scrumcardlist2',
+			'leftmenu'=>'scrumcardlist2',
 			'url'=>'/scrumproject/scrumcard_list.php?search_status=2',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
@@ -601,7 +592,256 @@ class modScrumProject extends DolibarrModules
 			'user'=>2,
 		);
 
-		/* END MODULEBUILDER LEFTMENU SCRUMSPRINT */
+
+		/**
+		 * MENU SCRUM USER STORY
+		 */
+
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'ScrumUserStory',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstory',
+			'url'=>'/scrumproject/scrumuserstory_list.php',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstory',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'NewScrumUserStory',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorynew',
+			'url'=>'/scrumproject/scrumuserstory_card.php?action=create',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstory->write',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstory',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'List',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorylist',
+			'url'=>'/scrumproject/scrumuserstory_list.php',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorylist',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'StatusScrumUserStoryDraft',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorylist0',
+			'url'=>'/scrumproject/scrumuserstory_list.php?search_status=0',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorylist',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'StatusScrumUserStoryReady',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorylist1',
+			'url'=>'/scrumproject/scrumuserstory_list.php?search_status=1',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorylist',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'StatusScrumUserStoryDone',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorylist2',
+			'url'=>'/scrumproject/scrumuserstory_list.php?search_status=2',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+
+		/**
+		 * MENU SCRUM USER STORY SPRINT
+		 */
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'ScrumUserStorySprint',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorysprint',
+			'url'=>'/scrumproject/scrumuserstorysprint_list.php',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorysprint',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'NewScrumUserStorySprint',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorysprintnew',
+			'url'=>'/scrumproject/scrumuserstorysprint_card.php?action=create',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->write',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorysprint',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'List',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorysprintlist',
+			'url'=>'/scrumproject/scrumuserstorysprint_list.php',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorysprintlist',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'StatusScrumUserStorySprintDraft',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorysprintlist0',
+			'url'=>'/scrumproject/scrumuserstorysprint_list.php?search_status=0',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorysprintlist',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'StatusScrumUserStorySprintReady',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorysprintlist1',
+			'url'=>'/scrumproject/scrumuserstorysprint_list.php?search_status=1',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorysprintlist',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'StatusScrumUserStorySprintDone',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorysprintlist2',
+			'url'=>'/scrumproject/scrumuserstorysprint_list.php?search_status=2',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>2,
+		);
+
 		// Exports profiles provided by this module
 		$r = 1;
 		/* BEGIN MODULEBUILDER EXPORT SCRUMSPRINT */

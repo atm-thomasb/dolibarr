@@ -21,9 +21,9 @@
  */
 
 /**
- *      \file       admin/scumuserstorysprint_extrafields.php
+ *      \file       admin/scrumuserstorysprint_extrafields.php
  *		\ingroup    scrumproject
- *		\brief      Page to setup extra fields of scumuserstorysprint
+ *		\brief      Page to setup extra fields of scrumuserstorysprint
  */
 
 // Load Dolibarr environment
@@ -72,7 +72,7 @@ foreach ($tmptype2label as $key => $val) {
 
 $action = GETPOST('action', 'aZ09');
 $attrname = GETPOST('attrname', 'alpha');
-$elementtype = 'scrumproject_scumuserstorysprint'; //Must be the $table_element of the class that manage extrafield
+$elementtype = 'scrumproject_scrumuserstorysprint'; //Must be the $table_element of the class that manage extrafield
 
 if (!$user->admin) {
 	accessforbidden();
@@ -103,7 +103,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 $head = scrumprojectAdminPrepareHead();
 
-print dol_get_fiche_head($head, 'scumuserstorysprint_extrafields', $langs->trans($page_name), -1, 'scrumproject@scrumproject');
+print dol_get_fiche_head($head, 'scrumuserstorysprint_extrafields', $langs->trans($page_name), -1, 'scrumproject@scrumproject');
 
 require DOL_DOCUMENT_ROOT.'/core/tpl/admin_extrafields_view.tpl.php';
 

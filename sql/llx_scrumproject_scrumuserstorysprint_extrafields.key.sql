@@ -13,11 +13,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/.
 
-create table llx_scrumproject_scumuserstorysprint_extrafields
-(
-  rowid                     integer AUTO_INCREMENT PRIMARY KEY,
-  tms                       timestamp,
-  fk_object                 integer NOT NULL,
-  import_key                varchar(14)                          		-- import key
-) ENGINE=innodb;
 
+-- BEGIN MODULEBUILDER INDEXES
+ALTER TABLE llx_scrumproject_scrumuserstorysprint_extrafields ADD INDEX idx_scrumuserstorysprint_fk_object(fk_object);
+-- END MODULEBUILDER INDEXES

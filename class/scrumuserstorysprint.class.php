@@ -17,9 +17,9 @@
  */
 
 /**
- * \file        class/srumsprintuser.class.php
+ * \file        class/scrumuserstorysprint.class.php
  * \ingroup     scrumproject
- * \brief       This file is a CRUD class file for SrumSprintUser (Create/Read/Update/Delete)
+ * \brief       This file is a CRUD class file for ScrumUserStorySprint (Create/Read/Update/Delete)
  */
 
 // Put here all includes required by your class file
@@ -28,9 +28,9 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 /**
- * Class for SrumSprintUser
+ * Class for ScrumUserStorySprint
  */
-class SrumSprintUser extends CommonObject
+class ScrumUserStorySprint extends CommonObject
 {
 	/**
 	 * @var string ID of module.
@@ -40,12 +40,12 @@ class SrumSprintUser extends CommonObject
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'srumsprintuser';
+	public $element = 'scrumuserstorysprint';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
 	 */
-	public $table_element = 'scrumproject_srumsprintuser';
+	public $table_element = 'scrumproject_scrumuserstorysprint';
 
 	/**
 	 * @var int  Does this object support multicompany module ?
@@ -59,9 +59,9 @@ class SrumSprintUser extends CommonObject
 	public $isextrafieldmanaged = 1;
 
 	/**
-	 * @var string String with name of icon for srumsprintuser. Must be the part after the 'object_' into object_srumsprintuser.png
+	 * @var string String with name of icon for scrumuserstorysprint. Must be the part after the 'object_' into object_scrumuserstorysprint.png
 	 */
-	public $picto = 'srumsprintuser@scrumproject';
+	public $picto = 'scrumuserstorysprint@scrumproject';
 
 
 	const STATUS_DRAFT = 0;
@@ -103,23 +103,30 @@ class SrumSprintUser extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'fk_scrum_sprint' => array('type' => 'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label' => 'ScrumUserStory', 'enabled' => '1', 'position' => 52, 'notnull' => -1, 'visible' => -1, 'index' => 1, 'validate' => '1', 'foreignkey'=>'scrumproject_scrumsprint.rowid'),
-		'fk_user_role' => array('type' => 'integer', 'label' => 'ScrumUserRole', 'enabled' => '1', 'position' => 52, 'notnull' => -1, 'visible' => -1, 'index' => 1, 'validate' => '1', 'foreignkey'=>'c_type_contact.rowid'),
-		'fk_user' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid'),
-		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp'),
-		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2),
-		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2),
-		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid'),
-		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'foreignkey'=>'user.rowid'),
-		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Valid&eacute;', '9'=>'Annul&eacute;'), 'validate'=>'1'),
+		'fk_scrum_user_story' => array('type'=>'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1', 'label'=>'ScrumUserStory', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumuserstory.rowid', 'validate'=>'1',),
+		'fk_scrum_sprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumsprint.rowid', 'validate'=>'1',),
+		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
+		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_done' => array('type'=>'real', 'label'=>'QtyDone', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'description' => array('type'=>'text', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
+		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0, 'validate'=>'1',),
+		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>0, 'validate'=>'1',),
+		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
+		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
+		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
+		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2,),
+		'last_main_doc' => array('type'=>'varchar(255)', 'label'=>'LastMainDoc', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>0,),
+		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
+		'model_pdf' => array('type'=>'varchar(255)', 'label'=>'Model pdf', 'enabled'=>'1', 'position'=>1010, 'notnull'=>-1, 'visible'=>0,),
 	);
 	public $rowid;
-	public $label;
-	public $amount;
-	public $qty;
-	public $fk_soc;
-	public $fk_project;
+	public $fk_scrum_user_story;
+	public $fk_scrum_sprint;
+	public $business_value;
+	public $qty_planned;
+	public $qty_consumed;
+	public $qty_done;
 	public $description;
 	public $note_public;
 	public $note_private;
@@ -130,7 +137,6 @@ class SrumSprintUser extends CommonObject
 	public $last_main_doc;
 	public $import_key;
 	public $model_pdf;
-	public $status;
 	// END MODULEBUILDER PROPERTIES
 
 
@@ -139,17 +145,17 @@ class SrumSprintUser extends CommonObject
 	// /**
 	//  * @var string    Name of subtable line
 	//  */
-	// public $table_element_line = 'scrumproject_srumsprintuserline';
+	// public $table_element_line = 'scrumproject_scrumuserstorysprintline';
 
 	// /**
 	//  * @var string    Field with ID of parent key if this object has a parent
 	//  */
-	// public $fk_element = 'fk_srumsprintuser';
+	// public $fk_element = 'fk_scrumuserstorysprint';
 
 	// /**
 	//  * @var string    Name of subtable class that manage subtable lines
 	//  */
-	// public $class_element_line = 'SrumSprintUserline';
+	// public $class_element_line = 'ScrumUserStorySprintline';
 
 	// /**
 	//  * @var array	List of child tables. To test if we can delete object.
@@ -161,10 +167,10 @@ class SrumSprintUser extends CommonObject
 	//  *               If name matches '@ClassNAme:FilePathClass;ParentFkFieldName' it will
 	//  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
 	//  */
-	// protected $childtablesoncascade = array('scrumproject_srumsprintuserdet');
+	// protected $childtablesoncascade = array('scrumproject_scrumuserstorysprintdet');
 
 	// /**
-	//  * @var SrumSprintUserLine[]     Array of subtable lines
+	//  * @var ScrumUserStorySprintLine[]     Array of subtable lines
 	//  */
 	// public $lines = array();
 
@@ -189,7 +195,7 @@ class SrumSprintUser extends CommonObject
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->scrumproject->srumsprintuser->read) {
+		/*if ($user->rights->scrumproject->scrumuserstorysprint->read) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
@@ -503,8 +509,8 @@ class SrumSprintUser extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->srumsprintuser->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->srumsprintuser->srumsprintuser_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstorysprint->write))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstorysprint->scrumuserstorysprint_advance->validate))))
 		 {
 		 $this->error='NotEnoughPermissions';
 		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
@@ -546,7 +552,7 @@ class SrumSprintUser extends CommonObject
 
 			if (!$error && !$notrigger) {
 				// Call trigger
-				$result = $this->call_trigger('SRUMSPRINTUSER_VALIDATE', $user);
+				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_VALIDATE', $user);
 				if ($result < 0) {
 					$error++;
 				}
@@ -560,8 +566,8 @@ class SrumSprintUser extends CommonObject
 			// Rename directory if dir was a temporary ref
 			if (preg_match('/^[\(]?PROV/i', $this->ref)) {
 				// Now we rename also files into index
-				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'srumsprintuser/".$this->db->escape($this->newref)."'";
-				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'srumsprintuser/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
+				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'scrumuserstorysprint/".$this->db->escape($this->newref)."'";
+				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'scrumuserstorysprint/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
 				$resql = $this->db->query($sql);
 				if (!$resql) {
 					$error++; $this->error = $this->db->lasterror();
@@ -570,15 +576,15 @@ class SrumSprintUser extends CommonObject
 				// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments
 				$oldref = dol_sanitizeFileName($this->ref);
 				$newref = dol_sanitizeFileName($num);
-				$dirsource = $conf->scrumproject->dir_output.'/srumsprintuser/'.$oldref;
-				$dirdest = $conf->scrumproject->dir_output.'/srumsprintuser/'.$newref;
+				$dirsource = $conf->scrumproject->dir_output.'/scrumuserstorysprint/'.$oldref;
+				$dirdest = $conf->scrumproject->dir_output.'/scrumuserstorysprint/'.$newref;
 				if (!$error && file_exists($dirsource)) {
 					dol_syslog(get_class($this)."::validate() rename dir ".$dirsource." into ".$dirdest);
 
 					if (@rename($dirsource, $dirdest)) {
 						dol_syslog("Rename ok");
 						// Rename docs starting with $oldref with $newref
-						$listoffiles = dol_dir_list($conf->scrumproject->dir_output.'/srumsprintuser/'.$newref, 'files', 1, '^'.preg_quote($oldref, '/'));
+						$listoffiles = dol_dir_list($conf->scrumproject->dir_output.'/scrumuserstorysprint/'.$newref, 'files', 1, '^'.preg_quote($oldref, '/'));
 						foreach ($listoffiles as $fileentry) {
 							$dirsource = $fileentry['name'];
 							$dirdest = preg_replace('/^'.preg_quote($oldref, '/').'/', $newref, $dirsource);
@@ -628,7 +634,7 @@ class SrumSprintUser extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SRUMSPRINTUSER_UNVALIDATE');
+		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SCRUMUSERSTORYSPRINT_UNVALIDATE');
 	}
 
 	/**
@@ -652,7 +658,7 @@ class SrumSprintUser extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SRUMSPRINTUSER_CANCEL');
+		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SCRUMUSERSTORYSPRINT_CANCEL');
 	}
 
 	/**
@@ -676,7 +682,7 @@ class SrumSprintUser extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SRUMSPRINTUSER_REOPEN');
+		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SCRUMUSERSTORYSPRINT_REOPEN');
 	}
 
 	/**
@@ -699,14 +705,14 @@ class SrumSprintUser extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("SrumSprintUser").'</u>';
+		$label = img_picto('', $this->picto).' <u>'.$langs->trans("ScrumUserStorySprint").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}
 		$label .= '<br>';
 		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
 
-		$url = dol_buildpath('/scrumproject/srumsprintuser_card.php', 1).'?id='.$this->id;
+		$url = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?id='.$this->id;
 
 		if ($option != 'nolink') {
 			// Add param to save lastsearch_values or not
@@ -722,7 +728,7 @@ class SrumSprintUser extends CommonObject
 		$linkclose = '';
 		if (empty($notooltip)) {
 			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-				$label = $langs->trans("ShowSrumSprintUser");
+				$label = $langs->trans("ShowScrumUserStorySprint");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
 			$linkclose .= ' title="'.dol_escape_htmltag($label, 1).'"';
@@ -782,7 +788,7 @@ class SrumSprintUser extends CommonObject
 		//if ($withpicto != 2) $result.=(($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
 
 		global $action, $hookmanager;
-		$hookmanager->initHooks(array('srumsprintuserdao'));
+		$hookmanager->initHooks(array('scrumuserstorysprintdao'));
 		$parameters = array('id'=>$this->id, 'getnomurl'=>$result);
 		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 		if ($reshook > 0) {
@@ -918,8 +924,8 @@ class SrumSprintUser extends CommonObject
 	{
 		$this->lines = array();
 
-		$objectline = new SrumSprintUserLine($this->db);
-		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_srumsprintuser = '.((int) $this->id)));
+		$objectline = new ScrumUserStorySprintLine($this->db);
+		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_scrumuserstorysprint = '.((int) $this->id)));
 
 		if (is_numeric($result)) {
 			$this->error = $this->error;
@@ -941,15 +947,15 @@ class SrumSprintUser extends CommonObject
 		global $langs, $conf;
 		$langs->load("scrumproject@scrumproject");
 
-		if (empty($conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON)) {
-			$conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON = 'mod_srumsprintuser_standard';
+		if (empty($conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON)) {
+			$conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON = 'mod_scrumuserstorysprint_standard';
 		}
 
-		if (!empty($conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON)) {
+		if (!empty($conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON)) {
 			$mybool = false;
 
-			$file = $conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON.".php";
-			$classname = $conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON;
+			$file = $conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON.".php";
+			$classname = $conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON;
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
@@ -1007,12 +1013,12 @@ class SrumSprintUser extends CommonObject
 		$langs->load("scrumproject@scrumproject");
 
 		if (!dol_strlen($modele)) {
-			$modele = 'standard_srumsprintuser';
+			$modele = 'standard_scrumuserstorysprint';
 
 			if (!empty($this->model_pdf)) {
 				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->SRUMSPRINTUSER_ADDON_PDF)) {
-				$modele = $conf->global->SRUMSPRINTUSER_ADDON_PDF;
+			} elseif (!empty($conf->global->SCRUMUSERSTORYSPRINT_ADDON_PDF)) {
+				$modele = $conf->global->SCRUMUSERSTORYSPRINT_ADDON_PDF;
 			}
 		}
 
@@ -1060,12 +1066,12 @@ class SrumSprintUser extends CommonObject
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 
 /**
- * Class SrumSprintUserLine. You can also remove this and generate a CRUD class for lines objects.
+ * Class ScrumUserStorySprintLine. You can also remove this and generate a CRUD class for lines objects.
  */
-class SrumSprintUserLine extends CommonObjectLine
+class ScrumUserStorySprintLine extends CommonObjectLine
 {
-	// To complete with content of an object SrumSprintUserLine
-	// We should have a field rowid, fk_srumsprintuser and position
+	// To complete with content of an object ScrumUserStorySprintLine
+	// We should have a field rowid, fk_scrumuserstorysprint and position
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes

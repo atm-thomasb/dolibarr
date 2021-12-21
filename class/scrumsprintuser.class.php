@@ -17,9 +17,9 @@
  */
 
 /**
- * \file        class/scumuserstorysprint.class.php
+ * \file        class/srumsprintuser.class.php
  * \ingroup     scrumproject
- * \brief       This file is a CRUD class file for ScumUserStorySprint (Create/Read/Update/Delete)
+ * \brief       This file is a CRUD class file for SrumSprintUser (Create/Read/Update/Delete)
  */
 
 // Put here all includes required by your class file
@@ -28,9 +28,9 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 /**
- * Class for ScumUserStorySprint
+ * Class for SrumSprintUser
  */
-class ScumUserStorySprint extends CommonObject
+class SrumSprintUser extends CommonObject
 {
 	/**
 	 * @var string ID of module.
@@ -40,12 +40,12 @@ class ScumUserStorySprint extends CommonObject
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'scumuserstorysprint';
+	public $element = 'srumsprintuser';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
 	 */
-	public $table_element = 'scrumproject_scumuserstorysprint';
+	public $table_element = 'scrumproject_srumsprintuser';
 
 	/**
 	 * @var int  Does this object support multicompany module ?
@@ -59,9 +59,9 @@ class ScumUserStorySprint extends CommonObject
 	public $isextrafieldmanaged = 1;
 
 	/**
-	 * @var string String with name of icon for scumuserstorysprint. Must be the part after the 'object_' into object_scumuserstorysprint.png
+	 * @var string String with name of icon for srumsprintuser. Must be the part after the 'object_' into object_srumsprintuser.png
 	 */
-	public $picto = 'scumuserstorysprint@scrumproject';
+	public $picto = 'srumsprintuser@scrumproject';
 
 
 	const STATUS_DRAFT = 0;
@@ -101,45 +101,29 @@ class ScumUserStorySprint extends CommonObject
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
-	public $fields = array(
-		'rowid' => array('type' => 'integer', 'label' => 'TechnicalID', 'enabled' => '1', 'position' => 1, 'notnull' => 1, 'visible' => 0, 'noteditable' => '1', 'index' => 1, 'css' => 'left', 'comment' => "Id"),
-
-		'fk_scrum_user_story' => array('type' => 'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1', 'label' => 'ScrumUserStory', 'enabled' => '1', 'position' => 52, 'notnull' => -1, 'visible' => -1, 'index' => 1, 'validate' => '1', 'foreignkey'=>'scrumproject_scrumuserstory.rowid'),
-		'fk_scrum_sprint' => array('type' => 'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label' => 'ScrumUserStory', 'enabled' => '1', 'position' => 52, 'notnull' => -1, 'visible' => -1, 'index' => 1, 'validate' => '1','foreignkey'=>'scrumproject_scrumsprint.rowid'),
-
-		'qty_planned' => array('type' => 'real', 'label' => 'QtyPlanned', 'enabled' => '1', 'position' => 105, 'notnull' => 0, 'visible' => 1, 'default' => '0', 'isameasure' => '1', 'css' => 'maxwidth75imp', 'noteditable' => 1),
-		'qty_consumed' => array('type' => 'real', 'label' => 'QtyConsumed', 'enabled' => '1', 'position' => 100, 'notnull' => 1, 'visible' => 1, 'default' => '0', 'isameasure' => '1', 'css' => 'maxwidth75imp',),
-		'qty_done' => array('type' => 'real', 'label' => 'QtyDone', 'enabled' => '1', 'position' => 110, 'notnull' => 0, 'visible' => 1, 'default' => '0', 'isameasure' => '1', 'css' => 'maxwidth75imp', 'noteditable' => 1),
-
-		'description' => array('type' => 'text', 'label' => 'Description', 'enabled' => '1', 'position' => 60, 'notnull' => 0, 'visible' => 3, 'validate' => '1',),
-		'note_public' => array('type' => 'html', 'label' => 'NotePublic', 'enabled' => '1', 'position' => 61, 'notnull' => 0, 'visible' => 0, 'validate' => '1'),
-
-		'note_private' => array('type' => 'html', 'label' => 'NotePrivate', 'enabled' => '1', 'position' => 62, 'notnull' => 0, 'visible' => 0, 'validate' => '1',),
-		'date_creation' => array('type' => 'datetime', 'label' => 'DateCreation', 'enabled' => '1', 'position' => 500, 'notnull' => 1, 'visible' => -2),
-		'tms' => array('type' => 'timestamp', 'label' => 'DateModification', 'enabled' => '1', 'position' => 501, 'notnull' => 0, 'visible' => -2,),
-		'fk_user_creat' => array('type' => 'integer:User:user/class/user.class.php', 'label' => 'UserAuthor', 'enabled' => '1', 'position' => 510, 'notnull' => 1, 'visible' => -2, 'foreignkey' => 'user.rowid'),
-		'fk_user_modif' => array('type' => 'integer:User:user/class/user.class.php', 'label' => 'UserModif', 'enabled' => '1', 'position' => 511, 'notnull' => -1, 'visible' => -2,),
-		'last_main_doc' => array('type' => 'varchar(255)', 'label' => 'LastMainDoc', 'enabled' => '1', 'position' => 600, 'notnull' => 0, 'visible' => 0,),
-		'import_key' => array('type' => 'varchar(14)', 'label' => 'ImportId', 'enabled' => '1', 'position' => 1000, 'notnull' => -1, 'visible' => -2,),
-		'model_pdf' => array('type' => 'varchar(255)', 'label' => 'Model pdf', 'enabled' => '1', 'position' => 1010, 'notnull' => -1, 'visible' => 0,),);
+	public $fields=array(
+		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
+		'fk_scrum_sprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label'=>'ScrumUserStory', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumsprint.rowid', 'validate'=>'1',),
+		'fk_user_role' => array('type'=>'integer', 'label'=>'ScrumUserRole', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'c_type_contact.rowid', 'validate'=>'1',),
+		'fk_user' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
+		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
+		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
+		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
+		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
+		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
+		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Valid&eacute;', '9'=>'Annul&eacute;'), 'validate'=>'1',),
+	);
 	public $rowid;
-	public $entity;
-	public $ref;
-	public $label;
-	public $amount;
-	public $qty;
-	public $fk_soc;
-	public $fk_project;
-	public $description;
-	public $note_public;
-	public $note_private;
+	public $fk_scrum_sprint;
+	public $fk_user_role;
+	public $fk_user;
+	public $qty_velocity;
 	public $date_creation;
 	public $tms;
 	public $fk_user_creat;
 	public $fk_user_modif;
-	public $last_main_doc;
 	public $import_key;
-	public $model_pdf;
 	public $status;
 	// END MODULEBUILDER PROPERTIES
 
@@ -149,17 +133,17 @@ class ScumUserStorySprint extends CommonObject
 	// /**
 	//  * @var string    Name of subtable line
 	//  */
-	// public $table_element_line = 'scrumproject_scumuserstorysprintline';
+	// public $table_element_line = 'scrumproject_srumsprintuserline';
 
 	// /**
 	//  * @var string    Field with ID of parent key if this object has a parent
 	//  */
-	// public $fk_element = 'fk_scumuserstorysprint';
+	// public $fk_element = 'fk_srumsprintuser';
 
 	// /**
 	//  * @var string    Name of subtable class that manage subtable lines
 	//  */
-	// public $class_element_line = 'ScumUserStorySprintline';
+	// public $class_element_line = 'SrumSprintUserline';
 
 	// /**
 	//  * @var array	List of child tables. To test if we can delete object.
@@ -171,10 +155,10 @@ class ScumUserStorySprint extends CommonObject
 	//  *               If name matches '@ClassNAme:FilePathClass;ParentFkFieldName' it will
 	//  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
 	//  */
-	// protected $childtablesoncascade = array('scrumproject_scumuserstorysprintdet');
+	// protected $childtablesoncascade = array('scrumproject_srumsprintuserdet');
 
 	// /**
-	//  * @var ScumUserStorySprintLine[]     Array of subtable lines
+	//  * @var SrumSprintUserLine[]     Array of subtable lines
 	//  */
 	// public $lines = array();
 
@@ -199,7 +183,7 @@ class ScumUserStorySprint extends CommonObject
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->scrumproject->scumuserstorysprint->read) {
+		/*if ($user->rights->scrumproject->srumsprintuser->read) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
@@ -513,8 +497,8 @@ class ScumUserStorySprint extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scumuserstorysprint->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scumuserstorysprint->scumuserstorysprint_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->srumsprintuser->write))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->srumsprintuser->srumsprintuser_advance->validate))))
 		 {
 		 $this->error='NotEnoughPermissions';
 		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
@@ -556,7 +540,7 @@ class ScumUserStorySprint extends CommonObject
 
 			if (!$error && !$notrigger) {
 				// Call trigger
-				$result = $this->call_trigger('SCUMUSERSTORYSPRINT_VALIDATE', $user);
+				$result = $this->call_trigger('SRUMSPRINTUSER_VALIDATE', $user);
 				if ($result < 0) {
 					$error++;
 				}
@@ -570,8 +554,8 @@ class ScumUserStorySprint extends CommonObject
 			// Rename directory if dir was a temporary ref
 			if (preg_match('/^[\(]?PROV/i', $this->ref)) {
 				// Now we rename also files into index
-				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'scumuserstorysprint/".$this->db->escape($this->newref)."'";
-				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'scumuserstorysprint/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
+				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'srumsprintuser/".$this->db->escape($this->newref)."'";
+				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'srumsprintuser/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
 				$resql = $this->db->query($sql);
 				if (!$resql) {
 					$error++; $this->error = $this->db->lasterror();
@@ -580,15 +564,15 @@ class ScumUserStorySprint extends CommonObject
 				// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments
 				$oldref = dol_sanitizeFileName($this->ref);
 				$newref = dol_sanitizeFileName($num);
-				$dirsource = $conf->scrumproject->dir_output.'/scumuserstorysprint/'.$oldref;
-				$dirdest = $conf->scrumproject->dir_output.'/scumuserstorysprint/'.$newref;
+				$dirsource = $conf->scrumproject->dir_output.'/srumsprintuser/'.$oldref;
+				$dirdest = $conf->scrumproject->dir_output.'/srumsprintuser/'.$newref;
 				if (!$error && file_exists($dirsource)) {
 					dol_syslog(get_class($this)."::validate() rename dir ".$dirsource." into ".$dirdest);
 
 					if (@rename($dirsource, $dirdest)) {
 						dol_syslog("Rename ok");
 						// Rename docs starting with $oldref with $newref
-						$listoffiles = dol_dir_list($conf->scrumproject->dir_output.'/scumuserstorysprint/'.$newref, 'files', 1, '^'.preg_quote($oldref, '/'));
+						$listoffiles = dol_dir_list($conf->scrumproject->dir_output.'/srumsprintuser/'.$newref, 'files', 1, '^'.preg_quote($oldref, '/'));
 						foreach ($listoffiles as $fileentry) {
 							$dirsource = $fileentry['name'];
 							$dirdest = preg_replace('/^'.preg_quote($oldref, '/').'/', $newref, $dirsource);
@@ -638,7 +622,7 @@ class ScumUserStorySprint extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SCUMUSERSTORYSPRINT_UNVALIDATE');
+		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SRUMSPRINTUSER_UNVALIDATE');
 	}
 
 	/**
@@ -662,7 +646,7 @@ class ScumUserStorySprint extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SCUMUSERSTORYSPRINT_CANCEL');
+		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SRUMSPRINTUSER_CANCEL');
 	}
 
 	/**
@@ -686,7 +670,7 @@ class ScumUserStorySprint extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SCUMUSERSTORYSPRINT_REOPEN');
+		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SRUMSPRINTUSER_REOPEN');
 	}
 
 	/**
@@ -709,14 +693,14 @@ class ScumUserStorySprint extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("ScumUserStorySprint").'</u>';
+		$label = img_picto('', $this->picto).' <u>'.$langs->trans("SrumSprintUser").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}
 		$label .= '<br>';
 		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
 
-		$url = dol_buildpath('/scrumproject/scumuserstorysprint_card.php', 1).'?id='.$this->id;
+		$url = dol_buildpath('/scrumproject/srumsprintuser_card.php', 1).'?id='.$this->id;
 
 		if ($option != 'nolink') {
 			// Add param to save lastsearch_values or not
@@ -732,7 +716,7 @@ class ScumUserStorySprint extends CommonObject
 		$linkclose = '';
 		if (empty($notooltip)) {
 			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-				$label = $langs->trans("ShowScumUserStorySprint");
+				$label = $langs->trans("ShowSrumSprintUser");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
 			$linkclose .= ' title="'.dol_escape_htmltag($label, 1).'"';
@@ -792,7 +776,7 @@ class ScumUserStorySprint extends CommonObject
 		//if ($withpicto != 2) $result.=(($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
 
 		global $action, $hookmanager;
-		$hookmanager->initHooks(array('scumuserstorysprintdao'));
+		$hookmanager->initHooks(array('srumsprintuserdao'));
 		$parameters = array('id'=>$this->id, 'getnomurl'=>$result);
 		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 		if ($reshook > 0) {
@@ -928,8 +912,8 @@ class ScumUserStorySprint extends CommonObject
 	{
 		$this->lines = array();
 
-		$objectline = new ScumUserStorySprintLine($this->db);
-		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_scumuserstorysprint = '.((int) $this->id)));
+		$objectline = new SrumSprintUserLine($this->db);
+		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_srumsprintuser = '.((int) $this->id)));
 
 		if (is_numeric($result)) {
 			$this->error = $this->error;
@@ -951,15 +935,15 @@ class ScumUserStorySprint extends CommonObject
 		global $langs, $conf;
 		$langs->load("scrumproject@scrumproject");
 
-		if (empty($conf->global->SCRUMPROJECT_SCUMUSERSTORYSPRINT_ADDON)) {
-			$conf->global->SCRUMPROJECT_SCUMUSERSTORYSPRINT_ADDON = 'mod_scumuserstorysprint_standard';
+		if (empty($conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON)) {
+			$conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON = 'mod_srumsprintuser_standard';
 		}
 
-		if (!empty($conf->global->SCRUMPROJECT_SCUMUSERSTORYSPRINT_ADDON)) {
+		if (!empty($conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON)) {
 			$mybool = false;
 
-			$file = $conf->global->SCRUMPROJECT_SCUMUSERSTORYSPRINT_ADDON.".php";
-			$classname = $conf->global->SCRUMPROJECT_SCUMUSERSTORYSPRINT_ADDON;
+			$file = $conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON.".php";
+			$classname = $conf->global->SCRUMPROJECT_SRUMSPRINTUSER_ADDON;
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
@@ -1017,12 +1001,12 @@ class ScumUserStorySprint extends CommonObject
 		$langs->load("scrumproject@scrumproject");
 
 		if (!dol_strlen($modele)) {
-			$modele = 'standard_scumuserstorysprint';
+			$modele = 'standard_srumsprintuser';
 
 			if (!empty($this->model_pdf)) {
 				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->SCUMUSERSTORYSPRINT_ADDON_PDF)) {
-				$modele = $conf->global->SCUMUSERSTORYSPRINT_ADDON_PDF;
+			} elseif (!empty($conf->global->SRUMSPRINTUSER_ADDON_PDF)) {
+				$modele = $conf->global->SRUMSPRINTUSER_ADDON_PDF;
 			}
 		}
 
@@ -1070,12 +1054,12 @@ class ScumUserStorySprint extends CommonObject
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 
 /**
- * Class ScumUserStorySprintLine. You can also remove this and generate a CRUD class for lines objects.
+ * Class SrumSprintUserLine. You can also remove this and generate a CRUD class for lines objects.
  */
-class ScumUserStorySprintLine extends CommonObjectLine
+class SrumSprintUserLine extends CommonObjectLine
 {
-	// To complete with content of an object ScumUserStorySprintLine
-	// We should have a field rowid, fk_scumuserstorysprint and position
+	// To complete with content of an object SrumSprintUserLine
+	// We should have a field rowid, fk_srumsprintuser and position
 
 	/**
 	 * @var int  Does object support extrafields ? 0=No, 1=Yes

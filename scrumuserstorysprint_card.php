@@ -17,9 +17,9 @@
  */
 
 /**
- *   	\file       scumuserstorysprint_card.php
+ *   	\file       scrumuserstorysprint_card.php
  *		\ingroup    scrumproject
- *		\brief      Page to create/edit/view scumuserstorysprint
+ *		\brief      Page to create/edit/view scrumuserstorysprint
  */
 
 //if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');				// Do not create database handler $db
@@ -77,8 +77,8 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-dol_include_once('/scrumproject/class/scumuserstorysprint.class.php');
-dol_include_once('/scrumproject/lib/scrumproject_scumuserstorysprint.lib.php');
+dol_include_once('/scrumproject/class/scrumuserstorysprint.class.php');
+dol_include_once('/scrumproject/lib/scrumproject_scrumuserstorysprint.lib.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "other"));
@@ -89,16 +89,16 @@ $ref = GETPOST('ref', 'alpha');
 $action = GETPOST('action', 'aZ09');
 $confirm = GETPOST('confirm', 'alpha');
 $cancel = GETPOST('cancel', 'aZ09');
-$contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'scumuserstorysprintcard'; // To manage different context of search
+$contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'scrumuserstorysprintcard'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha');
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 $lineid   = GETPOST('lineid', 'int');
 
 // Initialize technical objects
-$object = new ScumUserStorySprint($db);
+$object = new ScrumUserStorySprint($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
-$hookmanager->initHooks(array('scumuserstorysprintcard', 'globalcard')); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks(array('scrumuserstorysprintcard', 'globalcard')); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -122,12 +122,12 @@ if (empty($action) && empty($id) && empty($ref)) {
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
 
 
-$permissiontoread = $user->rights->scrumproject->scumuserstorysprint->read;
-$permissiontoadd = $user->rights->scrumproject->scumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-$permissiontodelete = $user->rights->scrumproject->scumuserstorysprint->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-$permissionnote = $user->rights->scrumproject->scumuserstorysprint->write; // Used by the include of actions_setnotes.inc.php
-$permissiondellink = $user->rights->scrumproject->scumuserstorysprint->write; // Used by the include of actions_dellink.inc.php
-$upload_dir = $conf->scrumproject->multidir_output[isset($object->entity) ? $object->entity : 1].'/scumuserstorysprint';
+$permissiontoread = $user->rights->scrumproject->scrumuserstorysprint->read;
+$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->rights->scrumproject->scrumuserstorysprint->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissionnote = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_setnotes.inc.php
+$permissiondellink = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_dellink.inc.php
+$upload_dir = $conf->scrumproject->multidir_output[isset($object->entity) ? $object->entity : 1].'/scrumuserstorysprint';
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();
@@ -151,19 +151,19 @@ if ($reshook < 0) {
 if (empty($reshook)) {
 	$error = 0;
 
-	$backurlforlist = dol_buildpath('/scrumproject/scumuserstorysprint_list.php', 1);
+	$backurlforlist = dol_buildpath('/scrumproject/scrumuserstorysprint_list.php', 1);
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
 			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
 				$backtopage = $backurlforlist;
 			} else {
-				$backtopage = dol_buildpath('/scrumproject/scumuserstorysprint_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
+				$backtopage = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
 			}
 		}
 	}
 
-	$triggermodname = 'SCRUMPROJECT_SCUMUSERSTORYSPRINT_MODIFY'; // Name of trigger action code to execute when we modify record
+	$triggermodname = 'SCRUMPROJECT_SCRUMUSERSTORYSPRINT_MODIFY'; // Name of trigger action code to execute when we modify record
 
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
 	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
@@ -188,9 +188,9 @@ if (empty($reshook)) {
 	}
 
 	// Actions to send emails
-	$triggersendname = 'SCRUMPROJECT_SCUMUSERSTORYSPRINT_SENTBYMAIL';
-	$autocopy = 'MAIN_MAIL_AUTOCOPY_SCUMUSERSTORYSPRINT_TO';
-	$trackid = 'scumuserstorysprint'.$object->id;
+	$triggersendname = 'SCRUMPROJECT_SCRUMUSERSTORYSPRINT_SENTBYMAIL';
+	$autocopy = 'MAIN_MAIL_AUTOCOPY_SCRUMUSERSTORYSPRINT_TO';
+	$trackid = 'scrumuserstorysprint'.$object->id;
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 }
 
@@ -207,7 +207,7 @@ $form = new Form($db);
 $formfile = new FormFile($db);
 $formproject = new FormProjets($db);
 
-$title = $langs->trans("ScumUserStorySprint");
+$title = $langs->trans("ScrumUserStorySprint");
 $help_url = '';
 llxHeader('', $title, $help_url);
 
@@ -229,7 +229,7 @@ llxHeader('', $title, $help_url);
 
 // Part to create
 if ($action == 'create') {
-	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ScumUserStorySprint")), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ScrumUserStorySprint")), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -267,7 +267,7 @@ if ($action == 'create') {
 
 // Part to edit record
 if (($id || $ref) && $action == 'edit') {
-	print load_fiche_titre($langs->trans("ScumUserStorySprint"), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("ScrumUserStorySprint"), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -303,14 +303,14 @@ if (($id || $ref) && $action == 'edit') {
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
 	$res = $object->fetch_optionals();
 
-	$head = scumuserstorysprintPrepareHead($object);
+	$head = scrumuserstorysprintPrepareHead($object);
 	print dol_get_fiche_head($head, 'card', $langs->trans("Workstation"), -1, $object->picto);
 
 	$formconfirm = '';
 
 	// Confirmation to delete
 	if ($action == 'delete') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteScumUserStorySprint'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteScrumUserStorySprint'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
 	}
 	// Confirmation to delete line
 	if ($action == 'deleteline') {
@@ -354,7 +354,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/scrumproject/scumuserstorysprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.dol_buildpath('/scrumproject/scrumuserstorysprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	/*
@@ -548,13 +548,13 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$relativepath = $objref.'/'.$objref.'.pdf';
 			$filedir = $conf->scrumproject->dir_output.'/'.$object->element.'/'.$objref;
 			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
-			$genallowed = $user->rights->scrumproject->scumuserstorysprint->read; // If you can read, you can build the PDF to read content
-			$delallowed = $user->rights->scrumproject->scumuserstorysprint->write; // If you can create/edit, you can remove a file on card
-			print $formfile->showdocuments('scrumproject:ScumUserStorySprint', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
+			$genallowed = $user->rights->scrumproject->scrumuserstorysprint->read; // If you can read, you can build the PDF to read content
+			$delallowed = $user->rights->scrumproject->scrumuserstorysprint->write; // If you can create/edit, you can remove a file on card
+			print $formfile->showdocuments('scrumproject:ScrumUserStorySprint', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
 
 		// Show links to link elements
-		$linktoelem = $form->showLinkToObjectBlock($object, null, array('scumuserstorysprint'));
+		$linktoelem = $form->showLinkToObjectBlock($object, null, array('scrumuserstorysprint'));
 		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
 
 
@@ -562,7 +562,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		$MAXEVENT = 10;
 
-		$morehtmlcenter = dolGetButtonTitle($langs->trans('SeeAll'), '', 'fa fa-list-alt imgforviewmode', dol_buildpath('/scrumproject/scumuserstorysprint_agenda.php', 1).'?id='.$object->id);
+		$morehtmlcenter = dolGetButtonTitle($langs->trans('SeeAll'), '', 'fa fa-list-alt imgforviewmode', dol_buildpath('/scrumproject/scrumuserstorysprint_agenda.php', 1).'?id='.$object->id);
 
 		// List of actions on element
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
@@ -578,10 +578,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 
 	// Presend form
-	$modelmail = 'scumuserstorysprint';
+	$modelmail = 'scrumuserstorysprint';
 	$defaulttopic = 'InformationMessage';
 	$diroutput = $conf->scrumproject->dir_output;
-	$trackid = 'scumuserstorysprint'.$object->id;
+	$trackid = 'scrumuserstorysprint'.$object->id;
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/card_presend.tpl.php';
 }

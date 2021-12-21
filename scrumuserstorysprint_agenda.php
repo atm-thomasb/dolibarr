@@ -17,9 +17,9 @@
  */
 
 /**
- *  \file       scumuserstorysprint_agenda.php
+ *  \file       scrumuserstorysprint_agenda.php
  *  \ingroup    scrumproject
- *  \brief      Tab of events on ScumUserStorySprint
+ *  \brief      Tab of events on ScrumUserStorySprint
  */
 
 //if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');				// Do not create database handler $db
@@ -77,8 +77,8 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
-dol_include_once('/scrumproject/class/scumuserstorysprint.class.php');
-dol_include_once('/scrumproject/lib/scrumproject_scumuserstorysprint.lib.php');
+dol_include_once('/scrumproject/class/scrumuserstorysprint.class.php');
+dol_include_once('/scrumproject/lib/scrumproject_scrumuserstorysprint.lib.php');
 
 
 // Load translation files required by the page
@@ -119,10 +119,10 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$object = new ScumUserStorySprint($db);
+$object = new ScrumUserStorySprint($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
-$hookmanager->initHooks(array('scumuserstorysprintagenda', 'globalcard')); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks(array('scrumuserstorysprintagenda', 'globalcard')); // Note that conf->hooks_modules contains array
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 
@@ -132,7 +132,7 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->scrumproject->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity]."/".$object->id;
 }
 
-$permissiontoadd = $user->rights->scrumproject->scumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php
+$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();
@@ -184,14 +184,14 @@ if ($object->id > 0) {
 	if (!empty($conf->notification->enabled)) {
 		$langs->load("mails");
 	}
-	$head = scumuserstorysprintPrepareHead($object);
+	$head = scrumuserstorysprintPrepareHead($object);
 
 
 	print dol_get_fiche_head($head, 'agenda', '', -1, $object->picto);
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/scrumproject/scumuserstorysprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.dol_buildpath('/scrumproject/scrumuserstorysprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	/*
@@ -290,7 +290,7 @@ if ($object->id > 0) {
 		}
 
 
-		//print load_fiche_titre($langs->trans("ActionsOnScumUserStorySprint"), '', '');
+		//print load_fiche_titre($langs->trans("ActionsOnScrumUserStorySprint"), '', '');
 
 		// List of all actions
 		$filters = array();

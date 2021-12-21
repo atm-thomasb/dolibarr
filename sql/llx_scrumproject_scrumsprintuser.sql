@@ -14,26 +14,18 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 
-CREATE TABLE llx_scrumproject_scumuserstorysprint(
+CREATE TABLE llx_scrumproject_srumsprintuser(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	entity integer DEFAULT 1 NOT NULL, 
-	ref varchar(128) NOT NULL, 
-	label varchar(255), 
-	amount double DEFAULT NULL, 
-	qty real, 
-	fk_soc integer, 
-	fk_project integer, 
-	description text, 
-	note_public text, 
-	note_private text, 
+	fk_scrum_sprint integer, 
+	fk_user_role integer, 
+	fk_user integer NOT NULL, 
+	qty_velocity real NOT NULL, 
 	date_creation datetime NOT NULL, 
 	tms timestamp, 
 	fk_user_creat integer NOT NULL, 
 	fk_user_modif integer, 
-	last_main_doc varchar(255), 
 	import_key varchar(14), 
-	model_pdf varchar(255), 
 	status smallint NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

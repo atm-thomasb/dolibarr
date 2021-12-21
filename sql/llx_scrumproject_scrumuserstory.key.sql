@@ -16,10 +16,9 @@
 
 -- BEGIN MODULEBUILDER INDEXES
 ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_rowid (rowid);
-ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_entity (entity);
+ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_fk_task (fk_task);
+ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_business_value (business_value);
 ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_ref (ref);
-ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_fk_soc (fk_soc);
-ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_fk_project (fk_project);
 ALTER TABLE llx_scrumproject_scrumuserstory ADD CONSTRAINT llx_scrumproject_scrumuserstory_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
 ALTER TABLE llx_scrumproject_scrumuserstory ADD INDEX idx_scrumproject_scrumuserstory_status (status);
 -- END MODULEBUILDER INDEXES
