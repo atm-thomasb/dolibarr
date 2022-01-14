@@ -218,8 +218,7 @@ $title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("ScrumSprints"));
 // Build and execute select
 // --------------------------------------------------------------------
 $sql = 'SELECT ';
-foreach ($object->fields as $key => $val)
-{
+foreach ($object->fields as $key => $val) {
 	$sql .= 't.'.$key.', ';
 }
 // Add fields from extrafields

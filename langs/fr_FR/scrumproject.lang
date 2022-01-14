@@ -129,3 +129,4 @@ StatusScrumUserStoryDone = Terminée
 StatusScrumUserStorySprintDraft = Brouillon
 StatusScrumUserStorySprintReady = Prête
 StatusScrumUserStorySprintDone = Terminée
+BusinessValue = Business value
