@@ -26,8 +26,9 @@ CREATE TABLE llx_scrumproject_scrumuserstory(
 	date_creation datetime NOT NULL, 
 	tms timestamp, 
 	fk_user_creat integer NOT NULL, 
-	fk_user_modif integer, 
-	import_key varchar(14), 
+	fk_user_modif integer,
+    last_main_doc varchar(255),
+    import_key varchar(14),
 	status smallint NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

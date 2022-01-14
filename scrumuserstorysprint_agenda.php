@@ -80,7 +80,6 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 dol_include_once('/scrumproject/class/scrumuserstorysprint.class.php');
 dol_include_once('/scrumproject/lib/scrumproject_scrumuserstorysprint.lib.php');
 
-
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "other"));
 

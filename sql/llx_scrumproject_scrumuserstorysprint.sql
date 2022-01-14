@@ -21,7 +21,7 @@ CREATE TABLE llx_scrumproject_scrumuserstorysprint(
 	fk_scrum_sprint integer, 
 	business_value integer DEFAULT 50 NOT NULL, 
 	qty_planned real, 
-	qty_consumed real NOT NULL, 
+	qty_consumed real,
 	qty_done real, 
 	description text, 
 	note_public text, 

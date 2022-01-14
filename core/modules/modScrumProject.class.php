@@ -248,17 +248,17 @@ class modScrumProject extends DolibarrModules
 		 * DROIT POUR SCRUM CARDS
 		 */
 
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read scrum sprints'; // Permission label
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Create/Update scrum sprints'; // Permission label
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete scrum sprints'; // Permission label
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
@@ -268,17 +268,17 @@ class modScrumProject extends DolibarrModules
 		 * DROIT POUR SCRUM CARDS
 		 */
 
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read scrum cards'; // Permission label
 		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Create/Update scrum cards'; // Permission label
 		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete scrum cards'; // Permission label
 		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
@@ -288,17 +288,17 @@ class modScrumProject extends DolibarrModules
 		 * DROIT POUR SCRUM USER STORY
 		 */
 
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read scrum user story'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Create/Update scrum  user story'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete scrum  user story'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
@@ -309,17 +309,17 @@ class modScrumProject extends DolibarrModules
 		 * DROIT POUR SCRUM USER STORY SPRINT
 		 */
 
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read scrum user story affected yo sprint'; // Permission label
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Read scrum user story affected to sprint'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Affect scrum  user story on sprint'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
-		$this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete scrum user story from sprint'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
@@ -329,6 +329,9 @@ class modScrumProject extends DolibarrModules
 		$this->menu = array();
 		$r = 0;
 
+		/**
+		 * MENU SCRUM SPRINT
+		 */
 
         $this->menu[$r++]=array(
             // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -471,6 +474,11 @@ class modScrumProject extends DolibarrModules
 			'user'=>2,
 		);
 
+
+		/**
+		 * MENU SCRUM CARD => devient scrum task
+		 */
+/*
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'fk_menu'=>'fk_mainmenu=project',
@@ -591,7 +599,7 @@ class modScrumProject extends DolibarrModules
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>2,
 		);
-
+*/
 
 		/**
 		 * MENU SCRUM USER STORY
@@ -615,7 +623,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -635,7 +643,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstory->write',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2
+			'user'=>0
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -655,7 +663,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -675,7 +683,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -695,7 +703,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -715,7 +723,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 
 		/**
@@ -739,7 +747,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -759,7 +767,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->write',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2
+			'user'=>0
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -779,7 +787,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -799,7 +807,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -819,7 +827,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 		$this->menu[$r++]=array(
 			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -839,7 +847,7 @@ class modScrumProject extends DolibarrModules
 			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
-			'user'=>2,
+			'user'=>0,
 		);
 
 		// Exports profiles provided by this module

@@ -27,7 +27,8 @@ CREATE TABLE llx_scrumproject_scrumtask(
 	tms timestamp, 
 	fk_user_creat integer NOT NULL, 
 	fk_user_modif integer, 
-	import_key varchar(14), 
-	status smallint NOT NULL
+	import_key varchar(14),
+    last_main_doc varchar(255),
+    status smallint NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

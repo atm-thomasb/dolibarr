@@ -77,8 +77,9 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-dol_include_once('/scrumproject/class/scrumuserstory.class.php');
-dol_include_once('/scrumproject/lib/scrumproject_scrumuserstory.lib.php');
+dol_include_once('scrumproject/class/scrumuserstory.class.php');
+dol_include_once('scrumproject/retrocompatibility/htdocs/core/class/html.form.class.php');
+dol_include_once('scrumproject/lib/scrumproject_scrumuserstory.lib.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "other"));
@@ -203,7 +204,7 @@ if (empty($reshook)) {
  * Put here all code to build page
  */
 
-$form = new Form($db);
+$form = new SPRetroCompatibilityForm($db);
 $formfile = new FormFile($db);
 $formproject = new FormProjets($db);
 
