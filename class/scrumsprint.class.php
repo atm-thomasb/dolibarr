@@ -662,7 +662,7 @@ class ScrumSprint extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("ScrumSprint").'</u>';
+		$label = img_picto('', 'object_'.$this->picto).' <u>'.$langs->trans("ScrumSprint").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}

@@ -212,7 +212,7 @@ $now = dol_now();
 
 //$help_url="EN:Module_ScrumSprint|FR:Module_ScrumSprint_FR|ES:Módulo_ScrumSprint";
 $help_url = '';
-$title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("ScrumSprints"));
+$title = $langs->trans('ListOfScrumSprints');
 
 
 // Build and execute select
@@ -371,7 +371,7 @@ print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
 $newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumsprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'object_'.$object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
 $topicmail = "SendScrumSprintRef";

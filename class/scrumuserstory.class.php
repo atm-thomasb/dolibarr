@@ -697,7 +697,7 @@ class ScrumUserStory extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("ScrumUserStory").'</u>';
+		$label = img_picto('', 'object_'.$this->picto).' <u>'.$langs->trans("ScrumUserStory").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}

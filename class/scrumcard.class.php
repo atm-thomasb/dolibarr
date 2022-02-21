@@ -688,7 +688,7 @@ class ScrumCard extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("ScrumCard").'</u>';
+		$label = img_picto('', 'object_'.$this->picto).' <u>'.$langs->trans("ScrumCard").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}

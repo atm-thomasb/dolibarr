@@ -97,6 +97,8 @@ StatusScrumSprintPending = En cours
 StatusScrumSprintDone = Terminé
 StatusScrumSprintCancelled = Annulé
 
+ListOfScrumSprints = Liste des <strong>Sprints</strong>
+
 #####################################################
 # ScrumCard
 #
@@ -133,3 +135,4 @@ BusinessValue = Business value
 QtyConsumed = Qty consommée
 
 ScrumUserStorySprints = user story planifiée
+ListOfScrumUserStorys = Liste des user stories
