@@ -102,7 +102,7 @@ class ScrumUserStorySprint extends CommonObject
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
 	public $fields=array(
-		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
+		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id", 'showoncombobox' => 1),
 		'fk_scrum_user_story' => array('type'=>'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1', 'label'=>'ScrumUserStory', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumuserstory.rowid', 'validate'=>'1',),
 		'fk_scrum_sprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumsprint.rowid', 'validate'=>'1',),
 		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
@@ -705,12 +705,12 @@ class ScrumUserStorySprint extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', 'object_'.$this->picto).' <u>'.$langs->trans("ScrumUserStorySprint").'</u>';
+		$tooltip = img_picto('', 'object_'.$this->picto).' <u>'.$langs->trans("ScrumUserStorySprint").'</u>';
 		if (isset($this->status)) {
-			$label .= ' '.$this->getLibStatut(5);
+			$tooltip .= ' '.$this->getLibStatut(5);
 		}
-		$label .= '<br>';
-		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
+		$tooltip .= '<br>';
+		$tooltip .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
 
 		$url = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?id='.$this->id;
 
@@ -728,32 +728,20 @@ class ScrumUserStorySprint extends CommonObject
 		$linkclose = '';
 		if (empty($notooltip)) {
 			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-				$label = $langs->trans("ShowScrumUserStorySprint");
-				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
+				$tooltip = $langs->trans("ShowScrumUserStorySprint");
+				$linkclose .= ' alt="'.dol_escape_htmltag($tooltip, 1).'"';
 			}
-			$linkclose .= ' title="'.dol_escape_htmltag($label, 1).'"';
+			$linkclose .= ' title="'.dol_escape_htmltag($tooltip, 1).'"';
 			$linkclose .= ' class="classfortooltip'.($morecss ? ' '.$morecss : '').'"';
 		} else {
 			$linkclose = ($morecss ? ' class="'.$morecss.'"' : '');
 		}
 
-		if ($option == 'nolink' || empty($url)) {
-			$linkstart = '<span';
-		} else {
-			$linkstart = '<a href="'.$url.'"';
-		}
-		$linkstart .= $linkclose.'>';
-		if ($option == 'nolink' || empty($url)) {
-			$linkend = '</span>';
-		} else {
-			$linkend = '</a>';
-		}
 
-		$result .= $linkstart;
-
+		$linkHtml = '';
 		if (empty($this->showphoto_on_popup)) {
 			if ($withpicto) {
-				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
+				$linkHtml .= img_object(($notooltip ? '' : $tooltip), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
 			}
 		} else {
 			if ($withpicto) {
@@ -768,24 +756,36 @@ class ScrumUserStorySprint extends CommonObject
 
 					$pathtophoto = $class.'/'.$this->ref.'/thumbs/'.substr($filename, 0, $pospoint).'_mini'.substr($filename, $pospoint);
 					if (empty($conf->global->{strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'})) {
-						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
+						$linkHtml .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
 					} else {
-						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
+						$linkHtml .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
 					}
 
-					$result .= '</div>';
+					$linkHtml .= '</div>';
 				} else {
-					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
+					$linkHtml .= img_object(($notooltip ? '' : $tooltip), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
 				}
 			}
 		}
 
 		if ($withpicto != 2) {
-			$result .= $this->ref;
+			$linkHtml .= $this->ref;
 		}
 
-		$result .= $linkend;
-		//if ($withpicto != 2) $result.=(($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
+
+		if ($option == 'nolink' || empty($url)) {
+			$tagName =  'span';
+		} else {
+			$tagName =  'a';
+		}
+
+		$moreAttr = '';
+		if(!$option == 'nolink' && !empty($url)){
+			$moreAttr = ' href="'.$url.'" ';
+		}
+
+		$result .= '<'.$tagName.' '.$moreAttr . $linkclose.'>' . $linkHtml.'</'.$tagName.'>';
+
 
 		global $action, $hookmanager;
 		$hookmanager->initHooks(array('scrumuserstorysprintdao'));

@@ -99,6 +99,7 @@ $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
 
 $id = GETPOST('id', 'int');
+$fk_scrum_user_story_sprint = GETPOST('fk_scrum_user_story_sprint', 'int');
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -287,6 +288,9 @@ if ($object->ismultientitymanaged == 1) {
 } else {
 	$sql .= " WHERE 1 = 1";
 }
+
+
+
 foreach ($search as $key => $val) {
 	if (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
@@ -405,6 +409,35 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 
+
+if($fk_scrum_user_story_sprint > 0) {
+	dol_include_once('/scrumproject/class/scrumuserstorysprint.class.php');
+	$scrumUserStorySprint = new ScrumUserStorySprint($db);
+
+	if ($fk_scrum_user_story_sprint > 0 && is_numeric($fk_scrum_user_story_sprint)) {	// To discard case when id is list of ids like '1,2,3...'
+		$ret = $scrumUserStorySprint->fetch($fk_scrum_user_story_sprint);
+		if ($ret > 0) {
+			$scrumUserStorySprint->fetch_thirdparty();
+			$fk_scrum_user_story_sprint = $scrumUserStorySprint->id;
+		} else {
+			if (empty($scrumUserStorySprint->error) && !count($scrumUserStorySprint->errors)) {
+				if ($ret < 0) {	// if $ret == 0, it means not found.
+					setEventMessages('Fetch on object (type '.get_class($scrumUserStorySprint).') return an error without filling $object->error nor $object->errors', null, 'errors');
+				}
+			} else {
+				setEventMessages($scrumUserStorySprint->error, $scrumUserStorySprint->errors, 'errors');
+			}
+			$action = '';
+		}
+	}
+
+
+	dol_include_once('/scrumproject/lib/scrumproject_scrumuserstorysprint.lib.php');
+	$head = scrumuserstorysprintPrepareHead($scrumUserStorySprint);
+	print dol_get_fiche_head($head, 'scrumtask', $langs->trans("Workstation"), -1, $scrumUserStorySprint->picto);
+}
+
+
 // Example : Adding jquery code
 // print '<script type="text/javascript">
 // jQuery(document).ready(function() {
@@ -443,6 +476,11 @@ foreach ($search as $key => $val) {
 if ($optioncss != '') {
 	$param .= '&optioncss='.urlencode($optioncss);
 }
+
+if(!empty($fk_scrum_user_story_sprint)){
+	$param .= '&fk_scrum_user_story_sprint='.urlencode($fk_scrum_user_story_sprint);
+}
+
 // Add $param from extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_param.tpl.php';
 // Add $param from hooks
