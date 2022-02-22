@@ -170,6 +170,7 @@ foreach ($object->fields as $key => $val) {
 		);
 	}
 }
+
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 

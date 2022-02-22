@@ -102,7 +102,7 @@ class ScrumUserStorySprint extends CommonObject
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
 	public $fields=array(
-		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
+		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'fk_scrum_user_story' => array('type'=>'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1', 'label'=>'ScrumUserStory', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumuserstory.rowid', 'validate'=>'1',),
 		'fk_scrum_sprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumsprint.rowid', 'validate'=>'1',),
 		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
@@ -187,9 +187,9 @@ class ScrumUserStorySprint extends CommonObject
 
 		$this->db = $db;
 
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
-			$this->fields['rowid']['visible'] = 0;
-		}
+//		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
+//			$this->fields['rowid']['visible'] = 0;
+//		}
 		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
 			$this->fields['entity']['enabled'] = 0;
 		}
@@ -992,44 +992,120 @@ class ScrumUserStorySprint extends CommonObject
 		}
 	}
 
+
+
 	/**
-	 *  Create a document onto disk according to template module.
+	 * Return HTML string to put an input field into a page
+	 * Code very similar with showInputField of extra fields
 	 *
-	 *  @param	    string		$modele			Force template to use ('' to not force)
-	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-	 *  @param      int			$hidedetails    Hide details of lines
-	 *  @param      int			$hidedesc       Hide description
-	 *  @param      int			$hideref        Hide ref
-	 *  @param      null|array  $moreparams     Array to provide more information
-	 *  @return     int         				0 if KO, 1 if OK
+	 * @param  array   		$val	       Array of properties for field to show
+	 * @param  string  		$key           Key of attribute
+	 * @param  string  		$value         Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  		$moreparam     To add more parameters on html input tag
+	 * @param  string  		$keysuffix     Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  		$keyprefix     Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string|int	$morecss       Value for css to define style/length of field. May also be a numeric.
+	 * @return string
 	 */
-	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
+	public function showInputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = 0, $nonewbutton = 0)
 	{
-		global $conf, $langs;
+		global $conf, $langs, $form, $action;
 
-		$result = 0;
-		$includedocgeneration = 0;
-
-		$langs->load("scrumproject@scrumproject");
-
-		if (!dol_strlen($modele)) {
-			$modele = 'standard_scrumuserstorysprint';
-
-			if (!empty($this->model_pdf)) {
-				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->SCRUMUSERSTORYSPRINT_ADDON_PDF)) {
-				$modele = $conf->global->SCRUMUSERSTORYSPRINT_ADDON_PDF;
-			}
+		if($key == 'rowid'){
+			$out = $this->id;
+		}
+		else
+		{
+			$out = parent::showInputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss, $nonewbutton);
 		}
 
-		$modelpath = "core/modules/scrumproject/doc/";
-
-		if ($includedocgeneration && !empty($modele)) {
-			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-		}
-
-		return $result;
+		return $out;
 	}
+
+
+	/**
+	 * Return HTML string to show a field into a page
+	 *
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $moreparam      To add more parameters on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputFieldQuick($key, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = ''){
+		return $this->showOutputField($this->fields[$key], $key, $this->{$key}, $moreparam, $keysuffix, $keyprefix, $morecss);
+	}
+
+	/**
+	 * Return HTML string to show a field into a page
+	 * Code very similar with showOutputField of extra fields
+	 *
+	 * @param  array   $val		       Array of properties of field to show
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $value          Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  $moreparam      To add more parametes on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
+	{
+		global $conf, $langs, $form;
+		$out = '';
+		if ($key == 'status'){
+			$out =  $this->getLibStatut(5); // to fix dolibarr using 3 instead of 2
+		}
+		elseif($key == 'rowid')
+		{
+			$out = $this->getNomUrl(1);
+		}
+		else{
+			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
+
+		return $out;
+	}
+
+//	/**
+//	 *  Create a document onto disk according to template module.
+//	 *
+//	 *  @param	    string		$modele			Force template to use ('' to not force)
+//	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
+//	 *  @param      int			$hidedetails    Hide details of lines
+//	 *  @param      int			$hidedesc       Hide description
+//	 *  @param      int			$hideref        Hide ref
+//	 *  @param      null|array  $moreparams     Array to provide more information
+//	 *  @return     int         				0 if KO, 1 if OK
+//	 */
+//	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
+//	{
+//		global $conf, $langs;
+//
+//		$result = 0;
+//		$includedocgeneration = 0;
+//
+//		$langs->load("scrumproject@scrumproject");
+//
+//		if (!dol_strlen($modele)) {
+//			$modele = 'standard_scrumuserstorysprint';
+//
+//			if (!empty($this->model_pdf)) {
+//				$modele = $this->model_pdf;
+//			} elseif (!empty($conf->global->SCRUMUSERSTORYSPRINT_ADDON_PDF)) {
+//				$modele = $conf->global->SCRUMUSERSTORYSPRINT_ADDON_PDF;
+//			}
+//		}
+//
+//		$modelpath = "core/modules/scrumproject/doc/";
+//
+//		if ($includedocgeneration && !empty($modele)) {
+//			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+//		}
+//
+//		return $result;
+//	}
 
 	/**
 	 * Action executed by scheduler

@@ -349,6 +349,7 @@ class modScrumProject extends DolibarrModules
             'enabled'=>'$conf->scrumproject->enabled',
             // Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
             'perms'=>'$user->rights->scrumproject->scrumsprint->read',
+			'prefix' => '<span class="fa fa-running em092 pictofixedwidth scrum-project-left-menu-picto" style="color: #00384e;"></span>',
             'target'=>'',
             // 0=Menu for internal users, 1=external users, 2=both
             'user'=>2,
@@ -621,6 +622,7 @@ class modScrumProject extends DolibarrModules
 			'enabled'=>'$conf->scrumproject->enabled',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
 			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
+			'prefix' => '<span class="fa fa-lightbulb em092 pictofixedwidth scrum-project-left-menu-picto" style="color: #cb4f24;"></span>',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0,
@@ -745,6 +747,7 @@ class modScrumProject extends DolibarrModules
 			'enabled'=>'$conf->scrumproject->enabled',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
 			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'prefix' => '<span class="fa fa-clock em092 pictofixedwidth scrum-project-left-menu-picto" style="color: #00384e;"></span>',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0,

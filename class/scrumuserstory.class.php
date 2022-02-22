@@ -984,6 +984,8 @@ class ScrumUserStory extends CommonObject
 		}
 	}
 
+
+
 	/**
 	 *  Create a document onto disk according to template module.
 	 *
