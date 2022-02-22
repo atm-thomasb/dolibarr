@@ -97,7 +97,7 @@ StatusScrumSprintPending = En cours
 StatusScrumSprintDone = Terminé
 StatusScrumSprintCancelled = Annulé
 
-ListOfScrumSprints = Liste des <strong>Sprints</strong>
+ListOfScrumSprints = Liste des Sprints
 
 #####################################################
 # ScrumCard
