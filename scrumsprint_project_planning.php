@@ -22,26 +22,6 @@
  *		\brief      List page for scrumsprint
  */
 
-//if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');				// Do not create database handler $db
-//if (! defined('NOREQUIREUSER'))            define('NOREQUIREUSER', '1');				// Do not load object $user
-//if (! defined('NOREQUIRESOC'))             define('NOREQUIRESOC', '1');				// Do not load object $mysoc
-//if (! defined('NOREQUIRETRAN'))            define('NOREQUIRETRAN', '1');				// Do not load object $langs
-//if (! defined('NOSCANGETFORINJECTION'))    define('NOSCANGETFORINJECTION', '1');		// Do not check injection attack on GET parameters
-//if (! defined('NOSCANPOSTFORINJECTION'))   define('NOSCANPOSTFORINJECTION', '1');		// Do not check injection attack on POST parameters
-//if (! defined('NOCSRFCHECK'))              define('NOCSRFCHECK', '1');				// Do not check CSRF attack (test on referer + on token if option MAIN_SECURITY_CSRF_WITH_TOKEN is on).
-//if (! defined('NOTOKENRENEWAL'))           define('NOTOKENRENEWAL', '1');				// Do not roll the Anti CSRF token (used if MAIN_SECURITY_CSRF_WITH_TOKEN is on)
-//if (! defined('NOSTYLECHECK'))             define('NOSTYLECHECK', '1');				// Do not check style html tag into posted data
-//if (! defined('NOREQUIREMENU'))            define('NOREQUIREMENU', '1');				// If there is no need to load and show top and left menu
-//if (! defined('NOREQUIREHTML'))            define('NOREQUIREHTML', '1');				// If we don't need to load the html.form.class.php
-//if (! defined('NOREQUIREAJAX'))            define('NOREQUIREAJAX', '1');       	  	// Do not load ajax.lib.php library
-//if (! defined("NOLOGIN"))                  define("NOLOGIN", '1');					// If this page is public (can be called outside logged session). This include the NOIPCHECK too.
-//if (! defined('NOIPCHECK'))                define('NOIPCHECK', '1');					// Do not check IP defined into conf $dolibarr_main_restrict_ip
-//if (! defined("MAIN_LANG_DEFAULT"))        define('MAIN_LANG_DEFAULT', 'auto');					// Force lang to a particular value
-//if (! defined("MAIN_AUTHENTICATION_MODE")) define('MAIN_AUTHENTICATION_MODE', 'aloginmodule');	// Force authentication handler
-//if (! defined("NOREDIRECTBYMAINTOLOGIN"))  define('NOREDIRECTBYMAINTOLOGIN', 1);		// The main.inc.php does not make a redirect if not logged, instead show simple error message
-//if (! defined("FORCECSP"))                 define('FORCECSP', 'none');				// Disable all Content Security Policies
-//if (! defined('CSRFCHECK_WITH_TOKEN'))     define('CSRFCHECK_WITH_TOKEN', '1');		// Force use of CSRF protection with tokens even for GET
-//if (! defined('NOBROWSERNOTIF'))     		 define('NOBROWSERNOTIF', '1');				// Disable browser notification
 
 // Load Dolibarr environment
 $res = 0;
@@ -61,6 +41,7 @@ if (!$res) die("Include of main fails");
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 
 // load scrumproject libraries
 require_once __DIR__ . '/class/scrumsprint.class.php';
@@ -96,37 +77,97 @@ $pagenext = $page + 1;
 // Initialize technical objects
 $object = new ScrumSprint($db);
 $extrafields = new ExtraFields($db);
+
+$project = new Project($db);
+
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('scrumsprintlist')); // Note that conf->hooks_modules contains array
 
-// Fetch optionals attributes and labels
-$extrafields->fetch_name_optionals_label($object->table_element);
-//$extrafields->fetch_name_optionals_label($object->table_element_line);
 
-$search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
+$scrumFieldsToKeep = array(
+	'rowid'			=> array(),
+	'ref'			=> array('position'=>10, 'label' => 'RefSprint' ),
+	'fk_team' 		=> array('position'=>20  ),
+	'label'			=> array('position'=>30, 'label' => 'Sprint' ),
+	'date_start' 	=> array('position'=>35  ),
+	'date_end' 		=> array('position'=>40  ),
+	'qty_velocity'	=> array('position'=>100 ),
+	'qty_planned'	=> array('position'=>105 ),
+	'qty_done'		=> array('position'=>110 ),
+	'status' 		=> array('position'=>1000),
+);
+
+
+
+// Vu qu'il y a plusieurs table et object en jointures il faut
+$listFields = array();
+_addObjectFieldDefinition($listFields, $object->fields, $scrumFieldsToKeep);
+
+
+//
+//// Fetch optionals attributes and labels
+//$extrafields->fetch_name_optionals_label($object->table_element);
+////$extrafields->fetch_name_optionals_label($object->table_element_line);
+
+//$search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
 
 // Default sort order (if not yet defined by previous GETPOST)
-if (!$sortfield) $sortfield = "t.".key($object->fields); // Set here default search field. By default 1st field in definition.
+if (!$sortfield) $sortfield = "t.ref";
 if (!$sortorder) $sortorder = "ASC";
+
 
 // Initialize array of search criterias
 $search_all = GETPOST('search_all', 'alphanohtml') ? GETPOST('search_all', 'alphanohtml') : GETPOST('sall', 'alphanohtml');
 $search = array();
-foreach ($object->fields as $key => $val)
-{
+if (GETPOST('search_ref_project', 'alpha') !== '') $search[$key] = GETPOST('search_'.$key, 'alpha');
+foreach ($listFields as $key => $val){
 	if (GETPOST('search_'.$key, 'alpha') !== '') $search[$key] = GETPOST('search_'.$key, 'alpha');
+}
+
+if(empty($search['status'])){
+	$search['status'] = ['openall'];
 }
 
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
-foreach ($object->fields as $key => $val)
-{
+foreach ($listFields as $key => $val) {
 	if ($val['searchall']) $fieldstosearchall['t.'.$key] = $val['label'];
 }
 
 // Definition of array of fields for columns
-$arrayfields = array();
-foreach ($object->fields as $key => $val) {
+$arrayfields = array(
+	'p.title' => array(
+		'label'=>'Project',
+		'checked'=>1,
+		'enabled'=>1,
+		'position'=>1,
+	//	'help'=>$val['help']
+	),
+	'us_qty_planned' => array(
+		'label'=>'us_qty_planned',
+		'checked'=>1,
+		'enabled'=>1,
+		'position'=>1,
+		'help'=>$val['us_qty_planned_help']
+	),
+	'us_qty_consumed' => array(
+		'label'=>'us_qty_consumed',
+		'checked'=>1,
+		'enabled'=>1,
+		'position'=>1,
+		'help'=>$val['us_qty_consumed_help']
+	),
+	'us_qty_done' => array(
+		'label'=>'us_qty_done',
+		'checked'=>1,
+		'enabled'=>1,
+		'position'=>1,
+		'help'=>$val['us_qty_done_help']
+	)
+);
+
+
+foreach ($listFields as $key => $val) {
 	// If $val['visible']==0, then we never show the field
 	if (!empty($val['visible'])) {
 		$visible = (int) dol_eval($val['visible'], 1);
@@ -139,10 +180,11 @@ foreach ($object->fields as $key => $val) {
 		);
 	}
 }
-// Extra fields
-include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 
-$object->fields = dol_sort_array($object->fields, 'position');
+// Extra fields
+//include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php'; // pour l'instant j'affiche pas les extrafields
+
+$listFields = dol_sort_array($listFields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
 $permissiontoread = $user->rights->scrumproject->scrumsprint->read;
@@ -181,7 +223,7 @@ if (empty($reshook))
 	// Purge search criteria
 	if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) // All tests are required to be compatible with all browsers
 	{
-		foreach ($object->fields as $key => $val) {
+		foreach ($listFields as $key => $val) {
 			$search[$key] = '';
 		}
 		$toselect = '';
@@ -193,11 +235,13 @@ if (empty($reshook))
 		$massaction = ''; // Protection to avoid mass action if we force a new search during a mass action confirmation
 	}
 
-	// Mass actions
-	$objectclass = 'ScrumSprint';
-	$objectlabel = 'ScrumSprint';
-	$uploaddir = $conf->scrumproject->dir_output;
-	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
+
+	// On est sur une page de "Rapport" en qq sorte donc Faire attention aux actions en masse
+//	// Mass actions
+//	$objectclass = 'ScrumSprint';
+//	$objectlabel = 'ScrumSprint';
+//	$uploaddir = $conf->scrumproject->dir_output;
+//	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 }
 
 
@@ -212,19 +256,31 @@ $now = dol_now();
 
 //$help_url="EN:Module_ScrumSprint|FR:Module_ScrumSprint_FR|ES:Módulo_ScrumSprint";
 $help_url = '';
-$title = $langs->trans('ListOfScrumSprints');
+$title = $langs->trans('ListOfSprintProjectPlanning');
+
 
 
 // Build and execute select
 // --------------------------------------------------------------------
 $sql = 'SELECT ';
-foreach ($object->fields as $key => $val) {
+
+foreach ($listFields as $key => $val) {
 	$sql .= 't.'.$key.', ';
 }
-// Add fields from extrafields
-if (!empty($extrafields->attributes[$object->table_element]['label'])) {
-	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) $sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.' as options_'.$key.', ' : '');
-}
+
+$sql.= 'p.rowid fk_project, p.title project_title,';
+
+$sql.= 'SUM(sUSsprint.qty_planned) as us_qty_planned, ';
+$sql.= 'SUM(sUSsprint.qty_consumed) as us_qty_consumed, ';
+$sql.= 'SUM(sUSsprint.qty_done) as us_qty_done, ';
+
+//// Add fields from extrafields
+//if (!empty($extrafields->attributes[$object->table_element]['label'])) {
+//	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val){
+//		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.' as options_'.$key.', ' : '');
+//	}
+//}
+
 // Add fields from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $object); // Note that $action and $object may have been modified by hook
@@ -232,21 +288,66 @@ $sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
 $sql = preg_replace('/,\s*$/', '', $sql);
 $sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
 if (is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
+
+$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint as sUSsprint ON (t.rowid = sUSsprint.fk_scrum_sprint )";
+$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstory as sUS ON (sUSsprint.fk_scrum_user_story = sUS.rowid )";
+$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."projet_task as pt ON (sUS.fk_task = pt.rowid )";
+$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX.$project->table_element." as p ON (pt.fk_projet = p.rowid)";
+
+
+
 // Add table from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
 if ($object->ismultientitymanaged == 1) $sql .= " WHERE t.entity IN (".getEntity($object->element).")";
-else $sql .= " WHERE 1 = 1";
+else $sql .= " WHERE p.rowid > 0";
 foreach ($search as $key => $val)
 {
 	if ($key == 'status' && $search[$key] == -1) continue;
-	$mode_search = (($object->isInt($object->fields[$key]) || $object->isFloat($object->fields[$key])) ? 1 : 0);
-	if (strpos($object->fields[$key]['type'], 'integer:') === 0) {
+
+	if ($key == 'status' && !empty($search['status'])) {
+		$newarrayofstatus = array();
+		if(is_array($search['status'])){
+			foreach ($search['status'] as $key2 => $val2) {
+				if (in_array($val2, array('openall', 'closeall'))) {
+					continue;
+				}
+				$newarrayofstatus[] = $val2;
+			}
+		}
+		else{
+			if ($search['status'] == 'openall' || in_array('openall', $search['status'])) {
+				$newarrayofstatus[] = ScrumSprint::STATUS_PENDING;
+				$newarrayofstatus[] = ScrumSprint::STATUS_VALIDATED;
+			}
+			if ($search['status'] == 'closeall' || in_array('closeall', $search['status'])) {
+				$newarrayofstatus[] = ScrumSprint::STATUS_DONE;
+				$newarrayofstatus[] = ScrumSprint::STATUS_DRAFT;
+			}
+		}
+
+
+		if (count($newarrayofstatus)) {
+			$sql .= natural_search('t.'.$key, join(',', $newarrayofstatus), 2);
+		}
+		continue;
+	}
+
+	$mode_search = (($object->isInt($listFields[$key]) || $object->isFloat($listFields[$key])) ? 1 : 0);
+	if (strpos($listFields[$key]['type'], 'integer:') === 0) {
 		if ($search[$key] == '-1') $search[$key] = '';
 		$mode_search = 2;
 	}
-	if ($search[$key] != '') $sql .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
+
+	if ($search[$key] != ''){
+		$searchCol = $key;
+		if(isset($scrumFieldsToKeep[$key])){
+			$searchCol = 't.'.$key;
+		}
+
+		$sql .= natural_search($searchCol, $search[$key], $mode_search);
+	}
 }
 if ($search_all) $sql .= natural_search(array_keys($fieldstosearchall), $search_all);
 //$sql.= dolSqlDateFilter("t.field", $search_xxxday, $search_xxxmonth, $search_xxxyear);
@@ -257,24 +358,29 @@ $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListWhere', $parameters, $object); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
 
-/* If a group by is required
+
 $sql.= " GROUP BY ";
-foreach($object->fields as $key => $val)
+$sql.='p.rowid,p.title, ';
+foreach($listFields as $key => $val)
 {
 	$sql.='t.'.$key.', ';
 }
+
 // Add fields from extrafields
-if (! empty($extrafields->attributes[$object->table_element]['label'])) {
-	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) $sql.=($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.', ' : '');
-}
+//if (! empty($extrafields->attributes[$object->table_element]['label'])) {
+//	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) $sql.=($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.', ' : '');
+//}
+
+
 // Add where from hooks
 $parameters=array();
 $reshook=$hookmanager->executeHooks('printFieldListGroupBy',$parameters, $object);    // Note that $action and $object may have been modified by hook
 $sql.=$hookmanager->resPrint;
 $sql=preg_replace('/,\s*$/','', $sql);
-*/
+
 
 $sql .= $db->order($sortfield, $sortorder);
+
 
 // Count total nb of records
 $nbtotalofrecords = '';
@@ -315,6 +421,7 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 // --------------------------------------------------------------------
 
 llxHeader('', $title, $help_url);
+
 
 
 $arrayofselected = is_array($toselect) ? $toselect : array();
@@ -363,8 +470,19 @@ print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sort
 $topicmail = "SendScrumSprintRef";
 $modelmail = "scrumsprint";
 $objecttmp = new ScrumSprint($db);
-$trackid = 'xxxx'.$object->id;
-include DOL_DOCUMENT_ROOT.'/core/tpl/massactions_pre.tpl.php';
+//$trackid = 'xxxx'.$object->id;
+// Allow Pre-Mass-Action hook (eg for confirmation dialog)
+$parameters = array(
+	'toselect' => $toselect
+);
+
+$reshook = $hookmanager->executeHooks('doPreMassActions', $parameters, $object, $action);
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+} else {
+	print $hookmanager->resPrint;
+}
+
 
 if ($search_all)
 {
@@ -400,7 +518,29 @@ print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwit
 // Fields title search
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
-foreach ($object->fields as $key => $val)
+
+if (!empty($arrayfields['p.title']['checked'])) {
+	print '<td class="liste_titre">';
+	print '</td>';
+}
+
+if (!empty($arrayfields['us_qty_planned']['checked'])) {
+	print '<td class="liste_titre">';
+	print '</td>';
+}
+
+if (!empty($arrayfields['us_qty_consumed']['checked'])) {
+	print '<td class="liste_titre">';
+	print '</td>';
+}
+
+if (!empty($arrayfields['us_qty_done']['checked'])) {
+	print '<td class="liste_titre">';
+	print '</td>';
+}
+
+
+foreach ($listFields as $key => $val)
 {
 	$cssforfield = (empty($val['css']) ? '' : $val['css']);
 	if ($key == 'status') $cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -410,12 +550,29 @@ foreach ($object->fields as $key => $val)
 	if (!empty($arrayfields['t.'.$key]['checked']))
 	{
 		print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
-		if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) print $form->selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth100', 1);
+
+
+		if ($key == 'status') {
+			$arrayofstatus = array();
+			$arrayofstatus['openall'] = '-- '.$langs->trans('OpenAll').' --';
+			foreach ($object->fields['status']['arrayofkeyval'] as $key2 => $val2) {
+				$arrayofstatus[$key2] = $val2;
+			}
+			$selectedarray = null;
+			if (!empty($search[$key])) {
+				$selectedarray = array_values($search[$key]);
+			}
+			print Form::multiselectarray('search_status', $arrayofstatus, $selectedarray, 0, 0, 'minwidth100imp maxwidth150', 1, 0, '', '', '');
+		}elseif (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) print $form->selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth100', 1);
 		elseif (strpos($val['type'], 'integer:') === 0) {
 			print $object->showInputField($val, $key, $search[$key], '', '', 'search_', 'maxwidth125', 1);
 		} elseif (!preg_match('/^(date|timestamp)/', $val['type'])) print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag($search[$key]).'">';
+
+
 		print '</td>';
 	}
+
+
 }
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
@@ -435,7 +592,28 @@ print '</tr>'."\n";
 // Fields title label
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
-foreach ($object->fields as $key => $val)
+$colKey = 'p.title';
+if (!empty($arrayfields[$colKey]['checked'])) {
+	print getTitleFieldOfList($arrayfields[$colKey]['label'], 0, $_SERVER['PHP_SELF'], $colKey, '', $param, '', $sortfield, $sortorder, '')."\n";
+}
+
+$colKey = 'us_qty_planned';
+if (!empty($arrayfields['us_qty_planned']['checked'])) {
+	print getTitleFieldOfList($arrayfields[$colKey]['label'], 0, $_SERVER['PHP_SELF'], $colKey, '', $param, '', $sortfield, $sortorder, '')."\n";
+}
+
+$colKey = 'us_qty_consumed';
+if (!empty($arrayfields['us_qty_consumed']['checked'])) {
+	print getTitleFieldOfList($arrayfields[$colKey]['label'], 0, $_SERVER['PHP_SELF'], $colKey, '', $param, '', $sortfield, $sortorder, '')."\n";
+}
+
+$colKey = 'us_qty_done';
+if (!empty($arrayfields['us_qty_done']['checked'])) {
+	print getTitleFieldOfList($arrayfields[$colKey]['label'], 0, $_SERVER['PHP_SELF'], $colKey, '', $param, '', $sortfield, $sortorder, '')."\n";
+}
+
+
+foreach ($listFields as $key => $val)
 {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') $cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -481,9 +659,44 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
 
+	$project = _getObjectFromCache('Project', $obj->fk_project);
+	/**
+	 * @var Project $project
+	 */
+
 	// Show here line of result
 	print '<tr class="oddeven">';
-	foreach ($object->fields as $key => $val)
+
+	if (!empty($arrayfields['p.title']['checked'])) {
+		print '<td class="nowrap">';
+		print $project->getNomUrl(1,'',1);
+		print '</td>';
+	}
+
+	$colKey = 'us_qty_planned';
+	if (!empty($arrayfields[$colKey]['checked'])) {
+		print '<td >';
+		print convertQuantityToProjectGranularity($obj->us_qty_planned);
+		print '</td>';
+	}
+
+	$colKey = 'us_qty_consumed';
+	if (!empty($arrayfields[$colKey]['checked'])) {
+		print '<td >';
+		print convertQuantityToProjectGranularity($obj->us_qty_consumed);
+		print '</td>';
+	}
+
+	$colKey = 'us_qty_done';
+	if (!empty($arrayfields[$colKey]['checked'])) {
+		print '<td >';
+		print convertQuantityToProjectGranularity($obj->us_qty_done);
+		print '</td>';
+	}
+
+
+
+	foreach ($listFields as $key => $val)
 	{
 		$cssforfield = (empty($val['css']) ? '' : $val['css']);
 		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) $cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -498,8 +711,16 @@ while ($i < ($limit ? min($num, $limit) : $num))
 		if (!empty($arrayfields['t.'.$key]['checked']))
 		{
 			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
+
+
 			if ($key == 'status') print $object->getLibStatut(5);
-			else print $object->showOutputField($val, $key, $object->$key, '');
+			elseif(in_array($key, array('qty_velocity', 'qty_planned', 'qty_consumed', 'qty_done'))){
+				print convertQuantityToProjectGranularity($object->$key);
+			}else{
+				print $object->showOutputField($val, $key, $object->$key, '');
+			}
+
+
 			print '</td>';
 			if (!$i) $totalarray['nbfield']++;
 			if (!empty($val['isameasure']))
@@ -576,3 +797,62 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 // End of page
 llxFooter();
 $db->close();
+
+
+/**
+ * @param array $globalFields
+ * @param array $fields
+ * @param array $fieldsToKeep fields to keep with override values
+ * @param $sqltableprefix
+ * @return void
+ */
+function _addObjectFieldDefinition(&$globalFields, $fields, $fieldsToKeep){
+	foreach ($fieldsToKeep as $fieldKey => $fieldParams){
+		if(!empty($fields[$fieldKey])){
+			$globalFields[$fieldKey] = $fields[$fieldKey];
+			// au besoin il est passible de surchager la config originale
+			foreach ($fieldParams as $param => $value){
+				$globalFields[$fieldKey][$param]=$value;
+			}
+		}
+	}
+}
+
+/**
+ * copier de la class list view helper de webPassword
+ * @param $objetClassName
+ * @param $fk_object
+ * @return bool|CommonObject
+ */
+function _getObjectFromCache($objetClassName, $fk_object){
+	global $db, $TListViewObjectCache;
+
+	if(!class_exists($objetClassName)){
+		// TODO : Add error log here
+		return false;
+	}
+
+	if(empty($TListViewObjectCache[$objetClassName][$fk_object])){
+		$object = new $objetClassName($db);
+		if($object->fetch($fk_object, false) <= 0)
+		{
+			return false;
+		}
+
+		$TListViewObjectCache[$objetClassName][$fk_object] = $object;
+	}
+	else{
+		$object = $TListViewObjectCache[$objetClassName][$fk_object];
+	}
+
+	return $object;
+}
+
+
+function convertQuantityToProjectGranularity($value){
+	$value = doubleval($value);
+	$quotient = 7;
+	$outV = price($value / $quotient);
+
+	return '<span class="classfortooltip" title="'.$value.' / '.$quotient.' = '.$outV.'" >'.$outV.'</span>';
+}

@@ -88,8 +88,8 @@ ScrumProjectUserRoleDEV = Developer
 #
 # Liste
 #
-ScrumSprint = Sprint scrum
-ScrumSprints = sprints scrum
+ScrumSprint = Sprint
+ScrumSprints = sprints
 NewScrumSprint = Nouveau sprint
 StatusScrumSprintDraft = Brouillon
 StatusScrumSprintValid = Validé
@@ -98,6 +98,9 @@ StatusScrumSprintDone = Terminé
 StatusScrumSprintCancelled = Annulé
 
 ListOfScrumSprints = Liste des Sprints
+ProjectPlanningReportMenu = Planning projets
+ListOfSprintProjectPlanning = Planning projets/prints
+
 
 #####################################################
 # ScrumCard
