@@ -145,6 +145,7 @@ ListOfScrumUserStorys = Liste des user stories
 
 
 ScrumSprintUsers = Disponibilité en ressources humaines
+ScrumSprintUsersShort = Disponibilité RH
 
 # Droits
 ReadScrumSprintUser = Voir les ressources humaines liées à aux sprints
