@@ -980,44 +980,44 @@ class SrumSprintUser extends CommonObject
 		}
 	}
 
-	/**
-	 *  Create a document onto disk according to template module.
-	 *
-	 *  @param	    string		$modele			Force template to use ('' to not force)
-	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-	 *  @param      int			$hidedetails    Hide details of lines
-	 *  @param      int			$hidedesc       Hide description
-	 *  @param      int			$hideref        Hide ref
-	 *  @param      null|array  $moreparams     Array to provide more information
-	 *  @return     int         				0 if KO, 1 if OK
-	 */
-	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
-	{
-		global $conf, $langs;
-
-		$result = 0;
-		$includedocgeneration = 0;
-
-		$langs->load("scrumproject@scrumproject");
-
-		if (!dol_strlen($modele)) {
-			$modele = 'standard_srumsprintuser';
-
-			if (!empty($this->model_pdf)) {
-				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->SRUMSPRINTUSER_ADDON_PDF)) {
-				$modele = $conf->global->SRUMSPRINTUSER_ADDON_PDF;
-			}
-		}
-
-		$modelpath = "core/modules/scrumproject/doc/";
-
-		if ($includedocgeneration && !empty($modele)) {
-			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-		}
-
-		return $result;
-	}
+//	/**
+//	 *  Create a document onto disk according to template module.
+//	 *
+//	 *  @param	    string		$modele			Force template to use ('' to not force)
+//	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
+//	 *  @param      int			$hidedetails    Hide details of lines
+//	 *  @param      int			$hidedesc       Hide description
+//	 *  @param      int			$hideref        Hide ref
+//	 *  @param      null|array  $moreparams     Array to provide more information
+//	 *  @return     int         				0 if KO, 1 if OK
+//	 */
+//	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
+//	{
+//		global $conf, $langs;
+//
+//		$result = 0;
+//		$includedocgeneration = 0;
+//
+//		$langs->load("scrumproject@scrumproject");
+//
+//		if (!dol_strlen($modele)) {
+//			$modele = 'standard_srumsprintuser';
+//
+//			if (!empty($this->model_pdf)) {
+//				$modele = $this->model_pdf;
+//			} elseif (!empty($conf->global->SRUMSPRINTUSER_ADDON_PDF)) {
+//				$modele = $conf->global->SRUMSPRINTUSER_ADDON_PDF;
+//			}
+//		}
+//
+//		$modelpath = "core/modules/scrumproject/doc/";
+//
+//		if ($includedocgeneration && !empty($modele)) {
+//			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+//		}
+//
+//		return $result;
+//	}
 
 	/**
 	 * Action executed by scheduler

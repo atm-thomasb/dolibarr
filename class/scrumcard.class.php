@@ -105,8 +105,8 @@ class ScrumCard extends CommonObject
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
 		'points' => array('type'=>'real', 'label'=>'Points', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
-		'fk_user_dev' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserDEV', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
+		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
+		'fk_user_dev' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserDEV', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
 		'fk_task' => array('type'=>'integer:Task:projet/class/task.class.php', 'label'=>'Task', 'enabled'=>'1', 'position'=>55, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'projet_task.rowid',),
 		'fk_scrumsprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>57, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'scrumsprint.rowid',),
 		'fk_stage' => array('type'=>'integer:DictScrumCardStage:scrumproject/class/dictscrumcardstage.class.php', 'label'=>'Stage', 'enabled'=>'1', 'position'=>59, 'notnull'=>0, 'visible'=>1, 'index'=>1, 'foreignkey'=>'c_scrum_stage.rowid',),
@@ -949,45 +949,45 @@ class ScrumCard extends CommonObject
 			return "";
 		}
 	}
-
-	/**
-	 *  Create a document onto disk according to template module.
-	 *
-	 *  @param	    string		$modele			Force template to use ('' to not force)
-	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-	 *  @param      int			$hidedetails    Hide details of lines
-	 *  @param      int			$hidedesc       Hide description
-	 *  @param      int			$hideref        Hide ref
-	 *  @param      null|array  $moreparams     Array to provide more information
-	 *  @return     int         				0 if KO, 1 if OK
-	 */
-	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
-	{
-		global $conf, $langs;
-
-		$result = 0;
-		$includedocgeneration = 0;
-
-		$langs->load("scrumproject@scrumproject");
-
-		if (!dol_strlen($modele)) {
-			$modele = 'standard_scrumcard';
-
-			if (!empty($this->model_pdf)) {
-				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->SCRUMCARD_ADDON_PDF)) {
-				$modele = $conf->global->SCRUMCARD_ADDON_PDF;
-			}
-		}
-
-		$modelpath = "core/modules/scrumproject/doc/";
-
-		if ($includedocgeneration && !empty($modele)) {
-			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-		}
-
-		return $result;
-	}
+//
+//	/**
+//	 *  Create a document onto disk according to template module.
+//	 *
+//	 *  @param	    string		$modele			Force template to use ('' to not force)
+//	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
+//	 *  @param      int			$hidedetails    Hide details of lines
+//	 *  @param      int			$hidedesc       Hide description
+//	 *  @param      int			$hideref        Hide ref
+//	 *  @param      null|array  $moreparams     Array to provide more information
+//	 *  @return     int         				0 if KO, 1 if OK
+//	 */
+//	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
+//	{
+//		global $conf, $langs;
+//
+//		$result = 0;
+//		$includedocgeneration = 0;
+//
+//		$langs->load("scrumproject@scrumproject");
+//
+//		if (!dol_strlen($modele)) {
+//			$modele = 'standard_scrumcard';
+//
+//			if (!empty($this->model_pdf)) {
+//				$modele = $this->model_pdf;
+//			} elseif (!empty($conf->global->SCRUMCARD_ADDON_PDF)) {
+//				$modele = $conf->global->SCRUMCARD_ADDON_PDF;
+//			}
+//		}
+//
+//		$modelpath = "core/modules/scrumproject/doc/";
+//
+//		if ($includedocgeneration && !empty($modele)) {
+//			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+//		}
+//
+//		return $result;
+//	}
 
 	/**
 	 * Action executed by scheduler

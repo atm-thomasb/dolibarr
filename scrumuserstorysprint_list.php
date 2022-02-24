@@ -491,6 +491,44 @@ $objecttmp = new ScrumUserStorySprint($db);
 $trackid = 'xxxx'.$object->id;
 include DOL_DOCUMENT_ROOT.'/core/tpl/massactions_pre.tpl.php';
 
+
+
+if(empty($massaction)) {
+
+
+// Formulaire d'ajout rapide possé ici pour garder les filtres
+	print '<div class="quick-add-form" >';
+
+	print '<table class="">';
+	print '<tr>';
+
+	print '<td>';
+	print '</td>';
+
+	print '<td>';
+	print $object->showInputField('', 'fk_scrum_sprint', 0, '', 'quickadd_', '', 0,1);
+	print '</td>';
+
+	print '<td>';
+	print $object->showInputField('', 'fk_scrum_user_story', 0, '', 'quickadd_', '', 0,1);
+	print '</td>';
+
+	print '<td>';
+	print '<input name="quickadd_qty_planned" type="number" value="" placeholder="' . $langs->trans('QtyPlanned') . '" />';
+	print '</td>';
+
+	print '<td>';
+	print '<button class="butAction" type="submit" name="action" value="plan">' . $langs->trans('Plannifier') . '</button>';
+	print '</td>';
+
+	print '</tr>';
+	print '</table>';
+
+
+	print '</div>';
+}
+
+
 if ($search_all) {
 	foreach ($fieldstosearchall as $key => $val) {
 		$fieldstosearchall[$key] = $langs->trans($val);

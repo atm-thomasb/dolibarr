@@ -42,6 +42,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 
 // load scrumproject libraries
 require_once __DIR__ . '/class/scrumsprint.class.php';
@@ -87,13 +88,13 @@ $hookmanager->initHooks(array('scrumsprintlist')); // Note that conf->hooks_modu
 $scrumFieldsToKeep = array(
 	'rowid'			=> array(),
 	'ref'			=> array('position'=>10, 'label' => 'RefSprint' ),
-	'fk_team' 		=> array('position'=>20  ),
 	'label'			=> array('position'=>30, 'label' => 'Sprint' ),
-	'date_start' 	=> array('position'=>35  ),
-	'date_end' 		=> array('position'=>40  ),
-	'qty_velocity'	=> array('position'=>100 ),
-	'qty_planned'	=> array('position'=>105 ),
-	'qty_done'		=> array('position'=>110 ),
+	'qty_velocity'	=> array('position'=>35 ),
+	'qty_planned'	=> array('position'=>40 ),
+	'qty_done'		=> array('position'=>45),
+	'fk_team' 		=> array('position'=>50  ),
+	'date_start' 	=> array('position'=>55  ),
+	'date_end' 		=> array('position'=>60  ),
 	'status' 		=> array('position'=>1000),
 );
 
@@ -123,6 +124,9 @@ if (GETPOST('search_ref_project', 'alpha') !== '') $search[$key] = GETPOST('sear
 foreach ($listFields as $key => $val){
 	if (GETPOST('search_'.$key, 'alpha') !== '') $search[$key] = GETPOST('search_'.$key, 'alpha');
 }
+
+if (GETPOST('search_project_title', 'alpha') !== '') $search['search_project_title'] = GETPOST('search_project_title', 'alpha');
+
 
 if(empty($search['status'])){
 	$search['status'] = ['openall'];
@@ -223,7 +227,7 @@ if (empty($reshook))
 	// Purge search criteria
 	if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) // All tests are required to be compatible with all browsers
 	{
-		foreach ($listFields as $key => $val) {
+		foreach ($search as $key => $val) {
 			$search[$key] = '';
 		}
 		$toselect = '';
@@ -305,7 +309,6 @@ else $sql .= " WHERE p.rowid > 0";
 foreach ($search as $key => $val)
 {
 	if ($key == 'status' && $search[$key] == -1) continue;
-
 	if ($key == 'status' && !empty($search['status'])) {
 		$newarrayofstatus = array();
 		if(is_array($search['status'])){
@@ -345,6 +348,11 @@ foreach ($search as $key => $val)
 		if(isset($scrumFieldsToKeep[$key])){
 			$searchCol = 't.'.$key;
 		}
+
+		if($key == 'search_project_title'){
+			$searchCol = ['p.title', 'p.ref'];
+		}
+
 
 		$sql .= natural_search($searchCol, $search[$key], $mode_search);
 	}
@@ -462,9 +470,12 @@ print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
+
 $newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumsprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+
+
 
 // Add code for pre mass action (confirmation or email presend form)
 $topicmail = "SendScrumSprintRef";
@@ -521,6 +532,7 @@ print '<tr class="liste_titre">';
 
 if (!empty($arrayfields['p.title']['checked'])) {
 	print '<td class="liste_titre">';
+	print '<input name="search_project_title" value="'.dol_escape_htmltag($search['search_project_title']).'" >';
 	print '</td>';
 }
 
@@ -676,21 +688,21 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	$colKey = 'us_qty_planned';
 	if (!empty($arrayfields[$colKey]['checked'])) {
 		print '<td >';
-		print convertQuantityToProjectGranularity($obj->us_qty_planned);
+		print _convertQuantityToProjectGranularity($obj->us_qty_planned);
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_consumed';
 	if (!empty($arrayfields[$colKey]['checked'])) {
 		print '<td >';
-		print convertQuantityToProjectGranularity($obj->us_qty_consumed);
+		print _convertQuantityToProjectGranularity($obj->us_qty_consumed);
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_done';
 	if (!empty($arrayfields[$colKey]['checked'])) {
 		print '<td >';
-		print convertQuantityToProjectGranularity($obj->us_qty_done);
+		print _convertQuantityToProjectGranularity($obj->us_qty_done);
 		print '</td>';
 	}
 
@@ -715,7 +727,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 			if ($key == 'status') print $object->getLibStatut(5);
 			elseif(in_array($key, array('qty_velocity', 'qty_planned', 'qty_consumed', 'qty_done'))){
-				print convertQuantityToProjectGranularity($object->$key);
+				print _convertQuantityToProjectGranularity($object->$key);
 			}else{
 				print $object->showOutputField($val, $key, $object->$key, '');
 			}
@@ -849,9 +861,9 @@ function _getObjectFromCache($objetClassName, $fk_object){
 }
 
 
-function convertQuantityToProjectGranularity($value){
+function _convertQuantityToProjectGranularity($value){
 	$value = doubleval($value);
-	$quotient = 7;
+	$quotient = !empty($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY)? intval($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY): 7; // TODO ajouter soit une conf globale (une de plus ) ou utiliser celle de DOC2PROJECT_NB_HOURS_PER_DAY
 	$outV = price($value / $quotient);
 
 	return '<span class="classfortooltip" title="'.$value.' / '.$quotient.' = '.$outV.'" >'.$outV.'</span>';

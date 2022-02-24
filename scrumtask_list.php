@@ -515,7 +515,13 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
-$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumtask_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
+
+$newScrumTaskUrl = dol_buildpath('/scrumproject/scrumtask_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']);
+if($fk_scrum_user_story_sprint>0){
+	$newScrumTaskUrl.= '&fk_scrum_user_story_sprint='.$fk_scrum_user_story_sprint;
+}
+
+$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $newScrumTaskUrl, '', $permissiontoadd);
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 
