@@ -15,18 +15,18 @@
 
 
 -- BEGIN MODULEBUILDER INDEXES
-ALTER TABLE llx_scrumproject_srumsprintuser ADD INDEX idx_scrumproject_srumsprintuser_rowid (rowid);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD INDEX idx_scrumproject_srumsprintuser_fk_scrum_sprint (fk_scrum_sprint);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD CONSTRAINT llx_scrumproject_srumsprintuser_fk_scrum_sprint FOREIGN KEY (fk_scrum_sprint) REFERENCES llx_scrumproject_scrumsprint(rowid);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD INDEX idx_scrumproject_srumsprintuser_fk_user_role (fk_user_role);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD CONSTRAINT llx_scrumproject_srumsprintuser_fk_user_role FOREIGN KEY (fk_user_role) REFERENCES llx_c_type_contact(rowid);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD CONSTRAINT llx_scrumproject_srumsprintuser_fk_user FOREIGN KEY (fk_user) REFERENCES llx_user(rowid);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD CONSTRAINT llx_scrumproject_srumsprintuser_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD CONSTRAINT llx_scrumproject_srumsprintuser_fk_user_modif FOREIGN KEY (fk_user_modif) REFERENCES llx_user(rowid);
-ALTER TABLE llx_scrumproject_srumsprintuser ADD INDEX idx_scrumproject_srumsprintuser_status (status);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD INDEX idx_scrumproject_scrumsprintuser_rowid (rowid);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD INDEX idx_scrumproject_scrumsprintuser_fk_scrum_sprint (fk_scrum_sprint);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_scrum_sprint FOREIGN KEY (fk_scrum_sprint) REFERENCES llx_scrumproject_scrumsprint(rowid);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD INDEX idx_scrumproject_scrumsprintuser_fk_user_role (fk_user_role);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_user_role FOREIGN KEY (fk_user_role) REFERENCES llx_c_type_contact(rowid);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_user FOREIGN KEY (fk_user) REFERENCES llx_user(rowid);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_user_modif FOREIGN KEY (fk_user_modif) REFERENCES llx_user(rowid);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD INDEX idx_scrumproject_scrumsprintuser_status (status);
 -- END MODULEBUILDER INDEXES
 
---ALTER TABLE llx_scrumproject_srumsprintuser ADD UNIQUE INDEX uk_scrumproject_srumsprintuser_fieldxy(fieldx, fieldy);
+--ALTER TABLE llx_scrumproject_scrumsprintuser ADD UNIQUE INDEX uk_scrumproject_scrumsprintuser_fieldxy(fieldx, fieldy);
 
---ALTER TABLE llx_scrumproject_srumsprintuser ADD CONSTRAINT llx_scrumproject_srumsprintuser_fk_field FOREIGN KEY (fk_field) REFERENCES llx_scrumproject_myotherobject(rowid);
+--ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_field FOREIGN KEY (fk_field) REFERENCES llx_scrumproject_myotherobject(rowid);
 

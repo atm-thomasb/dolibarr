@@ -249,58 +249,39 @@ class modScrumProject extends DolibarrModules
 		 */
 
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read scrum sprints'; // Permission label
+		$this->rights[$r][1] = 'ReadScrumsprint'; // Permission label
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/Update scrum sprints'; // Permission label
+		$this->rights[$r][1] = 'WriteScrumsprint'; // Permission label
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete scrum sprints'; // Permission label
+		$this->rights[$r][1] = 'DeleteScrumsprint'; // Permission label
 		$this->rights[$r][4] = 'scrumsprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 
-		/**
-		 * DROIT POUR SCRUM CARDS
-		 */
 
-		// TODO Ya peut être plus besoin
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read scrum cards'; // Permission label
-		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/Update scrum cards'; // Permission label
-		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete scrum cards'; // Permission label
-		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
 
 		/**
 		 * DROIT POUR SCRUM USER STORY
 		 */
 
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read scrum user story'; // Permission label
+		$this->rights[$r][1] = 'ReadScrumuserstory'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/Update scrum  user story'; // Permission label
+		$this->rights[$r][1] = 'WriteScrumuserstory'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete scrum  user story'; // Permission label
+		$this->rights[$r][1] = 'DeleteScrumuserstory'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstory'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
@@ -311,17 +292,17 @@ class modScrumProject extends DolibarrModules
 		 */
 
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read scrum user story affected to sprint'; // Permission label
+		$this->rights[$r][1] = 'ReadScrumuserstorysprint'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Affect scrum  user story on sprint'; // Permission label
+		$this->rights[$r][1] = 'WriteScrumuserstorysprint'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete scrum user story from sprint'; // Permission label
+		$this->rights[$r][1] = 'DeleteScrumuserstorysprint'; // Permission label
 		$this->rights[$r][4] = 'scrumuserstorysprint'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
@@ -331,22 +312,68 @@ class modScrumProject extends DolibarrModules
 		 */
 
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read scrum user story task affected to sprint'; // Permission label
+		$this->rights[$r][1] = 'ReadScrumtask'; // Permission label
 		$this->rights[$r][4] = 'scrumtask'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Affect scrum  user story on sprint'; // Permission label
+		$this->rights[$r][1] = 'WriteScrumtask'; // Permission label
 		$this->rights[$r][4] = 'scrumtask'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete scrum user story from sprint'; // Permission label
+		$this->rights[$r][1] = 'DeleteScrumtask'; // Permission label
 		$this->rights[$r][4] = 'scrumtask'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 
 
+		/**
+		 * DROIT POUR SCRUM SPRINT USER : Ressource humaine lié au sprint
+		 */
+
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'ReadScrumSprintUser'; // Permission label
+		$this->rights[$r][4] = 'scrumsprintuser'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'WriteScrumSprintUser'; // Permission label
+		$this->rights[$r][4] = 'scrumsprintuser'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'DeleteScrumSprintUser'; // Permission label
+		$this->rights[$r][4] = 'scrumsprintuser'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+
+
+
+
+
+
+
+		/**
+		 * DROIT POUR SCRUM CARDS
+		 */
+
+		// TODO Ya peut être plus besoin
+//		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+//		$this->rights[$r][1] = 'Read scrum cards'; // Permission label
+//		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+//		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+//		$r++;
+//		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+//		$this->rights[$r][1] = 'Create/Update scrum cards'; // Permission label
+//		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+//		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+//		$r++;
+//		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+//		$this->rights[$r][1] = 'Delete scrum cards'; // Permission label
+//		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+//		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+//		$r++;
 
 		// Main menu entries to add
 		$this->menu = array();
@@ -518,6 +545,26 @@ class modScrumProject extends DolibarrModules
 			'user'=>0,
 		);
 
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumsprint',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'LeftMenuDeveloperAvailability',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumsprintlist',
+			'url'=>'/scrumproject/scrumsprintuser_list.php?mainmenu=project&leftmenu=scrumsprint',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumsprint->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>0,
+		);
 
 		/**
 		 * MENU SCRUM CARD => devient scrum task
@@ -739,6 +786,26 @@ class modScrumProject extends DolibarrModules
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumuserstorylist1',
 			'url'=>'/scrumproject/scrumuserstory_list.php?mainmenu=project&leftmenu=scrumuserstorylist&search_status=1',
+			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'scrumproject@scrumproject',
+			'position'=>1100+$r,
+			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumuserstorylist\'',
+			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->scrumproject->scrumuserstory->read',
+			'target'=>'',
+			// 0=Menu for internal users, 1=external users, 2=both
+			'user'=>0,
+		);
+		$this->menu[$r++]=array(
+			// '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumuserstorylist',
+			// This is a Left menu entry
+			'type'=>'left',
+			'titre'=>'StatusScrumUserStoryPlanned',
+			'mainmenu'=>'project',
+			'leftmenu'=>'scrumuserstorylist1',
+			'url'=>'/scrumproject/scrumuserstory_list.php?mainmenu=project&leftmenu=scrumuserstorylist&search_status=2',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,

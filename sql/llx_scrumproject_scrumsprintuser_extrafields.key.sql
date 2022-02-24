@@ -15,5 +15,5 @@
 
 
 -- BEGIN MODULEBUILDER INDEXES
-ALTER TABLE llx_scrumproject_srumsprintuser_extrafields ADD INDEX idx_srumsprintuser_fk_object(fk_object);
+ALTER TABLE llx_scrumproject_scrumsprintuser_extrafields ADD INDEX idx_scrumsprintuser_fk_object(fk_object);
 -- END MODULEBUILDER INDEXES

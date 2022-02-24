@@ -44,6 +44,9 @@ NewScrumUserStory = Nouvelle User story
 ScrumUserStorySprint = User story plannifiés
 NewScrumUserStorySprint = Nouvelle plannification
 
+
+LeftMenuDeveloperAvailability = Dispo RH
+
 #
 # Page À propos
 #
@@ -101,7 +104,6 @@ ListOfScrumSprints = Liste des Sprints
 ProjectPlanningReportMenu = Planning projets
 ListOfSprintProjectPlanning = Planning projets/prints
 
-
 #####################################################
 # ScrumCard
 #
@@ -128,6 +130,7 @@ GoToScrumCards = Voir les cartes
 
 StatusScrumUserStoryDraft = Brouillon
 StatusScrumUserStoryReady = Prête
+StatusScrumUserStoryPlanned = Planifié
 StatusScrumUserStoryDone = Terminée
 
 
@@ -139,3 +142,27 @@ QtyConsumed = Qty consommée
 
 ScrumUserStorySprints = user story planifiée
 ListOfScrumUserStorys = Liste des user stories
+
+
+ScrumSprintUsers = Disponibilité en ressources humaines
+
+# Droits
+ReadScrumSprintUser = Voir les ressources humaines liées à aux sprints
+WriteScrumSprintUser = Ajouter/Modifier les ressources humaines liées à aux sprints
+DeleteScrumSprintUser = Supprimer les ressources humaines liées à aux sprints
+
+ReadScrumtask = Voir les tâches scrum
+WriteScrumtask = Ajouter/Modifier les tâches scrum
+DeleteScrumtask = Supprimer les tâches scrum
+
+ReadScrumuserstory = Voir les User story (U.S)
+WriteScrumuserstory = Ajouter/Modifier les User story (U.S)
+DeleteScrumuserstory = Supprimer les User story (U.S)
+
+ReadScrumuserstorysprint = Voir les User story (U.S) planifiées
+WriteScrumuserstorysprint = Ajouter/Modifier les User story (U.S) planifiées
+DeleteScrumuserstorysprint = Supprimer les User story (U.S) planifiées
+
+ReadScrumsprint = Voir les sprints
+WriteScrumsprint = Ajouter/Modifier les sprints
+DeleteScrumsprint = Supprimer les sprints
