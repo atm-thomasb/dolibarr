@@ -493,7 +493,7 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/massactions_pre.tpl.php';
 
 
 
-if(empty($massaction)) {
+if(empty($massaction) && false) {
 
 
 // Formulaire d'ajout rapide possé ici pour garder les filtres
