@@ -170,3 +170,6 @@ DeleteScrumsprint = Supprimer les sprints
 
 
 Planned = Planifié
+
+SumOfDeveloperAvailability = Disponibilités RH saisies
+SumOfDeveloperAvailabilityIsDifferent = La vélocité planifié est différente des disponibilités saisies

@@ -1078,7 +1078,25 @@ class ScrumSprint extends CommonObject
 	 */
 	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
 	{
-		return parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		global $langs;
+
+		if($key == 'qty_velocity'){
+			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+			$countObj = $this->db->getRow("SELECT SUM(qty_velocity) qty_velocity FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($this->id));
+			if($countObj){
+				if($countObj->qty_velocity != $value){
+					$tooltip = '<strong>' . $langs->trans('SumOfDeveloperAvailabilityIsDifferent') . '</strong></br>';
+					$tooltip.= $langs->trans('SumOfDeveloperAvailability') . ' : ' .price($countObj->qty_velocity).'</br>';
+					$tooltip.= $langs->trans('QtyVelocity') . ' : ' .price($value);
+					$out = ' <span class="classfortooltip" title="'.dol_escape_htmltag($tooltip).'"  >'.price($value).' <span class="fa fa-warning"></span></span>';
+				}
+			}
+
+			return $out;
+		}
+		else{
+			return parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
 	}
 
 }
