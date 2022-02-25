@@ -81,6 +81,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
 // load scrumproject libraries
 require_once __DIR__.'/class/scrumsprintuser.class.php';
+require_once __DIR__.'/class/scrumsprint.class.php';
+require_once __DIR__.'/lib/scrumproject_scrumsprint.lib.php';
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -99,6 +101,7 @@ $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
 
 $id = GETPOST('id', 'int');
+$fk_sprint = GETPOST('fk_sprint', 'int');
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -450,6 +453,35 @@ $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSearchParam', $parameters, $object); // Note that $action and $object may have been modified by hook
 $param .= $hookmanager->resPrint;
 
+$newBtnBackToPageUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+
+if($fk_sprint > 0){
+
+	$param .= '&fk_sprint='.  $fk_sprint;
+
+	$sprint = new ScrumSprint($db);
+	$sprint->fetch($fk_sprint);
+
+	$head = scrumsprintPrepareHead($sprint);
+	print dol_get_fiche_head($head, 'scrumsprintuser', $langs->trans("ScrumSprint"), -1, $sprint->picto);
+
+	// Object card
+	// ------------------------------------------------------------
+	$linkback = '<a href="'.dol_buildpath('/scrumproject/scrumsprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+
+	$morehtmlref = '<div class="refidno">';
+	if(!empty($object->label)) $morehtmlref.= $object->label . '<br>';
+	$morehtmlref.= $object->showOutputField($object->fields['fk_team'], 'fk_team', $object->fk_team);
+	$morehtmlref .= '</div>';
+
+	dol_banner_tab($sprint, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+
+}
+else{
+
+}
+
+
 // List of mass actions available
 $arrayofmassactions = array(
 	//'validate'=>img_picto('', 'check', 'class="pictofixedwidth"').$langs->trans("Validate"),
@@ -477,7 +509,13 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
-$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumsprintuser_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
+if($fk_sprint>0){
+	print '<input type="hidden" name="fk_sprint" value="'.$fk_sprint.'">';
+}
+
+$newCardUrl = dol_buildpath('/scrumproject/scrumsprintuser_card.php', 1).'?action=create&backtopage='.urlencode($newBtnBackToPageUrl);
+if($fk_sprint > 0) { $newCardUrl.= '&fk_scrum_sprint='.$fk_sprint;}
+$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $newCardUrl, '', $permissiontoadd);
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 

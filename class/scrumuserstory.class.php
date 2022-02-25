@@ -496,12 +496,12 @@ class ScrumUserStory extends CommonObject
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 		$error = 0;
-
 		// Protection
 		if ($this->status == self::STATUS_VALIDATED) {
 			dol_syslog(get_class($this)."::validate action abandonned: already validated", LOG_WARNING);
 			return 0;
 		}
+
 
 		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstory->write))
 		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstory->scrumuserstory_advance->validate))))
@@ -522,7 +522,6 @@ class ScrumUserStory extends CommonObject
 			$num = $this->ref;
 		}
 		$this->newref = $num;
-
 		if (!empty($num)) {
 			// Validate
 			$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element;
@@ -606,6 +605,21 @@ class ScrumUserStory extends CommonObject
 		}
 	}
 
+
+
+
+
+	/**
+	 *	Set panned status
+	 *
+	 *	@param	User	$user			Object user that modify
+	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
+	 *	@return	int						<0 if KO, >0 if OK
+	 */
+	public function setPlanned($user, $notrigger = 0)
+	{
+		return $this->setStatusCommon($user, self::STATUS_PLANNED, $notrigger, 'SCRUMUSERSTORY_PLANNED');
+	}
 
 	/**
 	 *	Set draft status
@@ -832,9 +846,11 @@ class ScrumUserStory extends CommonObject
 			//$langs->load("scrumproject@scrumproject");
 			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
 			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
+			$this->labelStatus[self::STATUS_PLANNED] = $langs->transnoentitiesnoconv('Planned');
 			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
 			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
 			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
+			$this->labelStatusShort[self::STATUS_PLANNED] = $langs->transnoentitiesnoconv('Planned');
 			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
 		}
 

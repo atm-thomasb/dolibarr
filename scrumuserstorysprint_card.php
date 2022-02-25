@@ -78,6 +78,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 dol_include_once('/scrumproject/class/scrumuserstorysprint.class.php');
+dol_include_once('/scrumproject/class/scrumuserstory.class.php');
+dol_include_once('/scrumproject/class/scrumsprint.class.php');
 dol_include_once('/scrumproject/lib/scrumproject_scrumuserstorysprint.lib.php');
 
 // Load translation files required by the page
@@ -96,6 +98,7 @@ $lineid   = GETPOST('lineid', 'int');
 
 // Initialize technical objects
 $object = new ScrumUserStorySprint($db);
+
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('scrumuserstorysprintcard', 'globalcard')); // Note that conf->hooks_modules contains array
@@ -230,6 +233,14 @@ llxHeader('', $title, $help_url);
 // Part to create
 if ($action == 'create') {
 	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ScrumUserStorySprint")), '', $object->picto);
+
+	if(GETPOST('fk_scrum_user_story', 'int') == 0){
+		$object->fields['fk_scrum_user_story']['type'] = 'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1:status IN (' . ScrumUserStory::STATUS_VALIDATED . ') ';
+	}
+
+	if(GETPOST('fk_scrum_sprint', 'int') == 0){
+		$object->fields['fk_scrum_sprint']['type'] = 'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1:status IN (' . ScrumSprint::STATUS_DRAFT . ', ' . ScrumSprint::STATUS_VALIDATED . ', ' . ScrumSprint::STATUS_PENDING . ') ';
+	}
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';

@@ -127,12 +127,13 @@ class mod_scrumuserstory_standard extends ModeleNumRefScrumUserStory
 		$sql = "SELECT MAX(CAST(SUBSTRING(ref FROM ".$posindice.") AS SIGNED)) as max";
 		$sql .= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstory";
 		$sql .= " WHERE ref LIKE '".$db->escape($this->prefix)."____-%'";
-		$sql .= " AND fk_team = ".$object->fk_team;
+
 		if ($object->ismultientitymanaged == 1) {
 			$sql .= " AND entity = ".$conf->entity;
 		} elseif ($object->ismultientitymanaged == 2) {
 			// TODO
 		}
+
 
 		$resql = $db->query($sql);
 		if ($resql)

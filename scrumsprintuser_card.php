@@ -78,6 +78,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 dol_include_once('/scrumproject/class/scrumsprintuser.class.php');
+dol_include_once('/scrumproject/class/scrumsprint.class.php');
 dol_include_once('/scrumproject/lib/scrumproject_scrumsprintuser.lib.php');
 
 // Load translation files required by the page
@@ -90,7 +91,12 @@ $action = GETPOST('action', 'aZ09');
 $confirm = GETPOST('confirm', 'alpha');
 $cancel = GETPOST('cancel', 'aZ09');
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'scrumsprintusercard'; // To manage different context of search
-$backtopage = GETPOST('backtopage', 'alpha');
+//$backtopage = GETPOST('backtopage', 'alpha', 1);
+if(!empty($_GET['backtopage']) && filter_var($_GET['backtopage'], FILTER_VALIDATE_URL)){
+	// Pourquoi faire ça ? tout simplement pour récupérer la bonne valeur du GET car le GETPOST fait sauter le http:// ce qui à pour conséquence de casser le lien...
+	$backtopage = $_GET['backtopage'];
+}
+
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 $lineid   = GETPOST('lineid', 'int');
 
@@ -230,6 +236,10 @@ llxHeader('', $title, $help_url);
 // Part to create
 if ($action == 'create') {
 	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ScrumSprintUser")), '', $object->picto);
+
+	if(GETPOST('fk_scrum_sprint', 'int') == 0){
+		$object->fields['fk_scrum_sprint']['type'] = 'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1:status IN (' . ScrumSprint::STATUS_DRAFT . ', ' . ScrumSprint::STATUS_VALIDATED . ', ' . ScrumSprint::STATUS_PENDING . ') ';
+	}
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';

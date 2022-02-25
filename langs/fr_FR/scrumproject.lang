@@ -167,3 +167,6 @@ DeleteScrumuserstorysprint = Supprimer les User story (U.S) planifiées
 ReadScrumsprint = Voir les sprints
 WriteScrumsprint = Ajouter/Modifier les sprints
 DeleteScrumsprint = Supprimer les sprints
+
+
+Planned = Planifié
