@@ -290,6 +290,12 @@ if ($object->ismultientitymanaged == 1) {
 } else {
 	$sql .= " WHERE 1 = 1";
 }
+
+if($fk_sprint>0){
+	$sql .= " AND fk_scrum_sprint = ".intval($fk_sprint);
+}
+
+
 foreach ($search as $key => $val) {
 	if (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
@@ -476,6 +482,9 @@ if($fk_sprint > 0){
 
 	dol_banner_tab($sprint, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
 
+
+	$object->fields['fk_scrum_sprint']['visible'] = 0;
+	unset($arrayfields['t.fk_scrum_sprint']);
 }
 else{
 
