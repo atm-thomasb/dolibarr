@@ -18,17 +18,17 @@
  */
 
 /**
- *  \file       htdocs/core/modules/scrumproject/mod_scrumuserstory_standard.php
+ *  \file       htdocs/core/modules/scrumproject/mod_scrumsprintuser_standard.php
  *  \ingroup    scrumproject
- *  \brief      File of class to manage scrumuserstory numbering rules standard
+ *  \brief      File of class to manage ScrumSprintUser numbering rules standard
  */
-dol_include_once('/scrumproject/core/modules/scrumproject/modules_scrumuserstory.php');
+dol_include_once('/scrumproject/core/modules/scrumproject/modules_scrumsprintuser.php');
 
 
 /**
  *	Class to manage customer order numbering rules standard
  */
-class mod_scrumuserstory_standard extends ModeleNumRefScrumUserStory
+class mod_scrumsprintuser_standard extends ModeleNumRefScrumSprintUser
 {
 	/**
 	 * Dolibarr version of the loaded document
@@ -36,7 +36,7 @@ class mod_scrumuserstory_standard extends ModeleNumRefScrumUserStory
 	 */
 	public $version = 'dolibarr'; // 'development', 'experimental', 'dolibarr'
 
-	public $prefix = 'US';
+	public $prefix = 'SP';
 
 	/**
 	 * @var string Error code (or message)
@@ -87,7 +87,7 @@ class mod_scrumuserstory_standard extends ModeleNumRefScrumUserStory
 
 		$posindice = strlen($this->prefix) + 6;
 		$sql = "SELECT MAX(CAST(SUBSTRING(ref FROM ".$posindice.") AS SIGNED)) as max";
-		$sql .= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstory";
+		$sql .= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser";
 		$sql .= " WHERE ref LIKE '".$db->escape($this->prefix)."____-%'";
 //		$sql .= " AND fk_team = ".$object->fk_team;
 		if ($object->ismultientitymanaged == 1) {
@@ -125,15 +125,14 @@ class mod_scrumuserstory_standard extends ModeleNumRefScrumUserStory
 		// first we get the max value
 		$posindice = strlen($this->prefix) + 6;
 		$sql = "SELECT MAX(CAST(SUBSTRING(ref FROM ".$posindice.") AS SIGNED)) as max";
-		$sql .= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstory";
+		$sql .= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser";
 		$sql .= " WHERE ref LIKE '".$db->escape($this->prefix)."____-%'";
-
+//		$sql .= " AND fk_team = ".$object->fk_team;
 		if ($object->ismultientitymanaged == 1) {
 			$sql .= " AND entity = ".$conf->entity;
 		} elseif ($object->ismultientitymanaged == 2) {
 			// TODO
 		}
-
 
 		$resql = $db->query($sql);
 		if ($resql)
@@ -142,7 +141,7 @@ class mod_scrumuserstory_standard extends ModeleNumRefScrumUserStory
 			if ($obj) $max = intval($obj->max);
 			else $max = 0;
 		} else {
-			dol_syslog("mod_scrumuserstory_standard::getNextValue", LOG_DEBUG);
+			dol_syslog("mod_scrumsprintuser_standard::getNextValue", LOG_DEBUG);
 			return -1;
 		}
 
@@ -153,7 +152,7 @@ class mod_scrumuserstory_standard extends ModeleNumRefScrumUserStory
 		if ($max >= (pow(10, 4) - 1)) $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is
 		else $num = sprintf("%04s", $max + 1);
 
-		dol_syslog("mod_scrumuserstory_standard::getNextValue return ".$this->prefix.$yymm."-".$num);
+		dol_syslog("mod_scrumsprintuser_standard::getNextValue return ".$this->prefix.$yymm."-".$num);
 		return $this->prefix.$yymm."-".$num;
 	}
 }
