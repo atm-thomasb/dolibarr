@@ -468,33 +468,10 @@ if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'pr
 }
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
-print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
-if ($optioncss != '') {
-	print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';
-}
-print '<input type="hidden" name="token" value="'.newToken().'">';
-print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
-print '<input type="hidden" name="action" value="list">';
-print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
-print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
-print '<input type="hidden" name="page" value="'.$page.'">';
-print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
-
-$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
-
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
-
-// Add code for pre mass action (confirmation or email presend form)
-$topicmail = "SendScrumUserStorySprintRef";
-$modelmail = "scrumuserstorysprint";
-$objecttmp = new ScrumUserStorySprint($db);
-$trackid = 'xxxx'.$object->id;
-include DOL_DOCUMENT_ROOT.'/core/tpl/massactions_pre.tpl.php';
-
-
 
 if(empty($massaction) && false) {
 
+	print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 
 // Formulaire d'ajout rapide possé ici pour garder les filtres
 	print '<div class="quick-add-form" >';
@@ -526,7 +503,35 @@ if(empty($massaction) && false) {
 
 
 	print '</div>';
+	print '</form>';
 }
+
+
+
+
+print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+if ($optioncss != '') {
+	print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';
+}
+print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
+print '<input type="hidden" name="action" value="list">';
+print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
+print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
+print '<input type="hidden" name="page" value="'.$page.'">';
+print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
+
+$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
+
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+
+// Add code for pre mass action (confirmation or email presend form)
+$topicmail = "SendScrumUserStorySprintRef";
+$modelmail = "scrumuserstorysprint";
+$objecttmp = new ScrumUserStorySprint($db);
+$trackid = 'xxxx'.$object->id;
+include DOL_DOCUMENT_ROOT.'/core/tpl/massactions_pre.tpl.php';
+
 
 
 if ($search_all) {

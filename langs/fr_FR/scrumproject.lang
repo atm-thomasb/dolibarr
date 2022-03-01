@@ -173,3 +173,16 @@ Planned = Planifié
 
 SumOfDeveloperAvailability = Disponibilités RH saisies
 SumOfDeveloperAvailabilityIsDifferent = La vélocité planifié est différente des disponibilités saisies
+
+
+RefSprint = Ref. Sprint
+us_qty_planned = P.Planifié
+us_qty_planned_help = Temps projet planifié
+us_qty_consumed = P.Consommé
+us_qty_consumed_help = Temps consommé par l'équipe pour les user story affectées à ce sprint
+us_qty_done = P.Livrable
+us_qty_done_help = Temps planifié livrable
+QtyAvailablity = Disponibilité
+QtyAvailablityHelp = Disponibilité disponibilité réel
+AvailablityRate = Ratio de vélocité
+AvailablityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité x Ratio de vélocité = Vélocité

@@ -108,7 +108,9 @@ class ScrumSprintUser extends CommonObject
 		// fk_user_role : c'est le role en temps que contact, la valeur par défaut est à récupérer sur les extrafields de l'utilisateur todo : ajouter l'extrafield du user role par défaut
 		'fk_user_role' => array('type'=>'integer', 'label'=>'ScrumUserRole', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'c_type_contact.rowid', 'validate'=>'1',),
 		'fk_user' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'User', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'user.rowid',),
-		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_availablity' => array('type'=>'real', 'label'=>'QtyAvailablity', 'help' => 'QtyAvailablityHelp', 'enabled'=>'1', 'position'=>80, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'availablity_rate' => array('type'=>'real', 'label'=>'AvailablityRate', 'help' => 'AvailablityRateHelp', 'enabled'=>'1', 'position'=>90, 'notnull'=>1, 'visible'=>1, 'default'=>'1', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>5, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
@@ -222,6 +224,9 @@ class ScrumSprintUser extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
+
+		$this->calcVelocity();
+
 		$resultcreate = $this->createCommon($user, $notrigger);
 
 		//$resultvalidate = $this->validate($user, $notrigger);
@@ -447,6 +452,7 @@ class ScrumSprintUser extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		$this->calcVelocity();
 		return $this->updateCommon($user, $notrigger);
 	}
 
@@ -1053,6 +1059,20 @@ class ScrumSprintUser extends CommonObject
 		$this->db->commit();
 
 		return $error;
+	}
+
+
+	public function calcVelocity(){
+
+		if(empty($this->availablity_rate)){
+			$this->availablity_rate = 1;
+		}
+
+		$this->availablity_rate = doubleval($this->availablity_rate);
+		$this->qty_availablity = doubleval($this->qty_availablity);
+		$this->qty_velocity = $this->qty_availablity * $this->availablity_rate;
+
+		return  $this->qty_velocity;
 	}
 
 
