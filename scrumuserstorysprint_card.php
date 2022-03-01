@@ -235,7 +235,7 @@ if ($action == 'create') {
 	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ScrumUserStorySprint")), '', $object->picto);
 
 	if(GETPOST('fk_scrum_user_story', 'int') == 0){
-		$object->fields['fk_scrum_user_story']['type'] = 'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1:status IN (' . ScrumUserStory::STATUS_VALIDATED . ') ';
+		$object->fields['fk_scrum_user_story']['type'] = 'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1:status NOT IN (' . ScrumUserStory::STATUS_CANCELED . ', ' . ScrumUserStory::STATUS_DRAFT . ', ' . ScrumUserStory::STATUS_DONE . ') ';
 	}
 
 	if(GETPOST('fk_scrum_sprint', 'int') == 0){

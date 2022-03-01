@@ -67,6 +67,7 @@ class ScrumUserStory extends CommonObject
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;
 	const STATUS_PLANNED = 2;
+	const STATUS_DONE = 3;
 	const STATUS_CANCELED = 9;
 
 
@@ -106,7 +107,7 @@ class ScrumUserStory extends CommonObject
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>5, 'notnull'=>1,'noteditable'=>'1', 'default'=>'(PROV)', 'visible'=>1, 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'validate'=>'1', 'comment'=>"Reference of object"),
 		'fk_task' => array('type'=>'integer:Task:projet/class/task.class.php:1', 'label'=>'Task', 'enabled'=>'1', 'position'=>10, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'validate'=>'1',),
-		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>15, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
+		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>15, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
 		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'showoncombobox'=>'0', 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
 		'point' => array('type'=>'real', 'label'=>'Points', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'showoncombobox'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'help'=>"Help text for quantity", 'validate'=>'1',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
@@ -622,6 +623,18 @@ class ScrumUserStory extends CommonObject
 	}
 
 	/**
+	 *	Set done status
+	 *
+	 *	@param	User	$user			Object user that modify
+	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
+	 *	@return	int						<0 if KO, >0 if OK
+	 */
+	public function setDone($user, $notrigger = 0)
+	{
+		return $this->setStatusCommon($user, self::STATUS_DONE, $notrigger, 'SCRUMUSERSTORY_DONE');
+	}
+
+	/**
 	 *	Set draft status
 	 *
 	 *	@param	User	$user			Object user that modify
@@ -847,10 +860,12 @@ class ScrumUserStory extends CommonObject
 			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
 			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
 			$this->labelStatus[self::STATUS_PLANNED] = $langs->transnoentitiesnoconv('Planned');
+			$this->labelStatus[self::STATUS_DONE] = $langs->transnoentitiesnoconv('Done');
 			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
 			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
 			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
 			$this->labelStatusShort[self::STATUS_PLANNED] = $langs->transnoentitiesnoconv('Planned');
+			$this->labelStatusShort[self::STATUS_DONE] = $langs->transnoentitiesnoconv('Done');
 			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
 		}
 

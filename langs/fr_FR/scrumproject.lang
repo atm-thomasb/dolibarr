@@ -186,3 +186,5 @@ QtyAvailablity = Disponibilité
 QtyAvailablityHelp = Disponibilité disponibilité réel
 AvailablityRate = Ratio de vélocité
 AvailablityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité x Ratio de vélocité = Vélocité
+ScrumTask = Tâche scrum
+ScrumTasks = Tâches scrum
