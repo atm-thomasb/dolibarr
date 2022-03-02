@@ -77,8 +77,10 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
-dol_include_once('/scrumproject/class/scrumtask.class.php');
-dol_include_once('/scrumproject/lib/scrumproject_scrumtask.lib.php');
+require_once __DIR__ . '/class/scrumtask.class.php';
+require_once __DIR__ . '/class/scrumuserstory.class.php';
+require_once __DIR__ . '/class/scrumuserstorysprint.class.php';
+require_once __DIR__ . '/lib/scrumproject_scrumtask.lib.php';
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "companies"));
@@ -92,6 +94,8 @@ $backtopage = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
 $object = new ScrumTask($db);
+$userStorySprint = new ScrumUserStorySprint($db);
+$userStory = new ScrumUserStory($db);
 $projectstatic = new Project($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
@@ -105,7 +109,11 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->scrumproject->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity]."/".$object->id;
 }
 
-
+if($userStorySprint->fetch($object->fk_scrum_user_story_sprint) <= 0 || $userStory->fetch($userStorySprint->fk_scrum_user_story) <= 0)
+{
+	print dol_print_error($db);
+	exit;
+}
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();
@@ -126,6 +134,29 @@ if ($reshook < 0) {
 }
 if (empty($reshook)) {
 
+	if($action == 'addtimetotask'){
+		$timespent = GETPOST('timespent');
+
+		if(!empty($timespent)){
+			$TTimeExplode = explode($timespent, ':');
+			$TTimeExplode = array_map('intval', $TTimeExplode);
+			$timespent = $TTimeExplode[0] * 60 + !empty($TTimeExplode[1]) ? $TTimeExplode[1] : 0;
+		}
+
+		$progress = GETPOST('progress', 'int');
+		$date = strtotime(GETPOST('date').' '.GETPOST('time').':00');
+		$userid = GETPOST('userid', 'int');
+		$note = GETPOST('timespent_note', 'restricthtml');
+
+		$action = '';
+
+		if($object->addTimeSpend($user, $userid, $timespent, $progress, $date, $note)){
+			setEventMessage($langs->trans('TimeAdded'));
+			header('Location: ' .$_SERVER["PHP_SELF"].'?id=' . $id);
+		}else{
+			setEventMessage($langs->trans('Error') . ' ' . $object->errorsToString(), 'errors');
+		}
+	}
 
 
 
@@ -142,10 +173,12 @@ $form = new Form($db);
 
 //$help_url='EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes';
 $help_url = '';
-llxHeader('', $langs->trans('ScrumTask'), $help_url);
+$arrayofcss = array('/scrumproject/css/scrumproject.css');
+llxHeader('', $langs->trans('ScrumTask'), $help_url ,'', 0, 0, '', $arrayofcss);
 
 if ($id > 0 || !empty($ref)) {
 	$object->fetch_thirdparty();
+
 
 	$head = scrumtaskPrepareHead($object);
 
@@ -168,13 +201,19 @@ if ($id > 0 || !empty($ref)) {
 	print '<div class="fichecenter">';
 	print '<div class="underbanner clearboth"></div>';
 
+
+
+
 	/*
 		 * Form to add a new line of time spent
 		 */
 	if ($user->rights->projet->lire) {
 		print '<!-- table to add time spent -->'."\n";
 
-		print '<input type="hidden" name="taskid" value="'.$id.'">';
+		print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+
+		print '<input type="hidden" name="id" value="'.$object->id.'">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
 
 		print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 		print '<table class="noborder nohover centpercent">';
@@ -201,24 +240,10 @@ if ($id > 0 || !empty($ref)) {
 
 		// Contributor
 		print '<td class="maxwidthonsmartphone nowraponall">';
-		$contactsofproject = $projectstatic->getListContactId('internal');
-		if (count($contactsofproject) > 0) {
-			print img_object('', 'user', 'class="hideonsmartphone"');
-			if (in_array($user->id, $contactsofproject)) {
-				$userid = $user->id;
-			} else {
-				$userid = $contactsofproject[0];
-			}
+		print img_object('', 'user', 'class="hideonsmartphone"');
+		$userid = $user->id;
+		print $form->select_dolusers((GETPOST('userid', 'int') ? GETPOST('userid', 'int') : $userid), 'userid', 0, '', 0, '', '', 0, 0, 0, 'AND employee = 1 AND statut = 1', 0, $langs->trans("ResourceNotAssignedToProject"), 'maxwidth250');
 
-			if ($projectstatic->public) {
-				$contactsofproject = array();
-			}
-			print $form->select_dolusers((GETPOST('userid', 'int') ? GETPOST('userid', 'int') : $userid), 'userid', 0, '', 0, '', $contactsofproject, 0, 0, 0, '', 0, $langs->trans("ResourceNotAssignedToProject"), 'maxwidth250');
-		} else {
-			if ($nboftasks) {
-				print img_error($langs->trans('FirstAddRessourceToAllocateTime')).' '.$langs->trans('FirstAddRessourceToAllocateTime');
-			}
-		}
 		print '</td>';
 
 		// Note
@@ -228,22 +253,25 @@ if ($id > 0 || !empty($ref)) {
 
 		// Duration - Time spent
 		print '<td class="nowraponall">';
-		print '<input type="time" value="" name="timespent" step="900"  />';
+		print '<input type="time" value="" name="timespent"  />';
 		print '</td>';
 
 		// Progress declared
 		print '<td class="nowrap">';
-		print $formother->select_percent(GETPOST('progress') ?GETPOST('progress') : $object->progress, 'progress', 0, 5, 0, 100, 1);
+		print '<input style="vertical-align:middle;" type="range" id="progress" name="progress" min="0" max="100" step="5" oninput="this.nextElementSibling.value = this.value + \'%\'" value="'.GETPOST('progress', 'int').'"><output style="vertical-align:middle;" >'.GETPOST('progress', 'int').'</output>';
 		print '</td>';
 
 
 		print '<td class="center">';
 		$form->buttonsSaveCancel();
-		print '<input type="submit" name="save" class="button buttongen marginleftonly margintoponlyshort marginbottomonlyshort button-add" value="'.$langs->trans("Add").'">';
+		print '<button type="submit" name="action" class="button buttongen marginleftonly margintoponlyshort marginbottomonlyshort button-add" value="addtimetotask">'.$langs->trans("Add").'</button>';
 		print '</td></tr>';
 
 		print '</table>';
 		print '</div>';
+
+
+		print '</form>';
 	}
 
 

@@ -24,6 +24,7 @@
 
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
+require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -986,73 +987,69 @@ class ScrumTask extends CommonObject
 			return "";
 		}
 	}
-//
-//	/**
-//	 *  Create a document onto disk according to template module.
-//	 *
-//	 *  @param	    string		$modele			Force template to use ('' to not force)
-//	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-//	 *  @param      int			$hidedetails    Hide details of lines
-//	 *  @param      int			$hidedesc       Hide description
-//	 *  @param      int			$hideref        Hide ref
-//	 *  @param      null|array  $moreparams     Array to provide more information
-//	 *  @return     int         				0 if KO, 1 if OK
-//	 */
-//	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
-//	{
-//		global $conf, $langs;
-//
-//		$result = 0;
-//		$includedocgeneration = 1;
-//
-//		$langs->load("scrumproject@scrumproject");
-//
-//		if (!dol_strlen($modele)) {
-//			$modele = 'standard_scrumtask';
-//
-//			if (!empty($this->model_pdf)) {
-//				$modele = $this->model_pdf;
-//			} elseif (!empty($conf->global->SCRUMTASK_ADDON_PDF)) {
-//				$modele = $conf->global->SCRUMTASK_ADDON_PDF;
-//			}
-//		}
-//
-//		$modelpath = "core/modules/scrumproject/doc/";
-//
-//		if ($includedocgeneration && !empty($modele)) {
-//			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-//		}
-//
-//		return $result;
-//	}
+
 
 	/**
-	 * Action executed by scheduler
-	 * CAN BE A CRON TASK. In such a case, parameters come from the schedule job setup field 'Parameters'
-	 * Use public function doScheduledJob($param1, $param2, ...) to get parameters
-	 *
-	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 * @return int|false
 	 */
-	public function doScheduledJob()
-	{
-		global $conf, $langs;
+	public function getProjectTaskId(){
+		$sql = /** @lang MySQL */ "SELECT fk_task FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstory sus "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint susp ON (susp.fk_scrum_user_story = sus.rowid) "
+			." WHERE sus.rowid = ".$this->fk_scrum_user_story_sprint;
 
-		//$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_mydedicatedlofile.log';
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			return $obj->fk_task;
+		}
 
-		$error = 0;
-		$this->output = '';
-		$this->error = '';
+		return false;
+	}
 
-		dol_syslog(__METHOD__, LOG_DEBUG);
 
-		$now = dol_now();
+	/**
+	 * @param User $user User adding
+	 * @param int $fk_user user for time spent
+	 * @param int $timeSpent time spent in second
+	 * @param int $progress 0-100
+	 * @param timestamp $date
+	 * @param string $note
+	 * @return int|void
+	 */
+	public function addTimeSpend($user, $fk_user, $timeSpent, $progress = -1, $date = false, $note = '' ){
 
-		$this->db->begin();
+		global $langs;
 
-		// ...
+		$langs->loadLangs('projects');
 
-		$this->db->commit();
+		if(empty($fk_user) || $fk_user < 0){
+			$this->error = $langs->trans('ErrorUserNotAssignedToTask');
+			return -1;
+		}
 
-		return $error;
+		$fk_task = $this->getProjectTaskId();
+		if($fk_task){
+			$projectTask = new Task($this->db);
+			if($projectTask->fetch($fk_task)>0) {
+
+				$projectTask->timespent_note = $note;
+				$projectTask->progress = $progress; // If progress is -1 (not defined), we do not change value
+				$projectTask->timespent_duration = $timeSpent; // We store duration in seconds
+
+				$projectTask->timespent_date = $date;
+				$projectTask->timespent_withhour = 1;
+
+				$projectTask->timespent_fk_user = $fk_user;
+				$result = $projectTask->addTimeSpent($user);
+				if ($result >= 0) {
+					setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+				} else {
+					setEventMessages($langs->trans($projectTask->error), null, 'errors');
+					return -1;
+				}
+			}else{
+				$this->error = $langs->trans('FailFetchingTask');
+				return -1;
+			}
+		}
 	}
 }
