@@ -189,3 +189,5 @@ AvailablityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilit
 ScrumTask = Tâche scrum
 ScrumTasks = Tâches scrum
 ScrumSprintTime = Temps consommé
+
+WillRedirectYouToTaskPageForAction = En cliquant ici vous serez redirigé vers la page effectuant l'action

@@ -1147,31 +1147,88 @@ class ScrumUserStorySprint extends CommonObject
 
 		return $error;
 	}
-}
 
-
-require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
-
-/**
- * Class ScrumUserStorySprintLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class ScrumUserStorySprintLine extends CommonObjectLine
-{
-	// To complete with content of an object ScrumUserStorySprintLine
-	// We should have a field rowid, fk_scrumuserstorysprint and position
 
 	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-	 */
-	public $isextrafieldmanaged = 0;
-
-	/**
-	 * Constructor
 	 *
-	 * @param DoliDb $db Database handler
+	 * @return int
 	 */
-	public function __construct(DoliDB $db)
-	{
-		$this->db = $db;
+	public function calcTimeSpent(){
+
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_consumed) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask "
+			." WHERE fk_scrum_user_story_sprint = ".intval($this->id);
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_consumed = doubleval($obj->sumTimeSpent);
+			return $this->qty_consumed;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * @param User $user
+	 * @param      $notrigger
+	 * @return int
+	 */
+	public function updateTimeSpent(User $user, $notrigger = false){
+		global $user;
+
+		$error = 0;
+		$this->db->begin();
+
+		$this->calcTimeSpent();
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
+
+		if($this->db->query($sql)){
+
+			// Triggers
+			if (!$error && !$notrigger) {
+				// Call triggers
+				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_UPDATE_TIME_SPENT', $user);
+				if ($result < 0) {
+					$error++;
+				} //Do also here what you must do to rollback action if trigger fail
+				// End call triggers
+			}
+
+			// Commit or rollback
+			if ($error) {
+				$this->db->rollback();
+				return -1;
+			} else {
+				$this->db->commit();
+				return $this->id;
+			}
+		}
+		else {
+			$this->error = $this->db->lasterror();
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+
+	/**
+	 * @param $msg
+	 * @return void
+	 */
+	public function setErrorMsg($msg){
+		global $langs;
+
+		if(is_array($msg)){
+			foreach ($msg as $item){
+				$this->setErrorMsg($item);
+			}
+			return;
+		}
+
+		if (!empty($langs->tab_translate[$msg])) {    // Translation is available
+			$this->errors[] = $langs->trans($msg);
+		}else{
+			$this->errors[] = $msg;
+		}
 	}
 }

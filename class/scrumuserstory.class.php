@@ -1089,31 +1089,46 @@ class ScrumUserStory extends CommonObject
 
 		return $error;
 	}
-}
 
-
-require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
-
-/**
- * Class ScrumUserStoryLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class ScrumUserStoryLine extends CommonObjectLine
-{
-	// To complete with content of an object ScrumUserStoryLine
-	// We should have a field rowid, fk_scrumuserstory and position
 
 	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-	 */
-	public $isextrafieldmanaged = 0;
-
-	/**
-	 * Constructor
 	 *
-	 * @param DoliDb $db Database handler
+	 * @return int
 	 */
-	public function __construct(DoliDB $db)
-	{
-		$this->db = $db;
+	public function calcTimeSpent(){
+
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_consumed) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint "
+			." WHERE fk_scrum_user_story = ".intval($this->id);
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_consumed = doubleval($obj->sumTimeSpent);
+			return $this->qty_consumed;
+		}
+
+		return 0;
+	}
+
+
+	/**
+	 * @param $msg
+	 * @return void
+	 */
+	public function setErrorMsg($msg){
+		global $langs;
+
+		if(is_array($msg)){
+			foreach ($msg as $item){
+				$this->setErrorMsg($item);
+			}
+			return;
+		}
+
+		if (!empty($langs->tab_translate[$msg])) {    // Translation is available
+			$this->errors[] = $langs->trans($msg);
+		}else{
+			$this->errors[] = $msg;
+		}
 	}
 }
+

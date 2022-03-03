@@ -1019,12 +1019,18 @@ class ScrumTask extends CommonObject
 
 		global $langs;
 
-		$langs->loadLangs('projects');
+		$langs->load('projects');
 
 		if(empty($fk_user) || $fk_user < 0){
-			$this->error = $langs->trans('ErrorUserNotAssignedToTask');
+			$this->setErrorMsg('ErrorUserNotAssignedToTask');
 			return -1;
 		}
+
+		if(empty($timeSpent)){
+			$this->setErrorMsg('ErrorTimeSpentEmpty');
+			return -1;
+		}
+
 
 		$fk_task = $this->getProjectTaskId();
 		if($fk_task){
@@ -1039,17 +1045,175 @@ class ScrumTask extends CommonObject
 				$projectTask->timespent_withhour = 1;
 
 				$projectTask->timespent_fk_user = $fk_user;
+
+				$projectTask->fk_scrumproject_scrumtask = $this->id; // Permet au trigger de prendre le relay
+
 				$result = $projectTask->addTimeSpent($user);
-				if ($result >= 0) {
-					setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+				if ($result > 0) {
+					if($this->updateTimeSpent($user)>0){
+						return 1;
+					}
+					else{
+						return -2;
+					}
 				} else {
-					setEventMessages($langs->trans($projectTask->error), null, 'errors');
+					$this->setErrorMsg($projectTask->errorsToString());
 					return -1;
 				}
 			}else{
 				$this->error = $langs->trans('FailFetchingTask');
 				return -1;
 			}
+		}
+	}
+
+	/**
+	 *
+	 * @return int
+	 */
+	public function calcTimeSpent(){
+
+		$sql = /** @lang MySQL */ "SELECT SUM(ptt.task_duration) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "
+			." JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "
+			." WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id);
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_consumed = round(intval($obj->sumTimeSpent) / 3600 , 2);
+			return $this->qty_consumed;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * @param User $user
+	 * @param bool $notrigger
+	 * @return int
+	 */
+	public function updateTimeSpent(User $user, $notrigger = false){
+		global $user;
+
+		$error = 0;
+		$this->db->begin();
+
+		$this->calcTimeSpent();
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
+
+		if($this->db->query($sql)){
+
+			// Triggers
+			if (!$error && !$notrigger) {
+				// Call triggers
+				$result = $this->call_trigger('SCRUMTASK_UPDATE_TIME_SPENT', $user);
+				if ($result < 0) {
+					$error++;
+				} //Do also here what you must do to rollback action if trigger fail
+				// End call triggers
+			}
+
+			// UPDATE PARENT SCRUM USER STORY FOR SPRINT
+			require_once __DIR__ . '/scrumuserstorysprint.class.php';
+
+			$scrumUserStorySprint = new ScrumUserStorySprint($this->db);
+			if($scrumUserStorySprint->fetch($this->fk_scrum_user_story_sprint)>0){
+				if($scrumUserStorySprint->updateTimeSpent($user, $notrigger)<0){
+					$this->setErrorMsg($scrumUserStorySprint->errorsToString());
+					$error++;
+				}
+			}else{
+				$this->setErrorMsg('failFetchingScrumUserStorySprint');
+				$error++;
+			}
+
+
+			// Commit or rollback
+			if ($error) {
+				$this->db->rollback();
+				return -1;
+			} else {
+				$this->db->commit();
+				return $this->id;
+			}
+		}
+		else {
+			$this->setErrorMsg($this->db->lasterror());
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+	/**
+	 * @param int $fk_project_task_time
+	 * @return int 0 nothing to do , > 0 inserted and return rowid, -1 error
+	 */
+	public function linkTaskTimeToScrumTask($fk_project_task_time){
+
+		if($fk_project_task_time <= 0 || $this->id <= 0){
+			$this->setErrorMsg('InvalidIds');
+			return -1;
+		}
+
+		$linkExist = $this->getProjectTaskTimeLinkId($fk_project_task_time);
+		if(empty($linkExist)){
+
+			$sql = /** @lang MySQL */ "INSERT INTO ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time "
+				." (rowid, fk_projet_task_time, fk_scrumproject_scrumtask) "
+				." VALUES "
+				." (NULL, '".intval($fk_project_task_time)."', '".intval($this->id)."') ";
+			$res = $this->db->query($sql);
+			if (!$res) {
+				if($this->db->lasterrno() == 'DB_ERROR_RECORD_ALREADY_EXISTS'){
+					$this->setErrorMsg('ErrorRefAlreadyExists');
+				} else {
+					$this->setErrorMsg($this->db->lasterror());
+				}
+				return -1;
+			}
+			else {
+				return $this->db->last_insert_id(MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time');
+			}
+		}
+
+		return 0;
+	}
+
+	/**
+	 * @param int $fk_project_task_time project task time
+	 * @return int|false
+	 */
+	public function getProjectTaskTimeLinkId($fk_project_task_time){
+		$sql = /** @lang MySQL */ "SELECT rowid FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "
+			." WHERE pttl.fk_projet_task_time = ".intval($fk_project_task_time)
+			." AND pttl.fk_scrumproject_scrumtask = ".intval($this->id);
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			return $obj->rowid;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $msg
+	 * @return void
+	 */
+	public function setErrorMsg($msg){
+		global $langs;
+
+		if(is_array($msg)){
+			foreach ($msg as $item){
+				$this->setErrorMsg($item);
+			}
+			return;
+		}
+
+		if (!empty($langs->tab_translate[$msg])) {    // Translation is available
+			$this->errors[] = $langs->trans($msg);
+		}else{
+			$this->errors[] = $msg;
 		}
 	}
 }
