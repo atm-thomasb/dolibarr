@@ -396,13 +396,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
 
-	print '<div class="warning" >
-	<strong>TODO :</strong>
-	<ul>
-	<li>La saisie des temps doit se faire avec l\'object Task et utiliser la table de liaison llx_scrumproject_scrumtask_projet_task_time </li>
-	<li>Ajouter un onglet pour consulter la saisie des temps de cette scrum task</li>
-	</ul>
-	</div>';
 
 	print '<div class="fichecenter">';
 	print '<div class="fichehalfleft">';

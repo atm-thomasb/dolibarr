@@ -211,12 +211,13 @@ if (empty($reshook)) {
 		$note = GETPOST('timespent_note', 'restricthtml');
 
 		$action = '';
+		$res = $object->addTimeSpend($user, $userid, $timespent, $progress, $date, $note);
 
-		if($object->addTimeSpend($user, $userid, $timespent, $progress, $date, $note) > 0){
+		if($res > 0){
 			setEventMessage($langs->trans('TimeAdded'));
 			header('Location: ' .$_SERVER["PHP_SELF"].'?id=' . $id);
 		}else{
-			setEventMessage($langs->trans('Error') . ' ' . $object->errorsToString(), 'errors');
+			setEventMessage($langs->trans('Error'). ' ' . $res . ' ' . $object->errorsToString(), 'errors');
 		}
 	}
 

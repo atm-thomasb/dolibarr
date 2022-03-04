@@ -993,11 +993,11 @@ class ScrumTask extends CommonObject
 	 * @return int|false
 	 */
 	public function getProjectTaskId(){
-		$sql = /** @lang MySQL */ "SELECT fk_task FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstory sus "
+		$sql = /** @lang MySQL */ "SELECT sus.fk_task FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstory sus "
 			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint susp ON (susp.fk_scrum_user_story = sus.rowid) "
-			." WHERE sus.rowid = ".$this->fk_scrum_user_story_sprint;
-
+			." WHERE susp.rowid = ".$this->fk_scrum_user_story_sprint;
 		$obj = $this->db->getRow($sql);
+
 		if($obj){
 			return $obj->fk_task;
 		}
@@ -1033,6 +1033,7 @@ class ScrumTask extends CommonObject
 
 
 		$fk_task = $this->getProjectTaskId();
+
 		if($fk_task){
 			$projectTask = new Task($this->db);
 			if($projectTask->fetch($fk_task)>0) {
@@ -1061,9 +1062,13 @@ class ScrumTask extends CommonObject
 					return -1;
 				}
 			}else{
-				$this->error = $langs->trans('FailFetchingTask');
+				$this->setErrorMsg('FailFetchingTask');
 				return -1;
 			}
+		}
+		else{
+			$this->setErrorMsg('NoTaskLinkedToUS');
+			return -1;
 		}
 	}
 
