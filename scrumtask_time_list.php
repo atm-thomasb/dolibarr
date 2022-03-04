@@ -214,7 +214,7 @@ if (empty($reshook)) {
 		$res = $object->addTimeSpend($user, $userid, $timespent, $progress, $date, $note);
 
 		if($res > 0){
-			setEventMessage($langs->trans('TimeAdded'));
+			setEventMessage($langs->trans('TimeConsumedAdded'));
 			header('Location: ' .$_SERVER["PHP_SELF"].'?id=' . $id);
 		}else{
 			setEventMessage($langs->trans('Error'). ' ' . $res . ' ' . $object->errorsToString(), 'errors');
