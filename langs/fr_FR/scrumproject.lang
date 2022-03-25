@@ -70,9 +70,10 @@ MyWidgetDescription = Description de mon widget
 #
 SprintLabel = Titre
 SprintTeam = Équipe scrum
-QtyVelocity = Vélocité
+QtyVelocity = Vélocité disponible
 QtyPlanned = Qté planifiée
 QtyDone = Qté réalisée
+RefreshVelocity = Mettre à jour la vélocité disponible
 SetToPending = Démarrer
 SetToDone = Terminer
 SetBackToPending = Retour à en cours
@@ -169,7 +170,12 @@ WriteScrumsprint = Ajouter/Modifier les sprints
 DeleteScrumsprint = Supprimer les sprints
 
 
+TotalTimePlanned = Temps temps planifié
 Planned = Planifié
+TotalDone = Total produit
+OnXSprints = Sur %s sprint(s)
+onXSprints = sur %s sprint(s)
+RefreshTimes = Mettre à jours les temps
 
 SumOfDeveloperAvailability = Disponibilités RH saisies
 SumOfDeveloperAvailabilityIsDifferent = La vélocité planifié est différente des disponibilités saisies
@@ -183,7 +189,7 @@ us_qty_consumed_help = Temps consommé par l'équipe pour les user story affect�
 us_qty_done = P.Livrable
 us_qty_done_help = Temps planifié livrable
 QtyAvailablity = Disponibilité
-QtyAvailablityHelp = Disponibilité disponibilité réel
+QtyAvailablityHelp = Disponibilité disponibilité réel, la valeur par défaut peut être modifiée pour chaque utilisateur sur sa fiche.
 AvailablityRate = Ratio de vélocité
 AvailablityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité x Ratio de vélocité = Vélocité
 ScrumTask = Tâche scrum

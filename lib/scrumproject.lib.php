@@ -67,3 +67,4 @@ function scrumprojectAdminPrepareHead()
 
 	return $head;
 }
+

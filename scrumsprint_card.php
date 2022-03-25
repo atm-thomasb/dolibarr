@@ -152,6 +152,26 @@ if (empty($reshook))
 		$object->setStatusCommon($user, $object::STATUS_DONE, 0, 'SCRUMSPRINT_DONE');
 	}
 
+
+	if($action == 'refreshQuantities'){
+		$res = $object->refreshQuantities($user, true);
+		if($res>0){
+			setEventMessage($langs->trans('Updated'));
+		}else{
+			setEventMessage($object->errorsToString(), 'errors');
+		}
+	}
+
+	if($action == 'refreshVelocity'){
+		$res = $object->refreshVelocity($user, true);
+		if($res>0){
+			setEventMessage($langs->trans('Updated'));
+		}else{
+			setEventMessage($object->errorsToString(), 'errors');
+		}
+	}
+
+
 	// Actions when linking object each other
 	include DOL_DOCUMENT_ROOT.'/core/actions_dellink.inc.php';
 
@@ -376,6 +396,12 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		if (empty($reshook))
 		{
+			if($object->status == $object::STATUS_DRAFT) {
+				print dolGetButtonAction($langs->trans('RefreshVelocity'), '', 'default', $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=refreshVelocity');
+			}
+
+			print dolGetButtonAction($langs->trans('RefreshTimes'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refreshQuantities');
+
 			// Send
 			if (empty($user->socid)) {
 				print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init#formmailbeforetitle');

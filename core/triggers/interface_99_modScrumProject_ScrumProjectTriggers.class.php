@@ -159,7 +159,7 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		dol_include_once('/scrumproject/class/scrumsprint.class.php');
 		$sprint = new ScrumSprint($this->db);
 		$sprint->fetch($object->fk_scrumsprint);
-		$res = $sprint->calculateQuantities($user);
+		$res = $sprint->refreshQuantities($user);
 
 		if($res < 0) {
 			setEventMessages($langs->trans('ScrumSprintQuantitiesCalculatedError'), $sprint->errors, 'errors');

@@ -1018,6 +1018,76 @@ class ScrumUserStory extends CommonObject
 	}
 
 
+	/**
+	 * recupère les sommes de temps consommé, produit et plannifié sur l'ensemble des sprints
+	 * @return bool|int|object
+	 */
+	public function getTotalTimeFromSprints(){
+		$sql = 'SELECT COUNT(rowid) nb_print,  SUM(qty_consumed) total_qty_consumed, SUM(qty_planned) total_qty_planned, SUM(qty_done) total_qty_done   FROM '.MAIN_DB_PREFIX.'scrumproject_scrumuserstorysprint WHERE fk_scrum_user_story = '.$this->id;
+		$result = $this->db->getRow($sql);
+		if($result == false){
+			$this->setErrorMsg($this->db->error());
+		}
+
+		$this->totalTimeFromSprints = $result;
+
+		return $result;
+	}
+
+
+
+	/**
+	 * @param   string  $label      empty = auto (progress), string = replace output
+	 * @param   string  $tooltip    empty = auto , string = replace output
+	 * @return  string
+	 * @see getTaskProgressView()
+	 */
+	function getProgressBadge($label = '', $tooltip = '')
+	{
+		global $conf, $langs;
+
+		if(empty($this->totalTimeFromSprints)){
+			$this->getTotalTimeFromSprints();
+		}
+
+		if(!is_object($this->totalTimeFromSprints)){
+			return;
+		}
+
+		$out = '';
+		$badgeClass = '';
+		$progressCalculated = 0;
+		if (!empty($this->totalTimeFromSprints->total_qty_planned)) {
+
+			// define color according to time spend vs workload
+			$badgeClass = 'badge ';
+			if ($this->totalTimeFromSprints->total_qty_planned) {
+				$progressCalculated = round(100 * floatval($this->totalTimeFromSprints->total_qty_done) / floatval($this->totalTimeFromSprints->total_qty_planned), 2);
+
+				if ($this->totalTimeFromSprints->total_qty_consumed > $this->totalTimeFromSprints->total_qty_planned) {
+					$badgeClass .= 'badge-danger';
+				} else {
+					$badgeClass .= 'badge-success';
+				}
+			}
+		}
+
+		$title = '';
+		if (!empty($tooltip)) {
+			$badgeClass .= ' classfortooltip';
+			$title = 'title="'.dol_htmlentities($tooltip).'"';
+		}
+
+		if (empty($label)) {
+			$label = $progressCalculated.' %';
+		}
+
+		if (!empty($label)) {
+			$out = '<span class="'.$badgeClass.'" '.$title.' >'.$label.'</span>';
+		}
+
+		return $out;
+	}
 
 	/**
 	 *  Create a document onto disk according to template module.
@@ -1116,6 +1186,8 @@ class ScrumUserStory extends CommonObject
 	 */
 	public function setErrorMsg($msg){
 		global $langs;
+
+		if(empty($msg)) return;
 
 		if(is_array($msg)){
 			foreach ($msg as $item){

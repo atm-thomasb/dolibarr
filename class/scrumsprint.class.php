@@ -114,6 +114,7 @@ class ScrumSprint extends CommonObject
 		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_done' => array('type'=>'real', 'label'=>'QtyDone', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>5, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
@@ -133,6 +134,7 @@ class ScrumSprint extends CommonObject
 	public $note_private;
 	public $qty_velocity;
 	public $qty_planned;
+	public $qty_consumed;
 	public $qty_done;
 	public $date_creation;
 	public $tms;
@@ -1018,45 +1020,60 @@ class ScrumSprint extends CommonObject
 	}
 
 	/**
-	 * TODO : REVOIR CETTE PARTIE AVEC LA NOUVELLE STRUCTURE DE BDD
+	 *
 	 * Calculates the sprint velocity based on the default velocity of each DEV user linked to the sprint
 	 * @return int 1 if OK -1 if KO
 	 */
-	public function calculateVelocity(User $user) {
-		if($this->status != self::STATUS_DRAFT) return -1;
+	public function refreshVelocity(User $user, $update = false) {
+		if($this->status != self::STATUS_DRAFT) return 0;
 
-		$devs = $this->liste_contact(-1, 'internal', 0, 'DEV');
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_velocity) as qty_velocity "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser"
+			." WHERE fk_scrum_sprint = ".intval($this->id);
 
-		$velocity = 0;
-		foreach($devs as $dev) {
-			$usr = new User($this->db);
-			$usr->fetch($dev["id"]);
-			$velocity += $usr->array_options['options_scrumproject_velocity'];
+		$resql = $this->db->query($sql);
+		if($resql) {
+			$obj = $this->db->fetch_object($resql);
+			$this->qty_velocity = $obj->qty_velocity;
+
+			if($update){
+				return $this->update($user);
+			} else {
+				return 1;
+			}
+		} else {
+			dol_print_error($this->db);
+			$this->error = $this->db->lasterror();
+			return -1;
 		}
-
-		$this->qty_velocity = $velocity;
-		return $this->update($user);
 	}
 
 	/**
-	 * TODO : REVOIR CETTE PARTIE AVEC LA NOUVELLE STRUCTURE DE BDD
 	 * Calculates the sprint quantities : planned and done
 	 * Planned is the sum of points of all cards linked to the sprint
 	 * Done is the same but only for done cards
+	 * @param User $user
+	 * @param bool $update
 	 * @return int 1 if OK -1 if KO
 	 */
-	public function calculateQuantities(User $user) {
-		$sql = "SELECT SUM(c.points) as qty_planned, SUM(CASE WHEN c.status = ".ScrumCard::STATUS_DONE." THEN c.points ELSE 0 END) as qty_done";
-		$sql.= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumcard c";
-		$sql.= " WHERE c.fk_scrumsprint = ".$this->id;
+	public function refreshQuantities(User $user, $update = false) {
+
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_planned) as qty_planned, SUM(qty_done) as qty_done, SUM(qty_consumed) as qty_consumed "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint"
+			." WHERE fk_scrum_user_story = ".intval($this->id);
 
 		$resql = $this->db->query($sql);
 		if($resql) {
 			$obj = $this->db->fetch_object($resql);
 			$this->qty_planned = $obj->qty_planned;
 			$this->qty_done = $obj->qty_done;
+			$this->qty_consumed = $obj->qty_consumed;
 
-			return $this->update($user);
+			if($update){
+				return $this->update($user);
+			} else {
+				return 1;
+			}
 		} else {
 			dol_print_error($this->db);
 			$this->error = $this->db->lasterror();
@@ -1125,21 +1142,30 @@ class ScrumSprint extends CommonObject
 	 * @return void
 	 */
 	public function updateTimeSpent(User $user, $notrigger = false){
-		global $user;
-
-		$error = 0;
-		$this->db->begin();
 
 		$this->calcTimeSpent();
-
 		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
+		return $this->updateByQuery($user, $sql, 'SCRUMSPRINT_UPDATE_TIME_SPENT',  $notrigger);
+	}
 
+
+	/**
+	 * @param User $user
+	 * @param string $sql
+	 * @param string $tiggerName
+	 * @param bool $notrigger
+	 * @return int
+	 */
+	public function updateByQuery(User $user, $sql, $tiggerName,  $notrigger = false){
+		global $user;
+		$error = 0;
+		$this->db->begin();
 		if($this->db->query($sql)){
 
 			// Triggers
 			if (!$error && !$notrigger) {
 				// Call triggers
-				$result = $this->call_trigger('SCRUMSPRINT_UPDATE_TIME_SPENT', $user);
+				$result = $this->call_trigger($tiggerName, $user);
 				if ($result < 0) {
 					$error++;
 				} //Do also here what you must do to rollback action if trigger fail
@@ -1150,7 +1176,7 @@ class ScrumSprint extends CommonObject
 			// Commit or rollback
 			if ($error) {
 				$this->db->rollback();
-				return -1;
+				return -2;
 			} else {
 				$this->db->commit();
 				return $this->id;
@@ -1162,7 +1188,6 @@ class ScrumSprint extends CommonObject
 			return -1;
 		}
 	}
-
 
 	/**
 	 * @param $msg

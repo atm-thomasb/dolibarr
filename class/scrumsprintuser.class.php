@@ -27,6 +27,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
+require_once __DIR__ . '/scrumsprint.class.php';
+
 /**
  * Class for ScrumSprintUser
  */
@@ -201,6 +203,10 @@ class ScrumSprintUser extends CommonObject
 
 		if(!empty($user->id)) {
 			$this->fields['fk_user']['default'] = $user->id;
+
+			if(!empty($user->array_options['options_scrumproject_velocity'])){
+				$this->fields['qty_availablity']['default'] = round($user->array_options['options_scrumproject_velocity'], 2);
+			}
 		}
 
 		// Translate some data of arrayofkeyval
@@ -229,9 +235,37 @@ class ScrumSprintUser extends CommonObject
 
 		$resultcreate = $this->createCommon($user, $notrigger);
 
-		//$resultvalidate = $this->validate($user, $notrigger);
+		if($resultcreate > 0 && !$notrigger){
+			if($this->updateSprintVelocity($user)<0){
+				return -1;
+			}
+		}
 
 		return $resultcreate;
+	}
+
+	/**
+	 * @return void
+	 */
+	public function updateSprintVelocity($user){
+		if($this->fk_scrum_sprint > 0){
+			$sprint = new ScrumSprint($this->db);
+			if($sprint->fetch($this->fk_scrum_sprint)>0){
+				if($sprint->refreshVelocity($user, true)<0){
+					$this->error = $sprint->error;
+					$this->errors = array_merge($this->errors, $sprint->errors);
+					return -1;
+				}
+				return 1;
+			}
+			else{
+				$this->error = 'ErrorSprintNotFound';
+				$this->errors[] = $this->error;
+				return -1;
+			}
+		}
+
+		return 0;
 	}
 
 	/**
@@ -453,7 +487,15 @@ class ScrumSprintUser extends CommonObject
 	public function update(User $user, $notrigger = false)
 	{
 		$this->calcVelocity();
-		return $this->updateCommon($user, $notrigger);
+		$result = $this->updateCommon($user, $notrigger);
+
+		if($result > 0 && !$notrigger){
+			if($this->updateSprintVelocity($user)<0){
+				return -1;
+			}
+		}
+
+		return $result;
 	}
 
 	/**

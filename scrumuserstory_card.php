@@ -77,9 +77,10 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-dol_include_once('scrumproject/class/scrumuserstory.class.php');
-dol_include_once('scrumproject/retrocompatibility/htdocs/core/class/html.form.class.php');
-dol_include_once('scrumproject/lib/scrumproject_scrumuserstory.lib.php');
+require_once __DIR__ . '/class/scrumuserstory.class.php';
+require_once __DIR__ . '/retrocompatibility/htdocs/core/class/html.form.class.php';
+require_once __DIR__ . '/lib/scrumproject_scrumuserstory.lib.php';
+require_once __DIR__ . '/class/scrumToolBox.class.php';
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "other"));
@@ -412,6 +413,41 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	//unset($object->fields['fk_project']);				// Hide field already shown in banner
 	//unset($object->fields['fk_soc']);					// Hide field already shown in banner
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
+
+	$totalTime = $object->getTotalTimeFromSprints(); //	nb_print, total_qty_consumed, total_qty_planned, total_qty_done
+	if($totalTime){
+		print '<tr>';
+
+		print '<td>'.$langs->trans('TotalTimePlanned').'</td>';
+		print '<td>';
+		print ScrumToolBox::convertHourToReadable($totalTime->total_qty_planned);
+		print ' '.$langs->trans('onXSprints', $totalTime->nb_print);
+		print '</td>';
+		print '</tr>';
+
+		print '<tr>';
+		print '<td>'.$langs->trans('TotalDone').'</td>';
+		print '<td>'.ScrumToolBox::convertHourToReadable($totalTime->total_qty_done).'</td>';
+		print '</tr>';
+
+		print '<tr>';
+		print '<td>'.$langs->trans('TotalTimeSpent').'</td>';
+		print '<td>'.ScrumToolBox::convertHourToReadable($totalTime->total_qty_consumed).'</td>';
+		print '</tr>';
+
+		print '<tr>';
+		print '<td>'.$langs->trans('Progression').'</td>';
+		print '<td>'.$object->getProgressBadge().'</td>';
+		print '</tr>';
+	}
+	else{
+		print '<tr>';
+		print '<td>'.$langs->trans('ErrorOnGetTotalTimeFromSprints').'</td>';
+		print '<td>'.$object->errorsToString().'</td>';
+		print '</tr>';
+	}
+
+
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
