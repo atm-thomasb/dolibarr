@@ -35,6 +35,19 @@ NumberingModules = Modèles de numérotation pour %s
 ScrumCardStage = Projet Scrum - Étapes des cartes
 
 #
+# MENU
+#
+
+
+ScrumUserStory = User story
+NewScrumUserStory = Nouvelle User story
+ScrumUserStorySprint = User story plannifiés
+NewScrumUserStorySprint = Nouvelle plannification
+
+
+LeftMenuDeveloperAvailability = Dispo RH
+
+#
 # Page À propos
 #
 About = À propos
@@ -57,9 +70,10 @@ MyWidgetDescription = Description de mon widget
 #
 SprintLabel = Titre
 SprintTeam = Équipe scrum
-QtyVelocity = Vélocité
+QtyVelocity = Vélocité disponible
 QtyPlanned = Qté planifiée
 QtyDone = Qté réalisée
+RefreshVelocity = Mettre à jour la vélocité disponible
 SetToPending = Démarrer
 SetToDone = Terminer
 SetBackToPending = Retour à en cours
@@ -78,14 +92,18 @@ ScrumProjectUserRoleDEV = Developer
 #
 # Liste
 #
-ScrumSprint = Sprint scrum
-ScrumSprints = sprints scrum
+ScrumSprint = Sprint
+ScrumSprints = sprints
 NewScrumSprint = Nouveau sprint
 StatusScrumSprintDraft = Brouillon
 StatusScrumSprintValid = Validé
 StatusScrumSprintPending = En cours
 StatusScrumSprintDone = Terminé
 StatusScrumSprintCancelled = Annulé
+
+ListOfScrumSprints = Liste des Sprints
+ProjectPlanningReportMenu = Planning projets
+ListOfSprintProjectPlanning = Planning projets/prints
 
 #####################################################
 # ScrumCard
@@ -108,3 +126,75 @@ StatusScrumCardDraft = Brouillon
 StatusScrumCardReady = Prête
 StatusScrumCardDone = Terminée
 GoToScrumCards = Voir les cartes
+
+
+
+StatusScrumUserStoryDraft = Brouillon
+StatusScrumUserStoryReady = Prête
+StatusScrumUserStoryPlanned = Planifié
+StatusScrumUserStoryDone = Terminée
+
+
+StatusScrumUserStorySprintDraft = Brouillon
+StatusScrumUserStorySprintReady = Prête
+StatusScrumUserStorySprintDone = Terminée
+BusinessValue = Business value
+QtyConsumed = Qty consommée
+
+ScrumUserStorySprints = user story planifiée
+ListOfScrumUserStorys = Liste des user stories
+
+
+ScrumSprintUsers = Disponibilité en ressources humaines
+ScrumSprintUsersShort = Disponibilité RH
+
+# Droits
+ReadScrumSprintUser = Voir les ressources humaines liées à aux sprints
+WriteScrumSprintUser = Ajouter/Modifier les ressources humaines liées à aux sprints
+DeleteScrumSprintUser = Supprimer les ressources humaines liées à aux sprints
+
+ReadScrumtask = Voir les tâches scrum
+WriteScrumtask = Ajouter/Modifier les tâches scrum
+DeleteScrumtask = Supprimer les tâches scrum
+
+ReadScrumuserstory = Voir les User story (U.S)
+WriteScrumuserstory = Ajouter/Modifier les User story (U.S)
+DeleteScrumuserstory = Supprimer les User story (U.S)
+
+ReadScrumuserstorysprint = Voir les User story (U.S) planifiées
+WriteScrumuserstorysprint = Ajouter/Modifier les User story (U.S) planifiées
+DeleteScrumuserstorysprint = Supprimer les User story (U.S) planifiées
+
+ReadScrumsprint = Voir les sprints
+WriteScrumsprint = Ajouter/Modifier les sprints
+DeleteScrumsprint = Supprimer les sprints
+
+
+TotalTimePlanned = Temps temps planifié
+Planned = Planifié
+TotalDone = Total produit
+OnXSprints = Sur %s sprint(s)
+onXSprints = sur %s sprint(s)
+RefreshTimes = Mettre à jours les temps
+
+SumOfDeveloperAvailability = Disponibilités RH saisies
+SumOfDeveloperAvailabilityIsDifferent = La vélocité planifié est différente des disponibilités saisies
+
+
+RefSprint = Ref. Sprint
+us_qty_planned = P.Planifié
+us_qty_planned_help = Temps projet planifié
+us_qty_consumed = P.Consommé
+us_qty_consumed_help = Temps consommé par l'équipe pour les user story affectées à ce sprint
+us_qty_done = P.Livrable
+us_qty_done_help = Temps planifié livrable
+QtyAvailablity = Disponibilité
+QtyAvailablityHelp = Disponibilité disponibilité réel, la valeur par défaut peut être modifiée pour chaque utilisateur sur sa fiche.
+AvailablityRate = Ratio de vélocité
+AvailablityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité x Ratio de vélocité = Vélocité
+ScrumTask = Tâche scrum
+ScrumTasks = Tâches scrum
+ScrumSprintTime = Temps consommé
+
+WillRedirectYouToTaskPageForAction = En cliquant ici vous serez redirigé vers la page effectuant l'action
+TimeConsumedAdded = Temps consommé ajouté

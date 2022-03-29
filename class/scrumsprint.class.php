@@ -112,8 +112,9 @@ class ScrumSprint extends CommonObject
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0,),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>0,),
 		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'noteditable'=>1,),
-		'qty_done' => array('type'=>'real', 'label'=>'QtyDone', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'noteditable'=>1,),
+		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_done' => array('type'=>'real', 'label'=>'QtyDone', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>5, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
@@ -128,12 +129,13 @@ class ScrumSprint extends CommonObject
 	public $label;
 	public $date_start;
 	public $date_end;
-	public $qty_velocity;
-	public $qty_planned;
-	public $qty_done;
 	public $description;
 	public $note_public;
 	public $note_private;
+	public $qty_velocity;
+	public $qty_planned;
+	public $qty_consumed;
+	public $qty_done;
 	public $date_creation;
 	public $tms;
 	public $fk_user_creat;
@@ -662,7 +664,7 @@ class ScrumSprint extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("ScrumSprint").'</u>';
+		$label = img_picto('', 'object_'.$this->picto).' <u>'.$langs->trans("ScrumSprint").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}
@@ -926,45 +928,45 @@ class ScrumSprint extends CommonObject
 			return "";
 		}
 	}
-
-	/**
-	 *  Create a document onto disk according to template module.
-	 *
-	 *  @param	    string		$modele			Force template to use ('' to not force)
-	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-	 *  @param      int			$hidedetails    Hide details of lines
-	 *  @param      int			$hidedesc       Hide description
-	 *  @param      int			$hideref        Hide ref
-	 *  @param      null|array  $moreparams     Array to provide more information
-	 *  @return     int         				0 if KO, 1 if OK
-	 */
-	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
-	{
-		global $conf, $langs;
-
-		$result = 0;
-		$includedocgeneration = 0;
-
-		$langs->load("scrumproject@scrumproject");
-
-		if (!dol_strlen($modele)) {
-			$modele = 'standard_scrumsprint';
-
-			if (!empty($this->model_pdf)) {
-				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->SCRUMSPRINT_ADDON_PDF)) {
-				$modele = $conf->global->SCRUMSPRINT_ADDON_PDF;
-			}
-		}
-
-		$modelpath = "core/modules/scrumproject/doc/";
-
-		if ($includedocgeneration && !empty($modele)) {
-			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-		}
-
-		return $result;
-	}
+//
+//	/**
+//	 *  Create a document onto disk according to template module.
+//	 *
+//	 *  @param	    string		$modele			Force template to use ('' to not force)
+//	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
+//	 *  @param      int			$hidedetails    Hide details of lines
+//	 *  @param      int			$hidedesc       Hide description
+//	 *  @param      int			$hideref        Hide ref
+//	 *  @param      null|array  $moreparams     Array to provide more information
+//	 *  @return     int         				0 if KO, 1 if OK
+//	 */
+//	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
+//	{
+//		global $conf, $langs;
+//
+//		$result = 0;
+//		$includedocgeneration = 0;
+//
+//		$langs->load("scrumproject@scrumproject");
+//
+//		if (!dol_strlen($modele)) {
+//			$modele = 'standard_scrumsprint';
+//
+//			if (!empty($this->model_pdf)) {
+//				$modele = $this->model_pdf;
+//			} elseif (!empty($conf->global->SCRUMSPRINT_ADDON_PDF)) {
+//				$modele = $conf->global->SCRUMSPRINT_ADDON_PDF;
+//			}
+//		}
+//
+//		$modelpath = "core/modules/scrumproject/doc/";
+//
+//		if ($includedocgeneration && !empty($modele)) {
+//			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+//		}
+//
+//		return $result;
+//	}
 
 	/**
 	 * Action executed by scheduler
@@ -1018,47 +1020,193 @@ class ScrumSprint extends CommonObject
 	}
 
 	/**
+	 *
 	 * Calculates the sprint velocity based on the default velocity of each DEV user linked to the sprint
 	 * @return int 1 if OK -1 if KO
 	 */
-	public function calculateVelocity(User $user) {
-		if($this->status != self::STATUS_DRAFT) return -1;
+	public function refreshVelocity(User $user, $update = false) {
+		if($this->status != self::STATUS_DRAFT) return 0;
 
-		$devs = $this->liste_contact(-1, 'internal', 0, 'DEV');
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_velocity) as qty_velocity "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser"
+			." WHERE fk_scrum_sprint = ".intval($this->id);
 
-		$velocity = 0;
-		foreach($devs as $dev) {
-			$usr = new User($this->db);
-			$usr->fetch($dev["id"]);
-			$velocity += $usr->array_options['options_scrumproject_velocity'];
+		$resql = $this->db->query($sql);
+		if($resql) {
+			$obj = $this->db->fetch_object($resql);
+			$this->qty_velocity = $obj->qty_velocity;
+
+			if($update){
+				return $this->update($user);
+			} else {
+				return 1;
+			}
+		} else {
+			dol_print_error($this->db);
+			$this->error = $this->db->lasterror();
+			return -1;
 		}
-
-		$this->qty_velocity = $velocity;
-		return $this->update($user);
 	}
 
 	/**
 	 * Calculates the sprint quantities : planned and done
 	 * Planned is the sum of points of all cards linked to the sprint
 	 * Done is the same but only for done cards
+	 * @param User $user
+	 * @param bool $update
 	 * @return int 1 if OK -1 if KO
 	 */
-	public function calculateQuantities(User $user) {
-		$sql = "SELECT SUM(c.points) as qty_planned, SUM(CASE WHEN c.status = ".ScrumCard::STATUS_DONE." THEN c.points ELSE 0 END) as qty_done";
-		$sql.= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumcard c";
-		$sql.= " WHERE c.fk_scrumsprint = ".$this->id;
+	public function refreshQuantities(User $user, $update = false) {
+
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_planned) as qty_planned, SUM(qty_done) as qty_done, SUM(qty_consumed) as qty_consumed "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint"
+			." WHERE fk_scrum_user_story = ".intval($this->id);
 
 		$resql = $this->db->query($sql);
 		if($resql) {
 			$obj = $this->db->fetch_object($resql);
 			$this->qty_planned = $obj->qty_planned;
 			$this->qty_done = $obj->qty_done;
+			$this->qty_consumed = $obj->qty_consumed;
 
-			return $this->update($user);
+			if($update){
+				return $this->update($user);
+			} else {
+				return 1;
+			}
 		} else {
 			dol_print_error($this->db);
 			$this->error = $this->db->lasterror();
 			return -1;
+		}
+	}
+
+
+	/**
+	 * Return HTML string to show a field into a page
+	 * Code very similar with showOutputField of extra fields
+	 *
+	 * @param  array   $val			     Array of properties of field to show
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $value          Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  $moreparam      To add more parametes on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
+	{
+		global $langs;
+
+		if($key == 'qty_velocity'){
+			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+			$countObj = $this->db->getRow("SELECT SUM(qty_velocity) qty_velocity FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($this->id));
+			if($countObj){
+				if($countObj->qty_velocity != $value){
+					$tooltip = '<strong>' . $langs->trans('SumOfDeveloperAvailabilityIsDifferent') . '</strong></br>';
+					$tooltip.= $langs->trans('SumOfDeveloperAvailability') . ' : ' .price($countObj->qty_velocity).'</br>';
+					$tooltip.= $langs->trans('QtyVelocity') . ' : ' .price($value);
+					$out = ' <span class="classfortooltip" title="'.dol_escape_htmltag($tooltip).'"  >'.price($value).' <span class="fa fa-warning"></span></span>';
+				}
+			}
+
+			return $out;
+		}
+		else{
+			return parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
+	}
+
+	/**
+	 *
+	 * @return int
+	 */
+	public function calcTimeSpent(){
+
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_consumed) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint "
+			." WHERE fk_scrum_user_story = ".intval($this->id);
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_consumed = doubleval($obj->sumTimeSpent);
+			return $this->qty_consumed;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * @param User $user
+	 * @param      $notrigger
+	 * @return void
+	 */
+	public function updateTimeSpent(User $user, $notrigger = false){
+
+		$this->calcTimeSpent();
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
+		return $this->updateByQuery($user, $sql, 'SCRUMSPRINT_UPDATE_TIME_SPENT',  $notrigger);
+	}
+
+
+	/**
+	 * @param User $user
+	 * @param string $sql
+	 * @param string $tiggerName
+	 * @param bool $notrigger
+	 * @return int
+	 */
+	public function updateByQuery(User $user, $sql, $tiggerName,  $notrigger = false){
+		global $user;
+		$error = 0;
+		$this->db->begin();
+		if($this->db->query($sql)){
+
+			// Triggers
+			if (!$error && !$notrigger) {
+				// Call triggers
+				$result = $this->call_trigger($tiggerName, $user);
+				if ($result < 0) {
+					$error++;
+				} //Do also here what you must do to rollback action if trigger fail
+				// End call triggers
+			}
+
+
+			// Commit or rollback
+			if ($error) {
+				$this->db->rollback();
+				return -2;
+			} else {
+				$this->db->commit();
+				return $this->id;
+			}
+		}
+		else {
+			$this->error = $this->db->lasterror();
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+	/**
+	 * @param $msg
+	 * @return void
+	 */
+	public function setErrorMsg($msg){
+		global $langs;
+
+		if(is_array($msg)){
+			foreach ($msg as $item){
+				$this->setErrorMsg($item);
+			}
+			return;
+		}
+
+		if (!empty($langs->tab_translate[$msg])) {    // Translation is available
+			$this->errors[] = $langs->trans($msg);
+		}else{
+			$this->errors[] = $msg;
 		}
 	}
 }
