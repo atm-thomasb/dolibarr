@@ -127,15 +127,6 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 			return -1;
 		}
 
-		// Calculate the velocity of the sprint
-		$res = $object->calculateVelocity($user);
-		if($res > 0) {
-			setEventMessage($langs->trans('ScrumSprintVelocityCalculated', $object->qty_velocity));
-		} else if($res < 0) {
-			setEventMessages($langs->trans('ScrumSprintVelocityCalculatedError'), $object->errors, 'errors');
-			return -1;
-		}
-
 		return 0;
 	}
 
