@@ -40,7 +40,7 @@ class ScrumSprint extends CommonObject
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'scrumsprint';
+	public $element = 'scrumproject_scrumsprint';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
@@ -106,8 +106,8 @@ class ScrumSprint extends CommonObject
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'fk_team' => array('type'=>'integer:UserGroup:user/class/usergroup.class.php', 'label'=>'SprintTeam', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'usergroup.rowid',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'SprintLabel', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
-		'date_start' => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>35, 'notnull'=>1, 'visible'=>1,),
-		'date_end' => array('type'=>'date', 'label'=>'DateEnd', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>1,),
+		'date_start' => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>35, 'notnull'=>1, 'visible'=>1,'showoncombobox'=>'1',),
+		'date_end' => array('type'=>'date', 'label'=>'DateEnd', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>1,'showoncombobox'=>'1',),
 		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3,),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0,),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>0,),
@@ -1116,6 +1116,20 @@ class ScrumSprint extends CommonObject
 		else{
 			return parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
 		}
+	}
+
+	/**
+	 * Return HTML string to show a field into a page
+	 *
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $moreparam      To add more parameters on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputFieldQuick($key, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = ''){
+		return $this->showOutputField($this->fields[$key], $key, $this->{$key}, $moreparam, $keysuffix, $keyprefix, $morecss);
 	}
 
 	/**
