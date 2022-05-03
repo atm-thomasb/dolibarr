@@ -26,6 +26,7 @@
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 
 require_once __DIR__ .'/scrumuserstory.class.php';
+require_once __DIR__ .'/scrumsprint.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -232,7 +233,7 @@ class ScrumUserStorySprint extends CommonObject
 	{
 		$resultcreate = $this->createCommon($user, $notrigger);
 
-		if($resultcreate>0){
+		if($resultcreate>0 && !$notrigger){
 			$scrumUserStory = new ScrumUserStory($this->db);
 			if($scrumUserStory->fetch($this->fk_scrum_user_story)>0){
 				if($scrumUserStory->setPlanned($user) < 0){
@@ -240,6 +241,10 @@ class ScrumUserStorySprint extends CommonObject
 					$this->errors = $scrumUserStory->errors;
 					return -1;
 				}
+			}
+
+			if($this->refreshSprintQuantities($user)<0){
+				return -1;
 			}
 		}
 
@@ -464,7 +469,15 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
-		return $this->updateCommon($user, $notrigger);
+
+		$result = $this->updateCommon($user, $notrigger);
+		if($result>0 && !$notrigger){
+			if($this->refreshSprintQuantities($user)<0){
+				return -1;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -498,203 +511,169 @@ class ScrumUserStorySprint extends CommonObject
 		return $this->deleteLineCommon($user, $idline, $notrigger);
 	}
 
-
-	/**
-	 *	Validate object
-	 *
-	 *	@param		User	$user     		User making status change
-	 *  @param		int		$notrigger		1=Does not execute triggers, 0= execute triggers
-	 *	@return  	int						<=0 if OK, 0=Nothing done, >0 if KO
-	 */
-	public function validate($user, $notrigger = 0)
-	{
-		global $conf, $langs;
-
-		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-
-		$error = 0;
-
-		// Protection
-		if ($this->status == self::STATUS_VALIDATED) {
-			dol_syslog(get_class($this)."::validate action abandonned: already validated", LOG_WARNING);
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstorysprint->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstorysprint->scrumuserstorysprint_advance->validate))))
-		 {
-		 $this->error='NotEnoughPermissions';
-		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
-		 return -1;
-		 }*/
-
-		$now = dol_now();
-
-		$this->db->begin();
-
-		// Define new ref
-		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
-			$num = $this->getNextNumRef();
-		} else {
-			$num = $this->ref;
-		}
-		$this->newref = $num;
-
-		if (!empty($num)) {
-			// Validate
-			$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element;
-			$sql .= " SET ref = '".$this->db->escape($num)."',";
-			$sql .= " status = ".self::STATUS_VALIDATED;
-			if (!empty($this->fields['date_validation'])) {
-				$sql .= ", date_validation = '".$this->db->idate($now)."'";
-			}
-			if (!empty($this->fields['fk_user_valid'])) {
-				$sql .= ", fk_user_valid = ".((int) $user->id);
-			}
-			$sql .= " WHERE rowid = ".((int) $this->id);
-
-			dol_syslog(get_class($this)."::validate()", LOG_DEBUG);
-			$resql = $this->db->query($sql);
-			if (!$resql) {
-				dol_print_error($this->db);
-				$this->error = $this->db->lasterror();
-				$error++;
-			}
-
-			if (!$error && !$notrigger) {
-				// Call trigger
-				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_VALIDATE', $user);
-				if ($result < 0) {
-					$error++;
-				}
-				// End call triggers
-			}
-		}
-
-		if (!$error) {
-			$this->oldref = $this->ref;
-
-			// Rename directory if dir was a temporary ref
-			if (preg_match('/^[\(]?PROV/i', $this->ref)) {
-				// Now we rename also files into index
-				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'scrumuserstorysprint/".$this->db->escape($this->newref)."'";
-				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'scrumuserstorysprint/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
-				$resql = $this->db->query($sql);
-				if (!$resql) {
-					$error++; $this->error = $this->db->lasterror();
-				}
-
-				// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments
-				$oldref = dol_sanitizeFileName($this->ref);
-				$newref = dol_sanitizeFileName($num);
-				$dirsource = $conf->scrumproject->dir_output.'/scrumuserstorysprint/'.$oldref;
-				$dirdest = $conf->scrumproject->dir_output.'/scrumuserstorysprint/'.$newref;
-				if (!$error && file_exists($dirsource)) {
-					dol_syslog(get_class($this)."::validate() rename dir ".$dirsource." into ".$dirdest);
-
-					if (@rename($dirsource, $dirdest)) {
-						dol_syslog("Rename ok");
-						// Rename docs starting with $oldref with $newref
-						$listoffiles = dol_dir_list($conf->scrumproject->dir_output.'/scrumuserstorysprint/'.$newref, 'files', 1, '^'.preg_quote($oldref, '/'));
-						foreach ($listoffiles as $fileentry) {
-							$dirsource = $fileentry['name'];
-							$dirdest = preg_replace('/^'.preg_quote($oldref, '/').'/', $newref, $dirsource);
-							$dirsource = $fileentry['path'].'/'.$dirsource;
-							$dirdest = $fileentry['path'].'/'.$dirdest;
-							@rename($dirsource, $dirdest);
-						}
-					}
-				}
-			}
-		}
-
-		// Set new ref and current status
-		if (!$error) {
-			$this->ref = $num;
-			$this->status = self::STATUS_VALIDATED;
-		}
-
-		if (!$error) {
-			$this->db->commit();
-			return 1;
-		} else {
-			$this->db->rollback();
-			return -1;
-		}
-	}
+//
+//	/**
+//	 *	Validate object
+//	 *
+//	 *	@param		User	$user     		User making status change
+//	 *  @param		int		$notrigger		1=Does not execute triggers, 0= execute triggers
+//	 *	@return  	int						<=0 if OK, 0=Nothing done, >0 if KO
+//	 */
+//	public function validate($user, $notrigger = 0)
+//	{
+//		global $conf, $langs;
+//
+//		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+//
+//		$error = 0;
+//
+//		// Protection
+//		if ($this->status == self::STATUS_VALIDATED) {
+//			dol_syslog(get_class($this)."::validate action abandonned: already validated", LOG_WARNING);
+//			return 0;
+//		}
+//
+//		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstorysprint->write))
+//		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstorysprint->scrumuserstorysprint_advance->validate))))
+//		 {
+//		 $this->error='NotEnoughPermissions';
+//		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
+//		 return -1;
+//		 }*/
+//
+//		$now = dol_now();
+//
+//		$this->db->begin();
+//
+//		// Define new ref
+//		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
+//			$num = $this->getNextNumRef();
+//		} else {
+//			$num = $this->ref;
+//		}
+//		$this->newref = $num;
+//
+//		if (!empty($num)) {
+//			// Validate
+//			$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element;
+//			$sql .= " SET status = ".self::STATUS_VALIDATED;
+//			if (!empty($this->fields['date_validation'])) {
+//				$sql .= ", date_validation = '".$this->db->idate($now)."'";
+//			}
+//			if (!empty($this->fields['fk_user_valid'])) {
+//				$sql .= ", fk_user_valid = ".((int) $user->id);
+//			}
+//			$sql .= " WHERE rowid = ".((int) $this->id);
+//
+//			dol_syslog(get_class($this)."::validate()", LOG_DEBUG);
+//			$resql = $this->db->query($sql);
+//			if (!$resql) {
+//				dol_print_error($this->db);
+//				$this->error = $this->db->lasterror();
+//				$error++;
+//			}
+//
+//			if (!$error && !$notrigger) {
+//				// Call trigger
+//				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_VALIDATE', $user);
+//				if ($result < 0) {
+//					$error++;
+//				}
+//				// End call triggers
+//			}
+//		}
+//
+//		if (!$error) {
+//			$this->oldref = $this->id;
+//		}
+//
+//		// Set new ref and current status
+//		if (!$error) {
+//			$this->ref = $num;
+//			$this->status = self::STATUS_VALIDATED;
+//		}
+//
+//		if (!$error) {
+//			$this->db->commit();
+//			return 1;
+//		} else {
+//			$this->db->rollback();
+//			return -1;
+//		}
+//	}
 
 
-	/**
-	 *	Set draft status
-	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, >0 if OK
-	 */
-	public function setDraft($user, $notrigger = 0)
-	{
-		// Protection
-		if ($this->status <= self::STATUS_DRAFT) {
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
-		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SCRUMUSERSTORYSPRINT_UNVALIDATE');
-	}
-
-	/**
-	 *	Set cancel status
-	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
-	 */
-	public function cancel($user, $notrigger = 0)
-	{
-		// Protection
-		if ($this->status != self::STATUS_VALIDATED) {
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
-		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SCRUMUSERSTORYSPRINT_CANCEL');
-	}
-
-	/**
-	 *	Set back to validated status
-	 *
-	 *	@param	User	$user			Object user that modify
-	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
-	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
-	 */
-	public function reopen($user, $notrigger = 0)
-	{
-		// Protection
-		if ($this->status != self::STATUS_CANCELED) {
-			return 0;
-		}
-
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
-		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SCRUMUSERSTORYSPRINT_REOPEN');
-	}
+//	/**
+//	 *	Set draft status
+//	 *
+//	 *	@param	User	$user			Object user that modify
+//	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
+//	 *	@return	int						<0 if KO, >0 if OK
+//	 */
+//	public function setDraft($user, $notrigger = 0)
+//	{
+//		// Protection
+//		if ($this->status <= self::STATUS_DRAFT) {
+//			return 0;
+//		}
+//
+//		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
+//		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+//		 {
+//		 $this->error='Permission denied';
+//		 return -1;
+//		 }*/
+//
+//		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SCRUMUSERSTORYSPRINT_UNVALIDATE');
+//	}
+//
+//	/**
+//	 *	Set cancel status
+//	 *
+//	 *	@param	User	$user			Object user that modify
+//	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
+//	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
+//	 */
+//	public function cancel($user, $notrigger = 0)
+//	{
+//		// Protection
+//		if ($this->status != self::STATUS_VALIDATED) {
+//			return 0;
+//		}
+//
+//		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
+//		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+//		 {
+//		 $this->error='Permission denied';
+//		 return -1;
+//		 }*/
+//
+//		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SCRUMUSERSTORYSPRINT_CANCEL');
+//	}
+//
+//	/**
+//	 *	Set back to validated status
+//	 *
+//	 *	@param	User	$user			Object user that modify
+//	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
+//	 *	@return	int						<0 if KO, 0=Nothing done, >0 if OK
+//	 */
+//	public function reopen($user, $notrigger = 0)
+//	{
+//		// Protection
+//		if ($this->status != self::STATUS_CANCELED) {
+//			return 0;
+//		}
+//
+//		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
+//		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+//		 {
+//		 $this->error='Permission denied';
+//		 return -1;
+//		 }*/
+//
+//		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SCRUMUSERSTORYSPRINT_REOPEN');
+//	}
 
 	/**
 	 *  Return a link to the object card (with optionaly the picto)
@@ -1230,5 +1209,29 @@ class ScrumUserStorySprint extends CommonObject
 		}else{
 			$this->errors[] = $msg;
 		}
+	}
+
+	/**
+	 * @return void
+	 */
+	public function refreshSprintQuantities($user){
+		if($this->fk_scrum_sprint > 0){
+			$sprint = new ScrumSprint($this->db);
+			if($sprint->fetch($this->fk_scrum_sprint)>0){
+				if($sprint->refreshQuantities($user, true)<0){
+					$this->error = $sprint->error;
+					$this->errors = array_merge($this->errors, $sprint->errors);
+					return -1;
+				}
+				return 1;
+			}
+			else{
+				$this->error = 'ErrorSprintNotFound';
+				$this->errors[] = $this->error;
+				return -1;
+			}
+		}
+
+		return 0;
 	}
 }

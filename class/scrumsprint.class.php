@@ -1060,7 +1060,7 @@ class ScrumSprint extends CommonObject
 
 		$sql = /** @lang MySQL */ "SELECT SUM(qty_planned) as qty_planned, SUM(qty_done) as qty_done, SUM(qty_consumed) as qty_consumed "
 			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint"
-			." WHERE fk_scrum_user_story = ".intval($this->id);
+			." WHERE fk_scrum_sprint = ".intval($this->id);
 
 		$resql = $this->db->query($sql);
 		if($resql) {
