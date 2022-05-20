@@ -497,12 +497,7 @@ $reshook = $hookmanager->executeHooks('printFieldListSearchParam', $parameters, 
 $param .= $hookmanager->resPrint;
 
 // List of mass actions available
-$arrayofmassactions = array(
-	//'validate'=>$langs->trans("Validate"),
-	//'generate_doc'=>$langs->trans("ReGeneratePDF"),
-	//'builddoc'=>$langs->trans("PDFMerge"),
-	//'presend'=>$langs->trans("SendByMail"),
-);
+$arrayofmassactions = array();
 if ($permissiontodelete) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
 if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete'))) $arrayofmassactions = array();
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
@@ -894,7 +889,10 @@ while ($i < ($limit ? min($num, $limit) : $num))
 			{
 				if (!empty($arrayfields['t.'.$key]['checked']))
 				{
-					print '<td>';
+					print '<td class="center">';
+					if($key == 'status'){
+						print $scrumSprint->getLibStatut(2);
+					}
 					print '</td>';
 				}
 			}
@@ -920,7 +918,6 @@ while ($i < ($limit ? min($num, $limit) : $num))
 							print ' data-key="'.$extrafieldsobjectkey.'.'.$key.'"';
 							print ($title ? ' title="'.dol_escape_htmltag($title).'"' : '');
 							print '>';
-
 
 							print '</td>';
 						}
