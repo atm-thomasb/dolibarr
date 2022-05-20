@@ -155,7 +155,7 @@ foreach ($listFields as $key => $val) {
 // Definition of array of fields for columns
 $arrayfields = array(
 	'pt.label' => array(
-		'label'=>'Project',
+		'label'=>'Task',
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
@@ -498,7 +498,7 @@ $param .= $hookmanager->resPrint;
 
 // List of mass actions available
 $arrayofmassactions = array();
-if ($permissiontodelete) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
+//if ($permissiontodelete) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
 if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete'))) $arrayofmassactions = array();
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
