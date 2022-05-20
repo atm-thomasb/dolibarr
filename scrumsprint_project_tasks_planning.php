@@ -48,6 +48,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
 // load scrumproject libraries
 require_once __DIR__ . '/class/scrumuserstory.class.php';
 require_once __DIR__ . '/class/scrumsprint.class.php';
+require_once __DIR__ . '/class/scrumuserstorysprint.class.php';
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -444,8 +445,8 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 // Output page
 // --------------------------------------------------------------------
-
-llxHeader('', $title, $help_url);
+$arrayofjs = array('scrumproject/js/scrumproject.js');
+llxHeader('', $title, $help_url, '', 0, 0, $arrayofjs);
 
 
 $head = project_prepare_head($project);
@@ -736,21 +737,21 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	$colKey = 'us_qty_planned';
 	if (!empty($arrayfields[$colKey]['checked'])) {
 		print '<td >';
-		print _convertQuantityToProjectGranularity($obj->us_qty_planned);
+		print price($obj->us_qty_planned);
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_consumed';
 	if (!empty($arrayfields[$colKey]['checked'])) {
 		print '<td >';
-		print _convertQuantityToProjectGranularity($obj->us_qty_consumed);
+		print price($obj->us_qty_consumed);
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_done';
 	if (!empty($arrayfields[$colKey]['checked'])) {
 		print '<td >';
-		print _convertQuantityToProjectGranularity($obj->us_qty_done);
+		print price($obj->us_qty_done);
 		print '</td>';
 	}
 
@@ -810,92 +811,148 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	print '</tr>'."\n";
 
 
-	/////// SHOW DETAILS ///////
-	///
-	// Show here line of result
-	print '<tr class="oddeven toggle-line-display" data-parent="'. $obj->rowid.'">';
-
-	if (!empty($arrayfields['pt.label']['checked'])) {
-		print '<td class="nowrap">';
-
-		print '</td>';
-	}
-
-	$colKey = 'us_qty_planned';
-	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
-
-		print '</td>';
-	}
-
-	$colKey = 'us_qty_consumed';
-	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
-
-		print '</td>';
-	}
-
-	$colKey = 'us_qty_done';
-	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
-
-		print '</td>';
-	}
+	/** ******************** */
+	/** *** SHOW DETAILS *** */
+	/** ******************** */
 
 
+	$staticScrumUserStorySprint = new ScrumUserStorySprint($db);
+	$staticScrumSprint = new ScrumSprint($db);
 
-	foreach ($listFields as $key => $val)
-	{
-		if (!empty($arrayfields['t.'.$key]['checked']))
-		{
-			print '<td>';
-			print '</td>';
-		}
-	}
+	$sqld =  /** @Lang SQL */
+		 ' SELECT usp.rowid id, usp.fk_scrum_sprint, sp.date_start , sp.date_end '
+		.' FROM '.MAIN_DB_PREFIX.$staticScrumUserStorySprint->table_element . ' usp '
+		.' JOIN '.MAIN_DB_PREFIX.$staticScrumSprint->table_element . ' sp ON (usp.fk_scrum_sprint = sp.rowid) '
+		.' WHERE usp.fk_scrum_user_story = '.intval($obj->rowid);
 
-	// Extra fields
+	$usPlanneds = $db->getRows($sqld);
 
-	if (empty($extrafieldsobjectkey) && is_object($object)) {
-		$extrafieldsobjectkey = $object->table_element;
-	}
+	if($usPlanneds){
+		foreach ($usPlanneds as $usPlanned){
+			$errors = 0;
+			$errorMsg = '';
 
-// Loop to show all columns of extrafields from $obj, $extrafields and $db
-	if (!empty($extrafieldsobjectkey) && !empty($extrafields->attributes[$extrafieldsobjectkey])) {	// $extrafieldsobject is the $object->table_element like 'societe', 'socpeople', ...
-		if (key_exists('label', $extrafields->attributes[$extrafieldsobjectkey]) && is_array($extrafields->attributes[$extrafieldsobjectkey]['label']) && count($extrafields->attributes[$extrafieldsobjectkey]['label'])) {
-			if (empty($extrafieldsobjectprefix)) {
-				$extrafieldsobjectprefix = 'ef.';
+			$scrumUserStorySprint = new ScrumUserStorySprint($db);
+			$res = $scrumUserStorySprint->fetch($usPlanned->id);
+			if($res <= 0){
+				$errors++;
+				$errorMsg.= '';
 			}
 
-			foreach ($extrafields->attributes[$extrafieldsobjectkey]['label'] as $key => $val) {
-				if (!empty($arrayfields[$extrafieldsobjectprefix.$key]['checked'])) {
-					$tmpkey = 'options_'.$key;
+			$scrumSprint = new ScrumSprint($db);
+			$res = $scrumSprint->fetch($usPlanned->fk_scrum_sprint);
+			if($res <= 0){
+				$errors++;
+				$errorMsg.= '';
+			}
 
-					print '<td';
-					print ' data-key="'.$extrafieldsobjectkey.'.'.$key.'"';
-					print ($title ? ' title="'.dol_escape_htmltag($title).'"' : '');
-					print '>';
+			if($errors){
+				$colspan = 1;
+				foreach ($arrayfields as $key => $val) { if (!empty($val['checked'])) $colspan++; }
+				print '<tr class="oddeven toggle-line-display" data-parent="'. $obj->rowid.'">';
+				print '<td colspan="'.$colspan.'" class="opacitymedium">'.$langs->trans("Errors").' : '.$errorMsg.'</td>';
+				print '</tr>';
+				continue;
+			}
+
+			// Show here line of result
+			print '<tr class="oddeven toggle-line-display" data-parent="'. $obj->rowid.'">';
+
+			if (!empty($arrayfields['pt.label']['checked'])) {
+				print '<td class="nowrap">';
+				print $scrumSprint->getNomUrl(1);
+				print ' ' . $scrumSprint->showOutputFieldQuick('date_start');
+				print '-' . $scrumSprint->showOutputFieldQuick('date_end');
+				print ' ' . $scrumUserStorySprint->getNomUrl(1);
+				print '</td>';
+			}
+
+			$colKey = 'us_qty_planned';
+			if (!empty($arrayfields[$colKey]['checked'])) {
+				print '<td >';
+				print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
+				print '</td>';
+			}
+
+			$colKey = 'us_qty_consumed';
+			if (!empty($arrayfields[$colKey]['checked'])) {
+				print '<td >';
+				print $scrumUserStorySprint->showOutputFieldQuick('qty_consumed');
+				print '</td>';
+			}
+
+			$colKey = 'us_qty_done';
+			if (!empty($arrayfields[$colKey]['checked'])) {
+				print '<td >';
+				print $scrumUserStorySprint->showOutputFieldQuick('qty_done');
+				print '</td>';
+			}
 
 
+
+			foreach ($listFields as $key => $val)
+			{
+				if (!empty($arrayfields['t.'.$key]['checked']))
+				{
+					print '<td>';
 					print '</td>';
 				}
 			}
+
+			// Extra fields
+
+			if (empty($extrafieldsobjectkey) && is_object($object)) {
+				$extrafieldsobjectkey = $object->table_element;
+			}
+
+// Loop to show all columns of extrafields from $obj, $extrafields and $db
+			if (!empty($extrafieldsobjectkey) && !empty($extrafields->attributes[$extrafieldsobjectkey])) {	// $extrafieldsobject is the $object->table_element like 'societe', 'socpeople', ...
+				if (key_exists('label', $extrafields->attributes[$extrafieldsobjectkey]) && is_array($extrafields->attributes[$extrafieldsobjectkey]['label']) && count($extrafields->attributes[$extrafieldsobjectkey]['label'])) {
+					if (empty($extrafieldsobjectprefix)) {
+						$extrafieldsobjectprefix = 'ef.';
+					}
+
+					foreach ($extrafields->attributes[$extrafieldsobjectkey]['label'] as $key => $val) {
+						if (!empty($arrayfields[$extrafieldsobjectprefix.$key]['checked'])) {
+							$tmpkey = 'options_'.$key;
+
+							print '<td';
+							print ' data-key="'.$extrafieldsobjectkey.'.'.$key.'"';
+							print ($title ? ' title="'.dol_escape_htmltag($title).'"' : '');
+							print '>';
+
+
+							print '</td>';
+						}
+					}
+				}
+			}
+
+
+
+			// Fields from hook
+			$parameters = array('arrayfields'=>$arrayfields, 'object'=>$object, 'obj'=>$obj, 'i'=>$i, 'totalarray'=>&$totalarray);
+			$reshook = $hookmanager->executeHooks('printFieldListValueDetail', $parameters, $object); // Note that $action and $object may have been modified by hook
+			print $hookmanager->resPrint;
+
+
+			// Action column
+			print '<td class="nowrap center">';
+
+			print '</td>';
+
+			print '</tr>'."\n";
 		}
 	}
+	else{
+		$colspan = 1;
+		foreach ($arrayfields as $key => $val) { if (!empty($val['checked'])) $colspan++; }
 
+		print '<tr class="oddeven toggle-line-display" data-parent="'. $obj->rowid.'">';
+		print '<td colspan="'.$colspan.'" class="opacitymedium">'.$langs->trans("NoRecordFound").'</td>';
+		print '</tr>';
+	}
 
-
-	// Fields from hook
-	$parameters = array('arrayfields'=>$arrayfields, 'object'=>$object, 'obj'=>$obj, 'i'=>$i, 'totalarray'=>&$totalarray);
-	$reshook = $hookmanager->executeHooks('printFieldListValueDetail', $parameters, $object); // Note that $action and $object may have been modified by hook
-	print $hookmanager->resPrint;
-
-
-	// Action column
-	print '<td class="nowrap center">';
-
-	print '</td>';
-
-	print '</tr>'."\n";
 
 	$i++;
 }
