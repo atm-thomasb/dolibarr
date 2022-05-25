@@ -23,7 +23,18 @@ tr.toggle-line-display.--open{
 	color: #a9a9a9;
 }
 
+.live-edit{
+	--border-color: #c4c4c4;
+	cursor: text;
+}
+
+.live-edit:hover{
+	outline: 1px solid var(--border-color);
+}
+
 .live-edit:focus{
 	min-width: 30px;
-	outline: 1px solid #a9a9a9;
+	outline: 1px solid var(--border-color);
+	background-color: #fff;
+	box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.1);
 }

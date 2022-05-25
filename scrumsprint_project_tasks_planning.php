@@ -757,7 +757,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	 */
 
 	// Show here line of result
-	print '<tr class="oddeven">';
+	print '<tr class="oddeven" id="user-story-'.$obj->rowid.'">';
 
 	if (!empty($arrayfields['pt.label']['checked'])) {
 		print '<td class="nowrap">';
@@ -770,21 +770,21 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 	$colKey = 'us_qty_planned';
 	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
+		print '<td class="col-us-qty-planned" >';
 		print price($obj->us_qty_planned);
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_consumed';
 	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
+		print '<td class="col-us-qty-consumed" >';
 		print price($obj->us_qty_consumed);
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_done';
 	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
+		print '<td class="col-us-qty-consumed">';
 		print price($obj->us_qty_done);
 		print '</td>';
 	}
@@ -901,9 +901,15 @@ while ($i < ($limit ? min($num, $limit) : $num))
 				print '</td>';
 			}
 
+
 			$colKey = 'us_qty_planned';
 			if (!empty($arrayfields[$colKey]['checked'])) {
-				print '<td class="live-edit" data-ajax-target="">';
+				$liveEditInterfaceUrl = dol_buildpath('scrumproject/interface.php',2);
+				$liveEditInterfaceUrl.= '?element='.$scrumUserStorySprint->element;
+				$liveEditInterfaceUrl.= '&fk_element='.$scrumUserStorySprint->id;
+				$liveEditInterfaceUrl.= '&field=qty_planned';
+
+				print '<td class="live-edit" data-ajax-target="'.$liveEditInterfaceUrl.'" data-ajax-success-callback="scrumsprintProjectTasksPlanningLiveUpdate" >';
 				print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
 				print '</td>';
 			}

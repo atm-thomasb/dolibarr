@@ -35,7 +35,8 @@ jQuery(function ($) {
 	$(document).on('keydown', '.live-edit', function(e) {
 		if(e.key == 'Enter'){
 			e.preventDefault();
-			return SpLiveEdit.sendLiveLiveEdit($(this));
+			SpLiveEdit.sendLiveLiveEdit($(this), true);
+			$(this).trigger('blur');
 		}
 	});
 
@@ -93,20 +94,22 @@ jQuery(function ($) {
 		/**
 		 *
 		 * @param {jQuery} el
+		 * @param forceUpdate bool to force update when old and new value are same
 		 */
-		o.sendLiveLiveEdit = function (el){
+		o.sendLiveLiveEdit = function (el, forceUpdate = false){
 
 			if(el.data('ajax-target') == undefined){
 				o.setSPBadLiveEdit(el);
 				return false;
 			}
 
-			var urlInterface = $(this).data('ajax-target');
+			let urlInterface = el.data('ajax-target');
 
-
-			var sendData = {
-				'content': $(this).text(),
-				'token': o.newToken
+			let sendData = {
+				'value': el.text(),
+				'token': o.newToken,
+				'action': 'liveFieldUpdate',
+				'forceUpdate' : forceUpdate ? 1 : 0 // js bool is send as string ...
 			};
 
 			$.ajax({
@@ -115,16 +118,32 @@ jQuery(function ($) {
 				dataType: 'json',
 				data: sendData,
 				success: function (data) {
-					if(data.result) {
+					if(data.result > 0) {
 						// do stuff on success
+						if(el.data('ajax-success-callback') != undefined){
+							o.callBackFunction(el.data('ajax-success-callback'), el, data);
+						}
 					}
-					else {
+					else if(data.result == 0) {
+						// do stuff on idle
+						if(el.data('ajax-idle-callback') != undefined){
+							o.callBackFunction(el.data('ajax-fail-callback'), el, data);
+						}
+					}
+					else if(data.result < 0) {
 						// do stuff on error
+						if(el.data('ajax-fail-callback') != undefined){
+							o.callBackFunction(el.data('ajax-fail-callback'), el, data);
+						}
 					}
-					o.newToken = data.newToken;
-					o.dialogCountAddedProduct++; // indique qu'il faudra un rechargement de page à la fermeture de la dialogbox
-					o.focusAtEndSearchInput($('#search-all-form-input')); // on replace le focus sur la recherche global pour augmenter la productivité
-					o.setEventMessage(data.msg, data.result);
+
+					if(data.newToken != undefined){
+						o.newToken = data.newToken;
+					}
+
+					if(data.msg.length > 0) {
+						o.setEventMessage(data.msg, data.result > 0 ? true : false );
+					}
 				},
 				error: function (err) {
 					o.setEventMessage(o.lang.errorAjaxCall, false);
@@ -133,33 +152,26 @@ jQuery(function ($) {
 		}
 
 		/**
-		 * affectation du contenu dans l'attribut title
-		 *
-		 * @param $element
-		 * @param text
+		 * @param $functionName
+		 * @returns {boolean}
 		 */
-		o.setToolTip = function ($element, text){
-			$element.attr("title",text);
-			o.initToolTip($element);
+		o.isCallableFunction = function ($functionName){
+			return window[$functionName] instanceof Function;
 		}
 
-
 		/**
-		 * initialisation de la tootip
-		 * @param element
+		 * @param $functionName
+		 * @param {jQuery} el
+		 * @returns {boolean}
 		 */
-		o.initToolTip = function (element){
-			if(!element.data('tooltipset')){
-				element.data('tooltipset', true);
-				element.tooltip({
-					show: { collision: 'flipfit', effect:'toggle', delay:50 },
-					hide: { delay: 50 },
-					tooltipClass: 'mytooltip',
-					content: function () {
-						return $(this).prop('title');		/* To force to get title as is */
-					}
-				});
+		o.callBackFunction = function ($functionName, el = null, data = null){
+			if(!o.isCallableFunction($functionName)){
+				return false;
 			}
+
+			// execute function callback
+			let fn = window[$functionName];
+			return fn(el, data);
 		}
 
 		/**
@@ -182,26 +194,34 @@ jQuery(function ($) {
 			}
 		}
 
-
-		/**
-		 * equivalent de in_array en php
-		 * @param needle
-		 * @param haystack
-		 * @returns {boolean}
-		 */
-		o.inArray = function inArray(needle, haystack) {
-			var length = haystack.length;
-			for(var i = 0; i < length; i++) {
-				if(haystack[i] == needle) return true;
-			}
-			return false;
-		}
-
-
-
 	})(SpLiveEdit);
 
 	/* Init live edit for compatible elements */
 	SpLiveEdit.initLiveEdit();
 });
 
+/**
+ * use as callback function
+ * @param {jQuery} el
+ * @param responseData
+ */
+function scrumsprintProjectTasksPlanningLiveUpdate(el, responseData){
+
+	if(el.parent().data('parent') != undefined){
+		let userStoryLineSelector = '#user-story-' + el.parent().data('parent');
+
+		// set html value as imported
+		el.html(responseData.value);
+
+		console.log(responseData.value);
+
+		$.ajax({
+			url:window.location.href,
+			type:'GET',
+			success: function(data){
+				let colSelector = userStoryLineSelector + ' .col-us-qty-planned';
+				$(colSelector).html($(data).find(colSelector).html());
+			}
+		});
+	}
+}
