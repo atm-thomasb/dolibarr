@@ -81,12 +81,14 @@ function _actionLiveUpdate(&$jsonResponse){
 	$jsonResponse->value = $value;
 	$forceUpdate = GETPOST('forceUpdate', 'int');
 
+	// Todo use object display value like update form
 	$TAllowedObjects = array(
 		'scrumproject_scrumuserstorysprint' => array(
 			'allowedFields' => array('us_qty_planned')
 		)
 	);
 
+	// TODO use fields object rights
 	$TWriteRight = array(
 		'scrumproject_scrumuserstorysprint' => $user->rights->scrumproject->scrumuserstorysprint->write,
 	);
