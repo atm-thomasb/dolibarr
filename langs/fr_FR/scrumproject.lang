@@ -200,3 +200,5 @@ WillRedirectYouToTaskPageForAction = En cliquant ici vous serez redirigé vers l
 TimeConsumedAdded = Temps consommé ajouté
 
 ScrumProjectTasksPlanning = Planning Scrum
+DeleteUsPlanning = Supprimer cette cette plannification d'US
+CantBeDeletedAlreadyInUse = Ne peut être supprimé car actuellement utilisé

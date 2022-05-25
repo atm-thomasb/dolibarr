@@ -16,3 +16,14 @@ tr.toggle-line-display{
 tr.toggle-line-display.--open{
 	display: table-row;
 }
+
+
+
+.delete-ico.--disabled .fa:before, .delete-ico.--disabled:hover .fa:before{
+	color: #a9a9a9;
+}
+
+.live-edit:focus{
+	min-width: 30px;
+	outline: 1px solid #a9a9a9;
+}

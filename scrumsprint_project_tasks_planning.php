@@ -65,6 +65,7 @@ $toselect   = GETPOST('toselect', 'array'); // Array of ids of elements selected
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'scrumsprintlist'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss  = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
+$fk_user_story_sprint  = GETPOST('fk_user_story_sprint', 'int');
 
 $id = GETPOST('id', 'int');
 $fk_project = GETPOST('fk_project', 'int');
@@ -86,6 +87,11 @@ $extrafields = new ExtraFields($db);
 
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('scrumsprintlist')); // Note that conf->hooks_modules contains array
+
+
+
+$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->rights->scrumproject->scrumuserstorysprint->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
 
 
 $scrumFieldsToKeep = array(
@@ -251,6 +257,36 @@ if (empty($reshook))
 		|| GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha'))
 	{
 		$massaction = ''; // Protection to avoid mass action if we force a new search during a mass action confirmation
+	}
+
+
+
+	if($action == 'deletePlanning' && $confirm == 'yes'){
+		$errors = 0;
+		$currentDefaultPageUrl = $_SERVER['PHP_SELF'].'?fk_project='.$project->id;
+		$scrumUserStorySprint = new ScrumUserStorySprint($db);
+		$res = $scrumUserStorySprint->fetch($fk_user_story_sprint);
+		if($res <= 0){
+			$errors++;
+			setEventMessage($langs->trans('NotFound'), 'errors');
+		}
+
+		if(!$errors && !$scrumUserStorySprint->canBeDeleted()){
+			$errors++;
+			setEventMessage($langs->trans('CantBeDeletedAlreadyInUse'), 'errors');
+		}
+
+		if(!$errors) {
+			$res = $scrumUserStorySprint->delete($user);
+			if($res > 0){
+				setEventMessage($langs->trans('Deleted'));
+			}else{
+				setEventMessage($langs->trans('DeleteError').' '.$scrumUserStorySprint->errorsToString(), 'errors');
+			}
+		}
+
+		header('Location:'.$currentDefaultPageUrl);
+		exit;
 	}
 
 
@@ -512,8 +548,11 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 print '<input type="hidden" name="fk_project" value="'.$project->id.'">';
 
-
-$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumsprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
+$urlNewUserStorySprint = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1)
+	.'?action=create'
+	.'&fk_project='.$project->id
+	.'&backtopage='.urlencode($_SERVER['PHP_SELF']);
+$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle',$urlNewUserStorySprint, '', $permissiontoadd);
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 
@@ -864,7 +903,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 			$colKey = 'us_qty_planned';
 			if (!empty($arrayfields[$colKey]['checked'])) {
-				print '<td >';
+				print '<td class="live-edit" data-ajax-target="">';
 				print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
 				print '</td>';
 			}
@@ -935,6 +974,32 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 			// Action column
 			print '<td class="nowrap center">';
+
+
+
+			$url = dol_buildpath('scrumproject/scrumsprint_project_tasks_planning.php',1)
+				.'?fk_project='.$project->id
+				.'&action=deletePlanning'
+				.'&fk_user_story_sprint='.$scrumUserStorySprint->id;
+
+			$params = [ // Various params for future : recommended rather than adding more function arguments
+				'attr' => [ // to add or override button attributes
+					'classOverride' => 'classfortooltip delete-ico' // to replace class attribute of the button
+				],
+				'confirm' => [
+					'title' => $langs->trans('DeleteUsPlanning'), // Overide title of modal,  if empty default title use "ConfirmBtnCommonTitle" lang key
+					'action-btn-label' => $langs->trans('Delete'), // Overide label of action button,  if empty default label use "Confirm" lang key
+					'cancel-btn-label' => $langs->trans('Cancel'), // Overide label of cancel button,  if empty default label use "CloseDialog" lang key
+				],
+			];
+
+			$permissionToDeleteUSPlanned = $permissiontodelete && $scrumUserStorySprint->canBeDeleted();
+			if(!$permissionToDeleteUSPlanned){
+				$params['attr']['classOverride'].= ' --disabled';
+				$params['attr']['title'] = $langs->trans('CantBeDeletedAlreadyInUse'); // Overide title of modal,  if empty default title use "ConfirmBtnCommonTitle" lang key
+			}
+
+			print dolGetButtonAction($langs->trans('DeleteUsPlanning'), '<span class="fa fa-trash" ></span>', 'delete', $url, 'sprint-us-planned-delete-btn-'.$usPlanned->id, $permissionToDeleteUSPlanned, $params);
 
 			print '</td>';
 
