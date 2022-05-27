@@ -49,6 +49,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
 require_once __DIR__ . '/class/scrumuserstory.class.php';
 require_once __DIR__ . '/class/scrumsprint.class.php';
 require_once __DIR__ . '/class/scrumuserstorysprint.class.php';
+require_once __DIR__ . '/lib/scrumproject.lib.php';
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -481,8 +482,14 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 // Output page
 // --------------------------------------------------------------------
-$arrayofjs = array('scrumproject/js/scrumproject.js');
-llxHeader('', $title, $help_url, '', 0, 0, $arrayofjs);
+$arrayofjs = array(
+	'scrumproject/js/scrumproject.js',
+	'scrumproject/js/liveedit.js'
+);
+$arrayofcss = array(
+	'scrumproject/css/liveedit.css'
+);
+llxHeader('', $title, $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
 
 $head = project_prepare_head($project);
@@ -552,9 +559,17 @@ $urlNewUserStorySprint = dol_buildpath('/scrumproject/scrumuserstorysprint_card.
 	.'?action=create'
 	.'&fk_project='.$project->id
 	.'&backtopage='.urlencode($_SERVER['PHP_SELF']);
-$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle',$urlNewUserStorySprint, '', $permissiontoadd);
+$listBtn = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle',$urlNewUserStorySprint, '', $permissiontoadd);
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+if($fk_project>0){
+	$urlTaskPlanning = dol_buildpath('/scrumproject/scrumuserstorysprint_list.php', 1)
+		.'?fk_project='.$fk_project
+		.'&contextpage=scrumuserstorysprint_list_project_vue';
+	$listBtn.= dolGetButtonTitle($langs->trans('ViewByUsPlanned'), '', 'fa fa-list', $urlTaskPlanning, '', $permissiontoadd);
+}
+
+
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $listBtn, '', $limit, 0, 0, 1);
 
 
 
@@ -904,12 +919,11 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 			$colKey = 'us_qty_planned';
 			if (!empty($arrayfields[$colKey]['checked'])) {
-				$liveEditInterfaceUrl = dol_buildpath('scrumproject/interface.php',2);
-				$liveEditInterfaceUrl.= '?element='.$scrumUserStorySprint->element;
-				$liveEditInterfaceUrl.= '&fk_element='.$scrumUserStorySprint->id;
-				$liveEditInterfaceUrl.= '&field=qty_planned';
-
-				print '<td class="live-edit" data-ajax-target="'.$liveEditInterfaceUrl.'" data-ajax-success-callback="scrumsprintProjectTasksPlanningLiveUpdate" >';
+				$liveEdit = '';
+				if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
+					$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'qty_planned', 'scrumsprintProjectTasksPlanningLiveUpdate');
+				}
+				print '<td '.$liveEdit.' >';
 				print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
 				print '</td>';
 			}

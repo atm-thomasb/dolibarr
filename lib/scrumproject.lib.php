@@ -69,16 +69,16 @@ function scrumprojectAdminPrepareHead()
 }
 
 
-
 /**
  * Create a new object instance based on the element type
  * Fetch the object if id is provided
  *
  * @param string $elementType Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
- * @param int $elementId Id of element to provide if fetch is needed
+ * @param int    $elementId   Id of element to provide if fetch is needed
+ * @param int    $maxCacheByType max number of cached element by type
  * @return CommonObject object of $elementType, fetched by $elementId
  */
-function scrumProjectGetObjectByElement($elementType, $elementId = 0)
+function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheByType = 10)
 {
 	global $conf, $db;
 
@@ -275,16 +275,90 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0)
 		$res = dol_include_once('/'.$classpath.'/'.$classfile.'.class.php');
 		if ($res)
 		{
-			if (class_exists($classname)) {
-				$obj = new $classname($db);
-				if(!empty($elementId)) {
-					if($obj->fetch($elementId) < 1){
-						return 0;
-					}
-				}
-				return $obj;
+			if (class_exists($classname))
+			{
+				return scrumProjectGetObjectFromCache($classname, $elementId);
 			}
 		}
 	}
-	return $ret;
+	return false;
+}
+
+
+/**
+ * @param $objetClassName
+ * @param $fk_object
+ * @return bool|CommonObject
+ */
+function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheByType = 10){
+	global $db, $TScrumProjectGetObjectFromCache;
+
+	if(!class_exists($objetClassName)){
+		// TODO : Add error log here
+		return false;
+	}
+
+	if(empty($TScrumProjectGetObjectFromCache[$objetClassName][$fk_object])){
+		$object = new $objetClassName($db);
+		if($object->fetch($fk_object, false) <= 0)
+		{
+			return false;
+		}
+
+		if(is_array($TScrumProjectGetObjectFromCache[$objetClassName]) && count($TScrumProjectGetObjectFromCache[$objetClassName]) >= $maxCacheByType){
+			array_shift($TScrumProjectGetObjectFromCache[$objetClassName]);
+		}
+
+		$TScrumProjectGetObjectFromCache[$objetClassName][$fk_object] = $object;
+	}
+	else{
+		$object = $TScrumProjectGetObjectFromCache[$objetClassName][$fk_object];
+	}
+
+	return $object;
+}
+
+/**
+ * @param string $element             the commonobject element
+ * @param int    $fk_element          the object id
+ * @param string $field               field code to update
+ * @param string $ajaxSuccessCallback a javascript function name used for call back on update fail
+ * @param string $ajaxIdleCallback    a javascript function name used for call back on update do nothing
+ * @param string $ajaxFailCallback    a javascript function name used for call back on update fail
+ * @return string
+ */
+function scrumProjectGenLiveUpdateAttributes($element, $fk_element, $field, $ajaxSuccessCallback = '', $ajaxIdleCallback = '', $ajaxFailCallback = ''){
+	$liveEditInterfaceUrl = dol_buildpath('scrumproject/interface.php',2);
+	$liveEditInterfaceUrl.= '?element='.$element;
+	$liveEditInterfaceUrl.= '&fk_element='.$fk_element;
+	$liveEditInterfaceUrl.= '&field='.$field;
+
+	$attributes = array(
+		'data-ajax-target' => $liveEditInterfaceUrl,
+		'data-live-edit' => 1
+	);
+
+	if(!empty($ajaxSuccessCallback)){
+		$attributes['data-ajax-success-callback'] = $ajaxSuccessCallback;
+	}
+
+	if(!empty($ajaxIdleCallback)){
+		$attributes['data-ajax-idle-callback'] = $ajaxIdleCallback;
+	}
+
+	if(!empty($ajaxFailCallback)){
+		$attributes['data-ajax-fail-callback'] = $ajaxFailCallback;
+	}
+
+	$Aattr = array();
+	if (is_array($attributes)) {
+		foreach ($attributes as $attribute => $value) {
+			if (is_array($value) || is_object($value)) {
+				continue;
+			}
+			$Aattr[] = $attribute.'="'.dol_escape_htmltag($value).'"';
+		}
+	}
+
+	return !empty($Aattr)?implode(' ', $Aattr):'';
 }

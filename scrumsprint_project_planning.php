@@ -860,11 +860,17 @@ function _getObjectFromCache($objetClassName, $fk_object){
 	return $object;
 }
 
-
+/**
+ * Add tootltip to hours to get human days conversion
+ * @param $value
+ * @return string
+ */
 function _convertQuantityToProjectGranularity($value){
+	global $langs;
 	$value = doubleval($value);
 	$quotient = !empty($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY)? intval($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY): 7; // TODO ajouter soit une conf globale (une de plus ) ou utiliser celle de DOC2PROJECT_NB_HOURS_PER_DAY
 	$outV = price($value / $quotient);
 
-	return '<span class="classfortooltip" title="'.$value.' / '.$quotient.' = '.$outV.'" >'.$outV.'</span>';
+	$toolTip = $value.' '.$langs->trans('Hours').' / '.$quotient.' '.$langs->trans('HoursByDay').' = <strong>'.$outV.$langs->trans('shortLetterForDaysMan').'</strong>';
+	return '<span class="classfortooltip" title="'.dol_escape_htmltag($toolTip).'" >'.$value.'</span>';
 }

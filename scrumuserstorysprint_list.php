@@ -78,9 +78,11 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
 
 // load scrumproject libraries
 require_once __DIR__.'/class/scrumuserstorysprint.class.php';
+require_once __DIR__.'/lib/scrumproject.lib.php';
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -99,6 +101,9 @@ $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
 
 $id = GETPOST('id', 'int');
+
+$fk_project = GETPOST('fk_project', 'int');
+$project = scrumProjectGetObjectByElement('project', $fk_project);
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -130,6 +135,11 @@ if (!$sortfield) {
 	reset($object->fields);					// Reset is required to avoid key() to return null.
 	$sortfield = "t.".key($object->fields); // Set here default search field. By default 1st field in definition.
 }
+
+if($sortfield == 'societe'){
+	$sortfield = "s.nom"; // Set here default search field. By default 1st field in definiti
+}
+
 if (!$sortorder) {
 	$sortorder = "ASC";
 }
@@ -146,6 +156,10 @@ foreach ($object->fields as $key => $val) {
 		$search[$key.'_dtend'] = dol_mktime(23, 59, 59, GETPOST('search_'.$key.'_dtendmonth', 'int'), GETPOST('search_'.$key.'_dtendday', 'int'), GETPOST('search_'.$key.'_dtendyear', 'int'));
 	}
 }
+
+$search['societe'] = GETPOST('search_societe', 'alpha');
+$search['project_title'] = GETPOST('search_project_title', 'alpha');
+
 
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
@@ -170,6 +184,26 @@ foreach ($object->fields as $key => $val) {
 		);
 	}
 }
+
+if(!$project){
+	$arrayfields['societe'] = array(
+		'label'=>$langs->trans('Tiers'),
+		'checked'=>1,
+		'enabled'=>1,
+		'position'=>50,
+		'help'=> ''
+	);
+
+	$arrayfields['project_title'] = array(
+		'label'=>$langs->trans('Project'),
+		'checked'=>1,
+		'enabled'=>empty($fk_project),
+		'position'=>50,
+		'help'=> ''
+	);
+}
+
+
 
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
@@ -256,9 +290,13 @@ $now = dol_now();
 //$help_url="EN:Module_ScrumUserStorySprint|FR:Module_ScrumUserStorySprint_FR|ES:Módulo_ScrumUserStorySprint";
 $help_url = '';
 $title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("ScrumUserStorySprints"));
-$morejs = array();
-$morecss = array();
-
+$morejs = array(
+	'scrumproject/js/scrumproject.js',
+	'scrumproject/js/liveedit.js'
+);
+$morecss = array(
+	'scrumproject/css/liveedit.css'
+);
 
 // Build and execute select
 // --------------------------------------------------------------------
@@ -266,6 +304,9 @@ $sql = 'SELECT ';
 foreach ($object->fields as $key => $val) {
 	$sql .= 't.'.$key.', ';
 }
+
+$sql .= ' pt.fk_projet fk_project , p.title project_title, p.ref project_ref, p.fk_soc, ';
+
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
@@ -281,6 +322,14 @@ $sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
 if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 }
+
+
+$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstory as us ON (t.fk_scrum_user_story = us.rowid)";
+$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."projet_task as pt ON (us.fk_task = pt.rowid )";
+$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."projet as p ON (pt.fk_projet = p.rowid )";
+$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON (s.rowid = p.fk_soc )";
+
+
 // Add table from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object); // Note that $action and $object may have been modified by hook
@@ -290,8 +339,22 @@ if ($object->ismultientitymanaged == 1) {
 } else {
 	$sql .= " WHERE 1 = 1";
 }
+
+if($fk_project > 0){
+	$sql .= ' AND pt.fk_projet = '.intval($fk_project).' ';
+}
+
 foreach ($search as $key => $val) {
-	if (array_key_exists($key, $object->fields)) {
+
+	if($key == 'project_title' && $search[$key] != ''){
+		$searchCol = ['s.nom', 's.ref_ext', 's.code_client'];
+		$sql .= natural_search($searchCol, $search[$key]);
+	}
+	elseif($key == 'project_title' && $search[$key] != ''){
+		$searchCol = ['p.title', 'p.ref'];
+		$sql .= natural_search($searchCol, $search[$key]);
+	}
+	elseif (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
 			continue;
 		}
@@ -303,7 +366,12 @@ foreach ($search as $key => $val) {
 			$mode_search = 2;
 		}
 		if ($search[$key] != '') {
-			$sql .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
+			$searchCol = $key;
+			if(isset($scrumFieldsToKeep[$key])){
+				$searchCol = 't.'.$key;
+			}
+
+			$sql .= natural_search($searchCol, $search[$key], (($key == 'status') ? 2 : $mode_search));
 		}
 	} else {
 		if (preg_match('/(_dtstart|_dtend)$/', $key) && $search[$key] != '') {
@@ -358,25 +426,19 @@ $sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPri
 // Count total nb of records
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
-	/* This old and fast method to get and count full list returns all record so use a high amount of memory.
-	$resql = $db->query($sql);
-	$nbtotalofrecords = $db->num_rows($resql);
-	*/
-	/* The slow method does not consume memory on mysql (not tested on pgsql) */
-	/*$resql = $db->query($sql, 0, 'auto', 1);
-	while ($db->fetch_object($resql)) {
-		$nbtotalofrecords++;
-	}*/
+	$page = 0;
+	$offset = 0;
+
 	/* The fast and low memory method to get and count full list converts the sql into a sql count */
 	$sqlforcount = preg_replace('/^SELECT[a-z0-9\._\s\(\),]+FROM/i', 'SELECT COUNT(*) as nbtotalofrecords FROM', $sql);
-	$resql = $db->query($sqlforcount);
-	$objforcount = $db->fetch_object($resql);
-	$nbtotalofrecords = $objforcount->nbtotalofrecords;
-	if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
-		$page = 0;
-		$offset = 0;
+	$objforcount = $db->getRow($sqlforcount);
+	if($objforcount){
+		$nbtotalofrecords = $objforcount->nbtotalofrecords;
+		if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
+			$page = 0;
+			$offset = 0;
+		}
 	}
-	$db->free($resql);
 }
 
 // Complete request and execute it with limit
@@ -405,27 +467,46 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 // Output page
 // --------------------------------------------------------------------
-
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 
-// Example : Adding jquery code
-// print '<script type="text/javascript">
-// jQuery(document).ready(function() {
-// 	function init_myfunc()
-// 	{
-// 		jQuery("#myid").removeAttr(\'disabled\');
-// 		jQuery("#myid").attr(\'disabled\',\'disabled\');
-// 	}
-// 	init_myfunc();
-// 	jQuery("#mybutton").click(function() {
-// 		init_myfunc();
-// 	});
-// });
-// </script>';
+
+if($project) {
+	$head = project_prepare_head($project);
+	print dol_get_fiche_head($head, 'projectTasksPlanning', $langs->trans("Project"), -1, ($project->public ? 'projectpub' : 'project'));
+
+
+// Project card
+
+	$linkback = '<a href="' . DOL_URL_ROOT . '/projet/list.php?restore_lastsearch_values=1">' . $langs->trans("BackToList") . '</a>';
+
+	$morehtmlref = '<div class="refidno">';
+// Title
+	$morehtmlref .= dol_escape_htmltag($project->title);
+// Thirdparty
+	$morehtmlref .= '<br>' . $langs->trans('ThirdParty') . ' : ';
+	if (!empty($project->thirdparty->id) && $object->thirdparty->id > 0) {
+		$morehtmlref .= $project->thirdparty->getNomUrl(1, 'project');
+	}
+	$morehtmlref .= '</div>';
+
+// Define a complementary filter for search of next/prev ref.
+	if (empty($user->rights->projet->all->lire)) {
+		$objectsListId = $project->getProjectsAuthorizedForUser($user, 0, 0);
+		$project->next_prev_filter = " rowid IN (" . $db->sanitize(count($objectsListId) ? join(',', array_keys($objectsListId)) : '0') . ")";
+	}
+
+	dol_banner_tab($project, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+
+	print dol_get_fiche_end(-1);
+}
 
 $arrayofselected = is_array($toselect) ? $toselect : array();
 
 $param = '';
+if($project){
+	$param = '&fk_project='.$project->id;
+}
+
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
 	$param .= '&contextpage='.urlencode($contextpage);
 }
@@ -520,10 +601,18 @@ print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
+if($fk_project>0){
+	print '<input type="hidden" name="fk_project" value="'.$fk_project.'">';
+}
 
-$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
+$listBtn = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+if($fk_project>0){
+	$urlTaskPlanning = dol_buildpath('/scrumproject/scrumsprint_project_tasks_planning.php', 1).'?fk_project='.$fk_project;
+	$listBtn.= dolGetButtonTitle($langs->trans('ViewByTaskPlanned'), '', 'fa fa-tasks', $urlTaskPlanning, '', $permissiontoadd);
+}
+
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $listBtn, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
 $topicmail = "SendScrumUserStorySprintRef";
@@ -571,7 +660,23 @@ print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwit
 // Fields title search
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
-foreach ($object->fields as $key => $val) {
+
+	$key = 'societe';
+	if (!empty($arrayfields[$key]['checked'])) {
+		print '<td class="liste_titre">';
+		print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+		print '</td>';
+	}
+
+	$key = 'project_title';
+	if (!empty($arrayfields[$key]['checked'])) {
+		print '<td class="liste_titre">';
+		print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+		print '</td>';
+	}
+
+
+	foreach ($object->fields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
 		$cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -623,6 +728,15 @@ print '</tr>'."\n";
 // Fields title label
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
+
+if (!empty($arrayfields['societe']['checked'])) {
+	print getTitleFieldOfList($arrayfields['societe']['label'], 0, $_SERVER['PHP_SELF'], 'societe', '', $param, '', $sortfield, $sortorder)."\n";
+}
+
+if (!empty($arrayfields['project_title']['checked'])) {
+	print getTitleFieldOfList($arrayfields['project_title']['label'], 0, $_SERVER['PHP_SELF'], 'project_title', '', $param, '', $sortfield, $sortorder)."\n";
+}
+
 foreach ($object->fields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
@@ -676,6 +790,31 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 	// Show here line of result
 	print '<tr class="oddeven">';
+
+
+	if (!empty($arrayfields['societe']['checked'])) {
+		print '<td class="liste_titre">';
+		$societe = scrumProjectGetObjectByElement('societe', $obj->fk_soc);
+		if($societe){
+			/** @var Societe $societe */
+			print $societe->getNomUrl(1);
+		}
+		print '</td>';
+		$totalarray['nbfield']++;
+	}
+
+	if (!empty($arrayfields['project_title']['checked'])) {
+		print '<td class="liste_titre">';
+		$project = scrumProjectGetObjectByElement('project', $obj->fk_project);
+		if($project){
+			/** @var Project $project */
+			print $project->getNomUrl(1, '', 1);
+		}
+		print '</td>';
+		$totalarray['nbfield']++;
+	}
+
+
 	foreach ($object->fields as $key => $val) {
 		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
@@ -696,7 +835,14 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
 
 		if (!empty($arrayfields['t.'.$key]['checked'])) {
-			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
+
+			$liveEdit = '';
+			if($key==='qty_planned' &&  $object->statut == $object::STATUS_DRAFT){
+				$liveEdit = scrumProjectGenLiveUpdateAttributes($object->element, $object->id, 'qty_planned');
+			}
+
+
+			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').' '.$liveEdit.'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
 			} elseif ($key == 'rowid') {

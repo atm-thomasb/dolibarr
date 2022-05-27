@@ -202,3 +202,9 @@ TimeConsumedAdded = Temps consommé ajouté
 ScrumProjectTasksPlanning = Planning Scrum
 DeleteUsPlanning = Supprimer cette cette plannification d'US
 CantBeDeletedAlreadyInUse = Ne peut être supprimé car actuellement utilisé
+
+
+shortLetterForDaysMan = JH
+HoursByDay = Heures par jour
+ViewByUsPlanned = Passer en vue user story planifiée
+ViewByTaskPlanned = Passer en vue tâches plannifiée
