@@ -610,6 +610,12 @@ $listBtn = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_
 if($fk_project>0){
 	$urlTaskPlanning = dol_buildpath('/scrumproject/scrumsprint_project_tasks_planning.php', 1).'?fk_project='.$fk_project;
 	$listBtn.= dolGetButtonTitle($langs->trans('ViewByTaskPlanned'), '', 'fa fa-tasks', $urlTaskPlanning, '', $permissiontoadd);
+
+
+	// import task wizard
+	$urlTaskPlanning = dol_buildpath('/scrumproject/scrumuserstorysprint_import_wizard.php', 1)
+		.'?fk_project='.$fk_project;
+	$listBtn.= dolGetButtonTitle($langs->trans('TaskConvertionToUserStoryWizard'), '', 'fa fa-magic', $urlTaskPlanning, '', $permissiontoadd);
 }
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $listBtn, '', $limit, 0, 0, 1);

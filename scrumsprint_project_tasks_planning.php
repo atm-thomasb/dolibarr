@@ -51,6 +51,7 @@ require_once __DIR__ . '/class/scrumsprint.class.php';
 require_once __DIR__ . '/class/scrumuserstorysprint.class.php';
 require_once __DIR__ . '/lib/scrumproject.lib.php';
 
+
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
 
@@ -123,7 +124,7 @@ if ($fk_project > 0) {
 
 // Vu qu'il y a plusieurs table et object en jointures il faut
 $listFields = array();
-_addObjectFieldDefinition($listFields, $object->fields, $scrumFieldsToKeep);
+scrumProjectAddObjectFieldDefinition($listFields, $object->fields, $scrumFieldsToKeep);
 
 
 //
@@ -141,12 +142,15 @@ if (!$sortorder) $sortorder = "ASC";
 // Initialize array of search criterias
 $search_all = GETPOST('search_all', 'alphanohtml') ? GETPOST('search_all', 'alphanohtml') : GETPOST('sall', 'alphanohtml');
 $search = array();
-if (GETPOST('search_ref_project', 'alpha') !== '') $search[$key] = GETPOST('search_'.$key, 'alpha');
+
+
 foreach ($listFields as $key => $val){
 	if (GETPOST('search_'.$key, 'alpha') !== '') $search[$key] = GETPOST('search_'.$key, 'alpha');
 }
 
-if (GETPOST('search_task_label', 'alpha') !== '') $search['search_task_label'] = GETPOST('search_task_label', 'alpha');
+if (GETPOST('search_task_label', 'alpha') !== '') $search['task_label'] = GETPOST('search_task_label', 'alpha');
+if (GETPOST('search_ref_project', 'alpha') !== '') $search['ref_project'] = GETPOST('search_ref_project', 'alpha');
+
 
 
 if(empty($search['status'])){
@@ -346,7 +350,7 @@ $sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t"; // llx_scrumproj
 if (is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 
 $sql .= " JOIN ".MAIN_DB_PREFIX."projet_task as pt ON (t.fk_task = pt.rowid )";
-$sql .= " JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint as sUSsprint ON (t.rowid = sUSsprint.fk_scrum_user_story )";
+$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint as sUSsprint ON (t.rowid = sUSsprint.fk_scrum_user_story )";
 
 
 // Add table from hooks
@@ -359,11 +363,16 @@ $sql .= " WHERE pt.fk_projet = " . $project->id;
 if ($object->ismultientitymanaged == 1) $sql .= " AND t.entity IN (".getEntity($object->element).")";
 
 
-
-
-
 foreach ($search as $key => $val)
 {
+
+
+	if($key == 'task_label' && $search[$key] !=''){
+		$searchCol = ['pt.label'];
+		$sql .= natural_search($searchCol, $search[$key]);
+		continue;
+	}
+
 	if ($key == 'status' && $search[$key] == -1) continue;
 	if ($key == 'status' && !empty($search['status'])) {
 		$newarrayofstatus = array();
@@ -403,10 +412,6 @@ foreach ($search as $key => $val)
 		$searchCol = $key;
 		if(isset($scrumFieldsToKeep[$key])){
 			$searchCol = 't.'.$key;
-		}
-
-		if($key == 'search_task_label'){
-			$searchCol = ['pt.label', 'p.ref'];
 		}
 
 
@@ -558,7 +563,7 @@ print '<input type="hidden" name="fk_project" value="'.$project->id.'">';
 $urlNewUserStorySprint = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1)
 	.'?action=create'
 	.'&fk_project='.$project->id
-	.'&backtopage='.urlencode($_SERVER['PHP_SELF']);
+	.'&backtopage='.urlencode($_SERVER['PHP_SELF'].'?fk_project='.$project->id.$param);
 $listBtn = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle',$urlNewUserStorySprint, '', $permissiontoadd);
 
 if($fk_project>0){
@@ -566,6 +571,11 @@ if($fk_project>0){
 		.'?fk_project='.$fk_project
 		.'&contextpage=scrumuserstorysprint_list_project_vue';
 	$listBtn.= dolGetButtonTitle($langs->trans('ViewByUsPlanned'), '', 'fa fa-list', $urlTaskPlanning, '', $permissiontoadd);
+
+	// import task wizard
+	$urlTaskPlanning = dol_buildpath('/scrumproject/scrumuserstorysprint_import_wizard.php', 1)
+		.'?fk_project='.$fk_project;
+	$listBtn.= dolGetButtonTitle($langs->trans('TaskConvertionToUserStoryWizard'), '', 'fa fa-magic', $urlTaskPlanning, '', $permissiontoadd);
 }
 
 
@@ -628,7 +638,7 @@ print '<tr class="liste_titre">';
 
 if (!empty($arrayfields['pt.label']['checked'])) {
 	print '<td class="liste_titre">';
-	print '<input name="search_task_label" value="'.dol_escape_htmltag($search['search_task_label']).'" >';
+	print '<input name="search_task_label" value="'.dol_escape_htmltag($search['task_label']).'" >';
 	print '</td>';
 }
 
@@ -766,7 +776,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
-	$task = _getObjectFromCache('Task', $obj->fk_task);
+	$task = scrumProjectGetObjectByElement('projet_task', $obj->fk_task);
 	/**
 	 * @var Task $task
 	 */
@@ -786,7 +796,17 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	$colKey = 'us_qty_planned';
 	if (!empty($arrayfields[$colKey]['checked'])) {
 		print '<td class="col-us-qty-planned" >';
-		print price($obj->us_qty_planned);
+		if($task) {
+			$plannedWorkloadHours = $task->planned_workload / 60 / 60;
+			if($plannedWorkloadHours < $obj->us_qty_planned){
+				print dolGetBadge(price($obj->us_qty_planned), '', 'danger');
+			}else{
+				print price($obj->us_qty_planned);
+			}
+			print ' / '.price($plannedWorkloadHours);
+		}else{
+			print price($obj->us_qty_planned);
+		}
 		print '</td>';
 	}
 
@@ -825,7 +845,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 			if ($key == 'status') print $object->getLibStatut(5);
 			elseif(in_array($key, array('qty_velocity', 'qty_planned', 'qty_consumed', 'qty_done'))){
-				print _convertQuantityToProjectGranularity($object->$key);
+				print scrumProjectConvertQuantityToProjectGranularity($object->$key);
 			}else{
 				print $object->showOutputField($val, $key, $object->$key, '');
 			}
@@ -1085,61 +1105,3 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 llxFooter();
 $db->close();
 
-
-/**
- * @param array $globalFields
- * @param array $fields
- * @param array $fieldsToKeep fields to keep with override values
- * @param $sqltableprefix
- * @return void
- */
-function _addObjectFieldDefinition(&$globalFields, $fields, $fieldsToKeep){
-	foreach ($fieldsToKeep as $fieldKey => $fieldParams){
-		if(!empty($fields[$fieldKey])){
-			$globalFields[$fieldKey] = $fields[$fieldKey];
-			// au besoin il est passible de surchager la config originale
-			foreach ($fieldParams as $param => $value){
-				$globalFields[$fieldKey][$param]=$value;
-			}
-		}
-	}
-}
-
-/**
- * copier de la class list view helper de webPassword
- * @param $objetClassName
- * @param $fk_object
- * @return bool|CommonObject
- */
-function _getObjectFromCache($objetClassName, $fk_object){
-	global $db, $TListViewObjectCache;
-
-	if(!class_exists($objetClassName)){
-		// TODO : Add error log here
-		return false;
-	}
-
-	if(empty($TListViewObjectCache[$objetClassName][$fk_object])){
-		$object = new $objetClassName($db);
-		if($object->fetch($fk_object, false) <= 0)
-		{
-			return false;
-		}
-
-		$TListViewObjectCache[$objetClassName][$fk_object] = $object;
-	}
-	else{
-		$object = $TListViewObjectCache[$objetClassName][$fk_object];
-	}
-
-	return $object;
-}
-
-
-function _convertQuantityToProjectGranularity($value){
-	$value = doubleval($value);
-	$quotient = !empty($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY)? intval($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY): 7; // TODO ajouter soit une conf globale (une de plus ) ou utiliser celle de DOC2PROJECT_NB_HOURS_PER_DAY
-	$outV = price($value / $quotient);
-
-	return '<span class="classfortooltip" title="'.$value.' / '.$quotient.' = '.$outV.'" >'.$outV.'</span>';
-}

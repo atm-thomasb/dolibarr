@@ -34,10 +34,13 @@ function scrumsprintProjectTasksPlanningLiveUpdate(el, responseData){
 		// set html value as imported
 		el.html(responseData.value);
 
-		console.log(responseData.value);
+		let url = new URL(window.location.href);
+		if(!url.searchParams.get('fk_project')){
+			url.searchParams.append('fk_project', $('#searchFormList input[name="fk_project"]').val());
+		}
 
 		$.ajax({
-			url:window.location.href,
+			url:url.href,
 			type:'GET',
 			success: function(data){
 				let colSelector = userStoryLineSelector + ' .col-us-qty-planned';

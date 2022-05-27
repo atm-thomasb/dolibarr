@@ -208,3 +208,4 @@ shortLetterForDaysMan = JH
 HoursByDay = Heures par jour
 ViewByUsPlanned = Passer en vue user story planifiée
 ViewByTaskPlanned = Passer en vue tâches plannifiée
+TaskConvertionToUserStoryWizard = Importer les tâches dans la gestion scrum

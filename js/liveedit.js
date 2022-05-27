@@ -147,9 +147,12 @@ jQuery(function ($) {
 		 */
 		o.callBackFunction = function ($functionName, el = null, data = null){
 			if(!o.isCallableFunction($functionName)){
+				console.log('CallBack function ' + $functionName + ' not found !')
 				return false;
 			}
 
+
+			console.log('CallBack function ' + $functionName + ' executed')
 			// execute function callback
 			let fn = window[$functionName];
 			return fn(el, data);

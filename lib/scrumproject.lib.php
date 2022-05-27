@@ -362,3 +362,38 @@ function scrumProjectGenLiveUpdateAttributes($element, $fk_element, $field, $aja
 
 	return !empty($Aattr)?implode(' ', $Aattr):'';
 }
+
+
+/**
+ * @param array $globalFields
+ * @param array $fields
+ * @param array $fieldsToKeep fields to keep with override values
+ * @param $sqltableprefix
+ * @return void
+ */
+function scrumProjectAddObjectFieldDefinition(&$globalFields, $fields, $fieldsToKeep = false){
+	foreach ($fieldsToKeep as $fieldKey => $fieldParams){
+		if(!empty($fields[$fieldKey])){
+			$globalFields[$fieldKey] = $fields[$fieldKey];
+			// au besoin il est possible de surchager la config originale
+			foreach ($fieldParams as $param => $value){
+				$globalFields[$fieldKey][$param]=$value;
+			}
+		}
+	}
+}
+
+/**
+ * Add tootltip to hours to get human days conversion
+ * @param $value
+ * @return string
+ */
+function scrumProjectConvertQuantityToProjectGranularity($value){
+	global $langs;
+	$value = doubleval($value);
+	$quotient = !empty($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY)? intval($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY): 7; // TODO ajouter soit une conf globale (une de plus ) ou utiliser celle de DOC2PROJECT_NB_HOURS_PER_DAY
+	$outV = price($value / $quotient);
+
+	$toolTip = $value.' '.$langs->trans('Hours').' / '.$quotient.' '.$langs->trans('HoursByDay').' = <strong>'.$outV.$langs->trans('shortLetterForDaysMan').'</strong>';
+	return '<span class="classfortooltip" title="'.dol_escape_htmltag($toolTip).'" >'.$value.'</span>';
+}
