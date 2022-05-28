@@ -209,3 +209,7 @@ HoursByDay = Heures par jour
 ViewByUsPlanned = Passer en vue user story planifiée
 ViewByTaskPlanned = Passer en vue tâches plannifiée
 TaskConvertionToUserStoryWizard = Importer les tâches dans la gestion scrum
+ConfirmMassTaskImportIntoScrumManagementQuestion = Êtes-vous sur de vouloir importer en gestion scrum ces %s tâche(s) sélectionnée(s) ?
+ConfirmMassTaskImportIntoScrumManagement = Importer les tâches ?
+XUserStoryCreated = %s user stories créée(s)
+XUserStorySprintCreated = %s user stories plannifiée(s)

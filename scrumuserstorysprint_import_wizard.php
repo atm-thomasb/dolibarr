@@ -253,26 +253,105 @@ if (empty($reshook))
 	}
 
 
-	if($confirmmassaction && $massaction == 'converttasktous') {
+	if($confirm == 'yes' && $action == 'converttasktous') {
 		if(!empty($toselect)){
+			$successUs = 0;
+			$successPlannedUs = 0;
 			foreach ($toselect as $taskId){
 				$task = new Task($db);
 				if($task->fetch($taskId) > 0){
-					$scrumuserstory = new ScrumUserStory($db);
-					$scrumuserstory->business_value = ceil( ($task->planned_workload / 60 / 60) / 0.25 ) * 0.25;
-					$scrumuserstory->label = $task->label;
-					$scrumuserstory->description = $task->description;
-					$scrumuserstory->fk_task = $taskId;
-					$scrumuserstory->fk_project = $task->fk_project;
-					$scrumuserstory->fk_user_creat = $user->id;
-					$scrumuserstory->fk_user_po = $user->id;
-					$res = $scrumuserstory->create($user);
-					if($res < 0){
-						$scrumuserstory->validate($user);
-						setEventMessage($langs->trans('ErrorCreateScrumUserStory'). ' : '.$scrumuserstory->errorsToString(), 'errors');
+					$error = 0;
+					$fk_user_po = GETPOSTINT('fk_user_po');
+					$fk_scrum_sprint = GETPOSTINT('fk_scrum_sprint');
+
+					$scrumUserStory = new ScrumUserStory($db);
+					$scrumUserStory->business_value = ceil( ($task->planned_workload / 60 / 60) / 0.25 ) * 0.25;
+					$scrumUserStory->ref = $scrumUserStory->fields['ref']['default'];
+					$scrumUserStory->status = $scrumUserStory->fields['status']['default'];
+					$scrumUserStory->label = $task->label;
+					$scrumUserStory->description = $task->description;
+					$scrumUserStory->fk_task = $taskId;
+					$scrumUserStory->fk_user_creat = $user->id;
+					$scrumUserStory->fk_user_po = GETPOSTINT('fk_user_po');
+
+					// check errors
+					foreach ($scrumUserStory->fields as $key => $val){
+						if (!$error && !empty($val['validate']) && is_callable(array($scrumUserStory, 'validateField'))) {
+							if (!$scrumUserStory->validateField($scrumUserStory->fields, $key, $scrumUserStory->{$key})) {
+								$error++;
+							}
+						}
+					}
+
+					if(empty($error)){
+						$res = $scrumUserStory->create($user);
+
+						if($res > 0){
+							$successUs++;
+							$scrumUserStory->validate($user);
+
+							if($fk_scrum_sprint>0){
+								$error = 0;
+
+								$scrumUserStorySprint = new ScrumUserStorySprint($db);
+								$scrumUserStorySprint->ref = $scrumUserStorySprint->fields['ref']['default'];
+								$scrumUserStorySprint->status = $scrumUserStorySprint->fields['status']['default'];
+								$scrumUserStorySprint->fk_user_creat = $user->id;
+								$scrumUserStorySprint->fk_scrum_user_story = $res;
+								$scrumUserStorySprint->fk_scrum_sprint = $fk_scrum_sprint;
+								$scrumUserStorySprint->business_value = ceil( ($task->planned_workload / 60 / 60) / 0.25 ) * 0.25;
+								$scrumUserStorySprint->qty_planned = ceil( ($task->planned_workload / 60 / 60) / 0.25 ) * 0.25;
+//								$scrumUserStorySprint->description = $task->description; // ne pas copier sinon ça fait doublon
+
+								// check errors
+								foreach ($scrumUserStorySprint->fields as $key => $val){
+									if (!$error && !empty($val['validate']) && is_callable(array($scrumUserStorySprint, 'validateField'))) {
+										if (!$scrumUserStorySprint->validateField($scrumUserStorySprint->fields, $key, $scrumUserStorySprint->{$key})) {
+											$error++;
+										}
+									}
+								}
+								if(empty($error)){
+									$res = $scrumUserStorySprint->create($user);
+									if($res < 0){
+										setEventMessage($langs->trans('ErrorCreateScrumUserStorySprint'). ' : '.$res.' '.$scrumUserStorySprint->errorsToString(), 'errors');
+									}else{
+										$successPlannedUs++;
+									}
+								}
+								else{
+									if(!empty($scrumUserStorySprint->validateFieldsErrors)){
+										foreach ($scrumUserStorySprint->validateFieldsErrors as $field => $errorMsg){
+											setEventMessage($langs->trans($scrumUserStorySprint->fields[$field]['label']) . ' : ' .$errorMsg, 'errors');
+										}
+									}else{
+										setEventMessage($langs->trans('ErrorValidateScrumUserStoryValues'), 'errors');
+									}
+								}
+							}
+						}else{
+							setEventMessage($langs->trans('ErrorCreateScrumUserStory'). ' : '.$scrumUserStory->errorsToString(), 'errors');
+						}
+					}
+					else{
+						if(!empty($scrumUserStory->validateFieldsErrors)){
+							foreach ($scrumUserStory->validateFieldsErrors as $field => $errorMsg){
+								setEventMessage($langs->trans($scrumUserStory->fields[$field]['label']) . ' : ' .$errorMsg, 'errors');
+							}
+						}else{
+							setEventMessage($langs->trans('ErrorValidateScrumUserStoryValues'), 'errors');
+						}
 					}
 				}
 			}
+
+			if($successUs){
+				setEventMessage($langs->trans('XUserStoryCreated', $successUs));
+				setEventMessage($langs->trans('XUserStorySprintCreated', $successPlannedUs));
+			}
+
+			header("Location: ".$_SERVER['PHP_SELF']."?fk_project=".$fk_project);
+			exit;
 		}
 	}
 
@@ -507,7 +586,7 @@ if (empty($user->rights->projet->all->lire)) {
 	$project->next_prev_filter = " rowid IN (".$db->sanitize(count($objectsListId) ? join(',', array_keys($objectsListId)) : '0').")";
 }
 
-dol_banner_tab($project, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+dol_banner_tab($project, 'ref', $linkback, 0, 'ref', 'ref', $morehtmlref);
 
 print dol_get_fiche_end(-1);
 
@@ -534,7 +613,7 @@ $param .= $hookmanager->resPrint;
 $arrayofmassactions = array();
 
 if ($permissiontoadd) {
-	$arrayofmassactions['converttasktous'] = $langs->trans('TaskConvertionToUserStoryWizard');
+	$arrayofmassactions['converttasktous_confirm'] = $langs->trans('TaskConvertionToUserStoryWizard');
 };
 
 //if ($permissiontodelete) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
@@ -576,6 +655,8 @@ $modelmail = "scrumsprint";
 $objecttmp = new ScrumSprint($db);
 //$trackid = 'xxxx'.$object->id;
 // Allow Pre-Mass-Action hook (eg for confirmation dialog)
+
+
 $parameters = array(
 	'toselect' => $toselect
 );
@@ -583,9 +664,50 @@ $parameters = array(
 $reshook = $hookmanager->executeHooks('doPreMassActions', $parameters, $object, $action);
 if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-} else {
+} else if ($reshook > 0) {
 	print $hookmanager->resPrint;
 }
+else{
+	if ($massaction == 'converttasktous_confirm') {
+
+		$scrumUserStoryStatic = new ScrumUserStory($db);
+		$scrumUserStorySprintStatic = new ScrumUserStorySprint($db);
+
+		$formquestion = array(
+			'fk_user_po' => array(
+				'label'=> $langs->trans($scrumUserStoryStatic->fields['fk_user_po']['label'])
+				,'type'=> 'other'
+				,'value'=> $scrumUserStoryStatic->showInputField(null, 'fk_user_po', $user->id, '', '', '', 0, 1)
+				, 'size'=> ''
+				, 'morecss'=> ''
+				, 'moreattr'=> ''
+			),
+			'fk_scrum_sprint' => array(
+				'label'=> $langs->trans($scrumUserStorySprintStatic->fields['fk_scrum_sprint']['label'])
+				,'type'=> 'other'
+				,'value'=> $scrumUserStorySprintStatic->showInputField(null, 'fk_scrum_sprint', $user->id, '', '', '', 0, 1)
+				, 'size'=> ''
+				, 'morecss'=> ''
+				, 'moreattr'=> ''
+			),
+		);
+
+
+		print $form->formconfirm($_SERVER["PHP_SELF"],
+			$langs->trans("ConfirmMassTaskImportIntoScrumManagement"),
+			$langs->trans("ConfirmMassTaskImportIntoScrumManagementQuestion",
+			count($toselect)),
+			"converttasktous",
+			$formquestion,
+			'yes',
+			0,
+			200,
+			'500',
+			1
+		);
+	}
+}
+
 
 
 if ($search_all)
@@ -791,7 +913,12 @@ while ($i < ($limit ? min($num, $limit) : $num))
 			if (!empty($val['isameasure']))
 			{
 				if (!$i) $totalarray['pos'][$totalarray['nbfield']] = 't.'.$key;
-				$totalarray['val']['t.'.$key] += $object->$key;
+
+				if($key == 'planned_workload'){
+					$totalarray['val']['t.' . $key] += $object->$key / 60 / 60;
+				}else {
+					$totalarray['val']['t.' . $key] += $object->$key;
+				}
 			}
 		}
 	}

@@ -63,6 +63,7 @@ class ScrumUserStory extends CommonObject
 	 */
 	public $picto = 'scrumuserstory@scrumproject';
 
+	public $fk_user_po;
 
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;

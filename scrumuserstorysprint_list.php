@@ -495,7 +495,7 @@ if($project) {
 		$project->next_prev_filter = " rowid IN (" . $db->sanitize(count($objectsListId) ? join(',', array_keys($objectsListId)) : '0') . ")";
 	}
 
-	dol_banner_tab($project, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+	dol_banner_tab($project, 'ref', $linkback, 0, 'ref', 'ref', $morehtmlref);
 
 	print dol_get_fiche_end(-1);
 }
