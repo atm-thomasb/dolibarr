@@ -64,7 +64,7 @@ $db->close();    // Close $db database opened handler
 
 /**
  * @param stdClass $jsonResponse
- * @return void
+ * @return bool|void
  */
 function _actionLiveUpdate(&$jsonResponse){
 	global $user, $langs;

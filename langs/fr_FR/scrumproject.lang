@@ -206,10 +206,10 @@ CantBeDeletedAlreadyInUse = Ne peut être supprimé car actuellement utilisé
 
 shortLetterForDaysMan = JH
 HoursByDay = Heures par jour
-ViewByUsPlanned = Passer en vue user story planifiée
-ViewByTaskPlanned = Passer en vue tâches plannifiée
+ViewByUsPlanned = Passer en vue user stories planifiées
+ViewByTaskPlanned = Passer en vue tâches planifiées
 TaskConvertionToUserStoryWizard = Importer les tâches dans la gestion scrum
-ConfirmMassTaskImportIntoScrumManagementQuestion = Êtes-vous sur de vouloir importer en gestion scrum ces %s tâche(s) sélectionnée(s) ?
+ConfirmMassTaskImportIntoScrumManagementQuestion = Êtes-vous sûr de vouloir importer en gestion scrum ces %s tâche(s) sélectionnée(s) ?
 ConfirmMassTaskImportIntoScrumManagement = Importer les tâches ?
 XUserStoryCreated = %s user stories créée(s)
 XUserStorySprintCreated = %s user stories plannifiée(s)

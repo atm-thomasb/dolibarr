@@ -286,8 +286,9 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheB
 
 
 /**
- * @param $objetClassName
- * @param $fk_object
+ * @param string $objetClassName
+ * @param int $fk_object
+ * @param int $maxCacheByType
  * @return bool|CommonObject
  */
 function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheByType = 10){
@@ -368,10 +369,9 @@ function scrumProjectGenLiveUpdateAttributes($element, $fk_element, $field, $aja
  * @param array $globalFields
  * @param array $fields
  * @param array $fieldsToKeep fields to keep with override values
- * @param $sqltableprefix
  * @return void
  */
-function scrumProjectAddObjectFieldDefinition(&$globalFields, $fields, $fieldsToKeep = false){
+function scrumProjectAddObjectFieldDefinition(&$globalFields, $fields, $fieldsToKeep = array()){
 	foreach ($fieldsToKeep as $fieldKey => $fieldParams){
 		if(!empty($fields[$fieldKey])){
 			$globalFields[$fieldKey] = $fields[$fieldKey];
@@ -385,7 +385,7 @@ function scrumProjectAddObjectFieldDefinition(&$globalFields, $fields, $fieldsTo
 
 /**
  * Add tootltip to hours to get human days conversion
- * @param $value
+ * @param float $value
  * @return string
  */
 function scrumProjectConvertQuantityToProjectGranularity($value){
