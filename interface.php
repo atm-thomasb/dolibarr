@@ -85,12 +85,16 @@ function _actionLiveUpdate(&$jsonResponse){
 	$TAllowedObjects = array(
 		'scrumproject_scrumuserstorysprint' => array(
 			'allowedFields' => array('us_qty_planned')
+		),
+		'scrumproject_scrumsprintuser' => array(
+			'allowedFields' => array('qty_availablity', 'availablity_rate', 'qty_velocity')
 		)
 	);
 
 	// TODO use fields object rights
 	$TWriteRight = array(
 		'scrumproject_scrumuserstorysprint' => $user->rights->scrumproject->scrumuserstorysprint->write,
+		'scrumproject_scrumsprintuser' => $user->rights->scrumproject->scrumsprintuser->write,
 	);
 
 
