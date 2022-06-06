@@ -82,7 +82,6 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheB
 {
 	global $conf, $db;
 
-	$ret = -1;
 	$regs = array();
 
 	// Parse $objecttype (ex: project_task)
@@ -277,7 +276,7 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheB
 		{
 			if (class_exists($classname))
 			{
-				return scrumProjectGetObjectFromCache($classname, $elementId);
+				return scrumProjectGetObjectFromCache($classname, $elementId, $maxCacheByType);
 			}
 		}
 	}
