@@ -198,3 +198,18 @@ ScrumSprintTime = Temps consommé
 
 WillRedirectYouToTaskPageForAction = En cliquant ici vous serez redirigé vers la page effectuant l'action
 TimeConsumedAdded = Temps consommé ajouté
+
+ScrumProjectTasksPlanning = Planning Scrum
+DeleteUsPlanning = Supprimer cette plannification d'US
+CantBeDeletedAlreadyInUse = Ne peut être supprimé car actuellement utilisé
+
+
+shortLetterForDaysMan = JH
+HoursByDay = Heures par jour
+ViewByUsPlanned = Passer en vue user stories planifiées
+ViewByTaskPlanned = Passer en vue tâches planifiées
+TaskConvertionToUserStoryWizard = Importer les tâches dans la gestion scrum
+ConfirmMassTaskImportIntoScrumManagementQuestion = Êtes-vous sûr de vouloir importer en gestion scrum ces %s tâche(s) sélectionnée(s) ?
+ConfirmMassTaskImportIntoScrumManagement = Importer les tâches ?
+XUserStoryCreated = %s user stories créée(s)
+XUserStorySprintCreated = %s user stories plannifiée(s)

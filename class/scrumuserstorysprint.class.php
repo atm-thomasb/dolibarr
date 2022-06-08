@@ -223,6 +223,20 @@ class ScrumUserStorySprint extends CommonObject
 	}
 
 	/**
+	 * Check if a foreignKey exist
+	 * @return bool
+	 */
+	public function canBeDeleted(){
+		$obj = $this->db->getRow('SELECT COUNT(rowid) nb FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask WHERE fk_scrum_user_story_sprint = '.$this->id);
+		if($obj !== false){
+			return !(intval($obj->nb)>0);
+		}
+
+		return false;
+	}
+
+
+	/**
 	 * Create object into database
 	 *
 	 * @param  User $user      User that creates

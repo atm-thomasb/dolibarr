@@ -87,6 +87,7 @@ $langs->loadLangs(array("scrumproject@scrumproject", "other"));
 
 // Get parameters
 $id = GETPOST('id', 'int');
+$fk_project = GETPOST('fk_project', 'int');
 $ref = GETPOST('ref', 'alpha');
 $action = GETPOST('action', 'aZ09');
 $confirm = GETPOST('confirm', 'alpha');
@@ -234,8 +235,17 @@ llxHeader('', $title, $help_url);
 if ($action == 'create') {
 	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ScrumUserStorySprint")), '', $object->picto);
 
+	$uSTypeFieldQuery = 'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1:';
+	$projectFieldQuery = 'fk_task IN ( SELECT task.rowid FROM '.MAIN_DB_PREFIX.'projet_task task WHERE task.fk_projet = ' . intval($fk_project).' ) ';
+
 	if(GETPOST('fk_scrum_user_story', 'int') == 0){
-		$object->fields['fk_scrum_user_story']['type'] = 'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1:status NOT IN (' . ScrumUserStory::STATUS_CANCELED . ', ' . ScrumUserStory::STATUS_DRAFT . ', ' . ScrumUserStory::STATUS_DONE . ') ';
+		$object->fields['fk_scrum_user_story']['type'] = $uSTypeFieldQuery.'status NOT IN (' . ScrumUserStory::STATUS_CANCELED . ', ' . ScrumUserStory::STATUS_DRAFT . ', ' . ScrumUserStory::STATUS_DONE . ') ';
+		if(!empty($fk_project)) {
+			$object->fields['fk_scrum_user_story']['type'] .= ' AND '.$projectFieldQuery;
+		}
+	}
+	elseif(!empty($fk_project)) {
+		$object->fields['fk_scrum_user_story']['type'] = $uSTypeFieldQuery.$projectFieldQuery;
 	}
 
 	if(GETPOST('fk_scrum_sprint', 'int') == 0){

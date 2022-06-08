@@ -73,7 +73,7 @@ class modScrumProject extends DolibarrModules
 		// Name of image file used for this module.
 		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
-		$this->picto = 'module@scrumproject';
+		$this->picto = 'module.svg@scrumproject';
 		// Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
 			// Set this to 1 if module has its own trigger directory (core/triggers)
@@ -154,7 +154,9 @@ class modScrumProject extends DolibarrModules
 
 		// Array to add new pages in new tabs
 		$this->tabs = array();
-		$this->tabs[] = array('data'=>'scrumsprint@scrumproject:+scrumcardlist:ScrumCardTab:scrumprject@scrumproject:$user->rights->scrumproject->scrumcard->read:/scrumproject/scrumcard_list.php?scrumsprintid=__ID__');  					// To add a new tab identified by code tabname1
+		$this->tabs[] = array(
+			'data'=>'project:+projectTasksPlanning:ScrumProjectTasksPlanning:scrumproject@scrumproject:$user->rights->scrumproject->scrumuserstorysprint->read:/scrumproject/scrumsprint_project_tasks_planning.php?fk_project=__ID__'
+		);  					// To add a new tab identified by code tabname1
 		// Example:
 		// $this->tabs[] = array('data'=>'objecttype:+tabname1:Title1:mylangfile@scrumproject:$user->rights->scrumproject->read:/scrumproject/mynewtab1.php?id=__ID__');  					// To add a new tab identified by code tabname1
 		// $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@scrumproject:$user->rights->othermodule->read:/scrumproject/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.

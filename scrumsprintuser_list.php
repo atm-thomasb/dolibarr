@@ -83,6 +83,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once __DIR__.'/class/scrumsprintuser.class.php';
 require_once __DIR__.'/class/scrumsprint.class.php';
 require_once __DIR__.'/lib/scrumproject_scrumsprint.lib.php';
+require_once __DIR__ . '/lib/scrumproject.lib.php';
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -411,7 +412,13 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 // Output page
 // --------------------------------------------------------------------
-
+$morejs = array(
+	'scrumproject/js/scrumproject.js',
+	'scrumproject/js/liveedit.js'
+);
+$morecss = array(
+	'scrumproject/css/liveedit.css'
+);
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 
 // Example : Adding jquery code
@@ -697,7 +704,14 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
 
 		if (!empty($arrayfields['t.'.$key]['checked'])) {
-			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
+
+
+			$liveEdit = '';
+			if($object->statut == $object::STATUS_DRAFT && in_array($key, array('qty_availablity', 'availablity_rate', 'qty_velocity'))){
+				$liveEdit = scrumProjectGenLiveUpdateAttributes($object->element, $object->id, $key);
+			}
+
+			print '<td '.$liveEdit.' '.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
 			} elseif ($key == 'rowid') {

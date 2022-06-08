@@ -43,10 +43,14 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
-require_once __DIR__ . '/lib/scrumproject.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
 
 // load scrumproject libraries
+require_once __DIR__ . '/class/scrumuserstory.class.php';
 require_once __DIR__ . '/class/scrumsprint.class.php';
+require_once __DIR__ . '/class/scrumuserstorysprint.class.php';
+require_once __DIR__ . '/lib/scrumproject.lib.php';
+
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -63,8 +67,10 @@ $toselect   = GETPOST('toselect', 'array'); // Array of ids of elements selected
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'scrumsprintlist'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss  = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
+$fk_user_story_sprint  = GETPOST('fk_user_story_sprint', 'int');
 
 $id = GETPOST('id', 'int');
+$fk_project = GETPOST('fk_project', 'int');
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -77,29 +83,44 @@ $pageprev = $page - 1;
 $pagenext = $page + 1;
 
 // Initialize technical objects
-$object = new ScrumSprint($db);
+$object = new ScrumUserStory($db);
 $extrafields = new ExtraFields($db);
 
-$project = new Project($db);
 
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('scrumsprintlist')); // Note that conf->hooks_modules contains array
 
 
+
+$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->rights->scrumproject->scrumuserstorysprint->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+
+
 $scrumFieldsToKeep = array(
 	'rowid'			=> array(),
-	'ref'			=> array('position'=>10, 'label' => 'RefSprint' ),
-	'label'			=> array('position'=>30, 'label' => 'Sprint' ),
-	'qty_velocity'	=> array('position'=>35 ),
-	'qty_planned'	=> array('position'=>40 ),
-	'qty_done'		=> array('position'=>45),
-	'fk_team' 		=> array('position'=>50  ),
-	'date_start' 	=> array('position'=>55  ),
-	'date_end' 		=> array('position'=>60  ),
+//	'fk_task'		=> array('position'=>0 ), // les taches vont être géré a part
+	'ref'			=> array('position'=>10, 'label' => 'ScrumUserStory' ),
+	'qty_velocity'	=> array('position'=>35  ),
+	'qty_planned'	=> array('position'=>40  ),
+	'qty_done'		=> array('position'=>45  ),
 	'status' 		=> array('position'=>1000),
 );
 
 
+if ($fk_project == '') {
+	accessforbidden();
+}
+
+$project = new Project($db);
+if ($fk_project > 0) {
+	$ret = $project->fetch($fk_project); // If we create project, ref may be defined into POST but record does not yet exists into database
+	if ($ret > 0) {
+		$project->fetch_thirdparty();
+	}
+	else{
+		accessforbidden();
+	}
+}
 
 // Vu qu'il y a plusieurs table et object en jointures il faut
 $listFields = array();
@@ -121,12 +142,15 @@ if (!$sortorder) $sortorder = "ASC";
 // Initialize array of search criterias
 $search_all = GETPOST('search_all', 'alphanohtml') ? GETPOST('search_all', 'alphanohtml') : GETPOST('sall', 'alphanohtml');
 $search = array();
-if (GETPOST('search_ref_project', 'alpha') !== '') $search[$key] = GETPOST('search_'.$key, 'alpha');
+
+
 foreach ($listFields as $key => $val){
 	if (GETPOST('search_'.$key, 'alpha') !== '') $search[$key] = GETPOST('search_'.$key, 'alpha');
 }
 
-if (GETPOST('search_project_title', 'alpha') !== '') $search['search_project_title'] = GETPOST('search_project_title', 'alpha');
+if (GETPOST('search_task_label', 'alpha') !== '') $search['task_label'] = GETPOST('search_task_label', 'alpha');
+if (GETPOST('search_ref_project', 'alpha') !== '') $search['ref_project'] = GETPOST('search_ref_project', 'alpha');
+
 
 
 if(empty($search['status'])){
@@ -141,8 +165,8 @@ foreach ($listFields as $key => $val) {
 
 // Definition of array of fields for columns
 $arrayfields = array(
-	'p.title' => array(
-		'label'=>'Project',
+	'pt.label' => array(
+		'label'=>'Task',
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
@@ -241,6 +265,36 @@ if (empty($reshook))
 	}
 
 
+
+	if($action == 'deletePlanning' && $confirm == 'yes'){
+		$errors = 0;
+		$currentDefaultPageUrl = $_SERVER['PHP_SELF'].'?fk_project='.$project->id;
+		$scrumUserStorySprint = new ScrumUserStorySprint($db);
+		$res = $scrumUserStorySprint->fetch($fk_user_story_sprint);
+		if($res <= 0){
+			$errors++;
+			setEventMessage($langs->trans('NotFound'), 'errors');
+		}
+
+		if(!$errors && !$scrumUserStorySprint->canBeDeleted()){
+			$errors++;
+			setEventMessage($langs->trans('CantBeDeletedAlreadyInUse'), 'errors');
+		}
+
+		if(!$errors) {
+			$res = $scrumUserStorySprint->delete($user);
+			if($res > 0){
+				setEventMessage($langs->trans('Deleted'));
+			}else{
+				setEventMessage($langs->trans('DeleteError').' '.$scrumUserStorySprint->errorsToString(), 'errors');
+			}
+		}
+
+		header('Location:'.$currentDefaultPageUrl);
+		exit;
+	}
+
+
 	// On est sur une page de "Rapport" en qq sorte donc Faire attention aux actions en masse
 //	// Mass actions
 //	$objectclass = 'ScrumSprint';
@@ -273,7 +327,7 @@ foreach ($listFields as $key => $val) {
 	$sql .= 't.'.$key.', ';
 }
 
-$sql.= 'p.rowid fk_project, p.title project_title,';
+$sql.= 'pt.label task_label, t.fk_task,';
 
 $sql.= 'SUM(sUSsprint.qty_planned) as us_qty_planned, ';
 $sql.= 'SUM(sUSsprint.qty_consumed) as us_qty_consumed, ';
@@ -291,24 +345,34 @@ $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $object); // Note that $action and $object may have been modified by hook
 $sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
 $sql = preg_replace('/,\s*$/', '', $sql);
-$sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
+
+$sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t"; // llx_scrumproject_scrumuserstory
 if (is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 
-$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint as sUSsprint ON (t.rowid = sUSsprint.fk_scrum_sprint )";
-$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstory as sUS ON (sUSsprint.fk_scrum_user_story = sUS.rowid )";
-$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."projet_task as pt ON (sUS.fk_task = pt.rowid )";
-$sql .= " RIGHT JOIN ".MAIN_DB_PREFIX.$project->table_element." as p ON (pt.fk_projet = p.rowid)";
-
+$sql .= " JOIN ".MAIN_DB_PREFIX."projet_task as pt ON (t.fk_task = pt.rowid )";
+$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint as sUSsprint ON (t.rowid = sUSsprint.fk_scrum_user_story )";
 
 
 // Add table from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
-if ($object->ismultientitymanaged == 1) $sql .= " WHERE t.entity IN (".getEntity($object->element).")";
-else $sql .= " WHERE p.rowid > 0";
+// Filter on project
+$sql .= " WHERE pt.fk_projet = " . $project->id;
+
+if ($object->ismultientitymanaged == 1) $sql .= " AND t.entity IN (".getEntity($object->element).")";
+
+
 foreach ($search as $key => $val)
 {
+
+
+	if($key == 'task_label' && $search[$key] !=''){
+		$searchCol = ['pt.label'];
+		$sql .= natural_search($searchCol, $search[$key]);
+		continue;
+	}
+
 	if ($key == 'status' && $search[$key] == -1) continue;
 	if ($key == 'status' && !empty($search['status'])) {
 		$newarrayofstatus = array();
@@ -350,10 +414,6 @@ foreach ($search as $key => $val)
 			$searchCol = 't.'.$key;
 		}
 
-		if($key == 'search_project_title'){
-			$searchCol = ['p.title', 'p.ref'];
-		}
-
 
 		$sql .= natural_search($searchCol, $search[$key], $mode_search);
 	}
@@ -369,7 +429,7 @@ $sql .= $hookmanager->resPrint;
 
 
 $sql.= " GROUP BY ";
-$sql.='p.rowid,p.title, ';
+$sql.='pt.label, t.fk_task,';
 foreach($listFields as $key => $val)
 {
 	$sql.='t.'.$key.', ';
@@ -389,7 +449,6 @@ $sql=preg_replace('/,\s*$/','', $sql);
 
 
 $sql .= $db->order($sortfield, $sortorder);
-
 
 // Count total nb of records
 $nbtotalofrecords = '';
@@ -428,14 +487,48 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 // Output page
 // --------------------------------------------------------------------
+$arrayofjs = array(
+	'scrumproject/js/scrumproject.js',
+	'scrumproject/js/liveedit.js'
+);
+$arrayofcss = array(
+	'scrumproject/css/liveedit.css'
+);
+llxHeader('', $title, $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
-llxHeader('', $title, $help_url);
 
+$head = project_prepare_head($project);
+print dol_get_fiche_head($head, 'projectTasksPlanning', $langs->trans("Project"), -1, ($project->public ? 'projectpub' : 'project'));
+
+
+// Project card
+
+$linkback = '<a href="'.DOL_URL_ROOT.'/projet/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
+
+$morehtmlref = '<div class="refidno">';
+// Title
+$morehtmlref .= dol_escape_htmltag($project->title);
+// Thirdparty
+$morehtmlref .= '<br>'.$langs->trans('ThirdParty').' : ';
+if (!empty($project->thirdparty->id) && $object->thirdparty->id > 0) {
+	$morehtmlref .= $project->thirdparty->getNomUrl(1, 'project');
+}
+$morehtmlref .= '</div>';
+
+// Define a complementary filter for search of next/prev ref.
+if (empty($user->rights->projet->all->lire)) {
+	$objectsListId = $project->getProjectsAuthorizedForUser($user, 0, 0);
+	$project->next_prev_filter = " rowid IN (".$db->sanitize(count($objectsListId) ? join(',', array_keys($objectsListId)) : '0').")";
+}
+
+dol_banner_tab($project, 'ref', $linkback, 0, 'ref', 'ref', $morehtmlref);
+
+print dol_get_fiche_end(-1);
 
 
 $arrayofselected = is_array($toselect) ? $toselect : array();
 
-$param = '';
+$param = '&fk_project='.$project->id;
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage='.urlencode($contextpage);
 if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit='.urlencode($limit);
 foreach ($search as $key => $val)
@@ -452,13 +545,8 @@ $reshook = $hookmanager->executeHooks('printFieldListSearchParam', $parameters, 
 $param .= $hookmanager->resPrint;
 
 // List of mass actions available
-$arrayofmassactions = array(
-	//'validate'=>$langs->trans("Validate"),
-	//'generate_doc'=>$langs->trans("ReGeneratePDF"),
-	//'builddoc'=>$langs->trans("PDFMerge"),
-	//'presend'=>$langs->trans("SendByMail"),
-);
-if ($permissiontodelete) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
+$arrayofmassactions = array();
+//if ($permissiontodelete) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
 if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete'))) $arrayofmassactions = array();
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
@@ -470,11 +558,28 @@ print '<input type="hidden" name="action" value="list">';
 print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
+print '<input type="hidden" name="fk_project" value="'.$project->id.'">';
+
+$urlNewUserStorySprint = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1)
+	.'?action=create'
+	.'&fk_project='.$project->id
+	.'&backtopage='.urlencode($_SERVER['PHP_SELF'].'?fk_project='.$project->id.$param);
+$listBtn = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle',$urlNewUserStorySprint, '', $permissiontoadd);
+
+if($fk_project>0){
+	$urlTaskPlanning = dol_buildpath('/scrumproject/scrumuserstorysprint_list.php', 1)
+		.'?fk_project='.$fk_project
+		.'&contextpage=scrumuserstorysprint_list_project_vue';
+	$listBtn.= dolGetButtonTitle($langs->trans('ViewByUsPlanned'), '', 'fa fa-list', $urlTaskPlanning, '', $permissiontoadd);
+
+	// import task wizard
+	$urlTaskPlanning = dol_buildpath('/scrumproject/scrumuserstorysprint_import_wizard.php', 1)
+		.'?fk_project='.$fk_project;
+	$listBtn.= dolGetButtonTitle($langs->trans('TaskConvertionToUserStoryWizard'), '', 'fa fa-magic', $urlTaskPlanning, '', $permissiontoadd);
+}
 
 
-$newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumsprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
-
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $listBtn, '', $limit, 0, 0, 1);
 
 
 
@@ -531,9 +636,9 @@ print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwit
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
 
-if (!empty($arrayfields['p.title']['checked'])) {
+if (!empty($arrayfields['pt.label']['checked'])) {
 	print '<td class="liste_titre">';
-	print '<input name="search_project_title" value="'.dol_escape_htmltag($search['search_project_title']).'" >';
+	print '<input name="search_task_label" value="'.dol_escape_htmltag($search['task_label']).'" >';
 	print '</td>';
 }
 
@@ -605,7 +710,7 @@ print '</tr>'."\n";
 // Fields title label
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
-$colKey = 'p.title';
+$colKey = 'pt.label';
 if (!empty($arrayfields[$colKey]['checked'])) {
 	print getTitleFieldOfList($arrayfields[$colKey]['label'], 0, $_SERVER['PHP_SELF'], $colKey, '', $param, '', $sortfield, $sortorder, '')."\n";
 }
@@ -671,39 +776,51 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
-
-	$project = _getObjectFromCache('Project', $obj->fk_project);
+	$task = scrumProjectGetObjectByElement('projet_task', $obj->fk_task);
 	/**
-	 * @var Project $project
+	 * @var Task $task
 	 */
 
 	// Show here line of result
-	print '<tr class="oddeven">';
+	print '<tr class="oddeven" id="user-story-'.$obj->rowid.'">';
 
-	if (!empty($arrayfields['p.title']['checked'])) {
+	if (!empty($arrayfields['pt.label']['checked'])) {
 		print '<td class="nowrap">';
-		print $project->getNomUrl(1,'',1);
+		print '<span class="toggle-more-btn" title="'.dol_escape_htmltag($langs->trans('ShowDetails')).'" data-target="'. $obj->rowid.'"><i class="fa fa-plus-square" ></i></span>';
+		if($task) {
+			print $task->getNomUrl(1, '', 'task', 1).' ';
+		}
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_planned';
 	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
-		print scrumProjectConvertQuantityToProjectGranularity($obj->us_qty_planned);
+		print '<td class="col-us-qty-planned" >';
+		if($task) {
+			$plannedWorkloadHours = $task->planned_workload / 60 / 60;
+			if($plannedWorkloadHours < $obj->us_qty_planned){
+				print dolGetBadge(price($obj->us_qty_planned), '', 'danger');
+			}else{
+				print price($obj->us_qty_planned);
+			}
+			print ' / '.price($plannedWorkloadHours);
+		}else{
+			print price($obj->us_qty_planned);
+		}
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_consumed';
 	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
-		print scrumProjectConvertQuantityToProjectGranularity($obj->us_qty_consumed);
+		print '<td class="col-us-qty-consumed" >';
+		print price($obj->us_qty_consumed);
 		print '</td>';
 	}
 
 	$colKey = 'us_qty_done';
 	if (!empty($arrayfields[$colKey]['checked'])) {
-		print '<td >';
-		print scrumProjectConvertQuantityToProjectGranularity($obj->us_qty_done);
+		print '<td class="col-us-qty-consumed">';
+		print price($obj->us_qty_done);
 		print '</td>';
 	}
 
@@ -762,6 +879,183 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 	print '</tr>'."\n";
 
+
+	/** ******************** */
+	/** *** SHOW DETAILS *** */
+	/** ******************** */
+
+
+	$staticScrumUserStorySprint = new ScrumUserStorySprint($db);
+	$staticScrumSprint = new ScrumSprint($db);
+
+	$sqld =  /** @Lang SQL */
+		 ' SELECT usp.rowid id, usp.fk_scrum_sprint, sp.date_start , sp.date_end '
+		.' FROM '.MAIN_DB_PREFIX.$staticScrumUserStorySprint->table_element . ' usp '
+		.' JOIN '.MAIN_DB_PREFIX.$staticScrumSprint->table_element . ' sp ON (usp.fk_scrum_sprint = sp.rowid) '
+		.' WHERE usp.fk_scrum_user_story = '.intval($obj->rowid);
+
+	$usPlanneds = $db->getRows($sqld);
+
+	if($usPlanneds){
+		foreach ($usPlanneds as $usPlanned){
+			$errors = 0;
+			$errorMsg = '';
+
+			$scrumUserStorySprint = new ScrumUserStorySprint($db);
+			$res = $scrumUserStorySprint->fetch($usPlanned->id);
+			if($res <= 0){
+				$errors++;
+				$errorMsg.= '';
+			}
+
+			$scrumSprint = new ScrumSprint($db);
+			$res = $scrumSprint->fetch($usPlanned->fk_scrum_sprint);
+			if($res <= 0){
+				$errors++;
+				$errorMsg.= '';
+			}
+
+			if($errors){
+				$colspan = 1;
+				foreach ($arrayfields as $key => $val) { if (!empty($val['checked'])) $colspan++; }
+				print '<tr class="oddeven toggle-line-display" data-parent="'. $obj->rowid.'">';
+				print '<td colspan="'.$colspan.'" class="opacitymedium">'.$langs->trans("Errors").' : '.$errorMsg.'</td>';
+				print '</tr>';
+				continue;
+			}
+
+			// Show here line of result
+			print '<tr class="oddeven toggle-line-display" data-parent="'. $obj->rowid.'">';
+
+			if (!empty($arrayfields['pt.label']['checked'])) {
+				print '<td class="nowrap">';
+				print $scrumSprint->getNomUrl(1);
+				print ' ' . $scrumSprint->showOutputFieldQuick('date_start');
+				print '-' . $scrumSprint->showOutputFieldQuick('date_end');
+				print ' ' . $scrumUserStorySprint->getNomUrl(1);
+				print '</td>';
+			}
+
+
+			$colKey = 'us_qty_planned';
+			if (!empty($arrayfields[$colKey]['checked'])) {
+				$liveEdit = '';
+				if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
+					$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'qty_planned', 'scrumsprintProjectTasksPlanningLiveUpdate');
+				}
+				print '<td '.$liveEdit.' >';
+				print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
+				print '</td>';
+			}
+
+			$colKey = 'us_qty_consumed';
+			if (!empty($arrayfields[$colKey]['checked'])) {
+				print '<td >';
+				print $scrumUserStorySprint->showOutputFieldQuick('qty_consumed');
+				print '</td>';
+			}
+
+			$colKey = 'us_qty_done';
+			if (!empty($arrayfields[$colKey]['checked'])) {
+				print '<td >';
+				print $scrumUserStorySprint->showOutputFieldQuick('qty_done');
+				print '</td>';
+			}
+
+
+
+			foreach ($listFields as $key => $val)
+			{
+				if (!empty($arrayfields['t.'.$key]['checked']))
+				{
+					print '<td class="center">';
+					if($key == 'status'){
+						print $scrumSprint->getLibStatut(2);
+					}
+					print '</td>';
+				}
+			}
+
+			// Extra fields
+
+			if (empty($extrafieldsobjectkey) && is_object($object)) {
+				$extrafieldsobjectkey = $object->table_element;
+			}
+
+// Loop to show all columns of extrafields from $obj, $extrafields and $db
+			if (!empty($extrafieldsobjectkey) && !empty($extrafields->attributes[$extrafieldsobjectkey])) {	// $extrafieldsobject is the $object->table_element like 'societe', 'socpeople', ...
+				if (key_exists('label', $extrafields->attributes[$extrafieldsobjectkey]) && is_array($extrafields->attributes[$extrafieldsobjectkey]['label']) && count($extrafields->attributes[$extrafieldsobjectkey]['label'])) {
+					if (empty($extrafieldsobjectprefix)) {
+						$extrafieldsobjectprefix = 'ef.';
+					}
+
+					foreach ($extrafields->attributes[$extrafieldsobjectkey]['label'] as $key => $val) {
+						if (!empty($arrayfields[$extrafieldsobjectprefix.$key]['checked'])) {
+							$tmpkey = 'options_'.$key;
+
+							print '<td';
+							print ' data-key="'.$extrafieldsobjectkey.'.'.$key.'"';
+							print ($title ? ' title="'.dol_escape_htmltag($title).'"' : '');
+							print '>';
+
+							print '</td>';
+						}
+					}
+				}
+			}
+
+
+
+			// Fields from hook
+			$parameters = array('arrayfields'=>$arrayfields, 'object'=>$object, 'obj'=>$obj, 'i'=>$i, 'totalarray'=>&$totalarray);
+			$reshook = $hookmanager->executeHooks('printFieldListValueDetail', $parameters, $object); // Note that $action and $object may have been modified by hook
+			print $hookmanager->resPrint;
+
+
+			// Action column
+			print '<td class="nowrap center">';
+
+
+
+			$url = dol_buildpath('scrumproject/scrumsprint_project_tasks_planning.php',1)
+				.'?fk_project='.$project->id
+				.'&action=deletePlanning'
+				.'&fk_user_story_sprint='.$scrumUserStorySprint->id;
+
+			$params = [ // Various params for future : recommended rather than adding more function arguments
+				'attr' => [ // to add or override button attributes
+					'classOverride' => 'classfortooltip delete-ico' // to replace class attribute of the button
+				],
+				'confirm' => [
+					'title' => $langs->trans('DeleteUsPlanning'), // Overide title of modal,  if empty default title use "ConfirmBtnCommonTitle" lang key
+					'action-btn-label' => $langs->trans('Delete'), // Overide label of action button,  if empty default label use "Confirm" lang key
+					'cancel-btn-label' => $langs->trans('Cancel'), // Overide label of cancel button,  if empty default label use "CloseDialog" lang key
+				],
+			];
+
+			$permissionToDeleteUSPlanned = $permissiontodelete && $scrumUserStorySprint->canBeDeleted();
+			if(!$permissionToDeleteUSPlanned){
+				$params['attr']['classOverride'].= ' --disabled';
+				$params['attr']['title'] = $langs->trans('CantBeDeletedAlreadyInUse'); // Overide title of modal,  if empty default title use "ConfirmBtnCommonTitle" lang key
+			}
+
+			print dolGetButtonAction($langs->trans('DeleteUsPlanning'), '<span class="fa fa-trash" ></span>', 'delete', $url, 'sprint-us-planned-delete-btn-'.$usPlanned->id, $permissionToDeleteUSPlanned, $params);
+
+			print '</td>';
+
+			print '</tr>'."\n";
+		}
+	}
+	else{
+		$colspan = 1;
+		foreach ($arrayfields as $key => $val) { if (!empty($val['checked'])) $colspan++; }
+
+		print '<tr class="oddeven toggle-line-display" data-parent="'. $obj->rowid.'">';
+		print '<td colspan="'.$colspan.'" class="opacitymedium">'.$langs->trans("NoRecordFound").'</td>';
+		print '</tr>';
+	}
+
+
 	$i++;
 }
 
@@ -810,36 +1104,4 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 // End of page
 llxFooter();
 $db->close();
-
-
-
-/**
- * copier de la class list view helper de webPassword
- * @param $objetClassName
- * @param $fk_object
- * @return bool|CommonObject
- */
-function _getObjectFromCache($objetClassName, $fk_object){
-	global $db, $TListViewObjectCache;
-
-	if(!class_exists($objetClassName)){
-		// TODO : Add error log here
-		return false;
-	}
-
-	if(empty($TListViewObjectCache[$objetClassName][$fk_object])){
-		$object = new $objetClassName($db);
-		if($object->fetch($fk_object, false) <= 0)
-		{
-			return false;
-		}
-
-		$TListViewObjectCache[$objetClassName][$fk_object] = $object;
-	}
-	else{
-		$object = $TListViewObjectCache[$objetClassName][$fk_object];
-	}
-
-	return $object;
-}
 

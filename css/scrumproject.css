@@ -3,3 +3,23 @@
 	padding: 20px;
 	margin-bottom: 20px;
 }
+
+.toggle-more-btn{
+	margin-right: 0.7em;
+	cursor: pointer;
+}
+
+tr.toggle-line-display{
+	display: none;
+}
+
+tr.toggle-line-display.--open{
+	display: table-row;
+}
+
+
+
+.delete-ico.--disabled .fa:before, .delete-ico.--disabled:hover .fa:before{
+	color: #a9a9a9;
+}
+
