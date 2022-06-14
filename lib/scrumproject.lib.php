@@ -45,6 +45,21 @@ function scrumprojectAdminPrepareHead()
 	$head[$h][2] = 'scrumsprint_extrafields';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/scrumproject/admin/scrumuserstory_extrafields.php", 1);
+	$head[$h][1] = $langs->trans("ScrumUserStoryExtraFields");
+	$head[$h][2] = 'scrumuserstory_extrafields';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/scrumproject/admin/srcumuserstorysprint_extrafields.php", 1);
+	$head[$h][1] = $langs->trans("ScrumUserStorySprintExtraFields");
+	$head[$h][2] = 'scrumuserstorysprint_extrafields';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/scrumproject/admin/scrumkanban_extrafields.php", 1);
+	$head[$h][1] = $langs->trans("ScrumKanbanExtraFields");
+	$head[$h][2] = 'scrumkanban_extrafields';
+	$h++;
+
 	$head[$h][0] = dol_buildpath("/scrumproject/admin/scrumcard_extrafields.php", 1);
 	$head[$h][1] = $langs->trans("ScrumCardExtraFields");
 	$head[$h][2] = 'scrumcard_extrafields';
