@@ -32,6 +32,47 @@ let scrumKanban = {};
 			click : function(el){
 				o.cardClick(el);
 			},
+			context: function(el, e) {
+				console.log("Trigger on all items right-click!");
+			},
+			dropEl: function(el, target, source, sibling){
+				console.log(target.parentElement.getAttribute('data-id'));
+				console.log(el, target, source, sibling)
+			},
+			buttonClick: function(el, boardId) {
+				// console.log(el);
+				// console.log(boardId);
+				// create a form to enter element
+				var formItem = document.createElement("form");
+				formItem.setAttribute("class", "itemform");
+				formItem.innerHTML =
+					'<div class="form-group">' +
+					'<input class="form-control" autofocus />' +
+					'</div>' +
+					'<div class="form-group">' +
+					'<button type="submit" class="btn btn-primary btn-xs pull-right">Submit</button>' +
+					'<button type="button" id="CancelBtn" class="btn btn-default btn-xs pull-right">Cancel</button>' +
+					'</div>';
+
+				o.jkanban.addForm(boardId, formItem);
+				formItem.addEventListener("submit", function(e) {
+					e.preventDefault();
+					var text = e.target[0].value;
+					o.jkanban.addElement(boardId, {
+						title: text
+					});
+					formItem.parentNode.removeChild(formItem);
+				});
+				document.getElementById("CancelBtn").onclick = function() {
+					formItem.parentNode.removeChild(formItem);
+				};
+			},
+			itemAddOptions: {
+				enabled: true,
+				content: '+ Add New Card',
+				class: 'kanban-list-add-button',
+				footer: true
+			},
 			boards  :o.getBoards()
 		});
 
