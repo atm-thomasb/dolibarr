@@ -16,6 +16,8 @@
 
 -- BEGIN MODULEBUILDER INDEXES
 ALTER TABLE llx_scrumproject_scrumkanban ADD INDEX idx_scrumproject_scrumkanban_rowid (rowid);
+ALTER TABLE llx_scrumproject_scrumkanban ADD INDEX idx_scrumproject_scrumkanban_fk_scrum_sprint (fk_scrum_sprint);
+ALTER TABLE llx_scrumproject_scrumkanban ADD CONSTRAINT llx_scrumproject_scrumkanban_fk_scrum_sprint FOREIGN KEY (fk_scrum_sprint) REFERENCES llx_scrumproject_scrumsprint(rowid);
 ALTER TABLE llx_scrumproject_scrumkanban ADD INDEX idx_scrumproject_scrumkanban_entity (entity);
 ALTER TABLE llx_scrumproject_scrumkanban ADD INDEX idx_scrumproject_scrumkanban_ref (ref);
 ALTER TABLE llx_scrumproject_scrumkanban ADD INDEX idx_scrumproject_scrumkanban_fk_soc (fk_soc);

@@ -46,6 +46,11 @@ function scrumkanbanPrepareHead($object)
 	$head[$h][2] = 'card';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/scrumproject/scrumkanban_view.php", 1).'?id='.$object->id;
+	$head[$h][1] = $langs->trans("Kanban");
+	$head[$h][2] = 'kanban';
+	$h++;
+
 	if ($showtabofpagecontact) {
 		$head[$h][0] = dol_buildpath("/scrumproject/scrumkanban_contact.php", 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans("Contacts");

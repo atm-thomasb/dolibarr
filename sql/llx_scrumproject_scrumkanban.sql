@@ -17,6 +17,7 @@
 CREATE TABLE llx_scrumproject_scrumkanban(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
+	fk_scrum_sprint integer NOT NULL, 
 	entity integer DEFAULT 1 NOT NULL, 
 	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
 	label varchar(255), 

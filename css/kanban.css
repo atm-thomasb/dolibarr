@@ -1,0 +1,73 @@
+.kanban-header{
+	padding: 10px;
+	margin: 10px;
+	background: rgba(226,228,230,0.85);
+}
+
+.kanban-title__label{
+	font-weight: normal;
+}
+
+#scrum-kanban{
+	--box-border-radius : 4px;
+	--box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+
+	padding: 5px;
+}
+
+.scrumkanban-page{
+	background-image: url("https://trello-backgrounds.s3.amazonaws.com/SharedBackground/2398x1600/879b403290dda8e841fdaca6a34013ab/photo-1530103862676-de8c9debad1d.jpg");
+}
+
+/*
+* Kanban style override
+*/
+#scrum-kanban .kanban-board {
+	background: rgba(226,228,230,0.85);
+	border-radius: var(--box-border-radius);
+	box-shadow: var(--box-shadow);
+}
+
+#scrum-kanban .kanban-item {
+	border-radius: var(--box-border-radius);
+	box-shadow: var(--box-shadow);
+	margin-bottom: 10px;
+}
+
+#scrum-kanban .kanban-drag{
+	padding: 10px;
+}
+
+
+
+/**
+* Drop down
+ */
+
+/* The whole thing */
+.context-dropdown-menu {
+	display: none;
+	z-index: 1000;
+	position: absolute;
+	overflow: hidden;
+	border: 1px solid #CCC;
+	white-space: nowrap;
+	font-family: sans-serif;
+	background: #FFF;
+	color: #333;
+	border-radius: 5px;
+	padding: 0;
+}
+
+/* Each of the items in the list */
+.context-dropdown-menu li {
+	padding: 8px 12px;
+	cursor: pointer;
+	list-style-type: none;
+	transition: all .3s ease;
+	user-select: none;
+}
+
+.context-dropdown-menu li:hover {
+	background-color: #DEF;
+}

@@ -46,7 +46,7 @@ ScrumUserStory = User story
 NewScrumUserStory = Nouvelle User story
 ScrumUserStorySprint = User story plannifiés
 NewScrumUserStorySprint = Nouvelle plannification
-
+NewScrumKanban = Nouveau Kanban
 
 LeftMenuDeveloperAvailability = Dispo RH
 
@@ -216,3 +216,11 @@ ConfirmMassTaskImportIntoScrumManagementQuestion = Êtes-vous sûr de vouloir im
 ConfirmMassTaskImportIntoScrumManagement = Importer les tâches ?
 XUserStoryCreated = %s user stories créée(s)
 XUserStorySprintCreated = %s user stories plannifiée(s)
+
+
+# ScrumKanban
+ScrumKanban = Kanban
+ScrumKanbans = Kanbans
+StatusScrumKanbanDraft = Brouillon
+StatusScrumKanbanReady = Prêt
+StatusScrumKanbanDone = Terminée
