@@ -343,7 +343,7 @@ function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheBy
  * @return string
  */
 function scrumProjectGenLiveUpdateAttributes($element, $fk_element, $field, $ajaxSuccessCallback = '', $ajaxIdleCallback = '', $ajaxFailCallback = ''){
-	$liveEditInterfaceUrl = dol_buildpath('scrumproject/interface.php',2);
+	$liveEditInterfaceUrl = dol_buildpath('scrumproject/interface-liveupdate.php',2);
 	$liveEditInterfaceUrl.= '?element='.$element;
 	$liveEditInterfaceUrl.= '&fk_element='.$fk_element;
 	$liveEditInterfaceUrl.= '&field='.$field;

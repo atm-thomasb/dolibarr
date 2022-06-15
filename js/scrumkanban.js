@@ -2,12 +2,31 @@
 let scrumKanban = {};
 (function(o) {
 
-	// lang par défaut, les valeurs son ecrasées lors du chargement de la page en fonction de la langue
-	o.config = {};
+	/**
+	 * Store the max tms of all board element 
+	 * used to compare with database and determine if need update
+	 * @type {number}
+	 */
+	o.lastBoardUpdate = 0;
 
-	// lang par défaut, les valeurs son ecrasées lors du chargement de la page en fonction de la langue
+	/**
+	 * Congig par défaut, les valeurs sont écrasées lors du chargement de la page en fonction de la configuration transmise
+	 * @type {{}}
+	 */
+	o.config = {
+		interface_kanban_url: '../scripts/interface-kanban.php',
+		interface_liveupdate_url: '../scripts/interface-liveupdate.php',
+		fk_kanban : false
+	};
+
+
+	/**
+	 * lang par défaut, les valeurs sont écrasées lors du chargement de la page en fonction de la langue
+	 * 	@type {{}}
+ 	 */
 	o.langs = {
 		NewList:"Nouvelle liste",
+		NewCard:"Nouvelle carte",
 		BackLog:"BackLog",
 		errorAjaxCall:"Erreur d'appel ajax",
 		CloseDialog:"Fermer"
@@ -37,43 +56,49 @@ let scrumKanban = {};
 			},
 			dropEl: function(el, target, source, sibling){
 				console.log(target.parentElement.getAttribute('data-id'));
-				console.log(el, target, source, sibling)
+				console.log(el, target, source, sibling);
+
+				o.clearView();
 			},
 			buttonClick: function(el, boardId) {
+
+				o.clearView();
+
+				o.jkanban.addElement(boardId, {
+					title: o.langs.NewCard
+				});
+
 				// console.log(el);
 				// console.log(boardId);
 				// create a form to enter element
-				var formItem = document.createElement("form");
-				formItem.setAttribute("class", "itemform");
-				formItem.innerHTML =
-					'<div class="form-group">' +
-					'<input class="form-control" autofocus />' +
-					'</div>' +
-					'<div class="form-group">' +
-					'<button type="submit" class="btn btn-primary btn-xs pull-right">Submit</button>' +
-					'<button type="button" id="CancelBtn" class="btn btn-default btn-xs pull-right">Cancel</button>' +
-					'</div>';
-
-				o.jkanban.addForm(boardId, formItem);
-				formItem.addEventListener("submit", function(e) {
-					e.preventDefault();
-					var text = e.target[0].value;
-					o.jkanban.addElement(boardId, {
-						title: text
-					});
-					formItem.parentNode.removeChild(formItem);
-				});
-				document.getElementById("CancelBtn").onclick = function() {
-					formItem.parentNode.removeChild(formItem);
-				};
+				// var formItem = document.createElement("form");
+				// formItem.setAttribute("class", "itemform");
+				// formItem.innerHTML =
+				// 	'<div class="add-item-form-container">' +
+				// 		'<input class="form-control" autofocus />' +
+				// 		'<button type="submit" class="btn btn-primary btn-xs pull-right">Submit</button>' +
+				// 		'<button type="button" id="CancelBtn" class="btn btn-default btn-xs pull-right">Cancel</button>' +
+				// 	'</div>';
+				//
+				// o.jkanban.addForm(boardId, formItem);
+				// formItem.addEventListener("submit", function(e) {
+				// 	e.preventDefault();
+				// 	var text = e.target[0].value;
+				// 	o.jkanban.addElement(boardId, {
+				// 		title: text
+				// 	});
+				// 	formItem.parentNode.removeChild(formItem);
+				// });
+				// document.getElementById("CancelBtn").onclick = function() {
+				// 	formItem.parentNode.removeChild(formItem);
+				// };
 			},
 			itemAddOptions: {
 				enabled: true,
-				content: '+ Add New Card',
+				content: '+ ' + o.langs.NewCard,
 				class: 'kanban-list-add-button',
 				footer: true
-			},
-			boards  :o.getBoards()
+			}
 		});
 
 
@@ -87,7 +112,7 @@ let scrumKanban = {};
 		//     );
 		// });
 
-		// Add new list
+		// Add new list (column)
 		var addBoardDefault = document.getElementById('addkanbancol');
 		addBoardDefault.addEventListener('click', function () {
 			o.addKanbanList(o.langs.NewList);
@@ -105,6 +130,14 @@ let scrumKanban = {};
 	 */
 	o.cardClick = function(el){
 		alert(el.innerHTML);
+	}
+
+	o.clearView = function(){
+
+		// let kanbanAddForms = document.querySelectorAll('.add-item-form-container');
+		// kanbanAddForms.forEach(addFormItem => {
+		// 	addFormItem.remove();
+		// });
 	}
 
 	/**
@@ -134,66 +167,6 @@ let scrumKanban = {};
 		$target.dialog('open');
 	};
 
-
-	/**
-	 *
-	 * @param {jQuery} el
-	 * @param forceUpdate bool to force update when old and new value are same
-	 */
-	o.sendLiveLiveEdit = function (el, forceUpdate = false){
-
-		if(el.data('ajax-target') == undefined){
-			o.setSPBadLiveEdit(el);
-			return false;
-		}
-
-		let urlInterface = el.data('ajax-target');
-
-		let sendData = {
-			'value': el.text(),
-			'token': o.newToken,
-			'action': 'liveFieldUpdate',
-			'forceUpdate' : forceUpdate ? 1 : 0 // js bool is send as string ...
-		};
-
-		$.ajax({
-			method: 'POST',
-			url: urlInterface,
-			dataType: 'json',
-			data: sendData,
-			success: function (data) {
-				if(data.result > 0) {
-					// do stuff on success
-					if(el.data('ajax-success-callback') != undefined){
-						o.callBackFunction(el.data('ajax-success-callback'), el, data);
-					}
-				}
-				else if(data.result == 0) {
-					// do stuff on idle
-					if(el.data('ajax-idle-callback') != undefined){
-						o.callBackFunction(el.data('ajax-fail-callback'), el, data);
-					}
-				}
-				else if(data.result < 0) {
-					// do stuff on error
-					if(el.data('ajax-fail-callback') != undefined){
-						o.callBackFunction(el.data('ajax-fail-callback'), el, data);
-					}
-				}
-
-				if(data.newToken != undefined){
-					o.newToken = data.newToken;
-				}
-
-				if(data.msg.length > 0) {
-					o.setEventMessage(data.msg, data.result > 0 ? true : false );
-				}
-			},
-			error: function (err) {
-				o.setEventMessage(o.lang.errorAjaxCall, false);
-			}
-		});
-	}
 
 	o.addKanbanList = function(listName){
 
@@ -235,7 +208,6 @@ let scrumKanban = {};
 			return false;
 		}
 
-
 		console.log('CallBack function ' + $functionName + ' executed')
 		// execute function callback
 		let fn = window[$functionName];
@@ -262,47 +234,50 @@ let scrumKanban = {};
 		}
 	}
 
-	o.getBoards = function (){
-		return [
-			{
-				'id' : '_backlog',
-				'title'  : o.langs.BackLog,
-				'class' : 'info',
-				'item'  : [
-					{
-						'title':'My Task Test',
-					},
-					{
-						'title':'Buy Milk',
-					}
-				]
-			},
-			{
-				'id' : '_working',
-				'title'  : 'Working',
-				'class' : 'warning',
-				'item'  : [
-					{
-						'title':'Do Something!',
-					},
-					{
-						'title':'Run?',
-					}
-				]
-			},
-			{
-				'id' : '_done',
-				'title'  : 'Done',
-				'class' : 'success',
-				'item'  : [
-					{
-						'title':'All right',
-					},
-					{
-						'title':'Ok!',
-					}
-				]
+	o.getAllBoards = function (){
+
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban,
+			'token': o.newToken,
+			'action': 'getAllBoards',
+		};
+
+		o.callKanbanInterface(sendData, function(data){
+			if(data.result > 0) {
+				// recupérer les bonnes infos
+				o.jkanban.addBoards(
+					[{
+						'id' : '_default',
+						'title' : listName,
+						'item' : []
+					}]
+				)
 			}
-		];
+		});
 	}
+
+	o.callKanbanInterface = function (sendData, callBackFunction){
+		$.ajax({
+			method: 'POST',
+			url: o.config.interface_kanban_url,
+			dataType: 'json',
+			data: sendData,
+			success: function (data) {
+
+				callBackFunction(data);
+
+				if(data.newToken != undefined){
+					o.newToken = data.newToken;
+				}
+
+				if(data.msg.length > 0) {
+					o.setEventMessage(data.msg, data.result > 0 ? true : false );
+				}
+			},
+			error: function (err) {
+				o.setEventMessage(o.lang.errorAjaxCall, false);
+			}
+		});
+	}
+
 })(scrumKanban);

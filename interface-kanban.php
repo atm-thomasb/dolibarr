@@ -173,4 +173,3 @@ function _actionLiveUpdate(&$jsonResponse){
 		return false;
 	}
 }
-

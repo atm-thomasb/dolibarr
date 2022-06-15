@@ -10,13 +10,13 @@ jQuery(function ($) {
 
 
 	$(document).on('blur','.live-edit', function(){
-		return SpLiveEdit.sendLiveLiveEdit($(this));
+		return SpLiveEdit.sendLiveEdit($(this));
 	});
 
 	$(document).on('keydown', '.live-edit', function(e) {
 		if(e.key == 'Enter'){
 			e.preventDefault();
-			SpLiveEdit.sendLiveLiveEdit($(this), true);
+			SpLiveEdit.sendLiveEdit($(this), true);
 			$(this).trigger('blur');
 		}
 	});
@@ -77,7 +77,7 @@ jQuery(function ($) {
 		 * @param {jQuery} el
 		 * @param forceUpdate bool to force update when old and new value are same
 		 */
-		o.sendLiveLiveEdit = function (el, forceUpdate = false){
+		o.sendLiveEdit = function (el, forceUpdate = false){
 
 			if(el.data('ajax-target') == undefined){
 				o.setSPBadLiveEdit(el);
