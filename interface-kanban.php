@@ -36,140 +36,240 @@ if (!$res && file_exists($path . "../../../main.inc.php")) $res = @include($path
 if (!$res) die("Include of master fails");
 
 require_once __DIR__ . '/lib/scrumproject.lib.php';
+require_once __DIR__ . '/class/jsonResponse.class.php';
+require_once __DIR__ . '/class/scrumkanbanlist.class.php';
+if (!class_exists('Validate')) { require_once DOL_DOCUMENT_ROOT . '/core/class/validate.class.php'; }
 
 global $langs, $db, $hookmanager, $user, $mysoc;
 /**
  * @var DoliDB $db
  */
-$hookmanager->initHooks('scrumprojectinterface');
+$hookmanager->initHooks('scrumkanbaninterface');
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("scrumproject@scrumproject", "other", 'main'));
+$langs->loadLangs(array("scrumproject@scrumproject","scrumkanban@scrumproject", "other", 'main'));
 
 $action = GETPOST('action');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
 
+$jsonResponse = new JsonResponse();
 
-// AJOUT DE LIGNE DANS LES DOCUMENTS
-if ($action === 'liveFieldUpdate') {
-	// output
-	$jsonResponse = new stdClass();
-	_actionLiveUpdate($jsonResponse);
-	print json_encode($jsonResponse); // , JSON_PRETTY_PRINT
+
+if ($action === 'addKanbanList') {
+	_actionAddList($jsonResponse);
 }
+elseif ($action === 'getAllBoards') {
+	_actionGetAllBoards($jsonResponse);
+}
+else{
+	$jsonResponse->msg = 'Action not found';
+}
+
+print $jsonResponse->getJsonResponse();
 
 $db->close();    // Close $db database opened handler
 
 /**
- * @param stdClass $jsonResponse
+ * @param JsonResponse $jsonResponse
  * @return bool|void
  */
-function _actionLiveUpdate(&$jsonResponse){
-	global $user, $langs;
+function _actionAddList($jsonResponse){
+	global $user, $langs, $db;
 
-	$jsonResponse = new stdClass();
-	$jsonResponse->result = 0;
-	$jsonResponse->msg = '';
-	$jsonResponse->newToken = newToken();
+	$data = GETPOST("data", "array");
+	$validate = new Validate($db, $langs);
 
-	$element = GETPOST("element", 'aZ09');
-	$fk_element = GETPOST("fk_element", "int");
-	$field = GETPOST("field", "alphanohtml");
-	$value = GETPOST('value', 'alphanohtml');
-	$jsonResponse->value = $value;
-	$forceUpdate = GETPOST('forceUpdate', 'int');
-
-	// Todo use object display value like update form
-	$TAllowedObjects = array(
-		'scrumproject_scrumuserstorysprint' => array(
-			'allowedFields' => array('us_qty_planned')
-		),
-		'scrumproject_scrumsprintuser' => array(
-			'allowedFields' => array('qty_availablity', 'availablity_rate', 'qty_velocity')
-		)
-	);
-
-	// TODO use fields object rights
-	$TWriteRight = array(
-		'scrumproject_scrumuserstorysprint' => $user->rights->scrumproject->scrumuserstorysprint->write,
-		'scrumproject_scrumsprintuser' => $user->rights->scrumproject->scrumsprintuser->write,
-	);
-
-
-	// Test rights
-	if ($user->socid > 0 || empty($TWriteRight[$element])) {
-		$jsonResponse->msg = $langs->transnoentities('NotEnoughRights');
-		$jsonResponse->result = -1;
+	if(empty($data['fk_kanban'])){
+		$jsonResponse->msg = 'Need Kanban Id';
 		return false;
 	}
 
-	// Test element
-	if (empty($TAllowedObjects[$element])) {
-		$jsonResponse->msg = $langs->transnoentities('NotAllowedObject');
-		$jsonResponse->result = -1;
+	$fk_kanban = $data['fk_kanban'];
+
+	if(!$validate->isNumeric($fk_kanban)){
+		$jsonResponse->msg = $validate->error;
 		return false;
 	}
 
-	$object = scrumProjectGetObjectByElement($element, $fk_element);
-	if($object < 0){
-		$jsonResponse->msg = $langs->transnoentities('ErrorFetchingObject');
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if($object == 0){
-		$jsonResponse->msg = $langs->transnoentities('ElementNotFound');
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if(empty(($object->fields[$field]))){
-		$jsonResponse->msg = $langs->transnoentities('TargetFieldNotTargetable').' '.$field;
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if(empty(($object->fields[$field]))){
-		$jsonResponse->msg = $langs->transnoentities('TargetFieldNotTargetable');
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if (!empty($object->fields[$field]['validate'])
-		&& is_callable(array($object, 'validateField'))
-		&& !$object->validateField($object->fields, $field, $value)
-	) {
-		$jsonResponse->msg = $object->errorsToString();
-		$jsonResponse->result = -1;
+	/**
+	 * @var ScrumKanban $kanban
+	 */
+	$kanban = scrumProjectGetObjectByElement('scrumproject_scrumkanban', $fk_kanban);
+	if(!$kanban){
+		$jsonResponse->msg = $langs->trans('RequireValidExistingElement');
 		return false;
 	}
 
 
-	$fieldTypeArray = explode(':', $object->fields[$field]['type']);
-	$typeField = reset($fieldTypeArray);
-	if(in_array($typeField , array('integer', 'real'))){
-		$value = price2num($value);
-		$jsonResponse->value = price($value);
+	$kanbanList = new ScrumKanbanList($db);
+	$kanbanList->fk_scrum_kanban = $kanban->id;
+
+
+	$kanbanList->fk_rank = 0;
+	$obj = $db->getRow('SELECT MAX(fk_rank) maxRank FROM '.MAIN_DB_PREFIX.$kanbanList->table_element . ' WHERE fk_scrum_kanban = '.intval($kanban->id));
+	if($obj){
+		$kanbanList->fk_rank = intval($obj->maxRank) + 1;
 	}
 
-	// prevent useless save value
-	if(!$forceUpdate && $object->$field == $value){
-		$jsonResponse->result = 0;
-		return;
+	if(!empty($data['label'])){
+		$kanbanList->label = $data['label'];
+	}else{
+		$kanbanList->label = $langs->trans('NewList');
 	}
 
-	$object->$field = $value;
+	foreach ($kanbanList->fields as $field => $value) {
+		if (!empty($val['validate'])
+			&& is_callable(array($kanbanList, 'validateField'))
+			&& !$kanbanList->validateField($kanbanList->fields, $field, $kanbanList->{$field})
+		) {
+			$jsonResponse->msg = $kanbanList->errorsToString();
+			$jsonResponse->result = 0;
+			return false;
+		}
+	}
 
-	if($object->updateCommon($user) > 0){
-		$jsonResponse->msg = $langs->trans('Updated');
+
+	if($kanbanList->create($user) > 0){
+		$jsonResponse->msg = $langs->trans('Created');
 		$jsonResponse->result = 1;
+
+		$jsonResponse->data = $kanbanList->getKanBanListObjectFormatted();
+
 		return true;
 	}
 	else{
-		$jsonResponse->result = -1;
-		$jsonResponse->msg = $object->errorsToString();
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanList->errorsToString();
 		return false;
 	}
+}
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionGetAllBoards($jsonResponse){
+	global $user, $langs, $db;
+
+	$data = GETPOST("data", "array");
+	$validate = new Validate($db, $langs);
+
+	if(empty($data['fk_kanban'])){
+		$jsonResponse->msg = 'Need Kanban Id';
+		return false;
+	}
+
+	$fk_kanban = $data['fk_kanban'];
+	$kanban = _checkObjectByElement('scrumproject_scrumkanban', $fk_kanban, $jsonResponse);
+	if(!$kanban){
+		return false;
+	}
+
+	$staticKanbanList = new ScrumKanbanList($db);
+	$kanbanLists = $staticKanbanList->fetchAll('ASC', 'fk_rank', 0, 0, array('fk_scrum_kanbanlist = '.intval($kanban->id)));
+
+
+	if(is_array($kanbanLists)){
+		$jsonResponse->result = 1;
+		$jsonResponse->data = array();
+		foreach ($kanbanLists as $kanbanList){
+			$jsonResponse->data[] = $kanbanList->getKanBanListObjectFormatted();
+		}
+
+		return true;
+	}
+	else{
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanLists->errorsToString();
+		return false;
+	}
+}
+
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionAddItemToList($jsonResponse){
+	global $user, $langs, $db;
+
+	$data = GETPOST("data", "array");
+
+	// check kanban list data
+	if(empty($data['fk_kanbanlist'])){
+		$jsonResponse->msg = 'Need Kanbanlist Id';
+		return false;
+	}
+
+	$fk_kanbanlist = $data['fk_kanbanlist'];
+	$kanbanList = _checkObjectByElement('scrumproject_scrumkanbanlist', $fk_kanban, $jsonResponse);
+	if(!$kanbanList){
+		return false;
+	}
+
+	$scrumCard = new ScrumCard($db);
+	$scrumCard->fk_scrum_kanbanlist = $kanbanList->id;
+
+
+	$scrumCard->fk_rank = 0;
+	$obj = $db->getRow('SELECT MAX(fk_rank) maxRank FROM '.MAIN_DB_PREFIX.$scrumCard->table_element . ' WHERE fk_scrum_kanbanlist = '.intval($kanbanList->id));
+	if($obj){
+		$kanbanList->fk_rank = intval($obj->maxRank) + 1;
+	}
+
+	if(!empty($data['label'])){
+		$kanbanList->label = $data['label'];
+	}else{
+		$kanbanList->label = $langs->trans('NewList');
+	}
+
+	foreach ($kanbanList->fields as $field => $value) {
+		if (!empty($val['validate'])
+			&& is_callable(array($kanbanList, 'validateField'))
+			&& !$kanbanList->validateField($kanbanList->fields, $field, $kanbanList->{$field})
+		) {
+			$jsonResponse->msg = $kanbanList->errorsToString();
+			$jsonResponse->result = 0;
+			return false;
+		}
+	}
+
+
+	if($kanbanList->create($user) > 0){
+		$jsonResponse->msg = $langs->trans('Created');
+		$jsonResponse->result = 1;
+		$jsonResponse->data = $kanbanList->getKanBanListObjectFormatted();
+		return true;
+	}
+	else{
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanList->errorsToString();
+		return false;
+	}
+}
+
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|CommonObject
+ */
+function _checkObjectByElement($elementType, $id, $jsonResponse){
+	global $langs, $db;
+
+	$validate = new Validate($db, $langs);
+
+	if(!$validate->isNumeric($id)){
+		$jsonResponse->msg = $validate->error;
+		return false;
+	}
+
+	$kanbanlist = scrumProjectGetObjectByElement($elementType, $id);
+	if(!$kanbanlist){
+		$jsonResponse->msg = $elementType . ' : ' . $langs->trans('RequireValidExistingElement');
+		return false;
+	}
+
+	return $kanbanlist;
 }

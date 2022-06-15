@@ -149,12 +149,13 @@ $arrayofcss = array(
 top_htmlhead($head,  $object->ref . ' - ' . $object->label, 0, 0, $arrayofjs, $arrayofcss);
 
 $confToJs = array(
-	'MAIN_MAX_DECIMALS_TOT' => $conf->global->MAIN_MAX_DECIMALS_TOT,
-	'MAIN_MAX_DECIMALS_UNIT' => $conf->global->MAIN_MAX_DECIMALS_UNIT,
-	'interface_kanban_url' => dol_buildpath('scrumproject/scripts/interface-kanban.php',1),
-	'interface_liveupdate_url' => dol_buildpath('scrumproject/scripts/interface-liveupdate.php',1),
-	'js_url' => dol_buildpath('scrumproject/js/scrumkanban.js',1),
-	'fk_kanban' => $object->id
+	'MAIN_MAX_DECIMALS_TOT'		=> $conf->global->MAIN_MAX_DECIMALS_TOT,
+	'MAIN_MAX_DECIMALS_UNIT'	=> $conf->global->MAIN_MAX_DECIMALS_UNIT,
+	'interface_kanban_url'		=> dol_buildpath('scrumproject/interface-kanban.php',1),
+	'interface_liveupdate_url'	=> dol_buildpath('scrumproject/interface-liveupdate.php',1),
+	'js_url'					=> dol_buildpath('scrumproject/js/scrumkanban.js',1),
+	'fk_kanban'					=> $object->id,
+	'token'						=> newToken()
 );
 
 $jsLangs = array(

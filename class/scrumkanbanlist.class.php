@@ -26,12 +26,15 @@
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once __DIR__ . '/commonKanban.trait.php';
 
 /**
  * Class for ScrumKanbanList
  */
 class ScrumKanbanList extends CommonObject
 {
+	use CommonKanban;
+
 	/**
 	 * @var string ID of module.
 	 */
@@ -1026,60 +1029,48 @@ class ScrumKanbanList extends CommonObject
 		return $result;
 	}
 
+
 	/**
-	 * Action executed by scheduler
-	 * CAN BE A CRON TASK. In such a case, parameters come from the schedule job setup field 'Parameters'
-	 * Use public function doScheduledJob($param1, $param2, ...) to get parameters
-	 *
-	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 * get this object formatted for jKanan
+	 * @return stdClass
 	 */
-	public function doScheduledJob()
-	{
-		global $conf, $langs;
+	public function getKanBanListObjectFormatted(){
+		$object = new stdClass();
+		$object->id = 'board-' . $this->id; // kanban dom id
+		$object->title = $this->label;
+		$object->class = 'kankan-default-header';
 
-		//$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_mydedicatedlofile.log';
+		$object->objectId = $this->id;
 
-		$error = 0;
-		$this->output = '';
-		$this->error = '';
+		$object->item = array();
 
-		dol_syslog(__METHOD__, LOG_DEBUG);
-
-		$now = dol_now();
-
-		$this->db->begin();
-
-		// ...
-
-		$this->db->commit();
-
-		return $error;
+		return $object;
 	}
 }
 
 
-require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
+//require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 
-/**
- * Class ScrumKanbanListLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class ScrumKanbanListLine extends CommonObjectLine
-{
-	// To complete with content of an object ScrumKanbanListLine
-	// We should have a field rowid, fk_scrumkanbanlist and position
-
-	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-	 */
-	public $isextrafieldmanaged = 0;
-
-	/**
-	 * Constructor
-	 *
-	 * @param DoliDb $db Database handler
-	 */
-	public function __construct(DoliDB $db)
-	{
-		$this->db = $db;
-	}
-}
+///**
+// * Class ScrumKanbanListLine. You can also remove this and generate a CRUD class for lines objects.
+// */
+//class ScrumKanbanListLine extends CommonObjectLine
+//{
+//	// To complete with content of an object ScrumKanbanListLine
+//	// We should have a field rowid, fk_scrumkanbanlist and position
+//
+//	/**
+//	 * @var int  Does object support extrafields ? 0=No, 1=Yes
+//	 */
+//	public $isextrafieldmanaged = 0;
+//
+//	/**
+//	 * Constructor
+//	 *
+//	 * @param DoliDb $db Database handler
+//	 */
+//	public function __construct(DoliDB $db)
+//	{
+//		$this->db = $db;
+//	}
+//}

@@ -1072,26 +1072,26 @@ class ScrumKanban extends CommonObject
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 
-/**
- * Class ScrumKanbanLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class ScrumKanbanLine extends CommonObjectLine
-{
-	// To complete with content of an object ScrumKanbanLine
-	// We should have a field rowid, fk_scrumkanban and position
-
-	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-	 */
-	public $isextrafieldmanaged = 0;
-
-	/**
-	 * Constructor
-	 *
-	 * @param DoliDb $db Database handler
-	 */
-	public function __construct(DoliDB $db)
-	{
-		$this->db = $db;
-	}
-}
+///**
+// * Class ScrumKanbanLine. You can also remove this and generate a CRUD class for lines objects.
+// */
+//class ScrumKanbanLine extends CommonObjectLine
+//{
+//	// To complete with content of an object ScrumKanbanLine
+//	// We should have a field rowid, fk_scrumkanban and position
+//
+//	/**
+//	 * @var int  Does object support extrafields ? 0=No, 1=Yes
+//	 */
+//	public $isextrafieldmanaged = 0;
+//
+//	/**
+//	 * Constructor
+//	 *
+//	 * @param DoliDb $db Database handler
+//	 */
+//	public function __construct(DoliDB $db)
+//	{
+//		$this->db = $db;
+//	}
+//}

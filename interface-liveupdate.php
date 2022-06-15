@@ -41,7 +41,7 @@ global $langs, $db, $hookmanager, $user, $mysoc;
 /**
  * @var DoliDB $db
  */
-$hookmanager->initHooks('scrumprojectinterface');
+$hookmanager->initHooks('scrumliveupdateinterface');
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("scrumproject@scrumproject", "other", 'main'));

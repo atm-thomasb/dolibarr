@@ -2,6 +2,8 @@
 let scrumKanban = {};
 (function(o) {
 
+	// TODO see https://htmldom.dev/drag-to-scroll/
+
 	/**
 	 * Store the max tms of all board element 
 	 * used to compare with database and determine if need update
@@ -10,13 +12,20 @@ let scrumKanban = {};
 	o.lastBoardUpdate = 0;
 
 	/**
+	 * Dolibarr token
+	 * @type {string}
+	 */
+	o.newToken = '';
+
+	/**
 	 * Congig par défaut, les valeurs sont écrasées lors du chargement de la page en fonction de la configuration transmise
 	 * @type {{}}
 	 */
 	o.config = {
-		interface_kanban_url: '../scripts/interface-kanban.php',
-		interface_liveupdate_url: '../scripts/interface-liveupdate.php',
-		fk_kanban : false
+		interface_kanban_url: '../interface-kanban.php',
+		interface_liveupdate_url: '../interface-liveupdate.php',
+		fk_kanban : false,
+		token: false // to set at init
 	};
 
 
@@ -40,58 +49,61 @@ let scrumKanban = {};
 			o.config = Object.assign(o.config, config);
 		}
 
+		o.newToken = o.config.token;
+
 		if(langs && typeof langs === 'object'){
 			o.langs = Object.assign(o.langs, langs);
 		}
 
-		console.log(o.langs);
 		o.jkanban = new jKanban({
 			element : '#scrum-kanban',
 			gutter  : '5px',
 			click : function(el){
+				// callback when any board's item are clicked
 				o.cardClick(el);
 			},
 			context: function(el, e) {
+				// callback when any board's item are right clicked
 				console.log("Trigger on all items right-click!");
 			},
 			dropEl: function(el, target, source, sibling){
+				// callback when any board's item are dragged
 				console.log(target.parentElement.getAttribute('data-id'));
 				console.log(el, target, source, sibling);
 
+				o.setEventMessage('DSL le drop n\'est pas encore géré', false)
+
 				o.clearView();
 			},
+			dragendEl : function (el) {
+				// callback when any board's item stop drag
+				o.setEventMessage('Work in progress drag end el', false);
+			},
+			dragBoard        : function (el, source) {
+				// callback when any board stop drag
+				o.setEventMessage('Work in progress drag Board', false);
+
+				// a cause d'un bug d'affichage j'enlève le footer lors du déplacement
+				let boardSelector = el.getAttribute('data-id');
+				$('.kanban-board[data-id=' + boardSelector + '] footer').hide();
+			},
+			dragendBoard     : function (el) {
+				// callback when any board stop drag
+				o.setEventMessage('Work in progress drag end Board', false);
+
+				// reaffiche le bouton du footer
+				let boardSelector = el.getAttribute('data-id');
+				$('.kanban-board[data-id=' + boardSelector + '] footer').slideDown();
+			},
 			buttonClick: function(el, boardId) {
+				// callback when the board's button is clicked
 
 				o.clearView();
 
 				o.jkanban.addElement(boardId, {
-					title: o.langs.NewCard
+					title: o.langs.NewCard,
+					type: 'card'
 				});
-
-				// console.log(el);
-				// console.log(boardId);
-				// create a form to enter element
-				// var formItem = document.createElement("form");
-				// formItem.setAttribute("class", "itemform");
-				// formItem.innerHTML =
-				// 	'<div class="add-item-form-container">' +
-				// 		'<input class="form-control" autofocus />' +
-				// 		'<button type="submit" class="btn btn-primary btn-xs pull-right">Submit</button>' +
-				// 		'<button type="button" id="CancelBtn" class="btn btn-default btn-xs pull-right">Cancel</button>' +
-				// 	'</div>';
-				//
-				// o.jkanban.addForm(boardId, formItem);
-				// formItem.addEventListener("submit", function(e) {
-				// 	e.preventDefault();
-				// 	var text = e.target[0].value;
-				// 	o.jkanban.addElement(boardId, {
-				// 		title: text
-				// 	});
-				// 	formItem.parentNode.removeChild(formItem);
-				// });
-				// document.getElementById("CancelBtn").onclick = function() {
-				// 	formItem.parentNode.removeChild(formItem);
-				// };
 			},
 			itemAddOptions: {
 				enabled: true,
@@ -99,8 +111,19 @@ let scrumKanban = {};
 				class: 'kanban-list-add-button',
 				footer: true
 			}
+			// itemHandleOptions: {
+			// 	enabled             : true,                                 // if board item handle is enabled or not
+			// 	handleClass         : "item_handle",                         // css class for your custom item handle
+			// 	customCssHandler    : "drag_handler",                        // when customHandler is undefined, jKanban will use this property to set main handler class
+			// 	customCssIconHandler: "drag_handler_icon",                   // when customHandler is undefined, jKanban will use this property to set main icon handler class. If you want, you can use font icon libraries here
+			// 	customHandler       : "<span class='item_handle'>+</span> %title% "  // your entirely customized handler. Use %title% to position item title
+			// 																		 // any key's value included in item collection can be replaced with %key%
+			// },
+			// propagationHandlers: [] // the specified callback does not cancel the browser event. possible values: "click", "context"
 		});
 
+		// Get all board
+		o.getAllBoards();
 
 		// var toDoButton = document.getElementById('addToDo');
 		// toDoButton.addEventListener('click',function(){
@@ -170,14 +193,17 @@ let scrumKanban = {};
 
 	o.addKanbanList = function(listName){
 
-		// TODO create in ajax before add
-		o.jkanban.addBoards(
-			[{
-				'id' : '_default',
-				'title'  : listName,
-				'item'  : []
-			}]
-		)
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban
+		};
+
+		o.callKanbanInterface('addKanbanList', sendData, function(response){
+			if(response.result > 0) {
+				// recupérer les bonnes infos
+				o.jkanban.addBoards([response.data]
+				)
+			}
+		});
 	}
 
 	o.delKanbanList = function(listName){
@@ -237,45 +263,49 @@ let scrumKanban = {};
 	o.getAllBoards = function (){
 
 		let sendData = {
-			'fk_kanban': o.config.fk_kanban,
-			'token': o.newToken,
-			'action': 'getAllBoards',
+			'fk_kanban': o.config.fk_kanban
 		};
 
-		o.callKanbanInterface(sendData, function(data){
-			if(data.result > 0) {
+		o.callKanbanInterface('getAllBoards', sendData, function(response){
+			if(response.result > 0) {
 				// recupérer les bonnes infos
-				o.jkanban.addBoards(
-					[{
-						'id' : '_default',
-						'title' : listName,
-						'item' : []
-					}]
-				)
+				o.jkanban.addBoards(response.data)
 			}
 		});
 	}
 
-	o.callKanbanInterface = function (sendData, callBackFunction){
+	o.callKanbanInterface = function (action, sendData = {}, callBackFunction){
+		let ajaxData = {
+			'data': sendData,
+			'token': o.newToken,
+			'action': action,
+		};
+
+
+		if(sendData != undefined && typeof sendData === 'object'){
+			ajaxData = Object.assign(ajaxData, sendData);
+		}
+
+
 		$.ajax({
 			method: 'POST',
 			url: o.config.interface_kanban_url,
 			dataType: 'json',
-			data: sendData,
-			success: function (data) {
+			data: ajaxData,
+			success: function (response) {
 
-				callBackFunction(data);
+				callBackFunction(response);
 
-				if(data.newToken != undefined){
-					o.newToken = data.newToken;
+				if(response.newToken != undefined){
+					o.newToken = response.newToken;
 				}
 
-				if(data.msg.length > 0) {
-					o.setEventMessage(data.msg, data.result > 0 ? true : false );
+				if(response.msg.length > 0) {
+					o.setEventMessage(response.msg, response.result > 0 ? true : false );
 				}
 			},
 			error: function (err) {
-				o.setEventMessage(o.lang.errorAjaxCall, false);
+				o.setEventMessage(o.langs.errorAjaxCall, false);
 			}
 		});
 	}

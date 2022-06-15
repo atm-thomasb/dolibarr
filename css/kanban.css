@@ -16,8 +16,17 @@
 }
 
 .scrumkanban-page{
+	/*TODO : remove backgroud external image keep only for testing */
 	background-image: url("https://trello-backgrounds.s3.amazonaws.com/SharedBackground/2398x1600/879b403290dda8e841fdaca6a34013ab/photo-1530103862676-de8c9debad1d.jpg");
 }
+
+.kankan-default-header{
+	background: #2A92BF;
+	color: #fff;
+}
+
+
+
 
 /*
 * Kanban style override
@@ -26,6 +35,7 @@
 	background: rgba(226,228,230,0.85);
 	border-radius: var(--box-border-radius);
 	box-shadow: var(--box-shadow);
+	overflow: hidden;
 }
 
 #scrum-kanban .kanban-item {
@@ -80,4 +90,22 @@
 
 .context-dropdown-menu li:hover {
 	background-color: #DEF;
+}
+
+/*
+* Kanban item
+*/
+#scrum-kanban .kanban-item{
+	box-shadow: var(--box-shadow), inset 5px 0px 0px 0 var(--kanban-item-color, #fff);
+}
+.kanban-item[data-type="card"]{
+	--kanban-item-color : #a9a9a9;
+}
+
+.kanban-item[data-type="user-story"]{
+	--kanban-item-color : #e34f00;
+}
+
+.kanban-item[data-type="user-story-task"]{
+	--kanban-item-color : #d0b400;
 }
