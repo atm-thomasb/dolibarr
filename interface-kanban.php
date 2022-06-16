@@ -38,6 +38,7 @@ if (!$res) die("Include of master fails");
 require_once __DIR__ . '/lib/scrumproject.lib.php';
 require_once __DIR__ . '/class/jsonResponse.class.php';
 require_once __DIR__ . '/class/scrumkanbanlist.class.php';
+require_once __DIR__ . '/class/scrumcard.class.php';
 if (!class_exists('Validate')) { require_once DOL_DOCUMENT_ROOT . '/core/class/validate.class.php'; }
 
 global $langs, $db, $hookmanager, $user, $mysoc;
@@ -62,6 +63,9 @@ if ($action === 'addKanbanList') {
 }
 elseif ($action === 'getAllBoards') {
 	_actionGetAllBoards($jsonResponse);
+}
+elseif ($action === 'getAllItemToList') {
+	_actionAddItemToList($jsonResponse);
 }
 else{
 	$jsonResponse->msg = 'Action not found';
@@ -168,8 +172,11 @@ function _actionGetAllBoards($jsonResponse){
 	}
 
 	$staticKanbanList = new ScrumKanbanList($db);
-	$kanbanLists = $staticKanbanList->fetchAll('ASC', 'fk_rank', 0, 0, array('fk_scrum_kanbanlist = '.intval($kanban->id)));
+	$kanbanLists = $staticKanbanList->fetchAll('ASC', 'fk_rank', 0, 0, array('fk_scrum_kanban' => intval($kanban->id)));
 
+	/**
+	 * @var ScrumKanbanList[] $kanbanLists
+	 */
 
 	if(is_array($kanbanLists)){
 		$jsonResponse->result = 1;
@@ -182,7 +189,7 @@ function _actionGetAllBoards($jsonResponse){
 	}
 	else{
 		$jsonResponse->result = 0;
-		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanLists->errorsToString();
+		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $staticKanbanList->errorsToString();
 		return false;
 	}
 }
@@ -203,8 +210,10 @@ function _actionAddItemToList($jsonResponse){
 		return false;
 	}
 
+	// toDo vérifier le status du kanban aussi
+
 	$fk_kanbanlist = $data['fk_kanbanlist'];
-	$kanbanList = _checkObjectByElement('scrumproject_scrumkanbanlist', $fk_kanban, $jsonResponse);
+	$kanbanList = _checkObjectByElement('scrumproject_scrumkanbanlist', $fk_kanbanlist, $jsonResponse);
 	if(!$kanbanList){
 		return false;
 	}
@@ -213,34 +222,31 @@ function _actionAddItemToList($jsonResponse){
 	$scrumCard->fk_scrum_kanbanlist = $kanbanList->id;
 
 
-	$scrumCard->fk_rank = 0;
-	$obj = $db->getRow('SELECT MAX(fk_rank) maxRank FROM '.MAIN_DB_PREFIX.$scrumCard->table_element . ' WHERE fk_scrum_kanbanlist = '.intval($kanbanList->id));
-	if($obj){
-		$kanbanList->fk_rank = intval($obj->maxRank) + 1;
-	}
+	$scrumCard->fk_rank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
+
 
 	if(!empty($data['label'])){
-		$kanbanList->label = $data['label'];
+		$scrumCard->label = $data['label'];
 	}else{
-		$kanbanList->label = $langs->trans('NewList');
+		$scrumCard->label = $langs->trans('NewCard');
 	}
 
-	foreach ($kanbanList->fields as $field => $value) {
+	foreach ($scrumCard->fields as $field => $value) {
 		if (!empty($val['validate'])
-			&& is_callable(array($kanbanList, 'validateField'))
-			&& !$kanbanList->validateField($kanbanList->fields, $field, $kanbanList->{$field})
+			&& is_callable(array($scrumCard, 'validateField'))
+			&& !$scrumCard->validateField($scrumCard->fields, $field, $kanbanList->{$field})
 		) {
-			$jsonResponse->msg = $kanbanList->errorsToString();
+			$jsonResponse->msg = $scrumCard->errorsToString();
 			$jsonResponse->result = 0;
 			return false;
 		}
 	}
 
 
-	if($kanbanList->create($user) > 0){
+	if($scrumCard->create($user) > 0){
 		$jsonResponse->msg = $langs->trans('Created');
 		$jsonResponse->result = 1;
-		$jsonResponse->data = $kanbanList->getKanBanListObjectFormatted();
+		$jsonResponse->data = $scrumCard->getKanBanItemObjectFormatted();
 		return true;
 	}
 	else{

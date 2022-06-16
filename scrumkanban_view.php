@@ -165,42 +165,44 @@ $jsLangs = array(
 
 ?>
 <body id="mainbody" class="scrumkanban-page">
-<header class="kanban-header" role="banner">
-	<nav class="navigation" role="navigation">
-		<?php
-		$title = $object->getNomUrl(0) . ' <span class="kanban-title__label">'.$object->label.'</span>';
-		$newcardbutton = '';
-		$newcardbutton .= dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', '', 'addkanbancol', $permissiontoadd);
+	<section class="kanban" >
+		<header class="kanban-header" role="banner">
+			<nav class="navigation" role="navigation">
+				<?php
+				$title = $object->getNomUrl(0) . ' <span class="kanban-title__label">'.$object->label.'</span>';
+				$newcardbutton = '';
+				$newcardbutton .= dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', '', 'addkanbancol', $permissiontoadd);
 
 
-		print_barre_liste($title, '', $_SERVER["PHP_SELF"], '', '', '', '', '', '', 'object_'.$object->picto, 0, $newcardbutton, '', 0, 0, 0, 1);
+				print_barre_liste($title, '', $_SERVER["PHP_SELF"], '', '', '', '', '', '', 'object_'.$object->picto, 0, $newcardbutton, '', 0, 0, 0, 1);
 
-		?>
-	</nav>
-</header>
-<div id="scrum-kanban"></div>
-<script>
-
-
-	jQuery(function ($) {
-		let config = <?php print json_encode($confToJs) ?>;
-
-		// Chargement de la librairie js
-		let advps_script_to_load = document.createElement('script')
-		advps_script_to_load.setAttribute('src', config.js_url);
-		advps_script_to_load.setAttribute('id', 'advance-product-search-script-load');
-		document.body.appendChild(advps_script_to_load);
-		// now wait for it to load...
-		advps_script_to_load.onload = () => {
-			// script has loaded, you can now use it safely
-			// Apply conf to AdvancedProductSearch object
-			scrumKanban.init(config, <?php print json_encode($jsLangs) ?>);
-		};
-	});
+				?>
+			</nav>
+		</header>
+		<div id="scrum-kanban"></div>
+	</section>
+	<script>
 
 
+		jQuery(function ($) {
+			let config = <?php print json_encode($confToJs) ?>;
 
-</script>
+			// Chargement de la librairie js
+			let advps_script_to_load = document.createElement('script')
+			advps_script_to_load.setAttribute('src', config.js_url);
+			advps_script_to_load.setAttribute('id', 'advance-product-search-script-load');
+			document.body.appendChild(advps_script_to_load);
+			// now wait for it to load...
+			advps_script_to_load.onload = () => {
+				// script has loaded, you can now use it safely
+				// Apply conf to AdvancedProductSearch object
+				scrumKanban.init(config, <?php print json_encode($jsLangs) ?>);
+			};
+		});
+
+
+
+	</script>
 
 </body>
 

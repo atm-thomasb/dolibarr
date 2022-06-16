@@ -101,13 +101,10 @@ class ScrumCard extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
+		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
-		'points' => array('type'=>'real', 'label'=>'Points', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
-		'fk_user_dev' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserDEV', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
-		'fk_task' => array('type'=>'integer:Task:projet/class/task.class.php', 'label'=>'Task', 'enabled'=>'1', 'position'=>55, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'projet_task.rowid',),
-		'fk_scrumsprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>57, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'scrumsprint.rowid',),
-		'fk_stage' => array('type'=>'integer:DictScrumCardStage:scrumproject/class/dictscrumcardstage.class.php', 'label'=>'Stage', 'enabled'=>'1', 'position'=>59, 'notnull'=>0, 'visible'=>1, 'index'=>1, 'foreignkey'=>'c_scrum_stage.rowid',),
+		'fk_rank' => array('type'=>'integer', 'label'=>'Rank', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
+		'fk_scrum_kanbanlist' => array('type'=>'integer:ScrumKanbanList:scrumproject/class/scrumkanbanlist.class.php', 'label'=>'ScrumKanbanList', 'enabled'=>'1', 'position'=>55, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumkanbanlist.rowid',),
 		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3,),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0,),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>0,),
@@ -119,15 +116,10 @@ class ScrumCard extends CommonObject
 		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Pr&ecirc;te', '2'=>'Termin&eacute;e'),),
 	);
 	public $rowid;
-	public $ref;
 	public $entity;
 	public $label;
-	public $points;
-	public $fk_user_po;
-	public $fk_user_dev;
-	public $fk_task;
-	public $fk_scrumsprint;
-	public $fk_stage;
+	public $fk_rank;
+	public $fk_scrum_kanbanlist;
 	public $description;
 	public $note_public;
 	public $note_private;
@@ -947,73 +939,24 @@ class ScrumCard extends CommonObject
 			return "";
 		}
 	}
-//
-//	/**
-//	 *  Create a document onto disk according to template module.
-//	 *
-//	 *  @param	    string		$modele			Force template to use ('' to not force)
-//	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-//	 *  @param      int			$hidedetails    Hide details of lines
-//	 *  @param      int			$hidedesc       Hide description
-//	 *  @param      int			$hideref        Hide ref
-//	 *  @param      null|array  $moreparams     Array to provide more information
-//	 *  @return     int         				0 if KO, 1 if OK
-//	 */
-//	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
-//	{
-//		global $conf, $langs;
-//
-//		$result = 0;
-//		$includedocgeneration = 0;
-//
-//		$langs->load("scrumproject@scrumproject");
-//
-//		if (!dol_strlen($modele)) {
-//			$modele = 'standard_scrumcard';
-//
-//			if (!empty($this->model_pdf)) {
-//				$modele = $this->model_pdf;
-//			} elseif (!empty($conf->global->SCRUMCARD_ADDON_PDF)) {
-//				$modele = $conf->global->SCRUMCARD_ADDON_PDF;
-//			}
-//		}
-//
-//		$modelpath = "core/modules/scrumproject/doc/";
-//
-//		if ($includedocgeneration && !empty($modele)) {
-//			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-//		}
-//
-//		return $result;
-//	}
 
 	/**
-	 * Action executed by scheduler
-	 * CAN BE A CRON TASK. In such a case, parameters come from the schedule job setup field 'Parameters'
-	 * Use public function doScheduledJob($param1, $param2, ...) to get parameters
-	 *
-	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 * get this object formatted for jKanan
+	 * @return stdClass
 	 */
-	public function doScheduledJob()
-	{
-		global $conf, $langs;
+	public function getKanBanItemObjectFormatted(){
+		$object = new stdClass();
+		$object->id = 'scrumcard-' . $this->id; // kanban dom id
+		$object->title = $this->label;
+		$object->type = 'scrum-card';
+		$object->class = array();     // array of additional classes
+		$object->element = $this->element;
+		$object->cardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
 
-		//$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_mydedicatedlofile.log';
+		$object->objectId = $this->id;
 
-		$error = 0;
-		$this->output = '';
-		$this->error = '';
+		$object->item = array();
 
-		dol_syslog(__METHOD__, LOG_DEBUG);
-
-		$now = dol_now();
-
-		$this->db->begin();
-
-		// ...
-
-		$this->db->commit();
-
-		return $error;
+		return $object;
 	}
 }

@@ -99,11 +99,8 @@ let scrumKanban = {};
 				// callback when the board's button is clicked
 
 				o.clearView();
+				o.addKanbanCardToList(boardId);
 
-				o.jkanban.addElement(boardId, {
-					title: o.langs.NewCard,
-					type: 'card'
-				});
 			},
 			itemAddOptions: {
 				enabled: true,
@@ -119,7 +116,67 @@ let scrumKanban = {};
 			// 	customHandler       : "<span class='item_handle'>+</span> %title% "  // your entirely customized handler. Use %title% to position item title
 			// 																		 // any key's value included in item collection can be replaced with %key%
 			// },
-			// propagationHandlers: [] // the specified callback does not cancel the browser event. possible values: "click", "context"
+			// propagationHandlers: [], // the specified callback does not cancel the browser event. possible values: "click", "context"
+			// boards: [
+			// 	{
+			// 		id: "_todo",
+			// 		title: "To Do (Can drop item only in working)",
+			// 		class: "info,good",
+			// 		dragTo: ["_working"],
+			// 		item: [
+			// 			{
+			// 				id: "_test_delete",
+			// 				title: "Try drag this (Look the console)",
+			// 				drag: function(el, source) {
+			// 					console.log("START DRAG: " + el.dataset.eid);
+			// 				},
+			// 				dragend: function(el) {
+			// 					console.log("END DRAG: " + el.dataset.eid);
+			// 				},
+			// 				drop: function(el) {
+			// 					console.log("DROPPED: " + el.dataset.eid);
+			// 				}
+			// 			},
+			// 			{
+			// 				title: "Try Click This!",
+			// 				click: function(el) {
+			// 					alert("click");
+			// 				},
+			// 				context: function(el, e){
+			// 					alert("right-click at (" + `${e.pageX}` + "," + `${e.pageX}` + ")")
+			// 				},
+			// 				class: ["peppe", "bello"]
+			// 			}
+			// 		]
+			// 	},
+			// 	{
+			// 		id: "_working",
+			// 		title: "Working (Try drag me too)",
+			// 		class: "warning",
+			// 		item: [
+			// 			{
+			// 				title: "Do Something!"
+			// 			},
+			// 			{
+			// 				title: "Run?"
+			// 			}
+			// 		]
+			// 	},
+			// 	{
+			// 		id: "_done",
+			// 		title: "Done (Can drop item only in working)",
+			// 		class: "success",
+			// 		dragTo: ["_working"],
+			// 		item: [
+			// 			{
+			// 				title: "All right"
+			// 			},
+			// 			{
+			// 				title: "Ok!"
+			// 			}
+			// 		]
+			// 	}
+			// ]
 		});
 
 		// Get all board
@@ -152,7 +209,15 @@ let scrumKanban = {};
 	 * @param HTMLElement el
 	 */
 	o.cardClick = function(el){
-		alert(el.innerHTML);
+
+		if(el.getAttribute('data-cardurl') != undefined){
+			let label = 'test';
+			if(el.getAttribute('data-label') != undefined){
+				label = el.getAttribute('data-label');
+			}
+
+			o.dialogIFrame(el.getAttribute('data-eid'), el.getAttribute('data-cardurl'), label);
+		}
 	}
 
 	o.clearView = function(){
@@ -170,7 +235,15 @@ let scrumKanban = {};
 	 * @param url
 	 * @param label
 	 */
-	o.dialogIFrame = function (dialogId, $target, url, label = ''){
+	o.dialogIFrame = function (dialogId, url, label = ''){
+
+		let kanbanDialogId = '#kanbanitemdialog-' + dialogId;
+		if(document.getElementById(kanbanDialogId) == undefined){
+			$('body').append( $('<div id="kanbanitemdialog-' + dialogId + '" ></div>')); // put it into the DOM
+		}
+
+		$target = $(kanbanDialogId);
+
 		$target.html('<iframe class="iframedialog" id="iframedialog' + dialogId + '" style="border: 0px;" src="' + url + '" width="100%" height="98%"></iframe>');
 
 		$target.dialog({
@@ -200,10 +273,34 @@ let scrumKanban = {};
 		o.callKanbanInterface('addKanbanList', sendData, function(response){
 			if(response.result > 0) {
 				// recupérer les bonnes infos
-				o.jkanban.addBoards([response.data]
-				)
+				o.jkanban.addBoards([response.data])
 			}
 		});
+	}
+
+	o.addKanbanCardToList = function(listName){
+
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban,
+			'fk_kanbanlist' : o.getDolKanbanIdFromJKanbanDomId(listName)
+		};
+
+		o.callKanbanInterface('getAllItemToList', sendData, function(response){
+			if(response.result > 0) {
+				// recupérer les bonnes infos
+				o.jkanban.addElement( listName, response.data);
+			}
+		});
+	}
+
+	/**
+	 *
+	 * @param domId
+	 * @returns string
+	 */
+	o.getDolKanbanIdFromJKanbanDomId = function (domId){
+		// remove board- part
+		return domId.slice(6, domId.length);
 	}
 
 	o.delKanbanList = function(listName){

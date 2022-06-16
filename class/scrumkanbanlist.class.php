@@ -1031,6 +1031,32 @@ class ScrumKanbanList extends CommonObject
 
 
 	/**
+	 * @return int
+	 */
+	public function getMaxRankOfKanBanListItems(){
+		$maxRank = 0;
+		// récupération du rank le plus haut pour les cards
+		$obj = $this->db->getRow('SELECT MAX(fk_rank) maxRank FROM '.MAIN_DB_PREFIX . 'scrumproject_scrumcard WHERE fk_scrum_kanbanlist = '.intval($this->id));
+		if($obj){
+			$maxRank = max(intval($obj->maxRank),$maxRank);
+		}
+
+//		// Récupération du rank le plus haut pour les scrum tasks
+//		$obj = $this->db->getRow('SELECT MAX(fk_rank) maxRank FROM '.MAIN_DB_PREFIX . 'scrumproject_scrumtask WHERE fk_scrum_kanbanlist = '.intval($this->id));
+//		if($obj){
+//			$maxRank = max(intval($obj->maxRank),$maxRank);
+//		}
+//
+//		// Récupération du rank le plus haut pour les scrum user story sprint
+//		$obj = $this->db->getRow('SELECT MAX(fk_rank) maxRank FROM '.MAIN_DB_PREFIX . 'scrumproject_scrumuserstorysprint WHERE fk_scrum_kanbanlist = '.intval($this->id));
+//		if($obj){
+//			$maxRank = max(intval($obj->maxRank),$maxRank);
+//		}
+
+		return $maxRank;
+	}
+
+	/**
 	 * get this object formatted for jKanan
 	 * @return stdClass
 	 */
@@ -1040,9 +1066,23 @@ class ScrumKanbanList extends CommonObject
 		$object->title = $this->label;
 		$object->class = 'kankan-default-header';
 
-		$object->objectId = $this->id;
+		$object->objectid = $this->id;
 
 		$object->item = array();
+
+		$staticScrumCard = new ScrumCard($this->db);
+		$scrumCards = $staticScrumCard->fetchAll('ASC', 'fk_rank', 0, 0, array('fk_scrum_kanbanlist' => intval($this->id)));
+		/**
+		 * @var ScrumCard[] $scrumCards
+		 */
+
+		$object->test = $staticScrumCard->errorsToString();
+		if(is_array($scrumCards)){
+			foreach ($scrumCards as $scrumCard){
+				$object->item[] = $scrumCard->getKanBanItemObjectFormatted();
+			}
+		}
+
 
 		return $object;
 	}
