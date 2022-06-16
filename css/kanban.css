@@ -131,6 +131,11 @@ section.kanban{
 	--kanban-item-color : #d0b400;
 }
 
+.kanban-item__status{
+	display: block;
+	font-size: 0.8em;
+}
+
 /*
 * Scroll barr
  */
@@ -152,3 +157,5 @@ section.kanban{
 /*::-webkit-scrollbar-thumb:window-inactive {*/
 /*	background: rgba(0, 0, 0, 0.1)*/
 /*}*/
+
+

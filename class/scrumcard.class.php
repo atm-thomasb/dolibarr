@@ -948,6 +948,10 @@ class ScrumCard extends CommonObject
 		$object = new stdClass();
 		$object->id = 'scrumcard-' . $this->id; // kanban dom id
 		$object->title = $this->label;
+		$object->title.= '<span class="kanban-item__status">'.$this->LibStatut(intval($this->status), 2).'</span>';
+
+
+		$object->label = $this->label;
 		$object->type = 'scrum-card';
 		$object->class = array();     // array of additional classes
 		$object->element = $this->element;

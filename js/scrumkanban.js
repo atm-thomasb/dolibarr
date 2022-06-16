@@ -211,7 +211,7 @@ let scrumKanban = {};
 	o.cardClick = function(el){
 
 		if(el.getAttribute('data-cardurl') != undefined){
-			let label = 'test';
+			let label = '';
 			if(el.getAttribute('data-label') != undefined){
 				label = el.getAttribute('data-label');
 			}
