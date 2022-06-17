@@ -69,7 +69,13 @@ let scrumKanban = {};
 			dropEl: function(el, target, source, sibling){
 				// callback when any board's item are dragged
 				console.log(target.parentElement.getAttribute('data-id'));
-				console.log(el, target, source, sibling);
+				console.log('dropEl');
+				console.log('target');
+				console.log(target);
+				console.log('source');
+				console.log(source);
+				console.log('sibling');
+				console.log(sibling);
 
 				o.setEventMessage('DSL le drop n\'est pas encore géré', false)
 

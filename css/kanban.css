@@ -1,3 +1,8 @@
+:root{
+	--backdrop-filter-blur-radius : 5px;
+}
+
+
 *{
 	box-sizing: border-box;
 }
@@ -18,7 +23,10 @@ section.kanban{
 	position: relative;
 	padding: 10px;
 	margin: 10px;
-	background: rgba(226,228,230,0.85);
+	background: rgba(226,228,230,0.5);
+
+	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
+	backdrop-filter: blur(var(--backdrop-filter-blur-radius));
 }
 
 .kanban-title__label{
@@ -38,11 +46,20 @@ section.kanban{
 
 .scrumkanban-page{
 	/*TODO : remove backgroud external image keep only for testing */
-	background-image: url("https://trello-backgrounds.s3.amazonaws.com/SharedBackground/2398x1600/879b403290dda8e841fdaca6a34013ab/photo-1530103862676-de8c9debad1d.jpg");
+	background-image: url("../img/backgrounds/purple-flower.jpg");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+
+.kanban-board-header {
+	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
+	backdrop-filter: blur(var(--backdrop-filter-blur-radius));
 }
 
 .kankan-default-header{
-	background: #2A92BF;
+	background: rgba(70, 220, 29, 0.44);
 	color: #fff;
 }
 
@@ -53,10 +70,14 @@ section.kanban{
 * Kanban style override
 */
 #scrum-kanban .kanban-board {
-	background: rgba(226,228,230,0.85);
+	background: rgba(226,228,230,0.5);
 	border-radius: var(--box-border-radius);
 	box-shadow: var(--box-shadow);
 	overflow: hidden;
+
+
+	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
+	backdrop-filter: blur(var(--backdrop-filter-blur-radius));
 }
 
 #scrum-kanban .kanban-item {
@@ -140,8 +161,8 @@ section.kanban{
 * Scroll barr
  */
 ::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
+	width: 11px;
+	height: 11px;
 }
 
 ::-webkit-scrollbar-track {

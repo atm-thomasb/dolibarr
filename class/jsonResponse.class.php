@@ -32,7 +32,7 @@ class JsonResponse{
 
 	/**
 	 * return json encoded of object
-	 * @return string
+	 * @return string JSON
 	 */
 	public function getJsonResponse(){
 		$jsonResponse = new stdClass();
