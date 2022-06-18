@@ -187,14 +187,15 @@ section.kanban{
 	opacity: 1 !important;
 }
 
-.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-background{
-	background-color: rgba(163, 0, 0, 0.78) !important;
+
+.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-background{
+	background-color: rgba(41, 163, 0, 0.78) !important;
 	-webkit-backdrop-filter: blur(2px);
 	backdrop-filter: blur(2px);
 }
 
-.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-background{
-	background-color: rgba(41, 163, 0, 0.78) !important;
+.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-background{
+	background-color: rgba(163, 0, 0, 0.78) !important;
 	-webkit-backdrop-filter: blur(2px);
 	backdrop-filter: blur(2px);
 }
