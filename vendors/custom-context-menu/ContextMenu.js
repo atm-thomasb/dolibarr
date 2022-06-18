@@ -5,7 +5,7 @@ class ContextMenu {
 	 * @param target
 	 * @param menuItems
 	 * @param mode the theme "dark" "light" (will be added in data-theme)
-	 * @param triggerType "contextmenu" will replace context menu  "click"
+	 * @param triggerType "contextmenu" will replace context menu  "click" the click and both
 	 */
 	constructor({target = null, menuItems = [], mode = "dark", triggerType = 'contextmenu'}) {
 		this.target = target;
@@ -14,7 +14,7 @@ class ContextMenu {
 		this.targetNode = this.getTargetNode();
 		this.menuItemsNode = this.getMenuItemsNode();
 		this.isOpened = false;
-		this.triggerType = triggerType;
+		this.triggerType = triggerType; // ATM : Ajout du type de trigger permettant d'utiliser le click
 	}
 
 	getTargetNode() {
@@ -89,18 +89,33 @@ class ContextMenu {
 
 	init() {
 		const contextMenu = this.renderMenu();
-		document.addEventListener("click", () => this.closeMenu(contextMenu));
-		window.addEventListener("blur", () => this.closeMenu(contextMenu));
 
-		if(this.triggerType == "contextmenu") {
-			document.addEventListener("contextmenu", (e) => {
+		document.addEventListener('click', (e) => {
+			if(e.target.tagName == 'BODY' || e.target.tagName == 'HTML'){
+				contextMenu.remove();
+			}else{
 				this.targetNode.forEach((target) => {
 					if (!e.target.contains(target)) {
 						contextMenu.remove();
 					}
 				});
-			});
-		}
+			}
+		});
+
+		window.addEventListener("blur", () => this.closeMenu(contextMenu));
+
+
+		document.addEventListener('contextmenu', (e) => {
+			if(e.target.tagName == 'BODY' || e.target.tagName == 'HTML'){
+				contextMenu.remove();
+			}else{
+				this.targetNode.forEach((target) => {
+					if (!e.target.contains(target)) {
+						contextMenu.remove();
+					}
+				});
+			}
+		});
 
 		this.targetNode.forEach((target) => {
 

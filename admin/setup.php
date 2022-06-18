@@ -123,7 +123,7 @@ $formSetup->newItem('MYMODULE_MYPARAM5')->setAsEmailTemplate('thirdparty');
 $formSetup->newItem('MYMODULE_MYPARAM6')->setAsSecureKey()->enabled = 0; // disabled
 
 // Setup conf MYMODULE_MYPARAM7
-$formSetup->newItem('MYMODULE_MYPARAM7')->setAsProduct();
+//$formSetup->newItem('MYMODULE_MYPARAM7')->setAsProduct();
 
 $formSetup->newItem('Title')->setAsTitle();
 

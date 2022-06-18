@@ -140,11 +140,13 @@ $langs->load("externalsite");
 $head = '<link rel="icon" type="image/png" href="'.dol_buildpath('scrumproject/img/object_scrumkanban.png', 1).'" />';
 $head.= '<meta name="viewport" content="width=device-width, initial-scale=1" />';
 $arrayofjs = array(
-	'scrumproject/vendors/jkanban/dist/jkanban.js'
+	'scrumproject/vendors/jkanban/dist/jkanban.js',
+	'scrumproject/vendors/custom-context-menu/ContextMenu.js'
 );
 $arrayofcss = array(
 	'scrumproject/css/kanban.css',
-	'scrumproject/vendors/jkanban/dist/jkanban.css'
+	'scrumproject/vendors/jkanban/dist/jkanban.css',
+	'scrumproject/vendors/custom-context-menu/ContextMenu.css'
 );
 top_htmlhead($head,  $object->ref . ' - ' . $object->label, 0, 0, $arrayofjs, $arrayofcss);
 

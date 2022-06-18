@@ -83,7 +83,7 @@ let scrumKanban = {};
 			},
 			dragendEl : function (el) {
 				// callback when any board's item stop drag
-				o.setEventMessage('Work in progress drag end el', false);
+				o.setEventMessage('Work in progress drag end el');
 			},
 			dragBoard        : function (el, source) {
 				// callback when any board stop drag
@@ -348,18 +348,31 @@ let scrumKanban = {};
 	 * @param msg
 	 * @param status
 	 */
-	o.setEventMessage = function (msg, status = true){
+	o.setEventMessage = function (msg, status = true, sticky = false){
+
+		let jnotifyConf = {
+			delay: 1500                               // the default time to show each notification (in milliseconds)
+			, type : 'error'
+			, sticky: sticky                             // determines if the message should be considered "sticky" (user must manually close notification)
+			, closeLabel: "&times;"                     // the HTML to use for the "Close" link
+			, showClose: true                           // determines if the "Close" link should be shown if notification is also sticky
+			, fadeSpeed: 150                           // the speed to fade messages out (in milliseconds)
+			, slideSpeed: 250                           // the speed used to slide messages out (in milliseconds)
+
+		}
+
 
 		if(msg.length > 0){
 			if(status){
-				$.jnotify(msg, 'notice', {timeout: 5},{ remove: function (){} } );
+				jnotifyConf.type = '';
+				$.jnotify(msg, jnotifyConf);
 			}
 			else{
-				$.jnotify(msg, 'error', {timeout: 0, type: 'error'},{ remove: function (){} } );
+				$.jnotify(msg, jnotifyConf);
 			}
 		}
 		else{
-			$.jnotify('ErrorMessageEmpty', 'error', {timeout: 0, type: 'error'},{ remove: function (){} } );
+			$.jnotify('ErrorMessageEmpty', jnotifyConf);
 		}
 	}
 
@@ -397,7 +410,11 @@ let scrumKanban = {};
 			data: ajaxData,
 			success: function (response) {
 
-				callBackFunction(response);
+				if (typeof callBackFunction === 'function'){
+					callBackFunction(response);
+				} else {
+					console.error('Callback function invalide for callKanbanInterface');
+				}
 
 				if(response.newToken != undefined){
 					o.newToken = response.newToken;
