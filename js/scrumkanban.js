@@ -83,7 +83,7 @@ let scrumKanban = {};
 			},
 			dragendEl : function (el) {
 				// callback when any board's item stop drag
-				o.setEventMessage('Work in progress drag end el');
+				o.setEventMessage('Work in progress drag end el', false);
 			},
 			dragBoard        : function (el, source) {
 				// callback when any board stop drag
