@@ -68,14 +68,14 @@ let scrumKanban = {};
 			},
 			dropEl: function(el, target, source, sibling){
 				// callback when any board's item are dragged
-				console.log(target.parentElement.getAttribute('data-id'));
-				console.log('dropEl');
-				console.log('target');
-				console.log(target);
-				console.log('source');
-				console.log(source);
-				console.log('sibling');
-				console.log(sibling);
+				//console.log(target.parentElement.getAttribute('data-id'));
+				// console.log('dropEl');
+				// console.log('target');
+				// console.log(target);
+				// console.log('source');
+				// console.log(source);
+				// console.log('sibling');
+				// console.log(sibling);
 
 				o.setEventMessage('DSL le drop n\'est pas encore géré', false)
 
@@ -204,10 +204,21 @@ let scrumKanban = {};
 			o.addKanbanList(o.langs.NewList);
 		});
 
-		// var removeBoard = document.getElementById('removeBoard');
-		// removeBoard.addEventListener('click',function(){
-		// 	o.jkanban.removeBoard('_done');
-		// });
+		// TODO : bon pour l'instant ça marche pas
+		//  Doit normalement permettre de scroll les liste en même temps que l'on fait un drag and drop
+		//  mais je pense que le dragToScroll doit entrer en conflict
+		// o.kanbanAutoScroll = dragAutoScroll([
+		// 		document.querySelector('.kanban-container')
+		// 	],{
+		// 		margin: 20,
+		// 		maxSpeed: 5,
+		// 		scrollWhenOutside: true,
+		// 		autoScroll: function(){
+		// 			//Only scroll when the pointer is down, and there is a child being dragged.
+		// 			return this.down && o.jKanban.drake.dragging;
+		// 		}
+		// 	}
+		// );
 	};
 
 

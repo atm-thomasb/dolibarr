@@ -142,7 +142,12 @@ $head.= '<meta name="viewport" content="width=device-width, initial-scale=1" />'
 $arrayofjs = array(
 	'scrumproject/vendors/jkanban/dist/jkanban.js',
 	'scrumproject/vendors/custom-context-menu/ContextMenu.js',
-	'scrumproject/js/kanbanDragToScroll.js'
+	'scrumproject/js/kanbanDragToScroll.js', // la librairie qui permet de scroll au click
+
+	// TODO : bon pour l'instant dragAutoScroll ça marche pas
+	//  Doit normalement permettre de scroll les liste en même temps que l'on fait un drag and drop
+	//  mais je pense que le dragToScroll doit entrer en conflict
+	//	'scrumproject/js/dragAutoScroll.js',
 );
 $arrayofcss = array(
 	'scrumproject/css/kanban.css',

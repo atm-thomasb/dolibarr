@@ -1,4 +1,4 @@
-        function drag_auto_scroll(el_drg) {
+        function dragAutoScroll(el_drg) {
         //Thanks to StackOverFlow
         //Thanks to Peter-Paul Koch for Some of his concepts borrowed from http://www.quirksmode.org/js/dragdrop.html
             this.addEventSimple = function (obj, evt, fn) {

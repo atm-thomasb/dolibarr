@@ -1064,7 +1064,7 @@ class ScrumKanbanList extends CommonObject
 		$object = new stdClass();
 		$object->id = 'board-' . $this->id; // kanban dom id
 		$object->title = $this->label;
-		$object->class = 'kankan-default-header';
+		$object->class = 'kankan-default-header'; // 'classA,classB,classC,...';
 
 		$object->objectid = $this->id;
 

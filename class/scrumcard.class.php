@@ -26,12 +26,15 @@
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once __DIR__ . '/commonKanban.trait.php';
 
 /**
  * Class for ScrumCard
  */
 class ScrumCard extends CommonObject
 {
+	use CommonKanban;
+
 	/**
 	 * @var string ID of module.
 	 */
@@ -945,10 +948,31 @@ class ScrumCard extends CommonObject
 	 * @return stdClass
 	 */
 	public function getKanBanItemObjectFormatted(){
+		global $user;
+
 		$object = new stdClass();
 		$object->id = 'scrumcard-' . $this->id; // kanban dom id
-		$object->title = $this->label;
+		$object->title = '<span class="kanban-item__label">'.$this->label.'</span>';
+
+		$object->title.= '<div class="kanban-item__footer">';
+		// TODO : récupérer les temps passés
+		if(true){
+			$object->title.= '<span class="kanban-item__time-spend">'
+//				.'<i class="fa fa-hourglass-o"></i> '
+				.'-- / -- '
+				.'</span>';
+		}
+
 		$object->title.= '<span class="kanban-item__status">'.$this->LibStatut(intval($this->status), 2).'</span>';
+
+		$object->title.= '</div>';
+
+
+		// TODO : récupérer les contacts de la carte et/ou object attaché (user story, taches etcc)
+		$object->title.= '<span class="kanban-item__users">'
+			.self::getUserImg($user, 'kanban-item__user')
+			.self::getUserImg($user, 'kanban-item__user')
+			.'</span>';
 
 
 		$object->label = $this->label;

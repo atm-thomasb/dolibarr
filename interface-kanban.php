@@ -181,9 +181,29 @@ function _actionGetAllBoards($jsonResponse){
 	if(is_array($kanbanLists)){
 		$jsonResponse->result = 1;
 		$jsonResponse->data = array();
+
+		// The back log
+		$object = new stdClass();
+		$object->id = '__backlog'; // kanban dom id
+		$object->title = $langs->trans("KanbanBackLogList");
+		$object->class = 'kankan-backlog-header';
+		$object->objectid = '__backlog';
+		$object->item = array();
+		$jsonResponse->data[] = $object;
+
+		// All listes stored in databases
 		foreach ($kanbanLists as $kanbanList){
 			$jsonResponse->data[] = $kanbanList->getKanBanListObjectFormatted();
 		}
+
+		// the DONE list
+		$object = new stdClass();
+		$object->id = '__done'; // kanban dom id
+		$object->title = $langs->trans("KanbanDoneList");
+		$object->class = 'kankan-done-header';
+		$object->objectid = '__done';
+		$object->item = array();
+		$jsonResponse->data[] = $object;
 
 		return true;
 	}
