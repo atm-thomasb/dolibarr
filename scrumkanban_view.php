@@ -141,7 +141,8 @@ $head = '<link rel="icon" type="image/png" href="'.dol_buildpath('scrumproject/i
 $head.= '<meta name="viewport" content="width=device-width, initial-scale=1" />';
 $arrayofjs = array(
 	'scrumproject/vendors/jkanban/dist/jkanban.js',
-	'scrumproject/vendors/custom-context-menu/ContextMenu.js'
+	'scrumproject/vendors/custom-context-menu/ContextMenu.js',
+	'scrumproject/js/kanbanDragToScroll.js'
 );
 $arrayofcss = array(
 	'scrumproject/css/kanban.css',
@@ -167,18 +168,11 @@ $jsLangs = array(
 
 ?>
 <body id="mainbody" class="scrumkanban-page">
-	<section class="kanban" >
+	<section id="kanban" >
 		<header class="kanban-header" role="banner">
 			<nav class="navigation" role="navigation">
-				<?php
-				$title = $object->getNomUrl(0) . ' <span class="kanban-title__label">'.$object->label.'</span>';
-				$newcardbutton = '';
-				$newcardbutton .= dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', '', 'addkanbancol', $permissiontoadd);
-
-
-				print_barre_liste($title, '', $_SERVER["PHP_SELF"], '', '', '', '', '', '', 'object_'.$object->picto, 0, $newcardbutton, '', 0, 0, 0, 1);
-
-				?>
+				<span class="nav-title"><?php print $object->getNomUrl(1) . ' <span class="kanban-title__label">'.$object->label.'</span>'; ?></span>
+				<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
 			</nav>
 		</header>
 		<div id="scrum-kanban"></div>

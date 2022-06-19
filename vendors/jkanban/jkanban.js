@@ -386,7 +386,7 @@ var dragula = require('dragula');
 
     this.moveElement = function (targetBoardID, elementID, element) {
       if (targetBoardID === this.getParentBoardID(elementID)) {
-        return
+        return;
       }
 
       this.removeElement(elementID)
