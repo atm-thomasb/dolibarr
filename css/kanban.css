@@ -7,6 +7,10 @@
 	--default-strong-color : #223058;
 
 	--box-text-color : #626262;
+
+	--scrollbar-size : 11px;
+	--scrollbar-track-color : rgba(0, 0, 0, 0.1);
+	--scrollbar-thumb-color : rgba(197, 197, 197, 0.85);
 }
 
 
@@ -15,7 +19,7 @@
 }
 
 html{
-	min-height: 100%;
+	height: 100vh;
 	margin: 0px;
 	padding: 0px;
 }
@@ -25,14 +29,13 @@ body.scrumkanban-page{
 	width: 100vw;
 	margin: 0px;
 	padding: 0px;
-	min-height: 100%;
 }
 
 section#kanban{
-	max-height: 100%;
-	min-height: 100%;
+	height: 100%;
 	margin: 0px;
 	padding: 0px;
+
 }
 
 
@@ -40,27 +43,38 @@ section#kanban{
 * Scroll barr
  */
 ::-webkit-scrollbar {
-	width: 11px;
-	height: 11px;
+	width: var(--scrollbar-size);
+	height: var(--scrollbar-size);
 }
 
 ::-webkit-scrollbar-track {
-	background-color: rgba(0, 0, 0, 0.1);
+	background-color: var(--scrollbar-track-color);
 	border-radius:  10px;
 }
 
 ::-webkit-scrollbar-thumb {
 	border-radius:  10px;
-	background: rgba(197, 197, 197, 0.85);
+	background: var(--scrollbar-thumb-color);
+}
+
+::-webkit-scrollbar-corner{
+	background: rgba(0, 0, 0, 0.1);
 }
 
 /*::-webkit-scrollbar-thumb:window-inactive {*/
 /*	background: rgba(0, 0, 0, 0.1)*/
 /*}*/
 
+/* Scroll barr for list */
+.kanban-drag {
+	scrollbar-width: 5px;
+	--scrollbar-size: 5px;
+	--scrollbar-track-color : rgba(0, 0, 0, 0.08);
+	--scrollbar-thumb-color : rgba(0, 0, 0, 0.3);
+}
 
 
-
+/* HEADER */
 
 .kanban-header{
 	display: block;
@@ -107,7 +121,7 @@ section#kanban{
 
 	position: relative;
 	max-width: 100%;
-	min-height: calc(100vh - 100px);
+	min-height: calc(100vh - 80px);
 	overflow: auto;
 
 	/* For drag to scroll */
@@ -171,6 +185,10 @@ section#kanban{
 	font-size: 0.8em;
 }
 
+.kanban-drag{
+	max-height: calc(100vh - 180px);
+	overflow: auto;
+}
 
 /*
 * Kanban style override
