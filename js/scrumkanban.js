@@ -38,6 +38,7 @@ let scrumKanban = {};
 		NewCard:"Nouvelle carte",
 		BackLog:"BackLog",
 		errorAjaxCall:"Erreur d'appel ajax",
+		errorAjaxCallDisconnected:"Vous êtes déconnecté",
 		CloseDialog:"Fermer"
 	};
 
@@ -473,7 +474,25 @@ let scrumKanban = {};
 				}
 			},
 			error: function (err) {
-				o.setEventMessage(o.langs.errorAjaxCall, false);
+
+				if(err.responseText.length > 0){
+
+					// detect login page in case of just disconnected
+					let loginPage = $(err.responseText).find('[name="actionlogin"]');
+					if(loginPage != undefined && loginPage.val() == 'login'){
+						o.setEventMessage(o.langs.errorAjaxCallDisconnected, false);
+
+						setTimeout(function (){
+							location.reload();
+						}, 2000);
+
+					}else{
+						o.setEventMessage(o.langs.errorAjaxCall, false);
+					}
+				}
+				else{
+					o.setEventMessage(o.langs.errorAjaxCall, false);
+				}
 			}
 		});
 	}
