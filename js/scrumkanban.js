@@ -205,18 +205,9 @@ let scrumKanban = {};
 		// Get all board
 		o.getAllBoards();
 
-		// var toDoButton = document.getElementById('addToDo');
-		// toDoButton.addEventListener('click',function(){
-		// 	o.jkanban.addElement(
-		// 		'_todo',
-		//         {
-		//             'title':'Test Add',
-		//         }
-		//     );
-		// });
 
 		// Add new list (column)
-		var addBoardDefault = document.getElementById('addkanbancol');
+		let addBoardDefault = document.getElementById('addkanbancol');
 		addBoardDefault.addEventListener('click', function () {
 			o.addKanbanList(o.langs.NewList);
 		});

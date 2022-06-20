@@ -140,8 +140,9 @@ $langs->load("externalsite");
 $head = '<link rel="icon" type="image/png" href="'.dol_buildpath('scrumproject/img/object_scrumkanban.png', 1).'" />';
 $head.= '<meta name="viewport" content="width=device-width, initial-scale=1" />';
 $arrayofjs = array(
-	'scrumproject/vendors/jkanban/dist/jkanban.js',
+	'scrumproject/vendors/jkanban/dist/jkanban.js', // la librairie de base du kanban
 	'scrumproject/vendors/custom-context-menu/ContextMenu.js',
+	'scrumproject/js/liveedit.js', // la librairie live edit
 	'scrumproject/js/kanbanDragToScroll.js', // la librairie qui permet de scroll au click
 
 	// TODO : bon pour l'instant dragAutoScroll ça marche pas

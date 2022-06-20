@@ -10,13 +10,13 @@ jQuery(function ($) {
 
 
 	$(document).on('blur','.live-edit', function(){
-		return SpLiveEdit.sendLiveEdit($(this));
+		return SpLiveEdit.sendLiveEditFromElement($(this));
 	});
 
 	$(document).on('keydown', '.live-edit', function(e) {
 		if(e.key == 'Enter'){
 			e.preventDefault();
-			SpLiveEdit.sendLiveEdit($(this), true);
+			SpLiveEdit.sendLiveEditFromElement($(this), true);
 			$(this).trigger('blur');
 		}
 	});
@@ -77,44 +77,58 @@ jQuery(function ($) {
 		 * @param {jQuery} el
 		 * @param forceUpdate bool to force update when old and new value are same
 		 */
-		o.sendLiveEdit = function (el, forceUpdate = false){
+		o.sendLiveEditFromElement = function (el, forceUpdate = false){
 
 			if(el.data('ajax-target') == undefined){
 				o.setSPBadLiveEdit(el);
 				return false;
 			}
 
-			let urlInterface = el.data('ajax-target');
+			return o.sendLiveEdit(el,{
+				urlInterface : el.data('ajax-target'),
+				sendData : {
+					'value': el.text(),
+					'token': o.newToken,
+					'action': 'liveFieldUpdate',
+					'forceUpdate' : forceUpdate ? 1 : 0 // js bool is send as string ...
+				},
+				callback : {
+					success: el.data('ajax-success-callback'),
+					idle: el.data('ajax-idle-callback'),
+					fail: el.data('ajax-fail-callback')
+				}
+			});
+		}
 
-			let sendData = {
-				'value': el.text(),
-				'token': o.newToken,
-				'action': 'liveFieldUpdate',
-				'forceUpdate' : forceUpdate ? 1 : 0 // js bool is send as string ...
-			};
+		/**
+		 *
+		 * @param {object} el
+		 * @param {object} conf
+		 */
+		o.sendLiveEdit = function (el, conf){
 
 			$.ajax({
 				method: 'POST',
-				url: urlInterface,
+				url: conf.urlInterface,
 				dataType: 'json',
-				data: sendData,
+				data: conf.sendData,
 				success: function (data) {
 					if(data.result > 0) {
 						// do stuff on success
-						if(el.data('ajax-success-callback') != undefined){
-							o.callBackFunction(el.data('ajax-success-callback'), el, data);
+						if(conf.callback.success != undefined){
+							o.callBackFunction(conf.callback.success , el, data);
 						}
 					}
 					else if(data.result == 0) {
 						// do stuff on idle
-						if(el.data('ajax-idle-callback') != undefined){
-							o.callBackFunction(el.data('ajax-fail-callback'), el, data);
+						if(conf.callback.idle != undefined){
+							o.callBackFunction(conf.callback.idle, el, data);
 						}
 					}
 					else if(data.result < 0) {
 						// do stuff on error
-						if(el.data('ajax-fail-callback') != undefined){
-							o.callBackFunction(el.data('ajax-fail-callback'), el, data);
+						if(conf.callback.fail != undefined){
+							o.callBackFunction(conf.callback.fail, el, data);
 						}
 					}
 
@@ -151,8 +165,8 @@ jQuery(function ($) {
 				return false;
 			}
 
+			console.log('CallBack function ' + $functionName + ' executed');
 
-			console.log('CallBack function ' + $functionName + ' executed')
 			// execute function callback
 			let fn = window[$functionName];
 			return fn(el, data);
