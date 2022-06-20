@@ -67,6 +67,9 @@ elseif ($action === 'getAllBoards') {
 elseif ($action === 'getAllItemToList') {
 	_actionAddItemToList($jsonResponse);
 }
+elseif ($action === 'dropItemToList') {
+	_actionDropItemToList($jsonResponse);
+}
 else{
 	$jsonResponse->msg = 'Action not found';
 }
@@ -273,6 +276,127 @@ function _actionAddItemToList($jsonResponse){
 		$jsonResponse->result = 0;
 		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanList->errorsToString();
 		return false;
+	}
+}
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionDropItemToList($jsonResponse){
+	global $user, $langs, $db;
+
+	$data = GETPOST("data", "array");
+
+	if(empty($data['card-id'])){
+		$jsonResponse->msg = 'Need card Id';
+		return false;
+	}
+
+	$scrumCard = new ScrumCard($db);
+	if($scrumCard->fetch($data['card-id']) <= 0){
+		$jsonResponse->msg = 'Invalid card';
+		return false;
+	}
+
+	if(empty($data['target-list-id'])){
+		$jsonResponse->msg = 'Need target list Id';
+		return false;
+	}
+	$target_fk_scrumkanbanlist = $data['target-list-id'];
+
+	// toDo vérifier le status du kanban aussi
+
+	$kanbanList = _checkObjectByElement('scrumproject_scrumkanbanlist', $target_fk_scrumkanbanlist, $jsonResponse);
+	if(!$kanbanList){
+		return false;
+	}
+
+	if(!empty($data['before-card-id'])){
+		$beforeScrumCard = new ScrumCard($db);
+		$res = $beforeScrumCard->fetch($data['before-card-id']);
+		if($res<=0){
+			$jsonResponse->msg = 'Need target list Id';
+			return false;
+		}
+
+
+		$newRank = $beforeScrumCard->fk_rank;
+
+		$crumCardsAfter = $db->getRows(
+			/* @Lang SQL */
+			'SELECT rowid id, fk_rank '
+			. ' FROM '.MAIN_DB_PREFIX.$scrumCard->table_element
+			. ' WHERE fk_scrum_kanbanlist ='.intval($kanbanList->id)
+			. ' AND fk_rank >= '.intval($beforeScrumCard->fk_rank)
+		);
+
+		if(!empty($crumCardsAfter)){
+			$db->begin();
+			$error = 0;
+			foreach ($crumCardsAfter as $item){
+				$sqlUpdate = /* @Lang SQL */
+					'UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
+					. ' SET tms=NOW(), fk_rank = '.(intval($item->fk_rank)+1)
+					. ' WHERE rowid = '.intval($item->id)
+					. ';';
+
+				$resUp = $db->query($sqlUpdate);
+				if($resUp<0){
+					$error++;
+					break;
+				}
+			}
+
+			if(!empty($error)){
+				$db->rollback();
+				$jsonResponse->result = 0;
+				$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' .$db->error();
+				return false;
+			}
+
+			// Mise à jour de la card elle même
+			$sqlUpdate = /* @Lang SQL */
+				' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
+				. ' SET  tms=NOW(), fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
+				. ' WHERE rowid = '.intval($scrumCard->id).';';
+
+			if($db->query($sqlUpdate)){
+				$db->commit();
+				$jsonResponse->result = 1;
+				return true;
+			}
+			else{
+				$db->rollback();
+				$jsonResponse->result = 0;
+				$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' .$db->error();
+				return false;
+			}
+		}
+		else{
+			$jsonResponse->result = 0;
+			$jsonResponse->msg = $langs->trans('Card position error');
+			return false;
+		}
+	}
+	else{
+		$newRank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
+
+		// Mise à jour de la card elle même
+		$sqlUpdate = /* @Lang SQL */
+			' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
+			. ' SET fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
+			. ' WHERE rowid = '.intval($scrumCard->id).';';
+
+		if($db->query($sqlUpdate)){
+			$jsonResponse->result = 1;
+			return true;
+		}
+		else{
+			$jsonResponse->result = 0;
+			$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' . $scrumCard->errorsToString();
+			return false;
+		}
 	}
 }
 

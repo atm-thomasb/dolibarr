@@ -41,6 +41,7 @@ let scrumKanban = {};
 		CloseDialog:"Fermer"
 	};
 
+
 	o.jKanban = false;
 
 	o.init = function (config = {}, langs= {}){
@@ -67,23 +68,29 @@ let scrumKanban = {};
 				console.log("Trigger on all items right-click!");
 			},
 			dropEl: function(el, target, source, sibling){
-				// callback when any board's item are dragged
-				//console.log(target.parentElement.getAttribute('data-id'));
-				// console.log('dropEl');
-				// console.log('target');
-				// console.log(target);
-				// console.log('source');
-				// console.log(source);
-				// console.log('sibling');
-				// console.log(sibling);
 
-				o.setEventMessage('DSL le drop n\'est pas encore géré', false)
+				/**
+				 * @type {jKanban}
+				 * @var o.jkanban
+				 */
+
+				let sendData = {
+					'fk_kanban': o.config.fk_kanban,
+					'source-list-id': o.getDolListIdFromBoardElement(source),
+					'target-list-id': o.getDolListIdFromBoardElement(target),
+					'card-id': o.getDolCardIdFromCardElement(el),
+					'before-card-id': o.getDolCardIdFromCardElement(sibling)
+				};
+
+				o.callKanbanInterface('dropItemToList', sendData, function(response){
+					// do stuff ?
+				});
 
 				o.clearView();
 			},
 			dragendEl : function (el) {
 				// callback when any board's item stop drag
-				o.setEventMessage('Work in progress drag end el', false);
+				// o.setEventMessage('Work in progress drag end el', false);
 			},
 			dragBoard        : function (el, source) {
 				// callback when any board stop drag
@@ -254,12 +261,12 @@ let scrumKanban = {};
 	 */
 	o.dialogIFrame = function (dialogId, url, label = ''){
 
-		let kanbanDialogId = '#kanbanitemdialog-' + dialogId;
+		let kanbanDialogId = 'kanbanitemdialog-' + dialogId;
 		if(document.getElementById(kanbanDialogId) == undefined){
 			$('body').append( $('<div id="kanbanitemdialog-' + dialogId + '" ></div>')); // put it into the DOM
 		}
 
-		$target = $(kanbanDialogId);
+		$target = $('#' + kanbanDialogId);
 
 		$target.html('<iframe class="iframedialog" id="iframedialog' + dialogId + '" style="border: 0px;" src="' + url + '" width="100%" height="98%"></iframe>');
 
@@ -295,11 +302,15 @@ let scrumKanban = {};
 		});
 	}
 
+	/**
+	 *	Add Kanban card to list
+	 * @param {string} listName
+	 */
 	o.addKanbanCardToList = function(listName){
 
 		let sendData = {
 			'fk_kanban': o.config.fk_kanban,
-			'fk_kanbanlist' : o.getDolKanbanIdFromJKanbanDomId(listName)
+			'fk_kanbanlist' : o.getDolListIdFromJKanbanBoardDomId(listName)
 		};
 
 		o.callKanbanInterface('getAllItemToList', sendData, function(response){
@@ -311,13 +322,33 @@ let scrumKanban = {};
 	}
 
 	/**
-	 *
-	 * @param domId
-	 * @returns string
+	 * return dolibarr kanbanList id from dom board #id
+	 * @param {string} domId
+	 * @returns {string}
 	 */
-	o.getDolKanbanIdFromJKanbanDomId = function (domId){
+	o.getDolListIdFromJKanbanBoardDomId = function (domId){
 		// remove board- part
 		return domId.slice(6, domId.length);
+	}
+
+	/**
+	 * return dolibarr kanbanList id from dom board element
+	 * @param {Element} element
+	 * @returns {string}
+	 */
+	o.getDolListIdFromBoardElement = function (element){
+		if(element == undefined){ return undefined; }
+		return o.getDolListIdFromJKanbanBoardDomId(element.parentElement.getAttribute('data-id'));
+	}
+
+	/**
+	 * return dolibarr card id from dom card element
+	 * @param {Element} element
+	 * @returns {string}
+	 */
+	o.getDolCardIdFromCardElement = function (element){
+		if(element == undefined){ return undefined; }
+		return element.getAttribute('data-objectid');
 	}
 
 	o.delKanbanList = function(listName){
@@ -356,8 +387,9 @@ let scrumKanban = {};
 
 	/**
 	 *
-	 * @param msg
-	 * @param status
+	 * @param {string} msg
+	 * @param {boolean} status
+	 * @param {boolean} sticky
 	 */
 	o.setEventMessage = function (msg, status = true, sticky = false){
 
@@ -407,12 +439,6 @@ let scrumKanban = {};
 			'token': o.newToken,
 			'action': action,
 		};
-
-
-		if(sendData != undefined && typeof sendData === 'object'){
-			ajaxData = Object.assign(ajaxData, sendData);
-		}
-
 
 		$.ajax({
 			method: 'POST',

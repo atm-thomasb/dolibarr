@@ -109,7 +109,6 @@ section#kanban{
 /* KANBAN */
 
 #scrum-kanban{
-
 	padding: 0 5px 20px 5px;
 
 	position: relative;
@@ -163,7 +162,6 @@ section#kanban{
 .kanban-container{
 	--list-text-color : var(--box-text-color);
 }
-
 
 
 /*
@@ -272,6 +270,7 @@ section#kanban{
 }
 
 .kanban-list-add-button{
+	cursor: pointer;
 	border: none;
 	padding: 7px 7px;
 	margin: 0 var(--default-space-size) var(--default-space-size) var(--default-space-size) ;
