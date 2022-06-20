@@ -69,15 +69,10 @@ let scrumKanban = {};
 			},
 			dropEl: function(el, target, source, sibling){
 
-				/**
-				 * @type {jKanban}
-				 * @var o.jkanban
-				 */
-
 				let sendData = {
 					'fk_kanban': o.config.fk_kanban,
-					'source-list-id': o.getDolListIdFromBoardElement(source),
-					'target-list-id': o.getDolListIdFromBoardElement(target),
+					'source-list-id': o.getDolListIdFromKanbanDragElement(source),
+					'target-list-id': o.getDolListIdFromKanbanDragElement(target),
 					'card-id': o.getDolCardIdFromCardElement(el),
 					'before-card-id': o.getDolCardIdFromCardElement(sibling)
 				};
@@ -94,19 +89,34 @@ let scrumKanban = {};
 			},
 			dragBoard        : function (el, source) {
 				// callback when any board stop drag
-				o.setEventMessage('Work in progress drag Board', false);
 
 				// a cause d'un bug d'affichage j'enlève le footer lors du déplacement
 				let boardSelector = el.getAttribute('data-id');
 				$('.kanban-board[data-id=' + boardSelector + '] footer').hide();
 			},
-			dragendBoard     : function (el) {
+			dropBoard: function (el, target, source, sibling) {
 				// callback when any board stop drag
-				o.setEventMessage('Work in progress drag end Board', false);
+
+
+				// TODO
+				console.log(el);
+
+				let sendData = {
+					'fk_kanban': o.config.fk_kanban,
+					'list-id': o.getDolListIdFromBoard(el),
+					'before-list-id': o.getDolListIdFromBoard(sibling)
+				};
+
+				o.callKanbanInterface('changeListOrder', sendData, function(response){
+					// do stuff ?
+				});
 
 				// reaffiche le bouton du footer
 				let boardSelector = el.getAttribute('data-id');
 				$('.kanban-board[data-id=' + boardSelector + '] footer').slideDown();
+			},
+			dragendBoard     : function (el) {
+
 			},
 			buttonClick: function(el, boardId) {
 				// callback when the board's button is clicked
@@ -336,9 +346,19 @@ let scrumKanban = {};
 	 * @param {Element} element
 	 * @returns {string}
 	 */
-	o.getDolListIdFromBoardElement = function (element){
+	o.getDolListIdFromKanbanDragElement = function (element){
 		if(element == undefined){ return undefined; }
 		return o.getDolListIdFromJKanbanBoardDomId(element.parentElement.getAttribute('data-id'));
+	}
+
+	/**
+	 * return dolibarr kanbanList id from dom board element
+	 * @param {Element} element
+	 * @returns {string}
+	 */
+	o.getDolListIdFromBoard = function (element){
+		if(element == undefined){ return undefined; }
+		return o.getDolListIdFromJKanbanBoardDomId(element.getAttribute('data-id'));
 	}
 
 	/**

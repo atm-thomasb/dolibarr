@@ -70,6 +70,9 @@ elseif ($action === 'getAllItemToList') {
 elseif ($action === 'dropItemToList') {
 	_actionDropItemToList($jsonResponse);
 }
+elseif ($action === 'changeListOrder') {
+	_actionChangeListOrder($jsonResponse);
+}
 else{
 	$jsonResponse->msg = 'Action not found';
 }
@@ -185,28 +188,30 @@ function _actionGetAllBoards($jsonResponse){
 		$jsonResponse->result = 1;
 		$jsonResponse->data = array();
 
-		// The back log
-		$object = new stdClass();
-		$object->id = '__backlog'; // kanban dom id
-		$object->title = $langs->trans("KanbanBackLogList");
-		$object->class = 'kankan-backlog-header';
-		$object->objectid = '__backlog';
-		$object->item = array();
-		$jsonResponse->data[] = $object;
+//		// The back log
+		// REPLACED with a real list
+//		$object = new stdClass();
+//		$object->id = '__backlog'; // kanban dom id
+//		$object->title = $langs->trans("KanbanBackLogList");
+//		$object->class = 'kankan-backlog-header';
+//		$object->objectid = '__backlog';
+//		$object->item = array();
+//		$jsonResponse->data[] = $object;
 
 		// All listes stored in databases
 		foreach ($kanbanLists as $kanbanList){
 			$jsonResponse->data[] = $kanbanList->getKanBanListObjectFormatted();
 		}
 
-		// the DONE list
-		$object = new stdClass();
-		$object->id = '__done'; // kanban dom id
-		$object->title = $langs->trans("KanbanDoneList");
-		$object->class = 'kankan-done-header';
-		$object->objectid = '__done';
-		$object->item = array();
-		$jsonResponse->data[] = $object;
+//		// the DONE list
+		// REPLACED with a real list
+//		$object = new stdClass();
+//		$object->id = '__done'; // kanban dom id
+//		$object->title = $langs->trans("KanbanDoneList");
+//		$object->class = 'kankan-done-header';
+//		$object->objectid = '__done';
+//		$object->item = array();
+//		$jsonResponse->data[] = $object;
 
 		return true;
 	}
@@ -329,20 +334,23 @@ function _actionDropItemToList($jsonResponse){
 			. ' FROM '.MAIN_DB_PREFIX.$scrumCard->table_element
 			. ' WHERE fk_scrum_kanbanlist ='.intval($kanbanList->id)
 			. ' AND fk_rank >= '.intval($beforeScrumCard->fk_rank)
+			. ' ORDER BY fk_rank ASC'
 		);
 
 		if(!empty($crumCardsAfter)){
 			$db->begin();
 			$error = 0;
+			$nextRank = intval($newRank);
 			foreach ($crumCardsAfter as $item){
+				$nextRank++;
 				$sqlUpdate = /* @Lang SQL */
 					'UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
-					. ' SET tms=NOW(), fk_rank = '.(intval($item->fk_rank)+1)
+					. ' SET tms=NOW(), fk_rank = '.$nextRank
 					. ' WHERE rowid = '.intval($item->id)
 					. ';';
 
 				$resUp = $db->query($sqlUpdate);
-				if($resUp<0){
+				if(!$resUp){
 					$error++;
 					break;
 				}
@@ -359,7 +367,7 @@ function _actionDropItemToList($jsonResponse){
 			$sqlUpdate = /* @Lang SQL */
 				' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
 				. ' SET  tms=NOW(), fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
-				. ' WHERE rowid = '.intval($scrumCard->id).';';
+				. ' WHERE rowid = '.intval($scrumCard->id);
 
 			if($db->query($sqlUpdate)){
 				$db->commit();
@@ -386,7 +394,7 @@ function _actionDropItemToList($jsonResponse){
 		$sqlUpdate = /* @Lang SQL */
 			' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
 			. ' SET fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
-			. ' WHERE rowid = '.intval($scrumCard->id).';';
+			. ' WHERE rowid = '.intval($scrumCard->id);
 
 		if($db->query($sqlUpdate)){
 			$jsonResponse->result = 1;
@@ -400,6 +408,126 @@ function _actionDropItemToList($jsonResponse){
 	}
 }
 
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionChangeListOrder($jsonResponse){
+	global  $langs, $db;
+
+	$data = GETPOST("data", "array");
+
+	// Get kanban
+	if(empty($data['fk_kanban'])){
+		$jsonResponse->msg = 'Need Kanban Id';
+		return false;
+	}
+
+	$fk_kanban = $data['fk_kanban'];
+	$kanban = _checkObjectByElement('scrumproject_scrumkanban', $fk_kanban, $jsonResponse);
+	if(!$kanban){
+		return false;
+	}
+
+	// Get list
+	if(empty($data['list-id'])){
+		$jsonResponse->msg = 'Need list Id';
+		return false;
+	}
+
+	$kanbanListId = $data['list-id'];
+	$kanbanList = _checkObjectByElement('scrumproject_scrumkanbanlist', $kanbanListId, $jsonResponse);
+	if(!$kanbanList){
+		return false;
+	}
+
+	/**
+	 * @var ScrumKanbanList $kanbanList
+	 */
+	if($fk_kanban != $kanbanList->fk_scrum_kanban){
+		$jsonResponse->msg = 'kanban scope error';
+		return false;
+	}
+
+	$newRank = 0;
+	$obj = $db->getRow('SELECT MAX(fk_rank) maxRank FROM '.MAIN_DB_PREFIX.$kanbanList->table_element . ' WHERE fk_scrum_kanban = '.intval($kanban->id));
+	if($obj){
+		$newRank = intval($obj->maxRank) + 1;
+	}
+
+	if(!empty($data['before-list-id'])) {
+		$beforeKanbanList = _checkObjectByElement('scrumproject_scrumkanbanlist', $data['before-list-id'], $jsonResponse);
+		if(!$beforeKanbanList){
+			return false;
+		}
+
+		$newRank = $beforeKanbanList->fk_rank;
+	}
+
+
+	$getListsAfter = $db->getRows(
+	/* @Lang SQL */
+		'SELECT rowid id, fk_rank '
+		. ' FROM '.MAIN_DB_PREFIX.$kanbanList->table_element
+		. ' WHERE rowid != '.intval($kanbanList->id)
+		. ' AND fk_rank >= '.intval($newRank)
+		. ' AND fk_scrum_kanban = '.intval($fk_kanban)
+		. ' ORDER BY fk_rank ASC'
+	);
+
+	if($getListsAfter===false) {
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $langs->trans('Card position query error').$db->error();
+		return false;
+	}
+
+	$db->begin();
+	$error = 0;
+
+	if(!empty($getListsAfter)) {
+		$nextRank = intval($newRank);
+		foreach ($getListsAfter as $item) {
+			$nextRank++;
+
+			$sqlUpdate = /* @Lang SQL */
+				'UPDATE ' . MAIN_DB_PREFIX . $kanbanList->table_element
+				. ' SET tms=NOW(), fk_rank = ' . $nextRank
+				. ' WHERE rowid = ' . intval($item->id);
+
+			$resUp = $db->query($sqlUpdate);
+			if (!$resUp) {
+				$error++;
+				break;
+			}
+		}
+
+		if (!empty($error)) {
+			$db->rollback();
+			$jsonResponse->result = 0;
+			$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' . $db->error();
+			return false;
+		}
+	}
+
+	// Mise à jour de la liste elle même
+	$sqlUpdate = /* @Lang SQL */
+		' UPDATE '.MAIN_DB_PREFIX.$kanbanList->table_element
+		. ' SET  tms=NOW(), fk_rank = '.intval($newRank)
+		. ' WHERE rowid = '.intval($kanbanList->id).';';
+
+	if($db->query($sqlUpdate)){
+		$db->commit();
+		$jsonResponse->result = 1;
+		return true;
+	}
+	else{
+		$db->rollback();
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' .$db->error();
+		return false;
+	}
+}
 
 /**
  * @param JsonResponse $jsonResponse
