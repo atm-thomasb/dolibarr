@@ -22,7 +22,7 @@ ALTER TABLE llx_scrumproject_scrumkanbanlist ADD INDEX idx_scrumproject_scrumkan
 ALTER TABLE llx_scrumproject_scrumkanbanlist ADD CONSTRAINT llx_scrumproject_scrumkanbanlist_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
 -- END MODULEBUILDER INDEXES
 
---ALTER TABLE llx_scrumproject_scrumkanbanlist ADD UNIQUE INDEX uk_scrumproject_scrumkanbanlist_fieldxy(fieldx, fieldy);
+ALTER TABLE llx_scrumproject_scrumkanbanlist ADD UNIQUE INDEX uk_scrumproject_scrumkanbanlist_code(fk_scrum_kanban, code);
 
 --ALTER TABLE llx_scrumproject_scrumkanbanlist ADD CONSTRAINT llx_scrumproject_scrumkanbanlist_fk_field FOREIGN KEY (fk_field) REFERENCES llx_scrumproject_myotherobject(rowid);
 

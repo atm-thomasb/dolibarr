@@ -24,6 +24,9 @@
 
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
+require_once __DIR__ . '/scrumkanbanlist.class.php';
+require_once __DIR__ . '/scrumcard.class.php';
+
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -230,8 +233,29 @@ class ScrumKanban extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-		$resultcreate = $this->createCommon($user, $notrigger);
+		global $langs;
 
+		$langs->load('scrumkanban@scrumproject');
+
+		$resultcreate = $this->createCommon($user, $notrigger);
+		if($resultcreate > 0){
+
+			// create backlog list
+			$backLogList = new ScrumKanbanList($this->db);
+			$backLogList->fk_scrum_kanban = $this->id;
+			$backLogList->label = $langs->transnoentities('KanbanBackLogList');
+			$backLogList->code = 'backlog';
+			$backLogList->fk_rank = 1;
+			$backLogList->create($user, $notrigger);
+
+			// create done list
+			$doneList = new ScrumKanbanList($this->db);
+			$doneList->fk_scrum_kanban = $this->id;
+			$doneList->label = $langs->transnoentities('KanbanDoneList');
+			$doneList->code = 'done';
+			$doneList->fk_rank = 2;
+			$doneList->create($user, $notrigger);
+		}
 		//$resultvalidate = $this->validate($user, $notrigger);
 
 		return $resultcreate;

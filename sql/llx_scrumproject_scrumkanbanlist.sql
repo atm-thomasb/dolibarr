@@ -18,9 +18,10 @@ CREATE TABLE llx_scrumproject_scrumkanbanlist(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	fk_scrum_kanban integer NOT NULL, 
-	fk_rank integer NOT NULL, 
-	label varchar(255), 
-	description text, 
+	fk_rank integer NOT NULL,
+    label varchar(255),
+    code varchar(20),
+    description text,
 	note_public text, 
 	note_private text, 
 	date_creation datetime NOT NULL, 
