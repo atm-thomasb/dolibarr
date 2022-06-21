@@ -169,6 +169,9 @@ section#kanban{
 	white-space: nowrap;
 	cursor: text;
 }
+.is-moving .kanban-list-label-field{
+	cursor: grabbing;
+}
 
 /** LIVE EDIT **/
 .kanban-list-label-field.live-edit{
