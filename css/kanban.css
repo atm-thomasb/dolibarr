@@ -167,6 +167,7 @@ section#kanban{
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	cursor: text;
 }
 
 /** LIVE EDIT **/
