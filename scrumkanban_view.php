@@ -152,6 +152,7 @@ $arrayofjs = array(
 );
 $arrayofcss = array(
 	'scrumproject/css/kanban.css',
+	'scrumproject/css/liveedit.css',
 	'scrumproject/vendors/jkanban/dist/jkanban.css',
 	'scrumproject/vendors/custom-context-menu/ContextMenu.css'
 );
@@ -163,6 +164,7 @@ $confToJs = array(
 	'interface_kanban_url'		=> dol_buildpath('scrumproject/interface-kanban.php',1),
 	'interface_liveupdate_url'	=> dol_buildpath('scrumproject/interface-liveupdate.php',1),
 	'js_url'					=> dol_buildpath('scrumproject/js/scrumkanban.js',1),
+	'srumprojectModuleFolderUrl'=> dol_buildpath('scrumproject/',1),
 	'fk_kanban'					=> $object->id,
 	'token'						=> newToken()
 );

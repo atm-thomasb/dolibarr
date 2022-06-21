@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	const mouseDownHandler = function (e) {
 
 		if((e.target || e.srcElement).id != kanbanDragElementId && !e.target.classList.contains('kanban-container')){
-			console.log(e.target);
 			return;
 		}
 

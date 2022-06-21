@@ -1,5 +1,7 @@
+
+
 // Utilisation d'une sorte de namespace en JS
-let scrumKanban = {};
+scrumKanban = {};
 (function(o) {
 
 	// TODO see https://htmldom.dev/drag-to-scroll/
@@ -24,6 +26,7 @@ let scrumKanban = {};
 	o.config = {
 		interface_kanban_url: '../interface-kanban.php',
 		interface_liveupdate_url: '../interface-liveupdate.php',
+		srumprojectModuleFolderUrl: '../',
 		fk_kanban : false,
 		token: false // to set at init
 	};
@@ -66,7 +69,7 @@ let scrumKanban = {};
 			},
 			context: function(el, e) {
 				// callback when any board's item are right clicked
-				console.log("Trigger on all items right-click!");
+				console.log("Trigger on all items right-click! at (" + `${e.pageX}` + "," + `${e.pageX}` + ")");
 			},
 			dropEl: function(el, target, source, sibling){
 
@@ -91,16 +94,13 @@ let scrumKanban = {};
 			dragBoard        : function (el, source) {
 				// callback when any board stop drag
 
-				// a cause d'un bug d'affichage j'enlève le footer lors du déplacement
-				let boardSelector = el.getAttribute('data-id');
-				$('.kanban-board[data-id=' + boardSelector + '] footer').hide();
+				// // a cause d'un bug d'affichage j'enlève le footer lors du déplacement
+				// let boardSelector = el.getAttribute('data-id');
+				// $('.kanban-board[data-id=' + boardSelector + '] footer').hide();
 			},
 			dropBoard: function (el, target, source, sibling) {
 				// callback when any board stop drag
-
-
-				// TODO
-				console.log(el);
+				// TODO : voir si pas plus judicieux d'envoyer la position de tout les boards au lieux de qq chose de relatif
 
 				let sendData = {
 					'fk_kanban': o.config.fk_kanban,
@@ -112,9 +112,9 @@ let scrumKanban = {};
 					// do stuff ?
 				});
 
-				// reaffiche le bouton du footer
-				let boardSelector = el.getAttribute('data-id');
-				$('.kanban-board[data-id=' + boardSelector + '] footer').slideDown();
+				// // reaffiche le bouton du footer
+				// let boardSelector = el.getAttribute('data-id');
+				// $('.kanban-board[data-id=' + boardSelector + '] footer').slideDown();
 			},
 			dragendBoard     : function (el) {
 
@@ -205,6 +205,11 @@ let scrumKanban = {};
 
 		// Get all board
 		o.getAllBoards();
+
+
+		o.loadJs(o.config.srumprojectModuleFolderUrl + '/js/liveedit.js', function (){
+			o.setLiveEditForBoardsTitle();
+		});
 
 
 		// Add new list (column)
@@ -495,6 +500,84 @@ let scrumKanban = {};
 				}
 			}
 		});
+	}
+
+	o.setLiveEditForBoardsTitle = function (){
+		let boardTitleSelector = '.kanban-list-label-field';
+
+		// /** Apparement l'event click suffit mais j'avais créée ça pour detecter le drag et le click du coup j'ai envie de le garder au cas ou il est possible que j'en ai besoin plus tard  */
+		// let startX; // start Y coordinate of the mouse
+		// let startY; // start Y coordinate of the mouse
+		//
+		// $(document).on('mousedown',boardTitleSelector, function(event) {
+		// 	startX = event.pageX;
+		// 	startY = event.pageY;
+		// });
+		//
+		//
+		// $(document).on('mouseup',boardTitleSelector, function(event) {
+		// 	const diffX = Math.abs(event.pageX - startX);
+		// 	const diffY = Math.abs(event.pageY - startY);
+		// 	let eventType;
+		// 	let delta = 6; // delta of click to be a drag or a click
+		// 	if (diffX < delta && diffY < delta) {
+		// 		// It's a click of ${diffX}px on X`;
+		//
+		// 		// to avoid miss click or drag I use
+		// 		if(SpLiveEdit.newToken.length == 0) {
+		// 			SpLiveEdit.newToken = o.newToken; // mise à jour du token
+		// 		}
+		//
+		// 		SpLiveEdit.setLiveUpdateAttributeForDolField($(this), {
+		// 			element : 'scrumproject_scrumkanbanlist',
+		// 			fk_element : o.getDolListIdFromJKanbanBoardDomId($(this).closest('.kanban-board').attr('data-id')),
+		// 			field : 'label',
+		// 			liveEditInterfaceUrl: o.config.interface_liveupdate_url
+		// 		});
+		//
+		// 		SpLiveEdit.setSPLiveEdit($(this));
+		// 		$(this).trigger('focus');
+		//
+		// 	} else {
+		// 		// It's a Swipe of ${diffX}px on X`;
+		// 	}
+		// });
+
+
+		$(document).on('click',boardTitleSelector, function() {
+			if(SpLiveEdit.newToken.length == 0) {
+				SpLiveEdit.newToken = o.newToken; // mise à jour du token
+			}
+
+			SpLiveEdit.setLiveUpdateAttributeForDolField($(this), {
+				element : 'scrumproject_scrumkanbanlist',
+				fk_element : o.getDolListIdFromJKanbanBoardDomId($(this).closest('.kanban-board').attr('data-id')),
+				field : 'label',
+				liveEditInterfaceUrl: o.config.interface_liveupdate_url
+			});
+
+			SpLiveEdit.setSPLiveEdit($(this));
+			$(this).trigger('focus');
+		});
+
+		$(document).on('blur',boardTitleSelector+'.live-edit', function(){
+			return SpLiveEdit.removeSPLiveEdit($(this));
+		});
+	}
+
+
+	o.loadJs = function (jsFileUrl, callBackFunction){
+		// Chargement de la librairie js
+		let advps_script_to_load = document.createElement('script')
+		advps_script_to_load.setAttribute('src', jsFileUrl);
+		document.body.appendChild(advps_script_to_load);
+		// now wait for it to load...
+		advps_script_to_load.onload = () => {
+			if (typeof callBackFunction === 'function'){
+				// script has loaded, you can now use it safely
+				callBackFunction();
+			}
+		};
 	}
 
 })(scrumKanban);

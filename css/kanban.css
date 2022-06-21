@@ -11,6 +11,8 @@
 	--scrollbar-size : 11px;
 	--scrollbar-track-color : rgba(0, 0, 0, 0.1);
 	--scrollbar-thumb-color : rgba(197, 197, 197, 0.85);
+
+	--list-text-color : var(--box-text-color);
 }
 
 
@@ -159,10 +161,48 @@ section#kanban{
 	color: var(--default-strong-color);
 }
 
-.kanban-container{
-	--list-text-color : var(--box-text-color);
+.kanban-list-label-field{
+	position: relative;
+	max-width: calc(100% - 30px);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
+/** LIVE EDIT **/
+.kanban-list-label-field.live-edit{
+	--border-color: rgba(0,0,0,0);
+}
+.kanban-list-label-field.live-edit:hover, .kanban-list-label-field.live-edit:focus{
+	outline: none;
+	background-color: #fff;
+	box-shadow: 0 0 0 3px #fff;
+}
+.kanban-list-label-field.live-edit:focus, .scrumkanban-page .kanban-board header .kanban-title-board .kanban-list-label-field.live-edit{
+	text-overflow: clip !important;
+	white-space: nowrap !important;
+	color: var(--default-strong-color);
+}
+
+.dropdown-btn{
+	display: block;
+	position: absolute;
+	top:0px;
+	right:0px;
+	min-width: 18px;
+	min-height: 18px;
+	cursor: pointer;
+	text-align: center;
+	color: #999999;
+}
+.dropdown-btn:hover{
+	color: #606060;
+}
+
+.dropdown-btn::before{
+	font-family: "Font Awesome 5 Free";
+	content: "\f142";
+}
 
 /*
 * Kanban item
@@ -263,10 +303,7 @@ section#kanban{
 .scrumkanban-page  .kanban-board header .kanban-title-board{
 	display: block;
 	position: relative;
-	max-width: calc(100% - 30px);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	width: 100%;
 }
 
 .kanban-list-add-button{

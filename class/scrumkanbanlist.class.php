@@ -1063,7 +1063,7 @@ class ScrumKanbanList extends CommonObject
 	public function getKanBanListObjectFormatted(){
 		$object = new stdClass();
 		$object->id = 'board-' . $this->id; // kanban dom id
-		$object->title = $this->label;
+		$object->title = '<div class="kanban-list-label-field">'.$this->label.'</div> <div class="dropdown-btn"></div>';
 		$object->class = 'kankan-default-header'; // 'classA,classB,classC,...';
 
 		$object->objectid = $this->id;

@@ -86,11 +86,12 @@ var dragula = require('dragula');
         self.drakeBoard = self
           .dragula([self.container], {
             moves: function (el, source, handle, sibling) {
-              if (!self.options.dragBoards) return false
-              return (
-                handle.classList.contains('kanban-board-header') ||
-                handle.classList.contains('kanban-title-board')
-              )
+				if (!self.options.dragBoards) return false
+				return (
+					handle.classList.contains('kanban-board-header') ||
+					handle.classList.contains('kanban-title-board') ||
+					handle.classList.contains('kanban-list-label-field') /** SPE KANBAN SCRUM PROJECT ATM */
+				)
             },
             accepts: function (el, target, source, sibling) {
               return target.classList.contains('kanban-container')

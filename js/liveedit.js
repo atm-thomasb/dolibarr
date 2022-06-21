@@ -16,14 +16,13 @@ jQuery(function ($) {
 	$(document).on('keydown', '.live-edit', function(e) {
 		if(e.key == 'Enter'){
 			e.preventDefault();
-			SpLiveEdit.sendLiveEditFromElement($(this), true);
 			$(this).trigger('blur');
 		}
 	});
 
 
 // Utilisation d'une sorte de namespace en JS
-	let SpLiveEdit = {};
+	SpLiveEdit = {};
 	(function(o) {
 		// lang par défaut, les valeurs son ecrasées lors du chargement de la page en fonction de la langue
 		o.lang = {
@@ -71,6 +70,15 @@ jQuery(function ($) {
 			el.attr('contenteditable', true);
 		};
 
+		/**
+		 * @param {jQuery} el
+		 */
+		o.removeSPLiveEdit = function (el) {
+			el.removeClass('live-edit');
+			el.attr('contenteditable', false);
+			el.removeAttr('contenteditable');
+			el.removeAttr('data-live-edit');
+		};
 
 		/**
 		 *
@@ -190,6 +198,23 @@ jQuery(function ($) {
 			else{
 				$.jnotify('ErrorMessageEmpty', 'error', {timeout: 0, type: 'error'},{ remove: function (){} } );
 			}
+		}
+
+		/**
+		 * @param {JQuery} $el           dom element to pimp
+		 * @param string $element             the commonobject element for dolibarr
+		 * @param int    $fk_element          the object id
+		 * @param string $field               field code to update
+		 * @return string
+		 */
+		o.setLiveUpdateAttributeForDolField = function($el, {element, fk_element, field, liveEditInterfaceUrl}){
+			let url = liveEditInterfaceUrl
+				+ '?element=' 		+ element
+				+ '&fk_element=' 	+ fk_element
+				+ '&field=' 		+ field;
+
+			$el.attr('data-ajax-target', url);
+			$el.attr('data-live-edit', 1);
 		}
 
 	})(SpLiveEdit);
