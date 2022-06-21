@@ -91,15 +91,7 @@ class ContextMenu {
 		const contextMenu = this.renderMenu();
 
 		document.addEventListener('click', (e) => {
-			if(e.target.tagName == 'BODY' || e.target.tagName == 'HTML'){
-				contextMenu.remove();
-			}else{
-				this.targetNode.forEach((target) => {
-					if (!e.target.contains(target)) {
-						contextMenu.remove();
-					}
-				});
-			}
+			contextMenu.remove();
 		});
 
 		window.addEventListener("blur", () => this.closeMenu(contextMenu));
@@ -118,31 +110,36 @@ class ContextMenu {
 		});
 
 		this.targetNode.forEach((target) => {
-
 			target.addEventListener(this.triggerType, (e) => {
-				e.preventDefault();
-				this.isOpened = true;
+				this.openMenu (contextMenu, e);
+			});
+		});
 
-				const {clientX, clientY} = e;
-				document.body.appendChild(contextMenu);
+		return contextMenu;
+	}
 
-				const positionY =
-					clientY + contextMenu.scrollHeight >= window.innerHeight
-						? window.innerHeight - contextMenu.scrollHeight - 20
-						: clientY;
-				const positionX =
-					clientX + contextMenu.scrollWidth >= window.innerWidth
-						? window.innerWidth - contextMenu.scrollWidth - 20
-						: clientX;
+	openMenu (contextMenu, e){
+		e.stopPropagation();
+		this.isOpened = true;
 
-				contextMenu.setAttribute(
-					"style",
-					`--width: ${contextMenu.scrollWidth}px;
+		const {clientX, clientY} = e;
+		document.body.appendChild(contextMenu);
+
+		const positionY =
+			clientY + contextMenu.scrollHeight >= window.innerHeight
+				? window.innerHeight - contextMenu.scrollHeight - 20
+				: clientY;
+		const positionX =
+			clientX + contextMenu.scrollWidth >= window.innerWidth
+				? window.innerWidth - contextMenu.scrollWidth - 20
+				: clientX;
+
+		contextMenu.setAttribute(
+			"style",
+			`--width: ${contextMenu.scrollWidth}px;
 					  --height: ${contextMenu.scrollHeight}px;
 					  --top: ${positionY}px;
 					  --left: ${positionX}px;`
-				);
-			});
-		});
+		);
 	}
 }

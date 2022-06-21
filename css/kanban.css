@@ -188,7 +188,7 @@ section#kanban{
 	color: var(--default-strong-color);
 }
 
-.dropdown-btn{
+.kanban-header-dropdown-btn{
 	display: block;
 	position: absolute;
 	top:0px;
@@ -199,11 +199,11 @@ section#kanban{
 	text-align: center;
 	color: #999999;
 }
-.dropdown-btn:hover{
+.kanban-header-dropdown-btn:hover{
 	color: #606060;
 }
 
-.dropdown-btn::before{
+.kanban-header-dropdown-btn::before{
 	font-family: "Font Awesome 5 Free";
 	content: "\f142";
 }
