@@ -245,7 +245,7 @@ class ScrumKanban extends CommonObject
 			$backLogList = new ScrumKanbanList($this->db);
 			$backLogList->fk_scrum_kanban = $this->id;
 			$backLogList->label = $langs->transnoentities('KanbanBackLogList');
-			$backLogList->code = 'backlog';
+			$backLogList->ref_code = 'backlog';
 			$backLogList->fk_rank = 1;
 			$res = $backLogList->create($user, $notrigger);
 			if($res<0){
@@ -324,7 +324,7 @@ class ScrumKanban extends CommonObject
 			$doneList = new ScrumKanbanList($this->db);
 			$doneList->fk_scrum_kanban = $this->id;
 			$doneList->label = $langs->transnoentities('KanbanDoneList');
-			$doneList->code = 'done';
+			$doneList->ref_code = 'done';
 			$doneList->fk_rank = 2;
 			$res = $doneList->create($user, $notrigger);
 			if($res<0){
@@ -476,7 +476,7 @@ class ScrumKanban extends CommonObject
 	 * @param  int         $offset       Offset
 	 * @param  array       $filter       Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
 	 * @param  string      $filtermode   Filter mode (AND or OR)
-	 * @return array|int                 int <0 if KO, array of pages if OK
+	 * @return ScrumKanban[]|int                 int <0 if KO, array of pages if OK
 	 */
 	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
 	{

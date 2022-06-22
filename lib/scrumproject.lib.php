@@ -93,7 +93,7 @@ function scrumprojectAdminPrepareHead()
  * @param int    $maxCacheByType max number of cached element by type
  * @return CommonObject object of $elementType, fetched by $elementId
  */
-function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheByType = 10)
+function scrumProjectGetObjectByElement($elementType, $elementId = false, $maxCacheByType = 10)
 {
 	global $conf, $db;
 
@@ -291,7 +291,11 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheB
 		{
 			if (class_exists($classname))
 			{
-				return scrumProjectGetObjectFromCache($classname, $elementId, $maxCacheByType);
+				if($elementId === false){
+					return new $classname($db);
+				}else{
+					return scrumProjectGetObjectFromCache($classname, $elementId, $maxCacheByType);
+				}
 			}
 		}
 	}
@@ -308,21 +312,13 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheB
 function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheByType = 10){
 	global $db, $TScrumProjectGetObjectFromCache;
 
-
 	if(!class_exists($objetClassName)){
 		// TODO : Add error log here
 		return false;
 	}
 
-
-
 	if(empty($TScrumProjectGetObjectFromCache[$objetClassName][$fk_object])){
 		$object = new $objetClassName($db);
-
-		if(empty($fk_object)){
-			return $object;
-		}
-
 		if($object->fetch($fk_object, false) <= 0)
 		{
 			return false;

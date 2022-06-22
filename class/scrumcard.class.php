@@ -985,8 +985,15 @@ class ScrumCard extends CommonObject
 		 */
 		$res = $this->fetchElementObject();
 
-		if($res>0){
+		if($res){
 			$elementObject = $this->elementObject;
+
+			if(is_callable(array($elementObject, 'getKanBanItemObjectFormatted'))){
+				$objectFromElement = $elementObject->getKanBanItemObjectFormatted($this, $object);
+				if($objectFromElement){
+					return $objectFromElement;
+				}
+			}
 
 			$object->element = $elementObject->element;
 
@@ -995,8 +1002,26 @@ class ScrumCard extends CommonObject
 				$useTime = true;
 				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
 				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
-//				$object->label = $elementObject->showOutputFieldQuick('label'); // TODO les scrum task n'ont pas de libellé
 
+				$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $elementObject->fk_scrum_user_story);
+
+				if($us ){
+					$object->label = $us->label;
+
+//					/** @var Task $elementObject */
+//					$task = scrumProjectGetObjectByElement('task', $us->fk_task);
+//					if($task){
+//						$object->label = $task->label; // les us plannifiées n'ont pas de libellé
+//					}
+//					else{
+//						$object->label = '<span class="error">Task Error</span>';
+//					}
+				}
+				else{
+					$object->label = '<span class="error">US Error</span>';
+				}
+
+				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
 				if(is_callable(array($elementObject, 'LibStatut'))){
@@ -1010,6 +1035,7 @@ class ScrumCard extends CommonObject
 				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
 				$object->label = $elementObject->showOutputFieldQuick('label');
 
+				$object->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story-task';
 
 				if(is_callable(array($elementObject, 'LibStatut'))){
@@ -1289,41 +1315,26 @@ class ScrumCard extends CommonObject
 
 	/**
 	 *	Get element object and children from database
-	 *
-	 * 	@param		string		$element_type	used to load children from database
-	 * 	@param		DoliDB		$db	            database
-	 *	@return     object | int        				>0 if OK, <0 if KO, 0 if not found
-	 */
-	static public function getElementObject($elementType, &$db)
-	{
-
-		if(!function_exists('scrumProjectGetObjectByElement')){
-			include_once __DIR__ .'/../lib/scrumproject.lib.php';
-		}
-
-		return scrumProjectGetObjectByElement($elementType);
-	}
-
-	/**
-	 *	Get element object and children from database
 	 *	@param      bool	$force       force fetching new
 	 *	@return     int         				>0 if OK, <0 if KO, 0 if not found
 	 */
 	public function fetchElementObject($force = false)
 	{
-		if(empty($force) && is_object($this->elementObject) && $this->elementObject->id > 0)
-		{
+		if(empty($force) && is_object($this->elementObject) && $this->elementObject->id > 0){
 			// use cache
 			return 1;
 		}
 
-		$this->elementObject = self::getElementObject($this->element_type, $this->db);
-
-		if(is_object($this->elementObject))
-		{
-			return $this->elementObject->fetch($this->fk_element);
+		if(!function_exists('scrumProjectGetObjectByElement')){
+			require_once __DIR__ . '/../lib/scrumproject.lib.php';
 		}
 
+		$this->elementObject = scrumProjectGetObjectByElement($this->element_type, $this->fk_element);
+		if($this->elementObject !== false){
+			return 1;
+		}
+
+		$this->elementObject = false;
 		return 0;
 	}
 

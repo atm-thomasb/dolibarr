@@ -20,7 +20,7 @@ CREATE TABLE llx_scrumproject_scrumkanbanlist(
 	fk_scrum_kanban integer NOT NULL, 
 	fk_rank integer NOT NULL,
     label varchar(255),
-    code varchar(20),
+    ref_code varchar(20),
     description text,
 	note_public text, 
 	note_private text, 

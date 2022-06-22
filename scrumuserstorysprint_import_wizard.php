@@ -265,7 +265,7 @@ if (empty($reshook))
 					$fk_scrum_sprint = GETPOSTINT('fk_scrum_sprint');
 
 					$scrumUserStory = new ScrumUserStory($db);
-					$scrumUserStory->business_value = '';
+					$scrumUserStory->business_value = $scrumUserStory->fields['business_value']['default'];
 					$scrumUserStory->ref = $scrumUserStory->fields['ref']['default'];
 					$scrumUserStory->status = $scrumUserStory->fields['status']['default'];
 					$scrumUserStory->label = $task->label;

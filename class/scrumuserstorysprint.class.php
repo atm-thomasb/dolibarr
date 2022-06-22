@@ -264,6 +264,43 @@ class ScrumUserStorySprint extends CommonObject
 			if($this->refreshSprintQuantities($user)<0){
 				return -1;
 			}
+
+			// Kanban
+			if(!class_exists('ScrumKanban')){ require_once __DIR__ .'/scrumkanban.class.php'; }
+			if(!class_exists('ScrumKanbanList')){ require_once __DIR__ .'/scrumkanbanlist.class.php'; }
+			if(!class_exists('ScrumCard')){ require_once __DIR__ .'/scrumcard.class.php'; }
+
+			$staticScrumKanban = new ScrumKanban($this->db);
+			$TScrumKanban = $staticScrumKanban->fetchAll('','', 1, 0, array('fk_scrum_sprint' => $this->fk_scrum_sprint));
+			if(is_array($TScrumKanban) && !empty($TScrumKanban)){
+				foreach ($TScrumKanban as $scrumkanban){
+					$staticScrumKanbanList = new ScrumKanbanList($this->db);
+					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => 'fk_scrum_kanban = '. intval($scrumkanban->id) .' AND  ref_code = \'backlog\''));
+
+					if(!empty($TScrumKanbanList) && is_array($TScrumKanbanList)){
+						$backLogList = reset($TScrumKanbanList);
+
+						$card = new ScrumCard($this->db);
+						$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $this->fk_scrum_user_story);
+						if($us){
+							$card->label = $us->label;
+						}
+						$card->fk_element = $this->id;
+						$card->element_type = $this->element;
+						$card->fk_scrum_kanbanlist = $backLogList->id;
+						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+						$res = $card->create($user, $notrigger);
+						if($res<=0){
+							$this->errors[] = $card->errorsToString();
+							$resultcreate = $res;
+						}
+					}
+				}
+			}
+			else{
+
+			}
+
 		}
 
 		return $resultcreate;
