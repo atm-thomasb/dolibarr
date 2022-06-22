@@ -283,7 +283,7 @@ section#kanban{
 	background: var(--default-block-background-color);
 	border-radius: var(--box-border-radius) !important;
 	box-shadow: var(--box-shadow);
-	overflow: hidden;
+	/*overflow: hidden;*/
 
 
 	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
@@ -390,4 +390,30 @@ section#kanban{
 
 .scrumkanban-page  div.jnotify-background {
 	box-shadow: 2px 2px 5px rgba(0,0,0,.3) !important;
+}
+
+
+
+
+/*
+*  highlight system
+*/
+
+#modal-background {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,.7);
+}
+
+#modal-background.active {
+	display: block;
+}
+
+.highlight-element{
+	position: relative;
+	z-index: 100;
 }

@@ -121,3 +121,7 @@
     transform: translateX(0);
   }
 }
+
+.contextMenu .fa {
+	margin-right: 7px;
+}

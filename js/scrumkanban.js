@@ -1,5 +1,3 @@
-
-
 // Utilisation d'une sorte de namespace en JS
 scrumKanban = {};
 (function(o) {
@@ -53,6 +51,10 @@ scrumKanban = {};
 		CloseDialog:"Fermer",
 		Copy:"Copier",
 		Delete:"Supprimer",
+		CardClone:"Cloner",
+		CardSplit:"Séparer",
+		AssignMe:"M'assigner à la tâche",
+		UnAssignMe:"Me désengager de la tâche",
 		ShowDolCard:"Afficher la fiche"
 	};
 
@@ -203,6 +205,10 @@ scrumKanban = {};
 		});
 
 		o.addDropDownMenuList();
+
+		// init Highlight backround
+		o.initHighlight();
+
 
 		// TODO : bon pour l'instant ça marche pas
 		//  Doit normalement permettre de scroll les liste en même temps que l'on fait un drag and drop
@@ -404,7 +410,6 @@ scrumKanban = {};
 			, showClose: true                           // determines if the "Close" link should be shown if notification is also sticky
 			, fadeSpeed: 150                           // the speed to fade messages out (in milliseconds)
 			, slideSpeed: 250                           // the speed used to slide messages out (in milliseconds)
-
 		}
 
 
@@ -529,7 +534,6 @@ scrumKanban = {};
 		// 	}
 		// });
 
-
 		$(document).on('click',boardTitleSelector, function() {
 			if(SpLiveEdit.newToken.length == 0) {
 				SpLiveEdit.newToken = o.newToken; // mise à jour du token
@@ -640,6 +644,38 @@ scrumKanban = {};
 
 			let menuItems = [
 				{
+					content: '<i class="fa fa-user-plus" ></i>' + o.langs.AssignMe,
+					events: {
+						click: function (e) {
+							o.setEventMessage('DSL pas possible pour l\'instant', false);
+						}
+					}
+				},
+				{
+					content: '<i class="fa fa-user-minus" ></i>' + o.langs.UnAssignMe,
+					events: {
+						click: function (e) {
+							o.setEventMessage('DSL pas possible pour l\'instant', false);
+						}
+					}
+				},
+				{
+					content: o.menuIcons.copyIcon + o.langs.CardClone,
+					events: {
+						click: function (e) {
+							o.setEventMessage('DSL pas possible pour l\'instant', false);
+						}
+					}
+				},
+				{
+					content: '<i class="fa fa-columns" ></i>' + o.langs.CardSplit,
+					events: {
+						click: function (e) {
+							o.setEventMessage('DSL pas possible pour l\'instant', false);
+						}
+					}
+				},
+				{
 					content: o.menuIcons.deleteIcon + o.langs.Delete,
 					events: {
 						click: function (e) {
@@ -662,6 +698,39 @@ scrumKanban = {};
 			let contextMenu = tclick.init();
 			tclick.openMenu (contextMenu, e);
 		}
+	}
+
+	/**
+	 * init Highlight
+	 */
+	o.initHighlight = function(){
+		$('body').append('<div id="modal-background" ></div>');
+
+		// $(document).on('click','.navigation', function() {
+		// 	o.setHighlight('.navigation');
+		// });
+
+		$(document).on('click','#modal-background', function() {
+			o.removeHighlight();
+		});
+	}
+
+	/**
+	 * remove all Highlight
+	 */
+	o.removeHighlight = function(){
+		$('#modal-background').removeClass('active');
+		$('.highlight-element').removeClass('highlight-element');
+	}
+
+	/**
+	 * highlight element
+	 * @param targetsSelector
+	 */
+	o.setHighlight = function(targetsSelector){
+		// todo see for usage of bringdown avec une opacité à 50% à la place du highlight
+		$('#modal-background').addClass('active');
+		$(targetsSelector).addClass('highlight-element');
 	}
 
 })(scrumKanban);
