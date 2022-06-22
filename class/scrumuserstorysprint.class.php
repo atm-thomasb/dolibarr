@@ -27,6 +27,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 
 require_once __DIR__ .'/scrumuserstory.class.php';
 require_once __DIR__ .'/scrumsprint.class.php';
+require_once __DIR__ . '/commonObjectQuickTools.trait.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -35,6 +36,9 @@ require_once __DIR__ .'/scrumsprint.class.php';
  */
 class ScrumUserStorySprint extends CommonObject
 {
+
+	use CommonObjectQuickTools;
+
 	/**
 	 * @var string ID of module.
 	 */
@@ -1027,19 +1031,6 @@ class ScrumUserStorySprint extends CommonObject
 	}
 
 
-	/**
-	 * Return HTML string to show a field into a page
-	 *
-	 * @param  string  $key            Key of attribute
-	 * @param  string  $moreparam      To add more parameters on html input tag
-	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
-	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
-	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
-	 * @return string
-	 */
-	public function showOutputFieldQuick($key, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = ''){
-		return $this->showOutputField($this->fields[$key], $key, $this->{$key}, $moreparam, $keysuffix, $keyprefix, $morecss);
-	}
 
 	/**
 	 * Return HTML string to show a field into a page

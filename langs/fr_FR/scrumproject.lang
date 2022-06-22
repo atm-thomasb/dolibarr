@@ -224,3 +224,5 @@ ScrumKanbans = Kanbans
 StatusScrumKanbanDraft = Brouillon
 StatusScrumKanbanReady = Prêt
 StatusScrumKanbanDone = Terminée
+ScrumCardLinkedTo=Lié à
+ScrumCardLinkedToHelp=Element Dolibarr auquel cette carte est liée

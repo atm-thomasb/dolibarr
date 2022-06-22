@@ -25,6 +25,7 @@
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
+require_once __DIR__ . '/commonObjectQuickTools.trait.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -33,6 +34,9 @@ require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
  */
 class ScrumTask extends CommonObject
 {
+
+	use CommonObjectQuickTools;
+
 	/**
 	 * @var string ID of module.
 	 */
@@ -123,6 +127,8 @@ class ScrumTask extends CommonObject
 	public $rowid;
 	public $ref;
 	public $fk_scrum_user_story_sprint;
+	public $qty_planned;
+	public $qty_consumed;
 	public $label;
 	public $description;
 	public $note_public;
@@ -369,7 +375,7 @@ class ScrumTask extends CommonObject
 	 * @param  int         $offset       Offset
 	 * @param  array       $filter       Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
 	 * @param  string      $filtermode   Filter mode (AND or OR)
-	 * @return array|int                 int <0 if KO, array of pages if OK
+	 * @return self[]|int                 int <0 if KO, array of pages if OK
 	 */
 	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
 	{

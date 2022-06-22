@@ -308,13 +308,21 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheB
 function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheByType = 10){
 	global $db, $TScrumProjectGetObjectFromCache;
 
+
 	if(!class_exists($objetClassName)){
 		// TODO : Add error log here
 		return false;
 	}
 
+
+
 	if(empty($TScrumProjectGetObjectFromCache[$objetClassName][$fk_object])){
 		$object = new $objetClassName($db);
+
+		if(empty($fk_object)){
+			return $object;
+		}
+
 		if($object->fetch($fk_object, false) <= 0)
 		{
 			return false;

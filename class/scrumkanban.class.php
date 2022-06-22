@@ -26,6 +26,7 @@
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 require_once __DIR__ . '/scrumkanbanlist.class.php';
 require_once __DIR__ . '/scrumcard.class.php';
+require_once __DIR__ . '/../lib/scrumproject.lib.php';
 
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
@@ -246,7 +247,78 @@ class ScrumKanban extends CommonObject
 			$backLogList->label = $langs->transnoentities('KanbanBackLogList');
 			$backLogList->code = 'backlog';
 			$backLogList->fk_rank = 1;
-			$backLogList->create($user, $notrigger);
+			$res = $backLogList->create($user, $notrigger);
+			if($res<0){
+				$this->errors[] = $backLogList->errorsToString();
+				return  -1;
+			}
+
+			$errors = 0;
+			if($this->fk_scrum_sprint > 0){
+				if(!class_exists('ScrumUserStorySprint')){	require_once __DIR__ . '/scrumuserstorysprint.class.php'; }
+				if(!class_exists('ScrumUserStory')){ require_once __DIR__ . '/scrumuserstory.class.php'; }
+				if(!class_exists('ScrumTask')){ require_once __DIR__ . '/scrumtask.class.php'; }
+
+				// Add users stories to sprint
+				$staticScrumUserStorySprint = new ScrumUserStorySprint($this->db);
+				/**
+				 * @var ScrumUserStorySprint[] $TUsersStorySprint
+				 */
+				$TUsersStorySprint = $staticScrumUserStorySprint->fetchAll( 'ASC', 'business_value',0,  0, array('fk_scrum_sprint' => $this->fk_scrum_sprint));
+
+				if(!empty($TUsersStorySprint) && is_array($TUsersStorySprint)){
+					foreach ($TUsersStorySprint as $usSprint){
+						/**
+						 * @var ScrumUserStory $us
+						 */
+						$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $usSprint->fk_scrum_user_story);
+						if($us){
+							$card = new ScrumCard($this->db);
+							$card->label = $us->label;
+							$card->fk_element = $usSprint->id;
+							$card->element_type = $usSprint->element;
+							$card->fk_scrum_kanbanlist = $backLogList->id;
+							$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+							$res = $card->create($user, $notrigger);
+							if($res>0){
+
+								// Ajout des tâches
+								$staticTask = new ScrumTask($this->db);
+								$TScrumTask = $staticTask->fetchAll('', '', 0, 0, array('fk_scrum_user_story_sprint' => $usSprint->id));
+								if(!empty($TScrumTask) && is_array($TScrumTask)){
+									foreach ($TScrumTask as $scrumTask){
+										$card = new ScrumCard($this->db);
+										$card->label = $scrumTask->label;
+										$card->fk_element = $scrumTask->id;
+										$card->element_type = $scrumTask->element;
+										$card->fk_scrum_kanbanlist = $backLogList->id;
+										$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+										$res = $card->create($user, $notrigger);
+										if($res<=0){
+											$this->errors[] = $card->errorsToString();
+											$errors++;
+										}
+									}
+								}
+							}else{
+								$this->errors[] = $card->errorsToString();
+								$errors++;
+							}
+						}else{
+							$this->errors[] = 'US not found';
+							$errors++;
+						}
+					}
+				}elseif($TUsersStorySprint < 0){
+					$this->errors[] = $staticScrumUserStorySprint->errorsToString();
+					$errors++;
+				}
+			}
+
+			if($errors){
+				$resultcreate = -1;
+			}
+
 
 			// create done list
 			$doneList = new ScrumKanbanList($this->db);
@@ -254,7 +326,11 @@ class ScrumKanban extends CommonObject
 			$doneList->label = $langs->transnoentities('KanbanDoneList');
 			$doneList->code = 'done';
 			$doneList->fk_rank = 2;
-			$doneList->create($user, $notrigger);
+			$res = $doneList->create($user, $notrigger);
+			if($res<0){
+				$this->errors[] = $doneList->errorsToString();
+				return  -1;
+			}
 		}
 		//$resultvalidate = $this->validate($user, $notrigger);
 

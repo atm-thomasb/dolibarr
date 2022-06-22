@@ -220,11 +220,11 @@ section#kanban{
 }
 
 .kanban-item[data-type="scrum-user-story"]{
-	--kanban-item-color : #e34f00;
+	--kanban-item-color : #ffa500;
 }
 
 .kanban-item[data-type="scrum-user-story-task"]{
-	--kanban-item-color : #d0b400;
+	--kanban-item-color : #ffeb00;
 }
 
 .kanban-drag{
@@ -271,6 +271,7 @@ section#kanban{
 
 .kanban-item__status{
 	font-size: 0.8em;
+	margin-left: 10px;
 }
 
 
