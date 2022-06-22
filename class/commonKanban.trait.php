@@ -21,19 +21,20 @@ trait CommonKanban {
 		global $langs;
 		$userImage = $userDropDownImage = '';
 		$modulepart = 'userphoto';
-		if (!empty($user->photo)) {
+//		if (!empty($user->photo)) {
 			if(!class_exists('Form')){ include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php'; }
 			return Form::showphoto($modulepart, $user, 0, 0, 0, $cssClass, $imageSize, $fullSize, 1);
-		} else {
-			$nophoto = '/public/theme/common/user_anonymous.png';
-			if ($user->gender == 'man') {
-				$nophoto = '/public/theme/common/user_man.png';
-			}
-			if ($user->gender == 'woman') {
-				$nophoto = '/public/theme/common/user_woman.png';
-			}
-
-			return '<img title="'.dol_escape_htmltag($user->getFullName($langs)).'" class="photo'.$modulepart.($cssClass ? ' '.$cssClass : '').'" alt="No photo" src="'.DOL_URL_ROOT.$nophoto.'">';
-		}
+//		} else {
+//			$nophoto = '/public/theme/common/user_anonymous.png';
+//			if ($user->gender == 'man') {
+//				$nophoto = '/public/theme/common/user_man.png';
+//			}
+//			if ($user->gender == 'woman') {
+//				$nophoto = '/public/theme/common/user_woman.png';
+//			}
+//
+//			return '<img title="'.dol_escape_htmltag($user->getFullName($langs)).'" class="photo'.$modulepart.($cssClass ? ' '.$cssClass : '').'" alt="No photo" src="'.DOL_URL_ROOT.$nophoto.'">';
+//		}
 	}
+
 }

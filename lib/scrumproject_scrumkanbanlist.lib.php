@@ -33,10 +33,10 @@ function scrumkanbanlistPrepareHead($object)
 
 	$langs->load("scrumproject@scrumproject");
 
-	$showtabofpagecontact = 1;
+	$showtabofpagecontact = 0;
 	$showtabofpagenote = 1;
 	$showtabofpagedocument = 1;
-	$showtabofpageagenda = 1;
+	$showtabofpageagenda = 0;
 
 	$h = 0;
 	$head = array();

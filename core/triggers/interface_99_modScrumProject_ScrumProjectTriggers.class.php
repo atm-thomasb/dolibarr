@@ -115,6 +115,14 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		return 0;
 	}
 
+	/**
+	 * @param           $action
+	 * @param  ScrumSprint         $object
+	 * @param User      $user
+	 * @param Translate $langs
+	 * @param Conf      $conf
+	 * @return int
+	 */
 	public function scrumSprintCreate($action, $object, User $user, Translate $langs, Conf $conf) {
 		$object->fetch($object->id);
 

@@ -91,21 +91,17 @@ class ContextMenu {
 		const contextMenu = this.renderMenu();
 
 		document.addEventListener('click', (e) => {
-			contextMenu.remove();
+			if (!$(e.target).closest(this.target).length) {
+				contextMenu.remove();
+			}
 		});
 
 		window.addEventListener("blur", () => this.closeMenu(contextMenu));
 
-
 		document.addEventListener('contextmenu', (e) => {
-			if(e.target.tagName == 'BODY' || e.target.tagName == 'HTML'){
+			console.log('contextmenu');
+			if (!$(e.target).closest(this.target).length) {
 				contextMenu.remove();
-			}else{
-				this.targetNode.forEach((target) => {
-					if (!e.target.contains(target)) {
-						contextMenu.remove();
-					}
-				});
 			}
 		});
 
@@ -119,7 +115,7 @@ class ContextMenu {
 	}
 
 	openMenu (contextMenu, e){
-		e.stopPropagation();
+
 		this.isOpened = true;
 
 		const {clientX, clientY} = e;

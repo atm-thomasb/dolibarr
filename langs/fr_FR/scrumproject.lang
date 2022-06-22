@@ -226,3 +226,11 @@ StatusScrumKanbanReady = Prêt
 StatusScrumKanbanDone = Terminée
 ScrumCardLinkedTo=Lié à
 ScrumCardLinkedToHelp=Element Dolibarr auquel cette carte est liée
+
+
+TypeContact_scrumproject_scrumsprint_internal_PO = Product Owner
+TypeContact_scrumproject_scrumsprint_internal_DEV = Développeur
+TypeContact_scrumproject_scrumcard_internal_PO = Product Owner
+TypeContact_scrumproject_scrumcard_internal_DEV = Développeur
+TypeContact_scrumproject_scrumtask_internal_PO = Product Owner
+TypeContact_scrumproject_scrumtask_internal_DEV = Développeur

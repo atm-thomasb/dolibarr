@@ -80,7 +80,7 @@ scrumKanban = {};
 			},
 			context: function(el, e) {
 				// callback when any board's item are right clicked
-				console.log("Trigger on all items right-click! at (" + `${e.pageX}` + "," + `${e.pageX}` + ")");
+				o.addDropDownItemContextMenu(el, e);
 			},
 			dropEl: function(el, target, source, sibling){
 
@@ -132,7 +132,7 @@ scrumKanban = {};
 			},
 			buttonClick: function(el, boardId) {
 				// callback when the board's button is clicked
-
+				el.blur();// to avoid space key press
 				o.clearView();
 				o.addKanbanCardToList(boardId);
 
@@ -181,33 +181,6 @@ scrumKanban = {};
 			// 					alert("right-click at (" + `${e.pageX}` + "," + `${e.pageX}` + ")")
 			// 				},
 			// 				class: ["peppe", "bello"]
-			// 			}
-			// 		]
-			// 	},
-			// 	{
-			// 		id: "_working",
-			// 		title: "Working (Try drag me too)",
-			// 		class: "warning",
-			// 		item: [
-			// 			{
-			// 				title: "Do Something!"
-			// 			},
-			// 			{
-			// 				title: "Run?"
-			// 			}
-			// 		]
-			// 	},
-			// 	{
-			// 		id: "_done",
-			// 		title: "Done (Can drop item only in working)",
-			// 		class: "success",
-			// 		dragTo: ["_working"],
-			// 		item: [
-			// 			{
-			// 				title: "All right"
-			// 			},
-			// 			{
-			// 				title: "Ok!"
 			// 			}
 			// 		]
 			// 	}
@@ -596,6 +569,7 @@ scrumKanban = {};
 	o.addDropDownMenuList = function(){
 
 		$(document).on('click','.kanban-header-dropdown-btn', function(e) {
+
 			if($(this).attr('dropdownready') == undefined){
 				$(this).attr('dropdownready', 1);
 				let $menuDropDown = $(this);
@@ -647,6 +621,47 @@ scrumKanban = {};
 				tclick.openMenu (contextMenu, e);
 			}
 		});
+	}
+
+	/**
+	 *
+	 * @param HTMLElement el
+	 */
+	o.addDropDownItemContextMenu = function(el, e){
+		if($(el).attr('dropdownready') == undefined){
+			$(el).attr('dropdownready', 1);
+
+			let $menuDropDown = $(el);
+			if($(el).attr('id') == undefined){
+				$(el).attr('id', 'kanban-'+$menuDropDown.attr('data-eid'))
+			}
+
+			let menuDropDownId = $(el).attr('id');
+
+			let menuItems = [
+				{
+					content: o.menuIcons.deleteIcon + o.langs.Delete,
+					events: {
+						click: function (e) {
+							o.setEventMessage('DSL pas possible pour l\'instant', false);
+						}
+						// mouseover: () => console.log("Copy Button Mouseover")
+						// You can use any event listener from here
+					},
+					divider: "top" // top, bottom, top-bottom
+				}
+			];
+
+			let tclick = new ContextMenu({
+				target: '#' + menuDropDownId,
+				mode: "dark", //"light", // default: "dark"
+				menuItems,
+				triggerType: 'contextmenu'
+			});
+
+			let contextMenu = tclick.init();
+			tclick.openMenu (contextMenu, e);
+		}
 	}
 
 })(scrumKanban);

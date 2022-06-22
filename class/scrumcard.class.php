@@ -107,7 +107,7 @@ class ScrumCard extends CommonObject
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
 		'fk_rank' => array('type'=>'integer', 'label'=>'Rank', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'fk_scrum_kanbanlist' => array('type'=>'integer:ScrumKanbanList:scrumproject/class/scrumkanbanlist.class.php', 'label'=>'ScrumKanbanList', 'enabled'=>'1', 'position'=>55, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumkanbanlist.rowid',),
+		'fk_scrum_kanbanlist' => array('type'=>'integer:ScrumKanbanList:scrumproject/class/scrumkanbanlist.class.php', 'label'=>'ScrumKanbanList', 'enabled'=>'1', 'position'=>55, 'notnull'=>1, 'visible'=>0, 'index'=>1, 'foreignkey'=>'scrumproject_scrumkanbanlist.rowid',),
 		'fk_element' => array('type' => 'integer','label' => 'ScrumCardLinkedTo','help' => 'ScrumCardLinkedToHelp','enabled' => 1,'visible' => 1,'notnull' => 0,'default' => 0,'index' => 1,'position' => 0),
 		'element_type' => array('type' => 'varchar(40)','label' => 'element_type','enabled' => 1,'visible' => 0,'position' => 10,'required' => 0),
 		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3,),
@@ -974,11 +974,10 @@ class ScrumCard extends CommonObject
 		$object->cardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
 		$object->objectId = $this->id;
 
-		$TUsersAffected = array();
-
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
 		$status = $this->LibStatut(intval($this->status), 2);
+		$TContactUsersAffected = $this->liste_contact(-1,'internal');
 
 		/**
 		 * Traitement de l'element attaché
@@ -987,6 +986,7 @@ class ScrumCard extends CommonObject
 
 		if($res){
 			$elementObject = $this->elementObject;
+			$TContactUsersAffected = $elementObject->liste_contact(-1,'internal');
 
 			if(is_callable(array($elementObject, 'getKanBanItemObjectFormatted'))){
 				$objectFromElement = $elementObject->getKanBanItemObjectFormatted($this, $object);
@@ -1060,11 +1060,14 @@ class ScrumCard extends CommonObject
 
 
 		// Afficher les contacts de la carte et/ou object attaché (user story, taches etcc)
-		if(!empty($TUsersAffected)){
+		if(!empty($TContactUsersAffected)){
+			include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 			$object->title.= '<span class="kanban-item__users">';
-			foreach ($TUsersAffected as $userId){
+			foreach ($TContactUsersAffected as $contactUserAffected){
 				$userAffected = new User($this->db);
-				$object->title.= self::getUserImg($userAffected, 'kanban-item__user');
+				if($userAffected->fetch($contactUserAffected['id']) > 0){
+					$object->title.= self::getUserImg($userAffected, 'kanban-item__user');
+				}
 			}
 			$object->title.= '</span>';
 		}
