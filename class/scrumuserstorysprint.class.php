@@ -298,7 +298,7 @@ class ScrumUserStorySprint extends CommonObject
 				}
 			}
 			else{
-
+				// TODO gérer le cas des erreurs : passer ce code dans les triggers ?
 			}
 
 		}

@@ -234,6 +234,49 @@ class ScrumTask extends CommonObject
 
 		//$resultvalidate = $this->validate($user, $notrigger);
 
+
+		// Kanban
+		if(!class_exists('ScrumKanban')){ require_once __DIR__ .'/scrumkanban.class.php'; }
+		if(!class_exists('ScrumKanbanList')){ require_once __DIR__ .'/scrumkanbanlist.class.php'; }
+		if(!class_exists('ScrumCard')){ require_once __DIR__ .'/scrumcard.class.php'; }
+		if(!class_exists('ScrumUserStorySprint')){ require_once __DIR__ .'/scrumuserstorysprint.class.php'; }
+
+		$scrumUserStorySprint = new ScrumUserStorySprint($this->db);
+		$res = $scrumUserStorySprint->fetch($this->fk_scrum_user_story_sprint);
+		if($res > 0) {
+			$staticScrumKanban = new ScrumKanban($this->db);
+			$TScrumKanban = $staticScrumKanban->fetchAll('','', 1, 0, array('fk_scrum_sprint' => $scrumUserStorySprint->fk_scrum_sprint));
+			if(is_array($TScrumKanban) && !empty($TScrumKanban)){
+				foreach ($TScrumKanban as $scrumkanban){
+					$staticScrumKanbanList = new ScrumKanbanList($scrumUserStorySprint->db);
+					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => 'fk_scrum_kanban = '. intval($scrumkanban->id) .' AND  ref_code = \'backlog\''));
+
+					if(!empty($TScrumKanbanList) && is_array($TScrumKanbanList)){
+						$backLogList = reset($TScrumKanbanList);
+
+						$card = new ScrumCard($scrumUserStorySprint->db);
+						$card->label = $this->label;
+						$card->fk_element = $this->id;
+						$card->element_type = $this->element;
+						$card->fk_scrum_kanbanlist = $backLogList->id;
+						// TODO placer la tache sous son us
+						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+						$res = $card->create($user, $notrigger);
+						if($res<=0){
+							$this->errors[] = $card->errorsToString();
+							$resultcreate = $res;
+						}
+					}
+				}
+			}
+			else{
+				// TODO gérer le cas des erreurs : passer ce code dans les triggers ?
+			}
+		}
+
+
+
+
 		return $resultcreate;
 	}
 
