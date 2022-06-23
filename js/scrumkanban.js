@@ -704,13 +704,21 @@ scrumKanban = {};
 	 * init Highlight
 	 */
 	o.initHighlight = function(){
-		$('body').append('<div id="modal-background" ></div>');
+		// $('body').append('<div id="modal-background" ></div>');
 
-		// $(document).on('click','.navigation', function() {
+		$(document).on('mouseenter','.kanban-item[data-type="scrum-user-story"] .highlight-scrum-task', function(e) {
+			e.stopPropagation();
+			let usId = $(this).closest('.kanban-item').attr('data-targetelementid')
+			o.setHighlight('.kanban-item[data-type="scrum-user-story-task"][data-fk_scrum_user_story_sprint="'+usId+'"]', '.kanban-item');
+			o.setHighlight('.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]');
+		});
+
+		// $(document).on('mouseenter','.highlight-scrum-task', function(e) {
+		// 	e.stopPropagation();
 		// 	o.setHighlight('.navigation');
 		// });
 
-		$(document).on('click','#modal-background', function() {
+		$(document).on('click', function() {
 			o.removeHighlight();
 		});
 	}
@@ -719,18 +727,31 @@ scrumKanban = {};
 	 * remove all Highlight
 	 */
 	o.removeHighlight = function(){
-		$('#modal-background').removeClass('active');
+		// $('#modal-background').removeClass('active');
 		$('.highlight-element').removeClass('highlight-element');
+		$('.bringdown-element').removeClass('bringdown-element');
 	}
 
 	/**
 	 * highlight element
 	 * @param targetsSelector
 	 */
-	o.setHighlight = function(targetsSelector){
-		// todo see for usage of bringdown avec une opacité à 50% à la place du highlight
-		$('#modal-background').addClass('active');
+	o.setHighlight = function(targetsSelector, targetBringdown = undefined){
+		// $('#modal-background').addClass('active');
 		$(targetsSelector).addClass('highlight-element');
+
+		if(targetBringdown != undefined){
+			o.setBringdown(targetBringdown);
+		}
+	}
+
+
+	/**
+	 * bringdown element
+	 * @param targetsSelector
+	 */
+	o.setBringdown = function(targetsSelector){
+		$(targetsSelector).addClass('bringdown-element');
 	}
 
 })(scrumKanban);

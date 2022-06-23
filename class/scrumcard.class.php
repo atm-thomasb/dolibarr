@@ -996,6 +996,7 @@ class ScrumCard extends CommonObject
 			}
 
 			$object->element = $elementObject->element;
+			$object->targetelementid = $elementObject->id;
 
 			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
 				/** @var ScrumTask $elementObject */
@@ -1024,9 +1025,11 @@ class ScrumCard extends CommonObject
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
+				$status = '';
 				if(is_callable(array($elementObject, 'LibStatut'))){
-					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
+					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
 				}
+				$status.= '<span class="highlight-scrum-task" ><span class="fa fa-eye"></span></span>';
 			}
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
 				/** @var ScrumTask $elementObject */
@@ -1037,6 +1040,7 @@ class ScrumCard extends CommonObject
 
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story-task';
+				$object->fk_scrum_user_story_sprint = $elementObject->fk_scrum_user_story_sprint;
 
 				if(is_callable(array($elementObject, 'LibStatut'))){
 					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
