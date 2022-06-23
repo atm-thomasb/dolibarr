@@ -270,6 +270,13 @@ section#kanban{
 	vertical-align: center;
 }
 
+.kanban-item__header{
+
+}
+
+.kanban-item__footer{
+
+}
 
 .kanban-item__status{
 	font-size: 0.8em;
@@ -404,6 +411,7 @@ section#kanban{
 .highlight-scrum-task{
 	margin-left: 7px;
 	color: var(--list-text-color);
+	cursor: pointer;
 }
 
 .highlight-scrum-task:hover{
@@ -424,9 +432,6 @@ section#kanban{
 	display: block;
 }
 
-.bringdown-element{
-	opacity: 0.5;
-}
 
 .highlight-element{
 	position: relative;
@@ -434,4 +439,8 @@ section#kanban{
 }
 .highlight-element.kanban-item{
 	opacity: 1 !important;
+}
+
+.bringdown-element, .highlight-element.gu-transit{
+	opacity: 0.3 !important;
 }

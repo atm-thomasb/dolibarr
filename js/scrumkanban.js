@@ -76,9 +76,10 @@ scrumKanban = {};
 		o.jkanban = new jKanban({
 			element : '#scrum-kanban',
 			gutter  : '5px',
+			widthBoard: '270px',
 			click : function(el){
 				// callback when any board's item are clicked
-				o.cardClick(el);
+				// Attention : a éviter prévilégier des event listener séparés
 			},
 			context: function(el, e) {
 				// callback when any board's item are right clicked
@@ -192,6 +193,10 @@ scrumKanban = {};
 		// Get all board
 		o.getAllBoards();
 
+		// Open dialog for kanban item : pas d'utilisation du click fournis par le kanban pour permettre les clics sur des sous elements
+		$(document).on('click','.kanban-item', function() {
+			o.cardClick($(this)[0]);
+		})
 
 		o.loadJs(o.config.srumprojectModuleFolderUrl + '/js/liveedit.js', function (){
 			o.setLiveEditForBoardsTitle();
@@ -704,19 +709,26 @@ scrumKanban = {};
 	 * init Highlight
 	 */
 	o.initHighlight = function(){
-		// $('body').append('<div id="modal-background" ></div>');
 
-		$(document).on('mouseenter','.kanban-item[data-type="scrum-user-story"] .highlight-scrum-task', function(e) {
+		o.pressEscapeCallback(()=>{o.removeHighlight()});
+
+		$(document).on('click','.kanban-item[data-type="scrum-user-story"] .highlight-scrum-task', function(e) {
 			e.stopPropagation();
+			o.removeHighlight();
+
+			if($(this).data('highlight')){
+				$(this).data('highlight', false);
+				$(this).find('.fa').addClass('fa-eye').removeClass('fa-eye-slash');
+				return;
+			}
+
+			$(this).data('highlight', true);
+			$(this).find('.fa').removeClass('fa-eye').addClass('fa-eye-slash');
+
 			let usId = $(this).closest('.kanban-item').attr('data-targetelementid')
 			o.setHighlight('.kanban-item[data-type="scrum-user-story-task"][data-fk_scrum_user_story_sprint="'+usId+'"]', '.kanban-item');
 			o.setHighlight('.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]');
 		});
-
-		// $(document).on('mouseenter','.highlight-scrum-task', function(e) {
-		// 	e.stopPropagation();
-		// 	o.setHighlight('.navigation');
-		// });
 
 		$(document).on('click', function() {
 			o.removeHighlight();
@@ -727,7 +739,6 @@ scrumKanban = {};
 	 * remove all Highlight
 	 */
 	o.removeHighlight = function(){
-		// $('#modal-background').removeClass('active');
 		$('.highlight-element').removeClass('highlight-element');
 		$('.bringdown-element').removeClass('bringdown-element');
 	}
@@ -737,7 +748,6 @@ scrumKanban = {};
 	 * @param targetsSelector
 	 */
 	o.setHighlight = function(targetsSelector, targetBringdown = undefined){
-		// $('#modal-background').addClass('active');
 		$(targetsSelector).addClass('highlight-element');
 
 		if(targetBringdown != undefined){
@@ -752,6 +762,25 @@ scrumKanban = {};
 	 */
 	o.setBringdown = function(targetsSelector){
 		$(targetsSelector).addClass('bringdown-element');
+	}
+
+	/**
+	 * Create an event for eascape key press
+	 * @param callbackFunction
+	 */
+	o.pressEscapeCallback = function (callbackFunction){
+		document.onkeydown = function(evt) {
+			evt = evt || window.event;
+			var isEscape = false;
+			if ("key" in evt) {
+				isEscape = (evt.key === "Escape" || evt.key === "Esc");
+			} else {
+				isEscape = (evt.keyCode === 27);
+			}
+			if (isEscape) {
+				callbackFunction();
+			}
+		};
 	}
 
 })(scrumKanban);

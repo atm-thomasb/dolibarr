@@ -973,7 +973,7 @@ class ScrumCard extends CommonObject
 		$object->element = $this->element;
 		$object->cardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
 		$object->objectId = $this->id;
-
+		$object->title = '';
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
 		$status = $this->LibStatut(intval($this->status), 2);
@@ -1029,7 +1029,7 @@ class ScrumCard extends CommonObject
 				if(is_callable(array($elementObject, 'LibStatut'))){
 					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
 				}
-				$status.= '<span class="highlight-scrum-task" ><span class="fa fa-eye"></span></span>';
+				$status.= '<span class="highlight-scrum-task prevent-card-click" ><span class="fa fa-eye"></span></span>';
 			}
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
 				/** @var ScrumTask $elementObject */
@@ -1049,16 +1049,23 @@ class ScrumCard extends CommonObject
 		}
 
 
-		$object->title = '<span class="kanban-item__label">'.$object->label.'</span>';
-		$object->title.= '<div class="kanban-item__footer">';
+		$object->title.= '<div class="kanban-item__header">';
 
+		$object->title.= '</div>';
+
+
+		$object->title.= '<div class="kanban-item__header">';
+		$object->title.= '<span class="kanban-item__label">'.$object->label.'</span>';
+		$object->title.= '</div>';
+
+
+		$object->title.= '<div class="kanban-item__footer">';
 		if($useTime){
 			$object->title.= '<span class="kanban-item__time-spend">';
 //			$object->title.= '<i class="fa fa-hourglass-o"></i> ';
 			$object->title.= $timeSpend.' / '.$timePlanned;
 			$object->title.= '</span>';
 		}
-
 		$object->title.= '<span class="kanban-item__status">'.$status.'</span>';
 		$object->title.= '</div>';
 
