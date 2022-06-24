@@ -27,6 +27,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 
 require_once __DIR__ .'/scrumuserstory.class.php';
 require_once __DIR__ .'/scrumsprint.class.php';
+require_once __DIR__ . '/commonObjectQuickTools.trait.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -35,6 +36,9 @@ require_once __DIR__ .'/scrumsprint.class.php';
  */
 class ScrumUserStorySprint extends CommonObject
 {
+
+	use CommonObjectQuickTools;
+
 	/**
 	 * @var string ID of module.
 	 */
@@ -260,6 +264,43 @@ class ScrumUserStorySprint extends CommonObject
 			if($this->refreshSprintQuantities($user)<0){
 				return -1;
 			}
+
+			// Kanban
+			if(!class_exists('ScrumKanban')){ require_once __DIR__ .'/scrumkanban.class.php'; }
+			if(!class_exists('ScrumKanbanList')){ require_once __DIR__ .'/scrumkanbanlist.class.php'; }
+			if(!class_exists('ScrumCard')){ require_once __DIR__ .'/scrumcard.class.php'; }
+
+			$staticScrumKanban = new ScrumKanban($this->db);
+			$TScrumKanban = $staticScrumKanban->fetchAll('','', 1, 0, array('fk_scrum_sprint' => $this->fk_scrum_sprint));
+			if(is_array($TScrumKanban) && !empty($TScrumKanban)){
+				foreach ($TScrumKanban as $scrumkanban){
+					$staticScrumKanbanList = new ScrumKanbanList($this->db);
+					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => 'fk_scrum_kanban = '. intval($scrumkanban->id) .' AND  ref_code = \'backlog\''));
+
+					if(!empty($TScrumKanbanList) && is_array($TScrumKanbanList)){
+						$backLogList = reset($TScrumKanbanList);
+
+						$card = new ScrumCard($this->db);
+						$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $this->fk_scrum_user_story);
+						if($us){
+							$card->label = $us->label;
+						}
+						$card->fk_element = $this->id;
+						$card->element_type = $this->element;
+						$card->fk_scrum_kanbanlist = $backLogList->id;
+						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+						$res = $card->create($user, $notrigger);
+						if($res<=0){
+							$this->errors[] = $card->errorsToString();
+							$resultcreate = $res;
+						}
+					}
+				}
+			}
+			else{
+				// TODO gérer le cas des erreurs : passer ce code dans les triggers ?
+			}
+
 		}
 
 		return $resultcreate;
@@ -1027,19 +1068,6 @@ class ScrumUserStorySprint extends CommonObject
 	}
 
 
-	/**
-	 * Return HTML string to show a field into a page
-	 *
-	 * @param  string  $key            Key of attribute
-	 * @param  string  $moreparam      To add more parameters on html input tag
-	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
-	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
-	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
-	 * @return string
-	 */
-	public function showOutputFieldQuick($key, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = ''){
-		return $this->showOutputField($this->fields[$key], $key, $this->{$key}, $moreparam, $keysuffix, $keyprefix, $morecss);
-	}
 
 	/**
 	 * Return HTML string to show a field into a page

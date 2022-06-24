@@ -78,7 +78,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 require_once __DIR__ . '/class/scrumuserstory.class.php';
-require_once __DIR__ . '/retrocompatibility/htdocs/core/class/html.form.class.php';
+require_once __DIR__ . '/backport/v16/core/class/html.form.class.php';
 require_once __DIR__ . '/lib/scrumproject_scrumuserstory.lib.php';
 require_once __DIR__ . '/class/scrumToolBox.class.php';
 

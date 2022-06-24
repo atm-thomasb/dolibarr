@@ -24,6 +24,7 @@
 
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
+require_once __DIR__ . '/commonObjectQuickTools.trait.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -32,6 +33,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
  */
 class ScrumUserStory extends CommonObject
 {
+	use CommonObjectQuickTools;
+
 	/**
 	 * @var string ID of module.
 	 */

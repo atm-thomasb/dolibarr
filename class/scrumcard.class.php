@@ -26,12 +26,15 @@
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once __DIR__ . '/commonKanban.trait.php';
 
 /**
  * Class for ScrumCard
  */
 class ScrumCard extends CommonObject
 {
+	use CommonKanban;
+
 	/**
 	 * @var string ID of module.
 	 */
@@ -101,15 +104,12 @@ class ScrumCard extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'comment'=>"Reference of object"),
-		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
+		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
-		'points' => array('type'=>'real', 'label'=>'Points', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
-		'fk_user_dev' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserDEV', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
-		'fk_task' => array('type'=>'integer:Task:projet/class/task.class.php', 'label'=>'Task', 'enabled'=>'1', 'position'=>55, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'projet_task.rowid',),
-		'fk_scrumsprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>57, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'foreignkey'=>'scrumsprint.rowid',),
-		'fk_stage' => array('type'=>'integer:DictScrumCardStage:scrumproject/class/dictscrumcardstage.class.php', 'label'=>'Stage', 'enabled'=>'1', 'position'=>59, 'notnull'=>0, 'visible'=>1, 'index'=>1, 'foreignkey'=>'c_scrum_stage.rowid',),
+		'fk_rank' => array('type'=>'integer', 'label'=>'Rank', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
+		'fk_scrum_kanbanlist' => array('type'=>'integer:ScrumKanbanList:scrumproject/class/scrumkanbanlist.class.php', 'label'=>'ScrumKanbanList', 'enabled'=>'1', 'position'=>55, 'notnull'=>1, 'visible'=>0, 'index'=>1, 'foreignkey'=>'scrumproject_scrumkanbanlist.rowid',),
+		'fk_element' => array('type' => 'integer','label' => 'ScrumCardLinkedTo','help' => 'ScrumCardLinkedToHelp','enabled' => 1,'visible' => 1,'notnull' => 0,'default' => 0,'index' => 1,'position' => 0),
+		'element_type' => array('type' => 'varchar(40)','label' => 'element_type','enabled' => 1,'visible' => 0,'position' => 10,'required' => 0),
 		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3,),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0,),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>0,),
@@ -121,15 +121,18 @@ class ScrumCard extends CommonObject
 		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Pr&ecirc;te', '2'=>'Termin&eacute;e'),),
 	);
 	public $rowid;
-	public $ref;
 	public $entity;
 	public $label;
-	public $points;
-	public $fk_user_po;
-	public $fk_user_dev;
-	public $fk_task;
-	public $fk_scrumsprint;
-	public $fk_stage;
+	public $fk_rank;
+	public $fk_scrum_kanbanlist;
+
+	/** @var int $fk_element targeted element rowid */
+	public $fk_element;
+
+	/** @var string $element_type targeted element  */
+	public $element_type;
+
+
 	public $description;
 	public $note_public;
 	public $note_private;
@@ -141,6 +144,8 @@ class ScrumCard extends CommonObject
 	public $status;
 	// END MODULEBUILDER PROPERTIES
 
+	/** @var object $elementObject targeted element object  */
+	public $elementObject;
 
 	// If this object has a subtable with lines
 
@@ -457,6 +462,8 @@ class ScrumCard extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
+		unset($this->fk_element); // avoid conflict with standard Dolibarr comportment
+
 		return $this->deleteCommon($user, $notrigger);
 		//return $this->deleteCommon($user, $notrigger, 1);
 	}
@@ -949,73 +956,400 @@ class ScrumCard extends CommonObject
 			return "";
 		}
 	}
-//
-//	/**
-//	 *  Create a document onto disk according to template module.
-//	 *
-//	 *  @param	    string		$modele			Force template to use ('' to not force)
-//	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
-//	 *  @param      int			$hidedetails    Hide details of lines
-//	 *  @param      int			$hidedesc       Hide description
-//	 *  @param      int			$hideref        Hide ref
-//	 *  @param      null|array  $moreparams     Array to provide more information
-//	 *  @return     int         				0 if KO, 1 if OK
-//	 */
-//	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
-//	{
-//		global $conf, $langs;
-//
-//		$result = 0;
-//		$includedocgeneration = 0;
-//
-//		$langs->load("scrumproject@scrumproject");
-//
-//		if (!dol_strlen($modele)) {
-//			$modele = 'standard_scrumcard';
-//
-//			if (!empty($this->model_pdf)) {
-//				$modele = $this->model_pdf;
-//			} elseif (!empty($conf->global->SCRUMCARD_ADDON_PDF)) {
-//				$modele = $conf->global->SCRUMCARD_ADDON_PDF;
-//			}
-//		}
-//
-//		$modelpath = "core/modules/scrumproject/doc/";
-//
-//		if ($includedocgeneration && !empty($modele)) {
-//			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-//		}
-//
-//		return $result;
-//	}
 
 	/**
-	 * Action executed by scheduler
-	 * CAN BE A CRON TASK. In such a case, parameters come from the schedule job setup field 'Parameters'
-	 * Use public function doScheduledJob($param1, $param2, ...) to get parameters
-	 *
-	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 * get this object formatted for jKanan
+	 * @return stdClass
 	 */
-	public function doScheduledJob()
-	{
-		global $conf, $langs;
+	public function getKanBanItemObjectFormatted(){
+		global $user;
 
-		//$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_mydedicatedlofile.log';
+		$object = new stdClass();
+		$object->id = 'scrumcard-' . $this->id; // kanban dom id
 
-		$error = 0;
-		$this->output = '';
-		$this->error = '';
+		$object->label = $this->label;
+		$object->type = 'scrum-card';
+		$object->class = array();     // array of additional classes
+		$object->element = $this->element;
+		$object->cardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
+		$object->objectId = $this->id;
+		$object->title = '';
+		$useTime = false;
+		$timeSpend = $timePlanned ='--';
+		$status = $this->LibStatut(intval($this->status), 2);
+		$TContactUsersAffected = $this->liste_contact(-1,'internal');
 
-		dol_syslog(__METHOD__, LOG_DEBUG);
+		/**
+		 * Traitement de l'element attaché
+		 */
+		$res = $this->fetchElementObject();
 
-		$now = dol_now();
+		if($res){
+			$elementObject = $this->elementObject;
+			$TContactUsersAffected = $elementObject->liste_contact(-1,'internal');
 
-		$this->db->begin();
+			if(is_callable(array($elementObject, 'getKanBanItemObjectFormatted'))){
+				$objectFromElement = $elementObject->getKanBanItemObjectFormatted($this, $object);
+				if($objectFromElement){
+					return $objectFromElement;
+				}
+			}
 
-		// ...
+			$object->element = $elementObject->element;
+			$object->targetelementid = $elementObject->id;
 
-		$this->db->commit();
+			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
+				/** @var ScrumTask $elementObject */
+				$useTime = true;
+				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
+				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
 
-		return $error;
+				$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $elementObject->fk_scrum_user_story);
+
+				if($us ){
+					$object->label = $us->label;
+
+//					/** @var Task $elementObject */
+//					$task = scrumProjectGetObjectByElement('task', $us->fk_task);
+//					if($task){
+//						$object->label = $task->label; // les us plannifiées n'ont pas de libellé
+//					}
+//					else{
+//						$object->label = '<span class="error">Task Error</span>';
+//					}
+				}
+				else{
+					$object->label = '<span class="error">US Error</span>';
+				}
+
+				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
+				$object->type = 'scrum-user-story';
+
+				$status = '';
+				if(is_callable(array($elementObject, 'LibStatut'))){
+					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
+				}
+				$status.= '<span class="highlight-scrum-task prevent-card-click" ><span class="fa fa-eye"></span></span>';
+			}
+			elseif($elementObject->element == 'scrumproject_scrumtask'){
+				/** @var ScrumTask $elementObject */
+				$useTime = true;
+				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
+				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+				$object->label = $elementObject->showOutputFieldQuick('label');
+
+				$object->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$elementObject->id;
+				$object->type = 'scrum-user-story-task';
+				$object->fk_scrum_user_story_sprint = $elementObject->fk_scrum_user_story_sprint;
+
+				if(is_callable(array($elementObject, 'LibStatut'))){
+					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
+				}
+			}
+		}
+
+
+		$object->title.= '<div class="kanban-item__header">';
+
+		$object->title.= '</div>';
+
+
+		$object->title.= '<div class="kanban-item__header">';
+		$object->title.= '<span class="kanban-item__label">'.$object->label.'</span>';
+		$object->title.= '</div>';
+
+
+		$object->title.= '<div class="kanban-item__footer">';
+		if($useTime){
+			$object->title.= '<span class="kanban-item__time-spend">';
+//			$object->title.= '<i class="fa fa-hourglass-o"></i> ';
+			$object->title.= $timeSpend.' / '.$timePlanned;
+			$object->title.= '</span>';
+		}
+		$object->title.= '<span class="kanban-item__status">'.$status.'</span>';
+		$object->title.= '</div>';
+
+
+		// Afficher les contacts de la carte et/ou object attaché (user story, taches etcc)
+		if(!empty($TContactUsersAffected)){
+			include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+			$object->title.= '<span class="kanban-item__users">';
+			foreach ($TContactUsersAffected as $contactUserAffected){
+				$userAffected = new User($this->db);
+				if($userAffected->fetch($contactUserAffected['id']) > 0){
+					$object->title.= self::getUserImg($userAffected, 'kanban-item__user');
+				}
+			}
+			$object->title.= '</span>';
+		}
+
+		$object->item = array();
+
+		return $object;
 	}
+
+
+
+	/**
+	 * Return HTML string to put an input field into a page
+	 * Code very similar with showInputField of extra fields
+	 *
+	 * @param  array   		$val	       Array of properties for field to show
+	 * @param  string  		$key           Key of attribute
+	 * @param  string  		$value         Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  		$moreparam     To add more parameters on html input tag
+	 * @param  string  		$keysuffix     Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  		$keyprefix     Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string|int	$morecss       Value for css to define style/length of field. May also be a numeric.
+	 * @return string
+	 */
+	public function showInputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = 0, $nonewbutton = 0)
+	{
+		global $langs, $db;
+
+		// for cache
+		if(empty($this->form)){
+			$this->form = new Form($db);
+		}
+
+
+		if ($key == 'fk_element')
+		{
+			$compatibleElementList = $this->getCompatibleElementListLabels();
+			$elementTypeMoreParam = ' data-reset-target="#'.$keyprefix.$key.$keysuffix.'" data-reset-value="0" ';
+			$out= $this->form->selectarray($keyprefix.'element_type'.$keysuffix, $compatibleElementList, $this->element_type, 1, 0, 0, $elementTypeMoreParam, 0, 0, 0, '', 'form-toggle-trigger form-reset-trigger', 1);
+
+			$out.= '<input type="hidden" id="'.$keyprefix.$key.$keysuffix.'" name="'.$keyprefix.$key.$keysuffix.'" value="'.$this->fk_element.'" />';
+
+			// TODO : a remplacer par une recherche ajax plus propre
+			$compatibleElementList = $this->getCompatibleElementList();
+			foreach ($compatibleElementList as $item => $itemvalue){
+
+				// utilisation d'un override pour plus de flexibilite : peut etre issue d'un hook de getCompatibleElementList()
+				if(!empty($compatibleElementList[$item]['overrideFkElementType']))
+				{
+					$this->fields[$key]['type'] = $compatibleElementList[$item]['overrideFkElementType']; //'integer:webpassword:webpassword/class/webpassword.class.php:1:statut=1'
+				}
+				else{
+					$this->fields[$key]['type'] = $val['type'] = 'integer:'.$compatibleElementList[$item]['class'].':'.$compatibleElementList[$item]['classfile'].':1';
+				}
+
+				// Affichage par defaut du conteneur de formaulaire fonction de $this->element_type
+				$containerStatus = 0;
+				if($item==$this->element_type){
+					$containerStatus = 1;
+				}
+
+
+
+				$out.= '<div id="container_'.$item.'_'.$keyprefix.$key.$keysuffix.'" class="scrum-project-form-toggle-target" data-display="'.$containerStatus.'" data-toggle-trigger="'.$keyprefix.'element_type'.$keysuffix.'" data-toggle-trigger-value="'.$item.'" >';
+
+				$moreparam = ' data-cloneval-target="#'.$keyprefix.$key.$keysuffix.'" ';
+				$out.= parent::showInputField($val, $key, $value, $moreparam, $keysuffix, $item.'_'.$keyprefix, 'scrum-project-form-cloneval-trigger', $nonewbutton);
+
+				$out.= '</div>';
+			}
+
+
+		}
+		else{
+			$out = parent::showInputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Return HTML string to show a field into a page
+	 * Code very similar with showOutputField of extra fields
+	 *
+	 * @param  array   $val		       Array of properties of field to show
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $value          Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  $moreparam      To add more parametes on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
+	{
+
+		if ($key == 'fk_element')
+		{
+			$compatibleElementList = $this->getCompatibleElementListLabels();
+
+			if(!empty($compatibleElementList[$this->element_type])){
+				$out = $compatibleElementList[$this->element_type];
+
+				$this->fetchElementObject();
+				if(!empty($this->elementObject->id))
+				{
+					if(is_callable(array($this->elementObject, 'getNomUrl')))
+					{
+						$out =  $this->elementObject->getNomUrl(1);
+					}
+				}
+			}
+			else{
+				$out = '';
+			}
+		}
+		else{
+			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
+
+		return $out;
+	}
+
+
+	/**
+	 * Return array of compatible elements
+	 * Code very similar with showOutputField of extra fields
+	 *
+	 * @return array
+	 */
+	public function getCompatibleElementListLabels()
+	{
+		global $langs;
+
+		$compatibleElements = $this->getCompatibleElementList();
+
+		$list = array();
+
+		foreach ($compatibleElements as $key => $value){
+			$list[$key] = $value['label'];
+		}
+
+
+		// TODO : add hook here
+
+		return $list;
+	}
+
+	/**
+	 * Return array of compatible elements
+	 * Code very similar with showOutputField of extra fields
+	 *
+	 * @return array
+	 */
+	public function getCompatibleElementList()
+	{
+		global $langs, $user, $conf;
+		$error = 0;
+
+		$this->compatibleElementList = array();
+
+		if(!empty($conf->societe->enabled)){
+			$this->compatibleElementList['societe'] = array(
+				'label' 	=> $langs->trans('Societe'),
+				'class' 	=> 'Societe',
+				'classfile' => 'societe/class/societe.class.php',
+				'showTab'	=> $user->rights->webpassword->password->read && $conf->global->WEBPASSWORD_ACTIVATE_SOCIETE_TAB
+			);
+		}
+
+		if(!empty($conf->resource->enabled)){
+
+			$this->compatibleElementList['dolresource'] = array(
+				'label' => $langs->trans('Resource'),
+				'class' => 'Dolresource',
+				'classfile' => 'resource/class/dolresource.class.php',
+				'overrideFkElementType' => 'integer:Dolresource:resource/class/dolresource.class.php:1:fk_statut>=0',
+				'showTab'	=> $user->rights->webpassword->password->read && $conf->global->WEBPASSWORD_ACTIVATE_RESOURCE_TAB
+			);
+		}
+
+		// Call triggers for the "security events" log
+		include_once DOL_DOCUMENT_ROOT.'/core/class/interfaces.class.php';
+		$interface = new Interfaces($this->db);
+		$result = $interface->run_triggers('SCRUMPROJECT_GET_COMPATIBLE_ELEMENT_LIST', $this, $user, $langs, $conf);
+		if ($result < 0) {
+			$error++;
+		}
+		// End call triggers
+
+		return $this->compatibleElementList;
+	}
+
+	/**
+	 * test if curent object is compatible with webpassword
+	 *
+	 * @param CommonObject $object
+	 * @return string|false
+	 */
+	public function isCompatibleElement($object)
+	{
+		if(!is_object($object)){
+			return false;
+		}
+
+		if(empty($this->compatibleElementList)){
+			$this->getCompatibleElementList();
+		}
+
+		foreach ($this->compatibleElementList as $key => $values){
+			if($object->element === $key){
+				return $key;
+			}
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * Return the number of password stored for the element
+	 *
+	 * @param string $element
+	 * @param  int  $fk_element
+	 * @return string|false
+	 */
+	public function countElementItems($element, $fk_element)
+	{
+		if(empty($element) || empty($fk_element)){
+			return false;
+		}
+
+		$sql = 'SELECT COUNT(*) nb FROM '.MAIN_DB_PREFIX.$this->table_element.' t ';
+		$sql.= ' WHERE t.fk_element = '.intval($fk_element);
+		$sql.= ' AND t.element_type = \''.$this->db->escape($element).'\'';
+
+
+		$res = $this->db->query($sql);
+		if ($res)
+		{
+			$obj = $this->db->fetch_object($res);
+			return $obj->nb;
+		}
+
+		return false;
+	}
+
+
+	/**
+	 *	Get element object and children from database
+	 *	@param      bool	$force       force fetching new
+	 *	@return     int         				>0 if OK, <0 if KO, 0 if not found
+	 */
+	public function fetchElementObject($force = false)
+	{
+		if(empty($force) && is_object($this->elementObject) && $this->elementObject->id > 0){
+			// use cache
+			return 1;
+		}
+
+		if(!function_exists('scrumProjectGetObjectByElement')){
+			require_once __DIR__ . '/../lib/scrumproject.lib.php';
+		}
+
+		$this->elementObject = scrumProjectGetObjectByElement($this->element_type, $this->fk_element);
+		if($this->elementObject !== false){
+			return 1;
+		}
+
+		$this->elementObject = false;
+		return 0;
+	}
+
 }

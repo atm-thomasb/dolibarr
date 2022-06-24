@@ -30,6 +30,9 @@ ScrumProjectSetup = Configuration du module Projet Scrum
 Settings = Réglages
 ScrumProjectSetupPage = Page de configuration du module Projet Scrum
 ScrumSprintExtraFields = Attributs supplémentaires sprints
+ScrumKanbanExtraFields = Attributs supplémentaires Kanban
+ScrumUserStoryExtraFields = Attributs supplémentaires User story
+ScrumUserStorySprintExtraFields = Attributs supplémentaires User story plannifiés
 ScrumCardExtraFields = Attributs supplémentaires cartes
 NumberingModules = Modèles de numérotation pour %s
 ScrumCardStage = Projet Scrum - Étapes des cartes
@@ -43,7 +46,7 @@ ScrumUserStory = User story
 NewScrumUserStory = Nouvelle User story
 ScrumUserStorySprint = User story plannifiés
 NewScrumUserStorySprint = Nouvelle plannification
-
+NewScrumKanban = Nouveau Kanban
 
 LeftMenuDeveloperAvailability = Dispo RH
 
@@ -213,3 +216,21 @@ ConfirmMassTaskImportIntoScrumManagementQuestion = Êtes-vous sûr de vouloir im
 ConfirmMassTaskImportIntoScrumManagement = Importer les tâches ?
 XUserStoryCreated = %s user stories créée(s)
 XUserStorySprintCreated = %s user stories plannifiée(s)
+
+
+# ScrumKanban
+ScrumKanban = Kanban
+ScrumKanbans = Kanbans
+StatusScrumKanbanDraft = Brouillon
+StatusScrumKanbanReady = Prêt
+StatusScrumKanbanDone = Terminée
+ScrumCardLinkedTo=Lié à
+ScrumCardLinkedToHelp=Element Dolibarr auquel cette carte est liée
+
+
+TypeContact_scrumproject_scrumsprint_internal_PO = Product Owner
+TypeContact_scrumproject_scrumsprint_internal_DEV = Développeur
+TypeContact_scrumproject_scrumcard_internal_PO = Product Owner
+TypeContact_scrumproject_scrumcard_internal_DEV = Développeur
+TypeContact_scrumproject_scrumtask_internal_PO = Product Owner
+TypeContact_scrumproject_scrumtask_internal_DEV = Développeur

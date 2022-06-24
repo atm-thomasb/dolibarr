@@ -45,6 +45,21 @@ function scrumprojectAdminPrepareHead()
 	$head[$h][2] = 'scrumsprint_extrafields';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/scrumproject/admin/scrumuserstory_extrafields.php", 1);
+	$head[$h][1] = $langs->trans("ScrumUserStoryExtraFields");
+	$head[$h][2] = 'scrumuserstory_extrafields';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/scrumproject/admin/srcumuserstorysprint_extrafields.php", 1);
+	$head[$h][1] = $langs->trans("ScrumUserStorySprintExtraFields");
+	$head[$h][2] = 'scrumuserstorysprint_extrafields';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/scrumproject/admin/scrumkanban_extrafields.php", 1);
+	$head[$h][1] = $langs->trans("ScrumKanbanExtraFields");
+	$head[$h][2] = 'scrumkanban_extrafields';
+	$h++;
+
 	$head[$h][0] = dol_buildpath("/scrumproject/admin/scrumcard_extrafields.php", 1);
 	$head[$h][1] = $langs->trans("ScrumCardExtraFields");
 	$head[$h][2] = 'scrumcard_extrafields';
@@ -78,7 +93,7 @@ function scrumprojectAdminPrepareHead()
  * @param int    $maxCacheByType max number of cached element by type
  * @return CommonObject object of $elementType, fetched by $elementId
  */
-function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheByType = 10)
+function scrumProjectGetObjectByElement($elementType, $elementId = false, $maxCacheByType = 10)
 {
 	global $conf, $db;
 
@@ -276,7 +291,11 @@ function scrumProjectGetObjectByElement($elementType, $elementId = 0, $maxCacheB
 		{
 			if (class_exists($classname))
 			{
-				return scrumProjectGetObjectFromCache($classname, $elementId, $maxCacheByType);
+				if($elementId === false){
+					return new $classname($db);
+				}else{
+					return scrumProjectGetObjectFromCache($classname, $elementId, $maxCacheByType);
+				}
 			}
 		}
 	}
@@ -328,7 +347,7 @@ function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheBy
  * @return string
  */
 function scrumProjectGenLiveUpdateAttributes($element, $fk_element, $field, $ajaxSuccessCallback = '', $ajaxIdleCallback = '', $ajaxFailCallback = ''){
-	$liveEditInterfaceUrl = dol_buildpath('scrumproject/interface.php',2);
+	$liveEditInterfaceUrl = dol_buildpath('scrumproject/interface-liveupdate.php',2);
 	$liveEditInterfaceUrl.= '?element='.$element;
 	$liveEditInterfaceUrl.= '&fk_element='.$fk_element;
 	$liveEditInterfaceUrl.= '&field='.$field;

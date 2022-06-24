@@ -265,7 +265,7 @@ if (empty($reshook))
 					$fk_scrum_sprint = GETPOSTINT('fk_scrum_sprint');
 
 					$scrumUserStory = new ScrumUserStory($db);
-					$scrumUserStory->business_value = ceil( ($task->planned_workload / 60 / 60) / 0.25 ) * 0.25;
+					$scrumUserStory->business_value = $scrumUserStory->fields['business_value']['default'];
 					$scrumUserStory->ref = $scrumUserStory->fields['ref']['default'];
 					$scrumUserStory->status = $scrumUserStory->fields['status']['default'];
 					$scrumUserStory->label = $task->label;
@@ -299,7 +299,7 @@ if (empty($reshook))
 								$scrumUserStorySprint->fk_user_creat = $user->id;
 								$scrumUserStorySprint->fk_scrum_user_story = $res;
 								$scrumUserStorySprint->fk_scrum_sprint = $fk_scrum_sprint;
-								$scrumUserStorySprint->business_value = ceil( ($task->planned_workload / 60 / 60) / 0.25 ) * 0.25;
+								$scrumUserStorySprint->business_value = $scrumUserStory->business_value;
 								$scrumUserStorySprint->qty_planned = ceil( ($task->planned_workload / 60 / 60) / 0.25 ) * 0.25;
 //								$scrumUserStorySprint->description = $task->description; // ne pas copier sinon ça fait doublon
 

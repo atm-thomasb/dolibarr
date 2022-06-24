@@ -41,7 +41,7 @@ global $langs, $db, $hookmanager, $user, $mysoc;
 /**
  * @var DoliDB $db
  */
-$hookmanager->initHooks('scrumprojectinterface');
+$hookmanager->initHooks('scrumliveupdateinterface');
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("scrumproject@scrumproject", "other", 'main'));
@@ -88,6 +88,9 @@ function _actionLiveUpdate(&$jsonResponse){
 		),
 		'scrumproject_scrumsprintuser' => array(
 			'allowedFields' => array('qty_availablity', 'availablity_rate', 'qty_velocity')
+		),
+		'scrumproject_scrumkanbanlist' => array(
+			'allowedFields' => array('label')
 		)
 	);
 
@@ -95,6 +98,7 @@ function _actionLiveUpdate(&$jsonResponse){
 	$TWriteRight = array(
 		'scrumproject_scrumuserstorysprint' => $user->rights->scrumproject->scrumuserstorysprint->write,
 		'scrumproject_scrumsprintuser' => $user->rights->scrumproject->scrumsprintuser->write,
+		'scrumproject_scrumkanbanlist' => $user->rights->scrumproject->scrumsprintuser->write,
 	);
 
 
@@ -173,4 +177,3 @@ function _actionLiveUpdate(&$jsonResponse){
 		return false;
 	}
 }
-

@@ -23,3 +23,6 @@ tr.toggle-line-display.--open{
 	color: #a9a9a9;
 }
 
+.icon-kanban{
+	transform: rotate(270deg) translateX(25%);
+}

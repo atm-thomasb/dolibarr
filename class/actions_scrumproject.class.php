@@ -75,20 +75,13 @@ class ActionsScrumProject
 	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
 	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
 	 */
-	public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
-	{
-		global $conf, $user, $langs;
-
-		if (in_array($parameters['currentcontext'], array('projecttaskcard')))
-		{
-			$url = dol_buildpath('/scrumproject/scrumcard_list.php?search_fk_task='.$object->id, 1);
-			$this->results = array();
-			$this->resprints = dolGetButtonAction($langs->trans('GoToScrumCards'), '', 'default', $url, '', $user->rights->scrumproject->scrumcard->read);
-			print $this->resprints;
-		}
-
-		return 0;
-	}
+//	public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
+//	{
+//		global $conf, $user, $langs;
+//
+//
+//		return 0;
+//	}
 
 
 	/**
