@@ -401,13 +401,19 @@ section#kanban{
 	border-radius: var(--user-image-size);
 
 	margin-right: calc(var(--user-image-size)/-2);
-	margin-bottom: calc(var(--user-image-size)/-3.5);
+	margin-bottom: -3px;
 
 	background: #949494;
 	border:3px solid #ededed;
+	transition: margin-right 0.2s ease-in-out;
+
+	z-index: 5;
+}
+.kanban-item__users:hover .kanban-item__user{
+	margin-right: 0;
 }
 .kanban-item__user:last-child{
-	margin-right: calc(var(--user-image-size)/-3.5);
+	margin-right: 3px;
 }
 
 .kanban-item__time-spend{

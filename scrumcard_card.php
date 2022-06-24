@@ -142,8 +142,252 @@ if (empty($reshook))
 
 	$triggermodname = 'SCRUMPROJECT_SCRUMCARD_MODIFY'; // Name of trigger action code to execute when we modify record
 
-	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
-	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
+
+
+
+	// Action to add record
+	if ($action == 'add' && !empty($permissiontoadd)) {
+		foreach ($object->fields as $key => $val) {
+
+			if ($object->fields[$key]['type'] == 'duration') {
+				if (GETPOST($key.'hour') == '' && GETPOST($key.'min') == '') {
+					continue; // The field was not submited to be saved
+				}
+			} else {
+				if (!GETPOSTISSET($key)) {
+					continue; // The field was not submited to be saved
+				}
+			}
+			// Ignore special fields
+			if (in_array($key, array('rowid', 'entity', 'import_key'))) {
+				continue;
+			}
+			if (in_array($key, array('date_creation', 'tms', 'fk_user_creat', 'fk_user_modif'))) {
+				if (!in_array(abs($val['visible']), array(1, 3))) {
+					continue; // Only 1 and 3 that are case to create
+				}
+			}
+
+			// Set value to insert
+			if (in_array($object->fields[$key]['type'], array('text', 'html'))) {
+				$value = GETPOST($key, 'restricthtml');
+			} elseif ($object->fields[$key]['type'] == 'date') {
+				$value = dol_mktime(12, 0, 0, GETPOST($key.'month', 'int'), GETPOST($key.'day', 'int'), GETPOST($key.'year', 'int')); // for date without hour, we use gmt
+			} elseif ($object->fields[$key]['type'] == 'datetime') {
+				$value = dol_mktime(GETPOST($key.'hour', 'int'), GETPOST($key.'min', 'int'), GETPOST($key.'sec', 'int'), GETPOST($key.'month', 'int'), GETPOST($key.'day', 'int'), GETPOST($key.'year', 'int'), 'tzuserrel');
+			} elseif ($object->fields[$key]['type'] == 'duration') {
+				$value = 60 * 60 * GETPOST($key.'hour', 'int') + 60 * GETPOST($key.'min', 'int');
+			} elseif (preg_match('/^(integer|price|real|double)/', $object->fields[$key]['type'])) {
+				$value = price2num(GETPOST($key, 'alphanohtml')); // To fix decimal separator according to lang setup
+			} elseif ($object->fields[$key]['type'] == 'boolean') {
+				$value = ((GETPOST($key) == '1' || GETPOST($key) == 'on') ? 1 : 0);
+			} elseif ($object->fields[$key]['type'] == 'reference') {
+				$tmparraykey = array_keys($object->param_list);
+				$value = $tmparraykey[GETPOST($key)].','.GETPOST($key.'2');
+			} else {
+				if ($key == 'lang') {
+					$value = GETPOST($key, 'aZ09') ?GETPOST($key, 'aZ09') : "";
+				} else {
+					$value = GETPOST($key, 'alphanohtml');
+				}
+			}
+			if (preg_match('/^integer:/i', $object->fields[$key]['type']) && $value == '-1') {
+				$value = ''; // This is an implicit foreign key field
+			}
+			if (!empty($object->fields[$key]['foreignkey']) && $value == '-1') {
+				$value = ''; // This is an explicit foreign key field
+			}
+
+			//var_dump($key.' '.$value.' '.$object->fields[$key]['type']);
+			$object->$key = $value;
+			if ($val['notnull'] > 0 && $object->$key == '' && !is_null($val['default']) && $val['default'] == '(PROV)') {
+				$object->$key = '(PROV)';
+			}
+			if ($val['notnull'] > 0 && $object->$key == '' && is_null($val['default'])) {
+				$error++;
+				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv($val['label'])), null, 'errors');
+			}
+
+			// Validation of fields values
+			if (getDolGlobalInt('MAIN_FEATURES_LEVEL') >= 2 || !empty($conf->global->MAIN_ACTIVATE_VALIDATION_RESULT)) {
+				if (!$error && !empty($val['validate']) && is_callable(array($object, 'validateField'))) {
+					if (!$object->validateField($object->fields, $key, $value)) {
+						$error++;
+					}
+				}
+			}
+		}
+
+
+		// récupération du bon ID en fonction du type d'élement lié
+		$fk_element = GETPOST('fk_element', 'int');
+		$element_type = GETPOST('element_type', 'aZ09');
+		if (empty($fk_element) && !empty($element_type) && $element_type != '-1'){
+			if (GETPOSTISSET($element_type.'_fk_element')) {
+				$object->fk_element = intval(GETPOST($element_type.'_fk_element', 'int'));
+			}
+		}
+
+		// Fill array 'array_options' with data from add form
+		if (!$error) {
+			$ret = $extrafields->setOptionalsFromPost(null, $object);
+			if ($ret < 0) {
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			$result = $object->create($user);
+			if ($result > 0) {
+				// Creation OK
+				if ($conf->categorie->enabled && method_exists($object, 'setCategories')) {
+					$categories = GETPOST('categories', 'array:int');
+					$object->setCategories($categories);
+				}
+				$urltogo = $backtopage ? str_replace('__ID__', $result, $backtopage) : $backurlforlist;
+				$urltogo = preg_replace('/--IDFORBACKTOPAGE--/', $object->id, $urltogo); // New method to autoselect project after a New on another form object creation
+				header("Location: ".$urltogo);
+				exit;
+			} else {
+				$error++;
+				// Creation KO
+				if (!empty($object->errors)) {
+					setEventMessages(null, $object->errors, 'errors');
+				} else {
+					setEventMessages($object->error, null, 'errors');
+				}
+				$action = 'create';
+			}
+		} else {
+			$action = 'create';
+		}
+	}
+	// Action to update record
+	elseif ($action == 'update' && !empty($permissiontoadd)) {
+		foreach ($object->fields as $key => $val) {
+			// Check if field was submited to be edited
+			if ($object->fields[$key]['type'] == 'duration') {
+				if (!GETPOSTISSET($key.'hour') || !GETPOSTISSET($key.'min')) {
+					continue; // The field was not submited to be saved
+				}
+			} elseif ($object->fields[$key]['type'] == 'boolean') {
+				if (!GETPOSTISSET($key)) {
+					$object->$key = 0; // use 0 instead null if the field is defined as not null
+					continue;
+				}
+			} else {
+				if (!GETPOSTISSET($key)) {
+					continue; // The field was not submited to be saved
+				}
+			}
+			// Ignore special fields
+			if (in_array($key, array('rowid', 'entity', 'import_key'))) {
+				continue;
+			}
+			if (in_array($key, array('date_creation', 'tms', 'fk_user_creat', 'fk_user_modif'))) {
+				if (!in_array(abs($val['visible']), array(1, 3, 4))) {
+					continue; // Only 1 and 3 and 4, that are cases to update
+				}
+			}
+
+			// Set value to update
+			if (preg_match('/^(text|html)/', $object->fields[$key]['type'])) {
+				$tmparray = explode(':', $object->fields[$key]['type']);
+				if (!empty($tmparray[1])) {
+					$value = GETPOST($key, $tmparray[1]);
+				} else {
+					$value = GETPOST($key, 'restricthtml');
+				}
+			} elseif ($object->fields[$key]['type'] == 'date') {
+				$value = dol_mktime(12, 0, 0, GETPOST($key.'month', 'int'), GETPOST($key.'day', 'int'), GETPOST($key.'year', 'int')); // for date without hour, we use gmt
+			} elseif ($object->fields[$key]['type'] == 'datetime') {
+				$value = dol_mktime(GETPOST($key.'hour', 'int'), GETPOST($key.'min', 'int'), GETPOST($key.'sec', 'int'), GETPOST($key.'month', 'int'), GETPOST($key.'day', 'int'), GETPOST($key.'year', 'int'), 'tzuserrel');
+			} elseif ($object->fields[$key]['type'] == 'duration') {
+				if (GETPOST($key.'hour', 'int') != '' || GETPOST($key.'min', 'int') != '') {
+					$value = 60 * 60 * GETPOST($key.'hour', 'int') + 60 * GETPOST($key.'min', 'int');
+				} else {
+					$value = '';
+				}
+			} elseif (preg_match('/^(integer|price|real|double)/', $object->fields[$key]['type'])) {
+				$value = price2num(GETPOST($key, 'alphanohtml')); // To fix decimal separator according to lang setup
+			} elseif ($object->fields[$key]['type'] == 'boolean') {
+				$value = ((GETPOST($key, 'aZ09') == 'on' || GETPOST($key, 'aZ09') == '1') ? 1 : 0);
+			} elseif ($object->fields[$key]['type'] == 'reference') {
+				$value = array_keys($object->param_list)[GETPOST($key)].','.GETPOST($key.'2');
+			} else {
+				if ($key == 'lang') {
+					$value = GETPOST($key, 'aZ09');
+				} else {
+					$value = GETPOST($key, 'alphanohtml');
+				}
+			}
+			if (preg_match('/^integer:/i', $object->fields[$key]['type']) && $value == '-1') {
+				$value = ''; // This is an implicit foreign key field
+			}
+			if (!empty($object->fields[$key]['foreignkey']) && $value == '-1') {
+				$value = ''; // This is an explicit foreign key field
+			}
+
+			$object->$key = $value;
+			if ($val['notnull'] > 0 && $object->$key == '' && is_null($val['default'])) {
+				$error++;
+				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv($val['label'])), null, 'errors');
+			}
+
+			// Validation of fields values
+			if (getDolGlobalInt('MAIN_FEATURES_LEVEL') >= 2 || !empty($conf->global->MAIN_ACTIVATE_VALIDATION_RESULT)) {
+				if (!$error && !empty($val['validate']) && is_callable(array($object, 'validateField'))) {
+					if (!$object->validateField($object->fields, $key, $value)) {
+						$error++;
+					}
+				}
+			}
+
+			if ($conf->categorie->enabled) {
+				$categories = GETPOST('categories', 'array');
+				if (method_exists($object, 'setCategories')) {
+					$object->setCategories($categories);
+				}
+			}
+		}
+
+		// récupération du bon ID en fonction du type d'élement lié
+		$fk_element = GETPOST('fk_element', 'int');
+		$element_type = GETPOST('element_type', 'aZ09');
+		if (empty($fk_element) && !empty($element_type) && $element_type != '-1'){
+			if (GETPOSTISSET($element_type.'_fk_element')) {
+				$object->fk_element = intval(GETPOST($element_type.'_fk_element', 'int'));
+			}
+		}
+
+		// Fill array 'array_options' with data from add form
+		if (!$error) {
+			$ret = $extrafields->setOptionalsFromPost(null, $object, '@GETPOSTISSET');
+			if ($ret < 0) {
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			$result = $object->update($user);
+			if ($result > 0) {
+				$action = 'view';
+			} else {
+				$error++;
+				// Creation KO
+				setEventMessages($object->error, $object->errors, 'errors');
+				$action = 'edit';
+			}
+		} else {
+			$action = 'edit';
+		}
+	}
+	else{
+		// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
+		include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
+	}
+
+
 
 	if($action == 'confirm_setdone' && $confirm == 'yes') {
 		$object->setStatusCommon($user, $object::STATUS_DONE, 0, 'SCRUMCARD_DONE');
