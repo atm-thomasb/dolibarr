@@ -367,7 +367,7 @@ section#kanban{
 	box-shadow: var(--box-shadow), inset 5px 0px 0px 0 var(--kanban-item-color, #fff);
 	padding: 7px 12px;
 }
-.kanban-item[data-type="scrum-card"]{
+.kanban-item[data-type="scrum-card-linked"]{
 	--kanban-item-color : #a9a9a9;
 }
 
@@ -377,6 +377,10 @@ section#kanban{
 
 .kanban-item[data-type="scrum-user-story-task"]{
 	--kanban-item-color : #ffeb00;
+}
+
+.kanban-item[data-type="project-task"]{
+	--kanban-item-color : #2e6391;
 }
 
 .kanban-drag{
@@ -409,10 +413,10 @@ section#kanban{
 
 	z-index: 5;
 }
-.kanban-item__users:hover .kanban-item__user{
-	margin-right: 0;
+.kanban-item__users:hover .kanban-item__user, .kanban-item__users:hover .kanban-item__user:last-child:not(:only-child){
+	margin-right: -2px;
 }
-.kanban-item__user:last-child{
+.kanban-item__user:last-child, .kanban-item__users:hover .kanban-item__user:last-child{
 	margin-right: 3px;
 }
 

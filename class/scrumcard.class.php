@@ -945,7 +945,7 @@ class ScrumCard extends CommonObject
 	 * get this object formatted for jKanan
 	 * @return stdClass
 	 */
-	public function getKanBanItemObjectFormatted(){
+	public function getScrumKanBanItemObjectFormatted(){
 		global $user;
 
 		$object = new stdClass();
@@ -974,8 +974,8 @@ class ScrumCard extends CommonObject
 			$object->element = $elementObject->element;
 			$object->targetelementid = $elementObject->id;
 
-			if(is_callable(array($elementObject, 'getKanBanItemObjectFormatted'))){
-				$objectFromElement = $elementObject->getKanBanItemObjectFormatted($this, $object);
+			if(is_callable(array($elementObject, 'getScrumKanBanItemObjectFormatted'))){
+				$objectFromElement = $elementObject->getScrumKanBanItemObjectFormatted($this, $object);
 				if($objectFromElement){
 					return $objectFromElement;
 				}
@@ -1042,6 +1042,17 @@ class ScrumCard extends CommonObject
 				if(is_callable(array($elementObject, 'LibStatut'))){
 					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
 				}
+			}
+			elseif($elementObject->element == 'project_task'){
+				/** @var Task $elementObject */
+				$useTime = true;
+				$object->type = 'project-task';
+
+				// todo prendre seulement les temps des utilisateurs affectés au kanban et à la tache
+				//  + limiter au temps du strint pout la remonté des temps
+			}
+			else{
+				$object->type = 'scrum-card-linked';
 			}
 		}
 
