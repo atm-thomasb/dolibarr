@@ -234,3 +234,5 @@ TypeContact_scrumproject_scrumcard_internal_PO = Product Owner
 TypeContact_scrumproject_scrumcard_internal_DEV = Développeur
 TypeContact_scrumproject_scrumtask_internal_PO = Product Owner
 TypeContact_scrumproject_scrumtask_internal_DEV = Développeur
+
+ScrumUserRoleForTask = Rôle par défaut

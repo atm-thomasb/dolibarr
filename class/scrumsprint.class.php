@@ -1104,6 +1104,11 @@ class ScrumSprint extends CommonObject
 
 		if($key == 'qty_velocity'){
 			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+
+			if(empty($out)){
+				return '--';
+			}
+
 			$countObj = $this->db->getRow("SELECT SUM(qty_velocity) qty_velocity FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($this->id));
 			if($countObj){
 				if($countObj->qty_velocity != $value){
@@ -1114,6 +1119,11 @@ class ScrumSprint extends CommonObject
 				}
 			}
 
+			return $out;
+		}
+		elseif(in_array($key, array('qty_planned', 'qty_consumed', 'qty_done'))){
+			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+			if(empty($out)){ $out = '--'; }
 			return $out;
 		}
 		else{

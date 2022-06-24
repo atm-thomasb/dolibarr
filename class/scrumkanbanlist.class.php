@@ -106,7 +106,7 @@ class ScrumKanbanList extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'fk_scrum_kanban' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumkanban.class.php:1', 'label'=>'ScrumKanban', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumkanban.rowid', 'validate'=>'1',),
+		'fk_scrum_kanban' => array('type'=>'integer:ScrumKanban:scrumproject/class/scrumkanban.class.php:1', 'label'=>'ScrumKanban', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumkanban.rowid', 'validate'=>'1',),
 		'fk_rank' => array('type'=>'integer', 'label'=>'Rank', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
 		'ref_code' => array('type'=>'varchar(20)', 'label'=>'code', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>5, 'validate'=>'1'),
