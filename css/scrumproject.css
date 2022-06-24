@@ -26,3 +26,16 @@ tr.toggle-line-display.--open{
 .icon-kanban{
 	transform: rotate(270deg) translateX(25%);
 }
+
+
+/*
+ * Form toggle display
+ */
+
+.scrum-project-form-toggle-target[data-display="0"]{
+	display: none;
+}
+
+.scrum-project-form-toggle-target[data-display="1"] .select2-container{
+	min-width: 200px; /* fix for micro with */
+}

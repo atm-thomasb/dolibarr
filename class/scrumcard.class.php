@@ -118,7 +118,7 @@ class ScrumCard extends CommonObject
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Pr&ecirc;te', '2'=>'Termin&eacute;e'),),
+		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2,  'default' => 0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Pr&ecirc;te', '2'=>'Termin&eacute;e'),),
 	);
 	public $rowid;
 	public $entity;
@@ -140,8 +140,8 @@ class ScrumCard extends CommonObject
 	public $tms;
 	public $fk_user_creat;
 	public $fk_user_modif;
-	public $import_key;
-	public $status;
+	public $import_key = '';
+	public $status = 0;
 	// END MODULEBUILDER PROPERTIES
 
 	/** @var object $elementObject targeted element object  */
@@ -510,32 +510,16 @@ class ScrumCard extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumcard->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumcard->scrumcard_advance->validate))))
-		 {
-		 $this->error='NotEnoughPermissions';
-		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
-		 return -1;
-		 }*/
-
 		$now = dol_now();
 
 		$this->db->begin();
 
-		// Define new ref
-		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) // empty should not happened, but when it occurs, the test save life
-		{
-			$num = $this->getNextNumRef();
-		} else {
-			$num = $this->ref;
-		}
-		$this->newref = $num;
+
 
 		if (!empty($num)) {
 			// Validate
 			$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element;
-			$sql .= " SET ref = '".$this->db->escape($num)."',";
-			$sql .= " status = ".self::STATUS_READY;
+			$sql .= " SET status = ".self::STATUS_READY;
 			if (!empty($this->fields['date_validation'])) $sql .= ", date_validation = '".$this->db->idate($now)."'";
 			if (!empty($this->fields['fk_user_valid'])) $sql .= ", fk_user_valid = ".$user->id;
 			$sql .= " WHERE rowid = ".$this->id;
@@ -560,19 +544,19 @@ class ScrumCard extends CommonObject
 
 		if (!$error)
 		{
-			$this->oldref = $this->ref;
-
+			$this->oldref = '(PROV'.$this->id.')';
+			$num = $this->id;
 			// Rename directory if dir was a temporary ref
-			if (preg_match('/^[\(]?PROV/i', $this->ref))
+			if (preg_match('/^[\(]?PROV/i', $this->id))
 			{
 				// Now we rename also files into index
 				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'scrumcard/".$this->db->escape($this->newref)."'";
-				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'scrumcard/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
+				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'scrumcard/".$this->db->escape($this->id)."' and entity = ".$conf->entity;
 				$resql = $this->db->query($sql);
 				if (!$resql) { $error++; $this->error = $this->db->lasterror(); }
 
 				// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments
-				$oldref = dol_sanitizeFileName($this->ref);
+				$oldref = dol_sanitizeFileName($this->id);
 				$newref = dol_sanitizeFileName($num);
 				$dirsource = $conf->scrumproject->dir_output.'/scrumcard/'.$oldref;
 				$dirdest = $conf->scrumproject->dir_output.'/scrumcard/'.$newref;
@@ -987,6 +971,8 @@ class ScrumCard extends CommonObject
 		if($res){
 			$elementObject = $this->elementObject;
 			$TContactUsersAffected = $elementObject->liste_contact(-1,'internal');
+			$object->element = $elementObject->element;
+			$object->targetelementid = $elementObject->id;
 
 			if(is_callable(array($elementObject, 'getKanBanItemObjectFormatted'))){
 				$objectFromElement = $elementObject->getKanBanItemObjectFormatted($this, $object);
@@ -995,14 +981,18 @@ class ScrumCard extends CommonObject
 				}
 			}
 
-			$object->element = $elementObject->element;
-			$object->targetelementid = $elementObject->id;
+
 
 			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
 				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
 				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+
+				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
+					$object->class[] = '--alert';
+					$object->class[] = '--time-consumed-error';
+				}
 
 				$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $elementObject->fk_scrum_user_story);
 
@@ -1029,13 +1019,20 @@ class ScrumCard extends CommonObject
 				if(is_callable(array($elementObject, 'LibStatut'))){
 					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
 				}
-				$status.= '<span class="highlight-scrum-task prevent-card-click" ><span class="fa fa-eye"></span></span>';
+				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
 				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
 				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+
+				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
+					$object->class[] = '--alert';
+					$object->class[] = '--time-consumed-error';
+				}
+
+
 				$object->label = $elementObject->showOutputFieldQuick('label');
 
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$elementObject->id;
@@ -1054,7 +1051,7 @@ class ScrumCard extends CommonObject
 		$object->title.= '</div>';
 
 
-		$object->title.= '<div class="kanban-item__header">';
+		$object->title.= '<div class="kanban-item__body">';
 		$object->title.= '<span class="kanban-item__label">'.$object->label.'</span>';
 		$object->title.= '</div>';
 
@@ -1063,7 +1060,7 @@ class ScrumCard extends CommonObject
 		if($useTime){
 			$object->title.= '<span class="kanban-item__time-spend">';
 //			$object->title.= '<i class="fa fa-hourglass-o"></i> ';
-			$object->title.= $timeSpend.' / '.$timePlanned;
+			$object->title.= '<span class="kanban-item__time-consumed">'.$timeSpend.'</span> / <span class="kanban-item__time-planned">'.$timePlanned.'</span>';
 			$object->title.= '</span>';
 		}
 		$object->title.= '<span class="kanban-item__status">'.$status.'</span>';
@@ -1117,7 +1114,7 @@ class ScrumCard extends CommonObject
 		{
 			$compatibleElementList = $this->getCompatibleElementListLabels();
 			$elementTypeMoreParam = ' data-reset-target="#'.$keyprefix.$key.$keysuffix.'" data-reset-value="0" ';
-			$out= $this->form->selectarray($keyprefix.'element_type'.$keysuffix, $compatibleElementList, $this->element_type, 1, 0, 0, $elementTypeMoreParam, 0, 0, 0, '', 'form-toggle-trigger form-reset-trigger', 1);
+			$out= $this->form->selectarray($keyprefix.'element_type'.$keysuffix, $compatibleElementList, $this->element_type, 1, 0, 0, $elementTypeMoreParam, 0, 0, 0, '', 'scrum-project-form-toggle-trigger scrum-project-form-reset-trigger', 1);
 
 			$out.= '<input type="hidden" id="'.$keyprefix.$key.$keysuffix.'" name="'.$keyprefix.$key.$keysuffix.'" value="'.$this->fk_element.'" />';
 
@@ -1245,7 +1242,6 @@ class ScrumCard extends CommonObject
 				'label' 	=> $langs->trans('Societe'),
 				'class' 	=> 'Societe',
 				'classfile' => 'societe/class/societe.class.php',
-				'showTab'	=> $user->rights->webpassword->password->read && $conf->global->WEBPASSWORD_ACTIVATE_SOCIETE_TAB
 			);
 		}
 
@@ -1256,8 +1252,19 @@ class ScrumCard extends CommonObject
 				'class' => 'Dolresource',
 				'classfile' => 'resource/class/dolresource.class.php',
 				'overrideFkElementType' => 'integer:Dolresource:resource/class/dolresource.class.php:1:fk_statut>=0',
-				'showTab'	=> $user->rights->webpassword->password->read && $conf->global->WEBPASSWORD_ACTIVATE_RESOURCE_TAB
 			);
+		}
+
+
+		if(!empty($conf->projet->enabled)) {
+			$this->compatibleElementList['task'] = array(
+				'label' => $langs->trans('Task'),
+				'class' => 'Task',
+				'classfile' => 'projet/class/task.class.php',
+				'overrideFkElementType' => 'integer:Task:projet/class/task.class.php:1',
+			);
+
+
 		}
 
 		// Call triggers for the "security events" log

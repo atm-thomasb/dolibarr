@@ -192,7 +192,16 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("ScrumCard");
 $help_url = '';
-llxHeader('', $title, $help_url);
+
+$arrayofjs = array(
+	'scrumproject/js/scrumproject.js',
+	'scrumproject/js/liveedit.js'
+);
+$arrayofcss = array(
+	'scrumproject/css/liveedit.css'
+);
+llxHeader('', $title, $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
+
 
 // Example : Adding jquery code
 print '<script type="text/javascript" language="javascript">

@@ -265,6 +265,8 @@ scrumKanban = {};
 	 */
 	o.dialogIFrame = function (dialogId, url, label = ''){
 
+		url = o.updateURLParameter(url, 'optioncss', 'print');
+
 		let kanbanDialogId = 'kanbanitemdialog-' + dialogId;
 		if(document.getElementById(kanbanDialogId) == undefined){
 			$('body').append( $('<div id="kanbanitemdialog-' + dialogId + '" ></div>')); // put it into the DOM
@@ -781,6 +783,59 @@ scrumKanban = {};
 				callbackFunction();
 			}
 		};
+	}
+
+
+	/**
+	 * Remplace la valeur d'un paramètre dans une URL
+	 * @param {string} url
+	 * @param {string} param the get param
+	 * @param {string} paramVal the new value
+	 * @returns {string}
+	 */
+	o.updateURLParameter = function (url, param, paramVal)
+	{
+		var TheAnchor = null;
+		var newAdditionalURL = "";
+		var tempArray = url.split("?");
+		var baseURL = tempArray[0];
+		var additionalURL = tempArray[1];
+		var temp = "";
+
+		if (additionalURL)
+		{
+			var tmpAnchor = additionalURL.split("#");
+			var TheParams = tmpAnchor[0];
+			TheAnchor = tmpAnchor[1];
+			if(TheAnchor)
+				additionalURL = TheParams;
+
+			tempArray = additionalURL.split("&");
+
+			for (var i=0; i<tempArray.length; i++)
+			{
+				if(tempArray[i].split('=')[0] != param)
+				{
+					newAdditionalURL += temp + tempArray[i];
+					temp = "&";
+				}
+			}
+		}
+		else
+		{
+			var tmpAnchor = baseURL.split("#");
+			var TheParams = tmpAnchor[0];
+			TheAnchor  = tmpAnchor[1];
+
+			if(TheParams)
+				baseURL = TheParams;
+		}
+
+		if(TheAnchor)
+			paramVal += "#" + TheAnchor;
+
+		var rows_txt = temp + "" + param + "=" + paramVal;
+		return baseURL + "?" + newAdditionalURL + rows_txt;
 	}
 
 })(scrumKanban);

@@ -29,6 +29,7 @@ require_once __DIR__ . '/commonObjectQuickTools.trait.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 require_once __DIR__ . '/scrumsprint.class.php';
+require_once __DIR__ . '/scrumtask.class.php';
 
 /**
  * Class for ScrumSprintUser
@@ -111,7 +112,7 @@ class ScrumSprintUser extends CommonObject
 		'fk_scrum_sprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumsprint.rowid', 'validate'=>'1',),
 
 		// fk_user_role : c'est le role en temps que contact, la valeur par défaut est à récupérer sur les extrafields de l'utilisateur todo : ajouter l'extrafield du user role par défaut
-		'fk_user_role' => array('type'=>'integer', 'label'=>'ScrumUserRole', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'c_type_contact.rowid', 'validate'=>'1',),
+		'fk_user_role' => array('type'=>'integer:', 'label'=>'ScrumUserRoleForTask', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'c_type_contact.rowid', 'validate'=>'1',),
 		'fk_user' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'User', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'user.rowid',),
 		'qty_availablity' => array('type'=>'real', 'label'=>'QtyAvailablity', 'help' => 'QtyAvailablityHelp', 'enabled'=>'1', 'position'=>80, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'availablity_rate' => array('type'=>'real', 'label'=>'AvailablityRate', 'help' => 'AvailablityRateHelp', 'enabled'=>'1', 'position'=>90, 'notnull'=>1, 'visible'=>1, 'default'=>'1', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
@@ -1136,10 +1137,25 @@ class ScrumSprintUser extends CommonObject
 	 */
 	public function showInputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = 0, $nonewbutton = 0)
 	{
-		global $conf, $langs, $form, $action;
+		global $conf, $langs, $form, $action, $user;
 
 		if($key == 'rowid'){
 			$out = $this->id;
+		}
+		elseif($key == 'fk_user_role'){
+			require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+
+			if(empty($value)){
+				$value = $this->fk_user_role;
+			}
+
+			if(empty($value)){
+				$value = $this->fk_user_role;
+			}
+
+			$formcompany = new FormCompany($this->db);
+			$out = $formcompany->selectTypeContact(new ScrumTask($this->db), $value, $keyprefix.$key.$keysuffix, 'internal', 'position', 0, 'minwidth125imp widthcentpercentminusx maxwidth400');
 		}
 		else
 		{
@@ -1175,6 +1191,12 @@ class ScrumSprintUser extends CommonObject
 		elseif($key == 'rowid')
 		{
 			$out = $this->getNomUrl(1);
+		}
+		elseif($key == 'fk_user_role'){
+			$libelle = $this->getValueFrom('c_type_contact', $value, 'libelle');
+			if($libelle){
+				$out = $langs->trans($libelle);
+			}
 		}
 		else{
 			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);

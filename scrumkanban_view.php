@@ -78,8 +78,8 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-dol_include_once('/scrumproject/class/scrumkanban.class.php');
-dol_include_once('/scrumproject/lib/scrumproject_scrumkanban.lib.php');
+require_once __DIR__ . '/class/scrumkanban.class.php';
+require_once __DIR__ . '/lib/scrumproject_scrumkanban.lib.php';
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject","scrumkanban@scrumproject", "other"));
@@ -180,6 +180,82 @@ $jsLangs = array(
 		<header class="kanban-header" role="banner">
 			<nav class="navigation" role="navigation">
 				<span class="nav-title"><?php print $object->getNomUrl(1) . ' <span class="kanban-title__label">'.$object->label.'</span>'; ?></span>
+
+
+				<span id="kanban-header-scrum-sprint-resume">
+				<?php
+				if(!empty($object->fk_scrum_sprint)){
+					require_once __DIR__ . '/class/scrumsprint.class.php';
+					$scrumSprint = new ScrumSprint($db);
+					if ($scrumSprint->fetch($object->fk_scrum_sprint) > 0){
+
+						$fieldK = 'label';
+						print '<span class="kanban-header__item"  >';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->getNomUrl(1). ' '.$scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+						print '</span>';
+
+						print '<span class="kanban-header__item" >';
+						print '<span class="fa fa-calendar-alt" ></span>';
+						$fieldK = 'date_start';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+
+						print '<span class="kanban-header__item__value">-</span>';
+
+						$fieldK = 'date_end';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+
+						print '</span>';
+
+
+
+						$fieldK = 'qty_velocity';
+						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans($scrumSprint->fields[$fieldK]['label'])).'" >';
+						print '<span class="fa fa-running" ></span>';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+						print '</span>';
+
+						$fieldK = 'qty_planned';
+						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans($scrumSprint->fields[$fieldK]['label'])).'" >';
+						print '<span class="fa fa-calendar-check-o" ></span>';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+						print '</span>';
+
+
+
+						$fieldK = 'qty_done';
+						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans($scrumSprint->fields[$fieldK]['label'])).'" >';
+						print '<span class="fa fa-check" ></span>';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+						print '</span>';
+
+
+						$fieldK = 'qty_consumed';
+						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans($scrumSprint->fields[$fieldK]['label'])).'" >';
+						print '<span class="fa fa-hourglass-o" ></span>';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+						print '</span>';
+
+					}else{
+						print '<span id="load-scrum-sprint-error" class="error" >'.$langs->trans('LoadingScrumSprintFail').'</span>';
+					}
+				}
+				?>
+				</span>
+
 				<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
 			</nav>
 		</header>

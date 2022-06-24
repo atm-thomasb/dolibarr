@@ -1,7 +1,7 @@
 :root{
 	--backdrop-filter-blur-radius : 5px;
-	--box-border-radius : 4px;
-	--box-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+	--box-border-radius : 2px;
+	--box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 	--default-space-size: 10px;
 	--default-block-background-color : rgba(226,228,230,0.8);
 	--default-strong-color : #223058;
@@ -13,14 +13,142 @@
 	--scrollbar-track-color : rgba(0, 0, 0, 0.1);
 	--scrollbar-thumb-color : rgba(197, 197, 197, 0.85);
 
+	--list-card-text-color : #333333;
+
 	--list-text-color : var(--box-text-color);
 	--list-text-color-hover : var(--box-text-color-hover);
-}
 
+	--font-awesome-familly : "Font Awesome 5 Free";
+	--font-awesome-weight :  900;
+
+	--list-button-default-bg-color: rgba(255,255,255,0.0);
+	--list-button-hover-bg-color: rgba(255,255,255,0.3);
+
+	--list-button-default-color: var(--list-text-color);
+	--list-button-hover-color: var(--list-button-default-color);
+
+}
 
 *{
 	box-sizing: border-box;
 }
+
+/*
+* Kanban style override
+*/
+.scrumkanban-page .kanban-board {
+	background: var(--default-block-background-color);
+	border-radius: var(--box-border-radius) !important;
+	box-shadow: var(--box-shadow);
+	/*overflow: hidden;*/
+
+
+	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
+	backdrop-filter: blur(var(--backdrop-filter-blur-radius));
+}
+
+.scrumkanban-page  .kanban-board.is-moving.gu-mirror .kanban-drag {
+	padding-right: var(--default-space-size); /* fix strange behavior */
+}
+
+.scrumkanban-page  .kanban-board-header{
+	position: relative;
+	padding: 7px var(--default-space-size);
+}
+
+
+.scrumkanban-page  .kanban-item {
+	margin-bottom: var(--default-space-size);
+}
+
+.scrumkanban-page  .kanban-board header .kanban-title-board{
+	display: block;
+	position: relative;
+	width: 100%;
+}
+
+.kanban-list-add-button{
+	cursor: pointer;
+	border: none;
+	padding: 7px 7px;
+	margin: 0 var(--default-space-size) var(--default-space-size) var(--default-space-size) ;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 14px;
+	border-radius: var(--box-border-radius);
+
+	background-color: var(--list-button-default-bg-color);
+	color: var(--list-button-default-color);
+}
+.kanban-list-add-button:hover{
+	background-color: var(--list-button-hover-bg-color);
+	color: var(--list-button-hover-color);
+}
+
+.scrumkanban-page .kanban-board .kanban-drag {
+	margin-right: calc(var(--default-space-size)/2) ;
+	padding: var(--default-space-size)  calc(var(--default-space-size)/2) var(--default-space-size) var(--default-space-size) ;
+}
+
+.scrumkanban-page .kanban-board header{
+	font-size: 14px;
+}
+
+/*
+* Dolibarr JQuery dialog override
+ */
+.scrumkanban-page .ui-widget-header{
+	border: none;
+	border-bottom: 1px solid #ececec;
+	color: #333333;
+	font-weight: normal;
+
+	background: none;
+	border-radius: 0;
+}
+
+.scrumkanban-page button.ui-button, .scrumkanban-page button.ui-button:focus  {
+	border: 1px solid #c5c5c5;
+	background: none;
+	border : none;
+}
+.scrumkanban-page button.ui-button:focus  {
+	border: 1px solid #c5c5c5;
+}
+
+/*
+* Dolibarr JNotify override
+ */
+
+.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-background{
+	border-radius: 0px;
+	opacity: 1 !important;
+}
+
+
+.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-background{
+	background-color: rgba(41, 163, 0, 0.78) !important;
+	-webkit-backdrop-filter: blur(2px);
+	backdrop-filter: blur(2px);
+}
+
+.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-background{
+	background-color: rgba(163, 0, 0, 0.78) !important;
+	-webkit-backdrop-filter: blur(2px);
+	backdrop-filter: blur(2px);
+}
+
+.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-close,.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-message,
+.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-close,.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-message{
+	color: #fff !important;
+}
+
+.scrumkanban-page  div.jnotify-background {
+	box-shadow: 2px 2px 5px rgba(0,0,0,.3) !important;
+}
+
+
 
 html{
 	height: 100vh;
@@ -86,10 +214,24 @@ section#kanban{
 
 	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
 	backdrop-filter: blur(var(--backdrop-filter-blur-radius));
+
+	box-shadow: var(--box-shadow)
 }
 
 .kanban-title__label{
-	font-weight: normal;
+	font-weight: bold;
+}
+
+.kanban-header__item{
+	color: var(--box-text-color);
+	margin-left: 10px;
+	padding-left: 10px;
+	border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+
+.kanban-header__item__value{
+	margin-left: 7px;
 }
 
 .nav-button{
@@ -110,10 +252,16 @@ section#kanban{
 	background-color: rgba(255,255,255,0.3);
 }
 
+#addkanbancol{
+	margin-left: 40px;
+}
+
 /* KANBAN */
 
 #scrum-kanban{
 	padding: 0 5px 20px 5px;
+
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Droid Sans", "Helvetica Neue", sans-serif;
 
 	position: relative;
 	max-width: 100%;
@@ -214,8 +362,10 @@ section#kanban{
 * Kanban item
 */
 .scrumkanban-page .kanban-item{
+	color: var(--list-card-text-color) ;
 	position: relative;
 	box-shadow: var(--box-shadow), inset 5px 0px 0px 0 var(--kanban-item-color, #fff);
+	padding: 7px 12px;
 }
 .kanban-item[data-type="scrum-card"]{
 	--kanban-item-color : #a9a9a9;
@@ -263,6 +413,7 @@ section#kanban{
 .kanban-item__time-spend{
 	color: var(--box-text-color);
 	font-size: 0.9em;
+	margin-right: 10px;
 }
 
 .kanban-item__time-spend .fa{
@@ -271,134 +422,52 @@ section#kanban{
 }
 
 .kanban-item__header{
-
+	z-index: 1;
+	min-height: 10px;
 }
 
 .kanban-item__footer{
+	z-index: 1;
+	min-height: 10px;
+}
 
+.kanban-item__body{
+	z-index: 1;
+	font-size: 14px;
+	min-height: 30px;
 }
 
 .kanban-item__status{
 	font-size: 0.8em;
-	margin-left: 10px;
 }
 
+/*.kanban-item.--alert{*/
+/*	overflow: hidden;*/
+/*}*/
 
+/*.kanban-item.--alert:after {*/
+/*	position: absolute;*/
+/*	z-index: 0;*/
+/*	font-family: var(--font-awesome-familly);*/
+/*	font-weight: var(--font-awesome-weight);*/
+/*	top: -40px;*/
+/*	right: -40px;*/
+/*	content: "\f071";*/
+/*	color: #880000;*/
+/*	font-size: 100px;*/
+/*	opacity: 0.1;*/
+/*}*/
 
-/*
-* Kanban style override
-*/
-.scrumkanban-page .kanban-board {
-	background: var(--default-block-background-color);
-	border-radius: var(--box-border-radius) !important;
-	box-shadow: var(--box-shadow);
-	/*overflow: hidden;*/
-
-
-	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
-	backdrop-filter: blur(var(--backdrop-filter-blur-radius));
-}
-
-.scrumkanban-page  .kanban-board.is-moving.gu-mirror .kanban-drag {
-	padding-right: var(--default-space-size); /* fix strange behavior */
-}
-
-.scrumkanban-page  .kanban-board-header{
-	position: relative;
-	padding: 7px var(--default-space-size);
-}
-
-
-.scrumkanban-page  .kanban-item {
-	border-radius: var(--box-border-radius);
-	margin-bottom: var(--default-space-size);
-}
-
-.scrumkanban-page  .kanban-board header .kanban-title-board{
-	display: block;
-	position: relative;
-	width: 100%;
-}
-
-.kanban-list-add-button{
-	cursor: pointer;
-	border: none;
-	padding: 7px 7px;
-	margin: 0 var(--default-space-size) var(--default-space-size) var(--default-space-size) ;
-	text-align: center;
-	text-decoration: none;
+.kanban-item.--alert .kanban-item__time-consumed{
 	display: inline-block;
-	font-size: 14px;
-	border-radius: var(--box-border-radius);
-
-	background-color: rgba(255,255,255,0);
-	color: var(--list-text-color);
-}
-.kanban-list-add-button:hover{
-	background-color: rgba(255,255,255,0.3);
-	color: #313131;
-}
-
-.scrumkanban-page .kanban-board .kanban-drag {
-	margin-right: calc(var(--default-space-size)/2) ;
-	padding: var(--default-space-size)  calc(var(--default-space-size)/2) var(--default-space-size) var(--default-space-size) ;
-}
-
-.scrumkanban-page .kanban-board header{
-	font-size: 14px;
-}
-
-/*
-* Dolibarr JQuery dialog override
- */
-.scrumkanban-page .ui-widget-header{
-	border: none;
-	border-bottom: 1px solid #ececec;
-	color: #333333;
-	font-weight: normal;
-
-	background: none;
-	border-radius: 0;
-}
-
-.scrumkanban-page button.ui-button, .scrumkanban-page button.ui-button:focus  {
-	border: 1px solid #c5c5c5;
-	background: none;
-	border : none;
-}
-.scrumkanban-page button.ui-button:focus  {
-	border: 1px solid #c5c5c5;
-}
-
-/*
-* Dolibarr JNotify override
- */
-
-.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-background{
-	border-radius: 0px;
-	opacity: 1 !important;
-}
-
-
-.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-background{
-	background-color: rgba(41, 163, 0, 0.78) !important;
-	-webkit-backdrop-filter: blur(2px);
-	backdrop-filter: blur(2px);
-}
-
-.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-background{
-	background-color: rgba(163, 0, 0, 0.78) !important;
-	-webkit-backdrop-filter: blur(2px);
-	backdrop-filter: blur(2px);
-}
-
-.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-close,.scrumkanban-page  .jnotify-container .jnotify-notification-error .jnotify-message,
-.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-close,.scrumkanban-page  .jnotify-container .jnotify-notification .jnotify-message{
-	color: #fff !important;
-}
-
-.scrumkanban-page  div.jnotify-background {
-	box-shadow: 2px 2px 5px rgba(0,0,0,.3) !important;
+	border-radius: 0.25rem;
+	vertical-align: baseline;
+	line-height: 1;
+	font-weight: 700;
+	color: #fff;
+	background-color: #9f1b05;
+	font-size: 11px;
+	padding: 0.25em 0.35em;
 }
 
 
@@ -409,13 +478,29 @@ section#kanban{
 */
 
 .highlight-scrum-task{
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
 	margin-left: 7px;
 	color: var(--list-text-color);
 	cursor: pointer;
+	padding: 5px;
+	border-radius: var(--box-border-radius);
+	line-height: 1em;
+	vertical-align: center;
 }
 
-.highlight-scrum-task:hover{
-	color: var(--list-text-color);
+.highlight-scrum-task:hover, .highlight-element .highlight-scrum-task{
+	color: var(--list-text-color-hover);
+	background-color: #ededed;
+}
+
+.highlight-scrum-task::before{
+	font-family: var(--font-awesome-familly);
+	font-weight: var(--font-awesome-familly);
+	content: "\f06e";
+}
+.highlight-element .highlight-scrum-task::before{
+	content: "\f070";
 }
 
 #modal-background {
@@ -443,4 +528,73 @@ section#kanban{
 
 .bringdown-element, .highlight-element.gu-transit{
 	opacity: 0.3 !important;
+}
+
+
+/** TOOLTIPS */
+/* Add this attribute to the element that needs a tooltip */
+[data-ktooltip] {
+	position: relative;
+	z-index: 2;
+	cursor: help;
+
+
+}
+
+/* Hide the tooltip content by default */
+[data-ktooltip]:before,
+[data-ktooltip]:after {
+	visibility: hidden;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* Position tooltip above the element */
+[data-ktooltip]:before {
+	position: absolute;
+	top: 150%;
+	left: 50%;
+	margin-bottom: 5px;
+	margin-left: -80px;
+	padding: 7px;
+	width: 160px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius:    3px;
+	border-radius:         3px;
+	background-color: #000;
+	background-color: hsla(0, 0%, 20%, 0.9);
+	color: #fff;
+	content: attr(data-ktooltip);
+	text-align: center;
+	font-size: 14px;
+	line-height: 1.2;
+	border: none;
+}
+
+/* Triangle hack to make tooltip look like a speech bubble */
+[data-ktooltip]:after {
+	position: absolute;
+	top: 150%;
+	left: 50%;
+	margin-left: -5px;
+	margin-top: -5px;
+	width: 0;
+	border-bottom: 5px solid #000;
+	border-bottom: 5px solid hsla(0, 0%, 20%, 0.9);
+	border-right: 5px solid transparent;
+	border-left: 5px solid transparent;
+	content: " ";
+	font-size: 0;
+	line-height: 0;
+}
+
+/* Show tooltip content on hover */
+[data-ktooltip]:hover:before,
+[data-ktooltip]:hover:after {
+	visibility: visible;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+	opacity: 1;
 }
