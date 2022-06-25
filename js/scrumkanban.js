@@ -737,10 +737,10 @@ scrumKanban = {};
 			o.setHighlight(tagetUserStoryTask);
 		});
 
-		// Fermeture au click : j'ai plutot ajouté un message pour faire que l'utilisateur appuis sur la touche escape
-		// $(document).on('click', function() {
-		// 	o.removeHighlight();
-		// });
+		// Fermeture au click sur le message de fermeture
+		$(document).on('click', '#press-esc-to-cancel', function() {
+			o.removeHighlight();
+		});
 	}
 
 	/**

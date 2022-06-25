@@ -537,6 +537,9 @@ section#kanban{
 	animation: slide-up 0.2s forwards, fade-in 0.2ms forwards;
 }
 
+#press-esc-to-cancel{
+	cursor: pointer;
+}
 
 
 
