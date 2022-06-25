@@ -55,6 +55,7 @@ scrumKanban = {};
 		CardSplit:"Séparer",
 		AssignMe:"M'assigner à la tâche",
 		UnAssignMe:"Me désengager de la tâche",
+		PressEscapeToAvoid:"Appuyer sur la touche ECHAP pour annuler",
 		ShowDolCard:"Afficher la fiche"
 	};
 
@@ -714,42 +715,63 @@ scrumKanban = {};
 
 		o.pressEscapeCallback(()=>{o.removeHighlight()});
 
+		// put it into the DOM
+		$('body').prepend($('<div id="press-esc-to-cancel" class="small-notify">'+ o.langs.PressEscapeToAvoid +'</div>'));
+
 		$(document).on('click','.kanban-item[data-type="scrum-user-story"] .highlight-scrum-task', function(e) {
 			e.stopPropagation();
-			o.removeHighlight();
 
-			if($(this).data('highlight')){
-				$(this).data('highlight', false);
-				$(this).find('.fa').addClass('fa-eye').removeClass('fa-eye-slash');
+			let usId = $(this).closest('.kanban-item').attr('data-targetelementid');
+			let tagetUserStory = '.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]';
+			let tagetUserStoryTask = '.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]';
+
+			if($(this).attr('data-highlight') == '1'){
+				o.removeHighlight(tagetUserStory);
+				o.removeHighlight(tagetUserStoryTask);
 				return;
 			}
 
-			$(this).data('highlight', true);
-			$(this).find('.fa').removeClass('fa-eye').addClass('fa-eye-slash');
+			$(this).attr('data-highlight', '1');
 
-			let usId = $(this).closest('.kanban-item').attr('data-targetelementid')
-			o.setHighlight('.kanban-item[data-type="scrum-user-story-task"][data-fk_scrum_user_story_sprint="'+usId+'"]', '.kanban-item');
-			o.setHighlight('.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]');
+			o.setHighlight(tagetUserStory, '.kanban-item');
+			o.setHighlight(tagetUserStoryTask);
 		});
 
-		$(document).on('click', function() {
-			o.removeHighlight();
-		});
+		// Fermeture au click : j'ai plutot ajouté un message pour faire que l'utilisateur appuis sur la touche escape
+		// $(document).on('click', function() {
+		// 	o.removeHighlight();
+		// });
 	}
 
 	/**
 	 * remove all Highlight
+	 * @param targetsSelector
+	 * @param targetBringdown
 	 */
-	o.removeHighlight = function(){
-		$('.highlight-element').removeClass('highlight-element');
-		$('.bringdown-element').removeClass('bringdown-element');
+	o.removeHighlight = function(targetsSelector = undefined){
+
+		if(targetsSelector != undefined){
+			$(targetsSelector + ' [data-highlight="1"]').attr('data-highlight', '0');
+			$(targetsSelector + '.highlight-element').removeClass('highlight-element');
+		}else{
+			$('[data-highlight="1"]').attr('data-highlight', '0');
+			$('.highlight-element').removeClass('highlight-element');
+		}
+
+		if(targetsSelector == undefined || $('[data-highlight="1"]').length == 0){
+			$('#press-esc-to-cancel').removeClass('--active');
+			$('.bringdown-element').removeClass('bringdown-element');
+		}
+
 	}
 
 	/**
 	 * highlight element
 	 * @param targetsSelector
+	 * @param targetBringdown
 	 */
 	o.setHighlight = function(targetsSelector, targetBringdown = undefined){
+		$('#press-esc-to-cancel').addClass('--active');
 		$(targetsSelector).addClass('highlight-element');
 
 		if(targetBringdown != undefined){
