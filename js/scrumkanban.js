@@ -74,6 +74,8 @@ scrumKanban = {};
 			o.langs = Object.assign(o.langs, langs);
 		}
 
+		o.initDarkMod();
+
 		o.jkanban = new jKanban({
 			element : '#scrum-kanban',
 			gutter  : '5px',
@@ -859,5 +861,31 @@ scrumKanban = {};
 		var rows_txt = temp + "" + param + "=" + paramVal;
 		return baseURL + "?" + newAdditionalURL + rows_txt;
 	}
+
+	o.initDarkMod = function(){
+		$(function() {
+			o.themeColorScheme = localStorage.getItem('data-theme-color-scheme');
+			if(o.themeColorScheme==''){
+				o.themeColorScheme = 'light';
+			}
+			localStorage.setItem('data-theme-color-scheme',o.themeColorScheme);
+			$('html').attr('data-theme-color-scheme' , o.themeColorScheme);
+		});
+
+		$(document).on('click','#light-bulb-toggle', function(e) {
+			e.stopPropagation();
+			o.toggleDarkMod();
+		});
+	}
+
+	o.toggleDarkMod = function (){
+		if(o.themeColorScheme=='light' || o.themeColorScheme==''){
+			o.themeColorScheme = 'dark';
+		}else{
+			o.themeColorScheme = 'light';
+		}
+		$('html').attr('data-theme-color-scheme',o.themeColorScheme);
+		localStorage.setItem('data-theme-color-scheme',o.themeColorScheme);
+	};
 
 })(scrumKanban);

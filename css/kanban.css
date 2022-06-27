@@ -1,4 +1,6 @@
 :root{
+	color-scheme: light dark; /* both supported */
+	--general-text-color : #626262;
 	--backdrop-filter-blur-radius : 5px;
 	--box-border-radius : 2px;
 	--box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
@@ -6,7 +8,7 @@
 	--default-block-background-color : rgba(234,234,234,0.87);
 	--default-strong-color : #223058;
 
-	--box-text-color : #626262;
+	--box-text-color : var(--general-text-color);
 	--box-text-color-hover : #444444;
 
 	--scrollbar-size : 11px;
@@ -28,6 +30,7 @@
 	--list-button-hover-color: var(--list-button-default-color);
 
 }
+
 
 *{
 	box-sizing: border-box;
@@ -245,12 +248,14 @@ section#kanban{
 	font-size: 14px;
 	border-radius: var(--box-border-radius);
 
-	background-color: rgba(255,255,255,0);
-	color: var(--box-text-color);
+	background-color: var(--list-button-default-bg-color);
+	color: var(--list-button-default-color);
 }
 .nav-button:hover{
-	background-color: rgba(255,255,255,0.3);
+	background-color: var(--list-button-hover-bg-color);
+	color: var(--list-button-hover-color);
 }
+
 
 #addkanbancol{
 	margin-left: 40px;
@@ -481,6 +486,20 @@ section#kanban{
 }
 
 
+.background-overlay{
+	display: none;
+	position: fixed;
+	top: 0;
+	right: 0;
+	background-color: rgb(0 0 0 / 50%);
+	height: 100vh;
+	width: 100vw;
+	z-index: -1;
+}
+
+.background-overlay.--active{
+	display: block;
+}
 
 
 /*
@@ -653,4 +672,69 @@ section#kanban{
 	100% {
 		opacity: 0;
 	}
+}
+
+
+/**
+* THIS IS DARK MOOOOOODDDDDDD !!!!!!!!!!!!!!
+**/
+
+html[data-theme-color-scheme="dark"]{
+	--general-text-color : #c0c0c0;
+	--default-block-background-color: rgb(57, 67, 84);
+	--kanban-item-backgroud-color : #485366;
+	--kanban-item-color:  #485366;
+	--default-strong-color: #dedede;
+
+	--box-text-color-hover: #e0e0e0;
+
+	--scrollbar-track-color: rgba(0, 0, 0, 0.1);
+	--scrollbar-thumb-color: rgb(44, 55, 70);
+
+	--list-card-text-color: #eeeeee;
+
+	--list-button-default-bg-color: rgba(255, 255, 255, 0.0);
+	--list-button-hover-bg-color: rgb(44, 55, 70);
+
+	color: var(--general-text-color);
+}
+
+html[data-theme-color-scheme="dark"] a:link, html[data-theme-color-scheme="dark"] a:visited{
+	color: #1c8ee7;
+}
+
+html[data-theme-color-scheme="dark"] .scrumkanban-page .kanban-item{
+	background-color: var(--kanban-item-backgroud-color);
+}
+
+html[data-theme-color-scheme="dark"] .scrumkanban-page .kanban-item__user {
+	background: #3d3d3d;
+	border: 3px solid #2f2f2f;
+}
+
+html[data-theme-color-scheme="dark"] nav img{
+	filter: brightness(0) invert(1);
+}
+
+html[data-theme-color-scheme="dark"] .badge-status0{
+	color: #999999 !important;
+	border-color: #424242 !important;
+	background-color: #3a3a3a !important;
+}
+html[data-theme-color-scheme="dark"] .badge-status0:hover{
+	 border-color: #5e5e5e !important;
+}
+
+html[data-theme-color-scheme="dark"] #dark-mode-background-overlay{
+	display: block;
+}
+
+html[data-theme-color-scheme="dark"] .highlight-scrum-task:hover,
+html[data-theme-color-scheme="dark"] .highlight-element .highlight-scrum-task {
+	color: var(--list-text-color-hover);
+	background-color: #384152;
+}
+
+html[data-theme-color-scheme="dark"] #light-bulb-toggle .fa.fa-lightbulb{
+	font-weight: 400 !important;
 }

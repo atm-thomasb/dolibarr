@@ -257,6 +257,7 @@ $jsLangs = array(
 				</span>
 
 				<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
+				<span id="light-bulb-toggle" class="nav-button"><i class="fa fa-lightbulb" ></i></span>
 			</nav>
 		</header>
 		<div id="scrum-kanban"></div>
@@ -283,7 +284,7 @@ $jsLangs = array(
 
 
 	</script>
-
+	<div id="dark-mode-background-overlay" class="background-overlay"></div>
 </body>
 
 <?php
