@@ -324,9 +324,15 @@ section#kanban{
 	white-space: nowrap;
 	cursor: text;
 }
-.is-moving .kanban-list-label-field{
+
+.is-moving .kanban-list-label-field, .scrumkanban-page .kanban-item.is-moving:hover{
 	cursor: grabbing;
 }
+
+.scrumkanban-page .drag_handler:hover , .scrumkanban-page .kanban-item:hover {
+	cursor: grab;
+}
+
 
 /** LIVE EDIT **/
 .kanban-list-label-field.live-edit{
