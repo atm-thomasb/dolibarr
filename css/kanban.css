@@ -681,7 +681,7 @@ section#kanban{
 
 html[data-theme-color-scheme="dark"]{
 	--general-text-color : #c0c0c0;
-	--default-block-background-color: rgb(57, 67, 84);
+	--default-block-background-color: rgba(57, 67, 84, 0.8);
 	--kanban-item-backgroud-color : #485366;
 	--kanban-item-color:  #485366;
 	--default-strong-color: #dedede;
@@ -737,4 +737,9 @@ html[data-theme-color-scheme="dark"] .highlight-element .highlight-scrum-task {
 
 html[data-theme-color-scheme="dark"] #light-bulb-toggle .fa.fa-lightbulb{
 	font-weight: 400 !important;
+}
+
+html[data-theme-color-scheme="dark"] .kanban-list-label-field.live-edit:hover, html[data-theme-color-scheme="dark"] .kanban-list-label-field.live-edit:focus{
+	background-color: #2c3746;
+	box-shadow: 0 0 0 3px #2c3746;
 }

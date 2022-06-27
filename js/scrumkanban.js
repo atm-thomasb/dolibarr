@@ -865,12 +865,17 @@ scrumKanban = {};
 	o.initDarkMod = function(){
 		$(function() {
 			o.themeColorScheme = localStorage.getItem('data-theme-color-scheme');
-			if(o.themeColorScheme==''){
+			if(o.themeColorScheme== null){
 				o.themeColorScheme = 'light';
+				if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					o.themeColorScheme = 'dark';
+				}
 			}
+
 			localStorage.setItem('data-theme-color-scheme',o.themeColorScheme);
 			$('html').attr('data-theme-color-scheme' , o.themeColorScheme);
 		});
+
 
 		$(document).on('click','#light-bulb-toggle', function(e) {
 			e.stopPropagation();
