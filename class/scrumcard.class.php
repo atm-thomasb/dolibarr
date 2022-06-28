@@ -1370,4 +1370,25 @@ class ScrumCard extends CommonObject
 		return 0;
 	}
 
+	/**
+	 * @param string $code
+	 * @param CommonObject $object
+	 * @return void
+	 */
+	public static function getInternalContactIdFromCode($code, $object, &$error = ''){
+		global $db;
+		$sql = "SELECT rowid id FROM ".MAIN_DB_PREFIX."c_type_contact WHERE active=1 AND element='".$db->escape($object->element)."' AND source='internal' AND code = '".$db->escape($code)."' ";
+		$obj = $db->getRow($sql);
+		if(!empty($obj)){
+			return $obj->id;
+		}elseif($obj!==false){
+			$error = $sql;
+			return 0;
+		}
+		else{
+			$error = $db->error();
+			return false;
+		}
+	}
+
 }

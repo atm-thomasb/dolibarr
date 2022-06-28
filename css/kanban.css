@@ -587,8 +587,6 @@ section#kanban{
 	position: relative;
 	z-index: 2;
 	cursor: help;
-
-
 }
 
 /* Hide the tooltip content by default */
@@ -745,7 +743,13 @@ html[data-theme-color-scheme="dark"] #light-bulb-toggle .fa.fa-lightbulb{
 	font-weight: 400 !important;
 }
 
-html[data-theme-color-scheme="dark"] .kanban-list-label-field.live-edit:hover, html[data-theme-color-scheme="dark"] .kanban-list-label-field.live-edit:focus{
+html[data-theme-color-scheme="dark"] .kanban-list-label-field.live-edit:hover,
+html[data-theme-color-scheme="dark"] .kanban-list-label-field.live-edit:focus{
 	background-color: #2c3746;
 	box-shadow: 0 0 0 3px #2c3746;
+}
+
+html[data-theme-color-scheme="dark"] div.ui-tooltip.mytooltip{
+	--tooltipfontcolor : #fff;
+	--tooltipbgcolor : hsla(0, 0%, 20%, 0.9);
 }

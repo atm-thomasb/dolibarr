@@ -15,6 +15,12 @@ class JsonResponse{
 	public $data;
 
 	/**
+	 * debug data
+	 * @var mixed
+	 */
+	public $debug;
+
+	/**
 	 * returned message used usually as set event message
 	 * @var string $msg
 	 */
@@ -40,6 +46,7 @@ class JsonResponse{
 		$jsonResponse->msg = $this->msg;
 		$jsonResponse->newToken = $this->newToken;
 		$jsonResponse->data = $this->data;
+		$jsonResponse->debug = $this->debug;
 
 		return json_encode($jsonResponse, JSON_PRETTY_PRINT);
 	}

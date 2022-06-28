@@ -75,6 +75,9 @@ scrumKanban = {};
 		}
 
 		o.initDarkMod();
+		o.initToolTip($('.classfortooltip'));
+		o.initAssignMeByPressingSpaceKey();
+
 
 		o.jkanban = new jKanban({
 			element : '#scrum-kanban',
@@ -647,7 +650,7 @@ scrumKanban = {};
 
 			let $menuDropDown = $(el);
 			if($(el).attr('id') == undefined){
-				$(el).attr('id', 'kanban-'+$menuDropDown.attr('data-eid'))
+				$(el).attr('id', 'kanban-' + $menuDropDown.attr('data-eid'))
 			}
 
 			let menuDropDownId = $(el).attr('id');
@@ -657,7 +660,17 @@ scrumKanban = {};
 					content: '<i class="fa fa-user-plus" ></i>' + o.langs.AssignMe,
 					events: {
 						click: function (e) {
-							o.setEventMessage('DSL pas possible pour l\'instant', false);
+							let sendData = {
+								'fk_kanban': o.config.fk_kanban,
+								'card-id': el.getAttribute('data-objectid')
+							};
+
+							o.callKanbanInterface('assignMeToCard', sendData, function(response){
+								if(response.result > 0) {
+									// recupérer les bonnes infos
+									o.jkanban.replaceElement(el, response.data);
+								}
+							});
 						}
 					}
 				},
@@ -665,7 +678,17 @@ scrumKanban = {};
 					content: '<i class="fa fa-user-minus" ></i>' + o.langs.UnAssignMe,
 					events: {
 						click: function (e) {
-							o.setEventMessage('DSL pas possible pour l\'instant', false);
+							let sendData = {
+								'fk_kanban': o.config.fk_kanban,
+								'card-id': el.getAttribute('data-objectid')
+							};
+
+							o.callKanbanInterface('removeMeToCard', sendData, function(response){
+								if(response.result > 0) {
+									// recupérer les bonnes infos
+									o.jkanban.replaceElement(el, response.data);
+								}
+							});
 						}
 					}
 				},
@@ -809,6 +832,32 @@ scrumKanban = {};
 		};
 	}
 
+	/**
+	 * Assign contact user to card by pressing space key
+	 * @param callbackFunction
+	 */
+	o.initAssignMeByPressingSpaceKey = function (callbackFunction){
+		document.addEventListener('keyup', event => {
+			if (event.code === 'Space') {
+				// todo limit ajx call to compatible elements
+				$('.kanban-item:hover').each(function() {
+					let sendData = {
+						'fk_kanban': o.config.fk_kanban,
+						'card-id': $( this ).attr('data-objectid')
+					};
+					let element = o.jkanban.findElement($( this ).attr('data-eid'));
+
+					o.callKanbanInterface('toggleAssignMeToCard', sendData, function(response){
+						if(response.result > 0) {
+							// recupérer les bonnes infos
+							o.jkanban.replaceElement(element, response.data);
+						}
+					});
+				});
+			}
+		})
+	}
+
 
 	/**
 	 * Remplace la valeur d'un paramètre dans une URL
@@ -892,5 +941,37 @@ scrumKanban = {};
 		$('html').attr('data-theme-color-scheme',o.themeColorScheme);
 		localStorage.setItem('data-theme-color-scheme',o.themeColorScheme);
 	};
+
+
+	/**
+	 * affectation du contenu dans l'attribut title
+	 *
+	 * @param $element
+	 * @param text
+	 */
+	o.setToolTip = function ($element, text){
+		$element.attr("title",text);
+		o.initToolTip($element);
+	}
+
+
+	/**
+	 * initialisation de la tootip
+	 * @param element
+	 */
+	o.initToolTip = function (element){
+
+		if(!element.data("tooltipset")){
+			element.data("tooltipset", true);
+			element.tooltip({
+				show: { collision: "flipfit", effect:"toggle", delay:50 },
+				hide: { delay: 50 },
+				tooltipClass: "mytooltip",
+				content: function () {
+					return $(this).prop("title");		/* To force to get title as is */
+				}
+			});
+		}
+	}
 
 })(scrumKanban);
