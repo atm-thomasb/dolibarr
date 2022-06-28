@@ -65,7 +65,7 @@
 }
 
 .scrumkanban-page  .kanban-item.gu-mirror {
-	box-shadow: 10px 10px 10px rgba(0,0,0,0.2);
+	--box-shadow: 10px 10px 10px rgba(0,0,0,0.2);
 }
 
 .scrumkanban-page  .kanban-board header .kanban-title-board{
