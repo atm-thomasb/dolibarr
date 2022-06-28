@@ -273,8 +273,6 @@ section#kanban{
 	min-height: calc(100vh - 80px);
 	overflow: auto;
 
-	/* For drag to scroll */
-	cursor: grab;
 
 	/* disable text selection */
 	-webkit-touch-callout: none; /* iOS Safari */

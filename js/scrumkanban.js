@@ -479,7 +479,7 @@ scrumKanban = {};
 				}
 
 				if(response.msg.length > 0) {
-					o.setEventMessage(response.msg, response.result > 0 ? true : false );
+					o.setEventMessage(response.msg, response.result > 0 ? true : false, response.result == 0 ? true : false );
 				}
 			},
 			error: function (err) {

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	var kanbanDragElementId = 'scrum-kanban';
 
 	const ele = document.getElementById(kanbanDragElementId);
-	ele.style.cursor = 'grab';
+
 
 	let pos = { top: 0, left: 0, x: 0, y: 0 };
 
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	};
 
 	const mouseUpHandler = function () {
-		ele.style.cursor = 'grab';
+		ele.style.cursor = 'auto';
 		ele.style.removeProperty('user-select');
 
 		document.removeEventListener('mousemove', mouseMoveHandler);
