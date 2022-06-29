@@ -743,23 +743,34 @@ scrumKanban = {};
 		// put it into the DOM
 		$('body').prepend($('<div id="press-esc-to-cancel" class="small-notify">'+ o.langs.PressEscapeToAvoid +'</div>'));
 
-		$(document).on('click','.kanban-item[data-type="scrum-user-story"] .highlight-scrum-task', function(e) {
-			e.stopPropagation();
 
-			let usId = $(this).closest('.kanban-item').attr('data-targetelementid');
-			let tagetUserStory = '.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]';
-			let tagetUserStoryTask = '.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]';
+		const toggleHighLight = function($el, usId){
+			const tagetUserStory = '.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]';
+			const tagetUserStoryTask = '.kanban-item[data-type="scrum-user-story-task"][data-fk_scrum_user_story_sprint="'+usId+'"]';
 
-			if($(this).attr('data-highlight') == '1'){
+			if($el.attr('data-highlight') == '1'){
 				o.removeHighlight(tagetUserStory);
 				o.removeHighlight(tagetUserStoryTask);
 				return;
 			}
 
-			$(this).attr('data-highlight', '1');
+			$(tagetUserStory + ' .highlight-scrum-task').attr('data-highlight', '1');
+			$(tagetUserStoryTask + ' .highlight-scrum-task').attr('data-highlight', '1');
 
 			o.setHighlight(tagetUserStory, '.kanban-item');
 			o.setHighlight(tagetUserStoryTask);
+		}
+
+		$(document).on('click','.kanban-item[data-type="scrum-user-story"] .highlight-scrum-task', function(e) {
+			e.stopPropagation();
+			const usId = $(this).closest('.kanban-item').attr('data-targetelementid');
+			toggleHighLight($(this), usId);
+		});
+
+		$(document).on('click','.kanban-item[data-type="scrum-user-story-task"] .highlight-scrum-task', function(e) {
+			e.stopPropagation();
+			const usId = $(this).closest('.kanban-item').attr('data-fk_scrum_user_story_sprint');
+			toggleHighLight($(this), usId);
 		});
 
 		// Fermeture au click sur le message de fermeture

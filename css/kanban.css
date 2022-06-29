@@ -385,11 +385,11 @@ section#kanban{
 }
 
 .kanban-item[data-type="scrum-user-story"]{
-	--kanban-item-color : #ffa500;
+	--kanban-item-color : #ff5c00;
 }
 
 .kanban-item[data-type="scrum-user-story-task"]{
-	--kanban-item-color : #ffeb00;
+	--kanban-item-color : #ffde00;
 }
 
 .kanban-item[data-type="project-task"]{
@@ -561,8 +561,18 @@ section#kanban{
 
 .small-notify.--active {
 	display: block;
-	animation: slide-up 0.2s forwards, fade-in 0.2ms forwards;
+	animation: small-notify-slide-up 0.2s forwards, fade-in 0.2ms forwards;
 }
+
+@keyframes small-notify-slide-up {
+	0% {
+		transform: translate(-50%, 100%);
+	}
+	100% {
+		transform: translate(-50%, 0%);
+	}
+}
+
 
 #press-esc-to-cancel{
 	cursor: pointer;

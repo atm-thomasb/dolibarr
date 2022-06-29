@@ -1042,6 +1042,7 @@ class ScrumCard extends CommonObject
 				if(is_callable(array($elementObject, 'LibStatut'))){
 					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
 				}
+				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
 			elseif($elementObject->element == 'project_task'){
 				/** @var Task $elementObject */
