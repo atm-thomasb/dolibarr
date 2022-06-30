@@ -179,7 +179,7 @@ $jsLangs = array(
 <body id="mainbody" class="scrumkanban-page">
 	<section id="kanban" >
 		<header class="kanban-header" role="banner">
-			<nav class="navigation" role="navigation">
+			<nav class="top-nav-bar" role="navigation">
 				<span class="nav-title"><?php print $object->getNomUrl(1) . ' <span class="kanban-title__label">'.$object->label.'</span>'; ?></span>
 
 
