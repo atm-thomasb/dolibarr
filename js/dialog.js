@@ -14,7 +14,7 @@ class Dialog {
 		this.settings = Object.assign(
 			{
 				title: '',
-				dialogClass: 'kanban-dialog',
+				dialogClass: '',
 				content: '',
 				template: '<header ></header>' +
 					'<form method="dialog" data-ref="form">\n' +
@@ -34,6 +34,9 @@ class Dialog {
 	init() {
 
 		this.dialog = document.createElement('dialog');
+		this.dialog.classList.add('kanban-dialog');
+
+
 		this.dialog.role = 'dialog';
 		if(this.settings.dialogClass.length > 0) {
 			this.dialog.classList.add(this.settings.dialogClass);
@@ -76,7 +79,6 @@ class Dialog {
 
 	open(settings = {}) {
 		const dialog = Object.assign({}, this.settings, settings)
-		this.dialog.className = dialog.dialogClass || ''
 
 		this.toggle()
 	}

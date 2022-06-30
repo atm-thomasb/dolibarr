@@ -1036,6 +1036,7 @@ scrumKanban = {};
 
 		const splitDialog = new Dialog({
 			title: o.langs.DeleteCardDialogTitle,
+			dialogClass: '--danger',
 			content: content
 		});
 
