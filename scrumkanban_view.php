@@ -144,6 +144,7 @@ $arrayofjs = array(
 	'scrumproject/vendors/custom-context-menu/ContextMenu.js',
 	'scrumproject/js/liveedit.js', // la librairie live edit
 	'scrumproject/js/kanbanDragToScroll.js', // la librairie qui permet de scroll au click
+	'scrumproject/js/dialog.js',
 
 	// TODO : bon pour l'instant dragAutoScroll ça marche pas
 	//  Doit normalement permettre de scroll les liste en même temps que l'on fait un drag and drop

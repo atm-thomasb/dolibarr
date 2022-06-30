@@ -56,7 +56,11 @@ scrumKanban = {};
 		AssignMe:"M'assigner à la tâche",
 		UnAssignMe:"Me désengager de la tâche",
 		PressEscapeToAvoid:"Appuyer sur la touche ECHAP pour annuler",
-		ShowDolCard:"Afficher la fiche"
+		ShowDolCard:"Afficher la fiche",
+		SplitUsInTask:"Séparer l'user story en tâches scrum",
+		SplitCard:"Découper la carte",
+		CloneCard:"Cloner la carte",
+		DeleteCardDialogTitle:"Supprimer cette carte ?"
 	};
 
 
@@ -269,7 +273,13 @@ scrumKanban = {};
 	 * @param url
 	 * @param label
 	 */
-	o.dialogIFrame = function (dialogId, url, label = ''){
+	o.dialogIFrame = function (dialogId, url, label = '', callBackFunc = {}){
+
+
+		callBackFunc =  Object.assign({
+			open : undefined,
+			close : undefined,
+		}, callBackFunc);
 
 		url = o.updateURLParameter(url, 'optioncss', 'print');
 
@@ -289,10 +299,14 @@ scrumKanban = {};
 			width: '80%',
 			title: label,
 			open: function (event, ui) {
-
+				if (typeof callBackFunc.open === 'function'){
+					callBackFunc.open(event, ui);
+				}
 			},
 			close: function (event, ui) {
-
+				if (typeof callBackFunc.close === 'function'){
+					callBackFunc.close(event, ui);
+				}
 			}
 		});
 
@@ -696,7 +710,7 @@ scrumKanban = {};
 					content: o.menuIcons.copyIcon + o.langs.CardClone,
 					events: {
 						click: function (e) {
-							o.setEventMessage('DSL pas possible pour l\'instant', false);
+							o.cloneCardDialog(e);
 						}
 					}
 				},
@@ -704,7 +718,7 @@ scrumKanban = {};
 					content: '<i class="fa fa-columns" ></i>' + o.langs.CardSplit,
 					events: {
 						click: function (e) {
-							o.setEventMessage('DSL pas possible pour l\'instant', false);
+							o.splitCardDialog(el);
 						}
 					}
 				},
@@ -712,7 +726,7 @@ scrumKanban = {};
 					content: o.menuIcons.deleteIcon + o.langs.Delete,
 					events: {
 						click: function (e) {
-							o.setEventMessage('DSL pas possible pour l\'instant', false);
+							o.deleteCardDialog(el);
 						}
 						// mouseover: () => console.log("Copy Button Mouseover")
 						// You can use any event listener from here
@@ -985,4 +999,53 @@ scrumKanban = {};
 		}
 	}
 
+	o.splitCardDialog = function(el){
+
+		// TODO detect type of element before
+
+		const content = '<h1 style="text-align: center;">Work in progress</h1>';
+
+
+		const splitDialog = new Dialog({
+			title: o.langs.SplitCard,
+			content: content
+		});
+	}
+
+	o.cloneCardDialog = function(el){
+		// TODO detect type of element before
+		//  User story and scrum task can not be cloned
+
+		const content = '<h1 style="text-align: center;">Work in progress</h1>';
+
+
+		const splitDialog = new Dialog({
+			title: o.langs.CloneCard,
+			content: content
+		});
+	}
+
+
+
+	o.deleteCardDialog = function(el){
+		// TODO detect type of element before
+		//  User story and scrum task can not be deleted ?
+
+		const content = '<h1 style="text-align: center;">Work in progress</h1>';
+
+
+		const splitDialog = new Dialog({
+			title: o.langs.DeleteCardDialogTitle,
+			content: content
+		});
+
+		splitDialog.waitForUser().then((userValidate) => {
+			if(userValidate){
+				// user click ok
+				o.setEventMessage('Work in progress delete', false);
+			}else{
+				// user cancel
+			}
+		});
+	}
 })(scrumKanban);

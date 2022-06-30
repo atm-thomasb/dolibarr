@@ -29,12 +29,126 @@
 	--list-button-default-color: var(--list-text-color);
 	--list-button-hover-color: var(--list-button-default-color);
 
+	--edge-size: 0.5em;
+	--default-clip-path :  polygon(
+			var(--edge-size) 0%,
+			100% 0,
+			100% calc(100% - var(--edge-size)),
+			calc(100% - var(--edge-size)) 100%,
+			0 100%,
+			0% var(--edge-size)
+	);
 }
 
 
 *{
 	box-sizing: border-box;
 }
+
+/**
+* Dialog
+ */
+
+dialog.kanban-dialog{
+	--dialog-text-color : #333;
+	--dialog-background-color : #fff;
+	--dialog-padding : 10px;
+
+	min-width: min(70vw, 500px);
+	border: none;
+	box-shadow: 0 0 10px 0 rgba(0,0,0,0.6);
+	color:var(--dialog-text-color);
+	background-color: var(--dialog-background-color );
+	padding: 0;
+
+	clip-path: var(--default-clip-path);
+}
+
+dialog.kanban-dialog::backdrop{
+	backdrop-filter: blur(1px);
+	background-color: rgba(0,0,0,0.5);
+}
+
+dialog.kanban-dialog :is(header, footer, .body):empty{
+	display: none;
+}
+
+dialog.kanban-dialog :where(header, footer, .body){
+	padding: 10px var(--dialog-padding);
+}
+
+dialog.kanban-dialog :where(header){
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+dialog.kanban-dialog :where(footer){
+	border-top: 1px solid rgba(0,0,0,0.1);
+	text-align: right;
+	background-color: rgba(0,0,0,0.05);
+}
+
+dialog.kanban-dialog footer button{
+	margin-left: 10px;
+}
+
+dialog.kanban-dialog[open]{
+	animation: slide-up 0.2s forwards, fade-in 0.2ms forwards;
+}
+
+
+
+
+html[data-theme-color-scheme="dark"] dialog.kanban-dialog{
+	--dialog-text-color : #ededed;
+	--dialog-background-color:rgba(57, 67, 84);
+}
+
+
+/*
+* Buttons
+ */
+
+button.kanban-btn {
+	--button-background-color :  rgba(51, 51, 51, 0.1);
+	--button-color :   #333333;
+	background-color: var(--button-background-color);
+	color: var(--button-color);
+	border-radius: 8px;
+	border-width: 0;
+	cursor: pointer;
+	display: inline-block;
+	font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 20px;
+	list-style: none;
+	margin: 0;
+	padding: 6px 8px;
+	text-align: center;
+	transition: all 200ms;
+	vertical-align: baseline;
+	white-space: nowrap;
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: manipulation;
+}
+
+button.kanban-btn:hover {
+	--button-background-color :  rgba(51, 51, 51, 0.2);
+}
+
+
+html[data-theme-color-scheme="dark"] button{
+	--button-color : #ededed;
+	--button-background-color:   rgb(71, 89, 114);
+}
+html[data-theme-color-scheme="dark"] button:hover{
+	--button-color : #dadada;
+	--button-background-color: var(--list-button-hover-bg-color);
+}
+
+
+
 
 /*
 * Kanban style override
@@ -121,7 +235,25 @@
 	border : none;
 }
 .scrumkanban-page button.ui-button:focus  {
-	border: 1px solid #c5c5c5;
+	border: 1px solid rgba(0,0,0,0.1);
+}
+
+.scrumkanban-page .ui-widget-overlay{
+	background: rgba(0,0,0,0.3);
+	opacity: 1;
+
+	-webkit-backdrop-filter: blur(5px);
+	backdrop-filter: blur(5px);
+}
+
+.ui-dialog{
+	border-radius: 0;
+	box-shadow: 0 0 10px 0 rgba(0,0,0,.5);
+	background-color: #fff;
+}
+
+.ui-widget.ui-widget-content{
+	border: none;
 }
 
 /*
@@ -212,7 +344,7 @@ section#kanban{
 	display: block;
 	position: sticky;
 	top:0px;
-	z-index: 1000;
+	z-index: 0;
 
 
 	padding: var(--default-space-size);
