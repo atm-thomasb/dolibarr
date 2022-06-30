@@ -203,6 +203,11 @@ scrumKanban = {};
 		// Get all board
 		o.getAllBoards();
 
+		// init du refresh du kanban
+		setTimeout(function(){
+			o.refreshAllBoards(true);
+		}, 5000);
+
 		// Open dialog for kanban item : pas d'utilisation du click fournis par le kanban pour permettre les clics sur des sous elements
 		$(document).on('click','.kanban-item', function() {
 			o.cardClick($(this)[0]);
@@ -464,6 +469,47 @@ scrumKanban = {};
 			if(response.result > 0) {
 				// recupérer les bonnes infos
 				o.jkanban.addBoards(response.data)
+			}
+		});
+	}
+
+	// Allow automatic refresh of boards
+	// TODO : pour l'instant c'est vraiment rudimentaire
+	//   WebSocket ? ou server-sent events ?
+	o.refreshAllBoards = function (autoRefresh = false){
+
+		console.log('refresh kanban');
+		console.log('boards : ' + o.jkanban.options.boards.length);
+		// todo : use o.lastBoardUpdate
+
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban
+		};
+
+		o.callKanbanInterface('getAllBoards', sendData, function(response){
+			if(response.result > 0) {
+
+				let boardsToDelete = [];
+
+				// get all boards
+				o.jkanban.options.boards.forEach(function(board, indexKey){
+					boardsToDelete.push(board.id);
+				});
+
+				// remove board
+				boardsToDelete.forEach(function(boardId, indexKey){
+					o.jkanban.removeBoard(boardId);
+				});
+
+				// recupérer les bonnes infos
+				o.jkanban.container.style.width = '';
+				o.jkanban.addBoards(response.data)
+			}
+
+			if(autoRefresh){
+				setTimeout(function(){
+					o.refreshAllBoards(autoRefresh);
+				}, 15000);
 			}
 		});
 	}

@@ -400,14 +400,11 @@ section#kanban{
 	top:0px;
 	z-index: 1;
 
-
 	padding: var(--default-space-size);
 	margin-bottom: var(--default-space-size);
 	background: var(--default-block-background-color);
-
 	-webkit-backdrop-filter: blur(var(--backdrop-filter-blur-radius));
 	backdrop-filter: blur(var(--backdrop-filter-blur-radius));
-
 	box-shadow: var(--box-shadow)
 }
 
