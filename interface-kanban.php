@@ -79,8 +79,14 @@ elseif ($action === 'assignMeToCard') {
 elseif ($action === 'toggleAssignMeToCard') {
 	_actionAssignUserToCard($jsonResponse, false, true);
 }
-elseif ($action === 'removeMeToCard') {
+elseif ($action === 'removeMeFromCard') {
 	_actionRemoveUserToCard($jsonResponse);
+}
+elseif ($action === 'removeList') {
+	_actionRemoveList($jsonResponse);
+}
+elseif ($action === 'removeCard') {
+	_actionRemoveCard($jsonResponse);
 }
 else{
 	$jsonResponse->msg = 'Action not found';
@@ -195,32 +201,17 @@ function _actionGetAllBoards($jsonResponse){
 
 	if(is_array($kanbanLists)){
 		$jsonResponse->result = 1;
-		$jsonResponse->data = array();
+		$jsonResponse->data = new stdClass();
 
-//		// The back log
-		// REPLACED with a real list
-//		$object = new stdClass();
-//		$object->id = '__backlog'; // kanban dom id
-//		$object->title = $langs->trans("KanbanBackLogList");
-//		$object->class = 'kankan-backlog-header';
-//		$object->objectid = '__backlog';
-//		$object->item = array();
-//		$jsonResponse->data[] = $object;
+		$jsonResponse->data->boards = array();
+
 
 		// All listes stored in databases
 		foreach ($kanbanLists as $kanbanList){
-			$jsonResponse->data[] = $kanbanList->getKanBanListObjectFormatted();
+			$jsonResponse->data->boards[] = $kanbanList->getKanBanListObjectFormatted();
 		}
 
-//		// the DONE list
-		// REPLACED with a real list
-//		$object = new stdClass();
-//		$object->id = '__done'; // kanban dom id
-//		$object->title = $langs->trans("KanbanDoneList");
-//		$object->class = 'kankan-done-header';
-//		$object->objectid = '__done';
-//		$object->item = array();
-//		$jsonResponse->data[] = $object;
+		$jsonResponse->data->md5Boards = md5(json_encode($jsonResponse->data->boards));
 
 		return true;
 	}
@@ -231,6 +222,94 @@ function _actionGetAllBoards($jsonResponse){
 	}
 }
 
+
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionRemoveList($jsonResponse){
+	global $user, $langs, $db;
+
+	$jsonResponse->result = 0;
+
+	$data = GETPOST("data", "array");
+
+	// check kanban list data
+	if(empty($data['kanban_list_id'])){
+		$jsonResponse->msg = 'Need Kanban list Id';
+		return false;
+	}
+
+	// toDo vérifier le status du kanban aussi
+
+	$kanbanListId = $data['kanban_list_id'];
+	$kanbanList = _checkObjectByElement('scrumproject_scrumkanbanlist', $kanbanListId, $jsonResponse);
+	/**
+	 * @var ScrumKanbanList $kanbanList
+	 */
+	if(!$kanbanList){
+		$jsonResponse->msg = 'Invalid Kanban list load';
+		return false;
+	}
+
+	if(empty($user->rights->scrumproject->scrumcard->write)){
+		$jsonResponse->msg = 'Not enough rights';
+		return false;
+	}
+
+	if($kanbanList->delete($user) <= 0){
+		$jsonResponse->msg = 'Error deleting scrum list : '.$kanbanList->errorsToString();
+		return false;
+	}
+
+	$jsonResponse->result = 1;
+	return true;
+}
+
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionRemoveCard($jsonResponse){
+	global $user, $langs, $db;
+
+	$jsonResponse->result = 0;
+
+	$data = GETPOST("data", "array");
+
+	// check kanban item data
+	if(empty($data['card_id'])){
+		$jsonResponse->msg = 'Need Kanban card Id';
+		return false;
+	}
+
+	// toDo vérifier le status du kanban aussi
+
+	$kanbanCardId = $data['card_id'];
+	$kanbanCard = _checkObjectByElement('scrumproject_scrumcard', $kanbanCardId, $jsonResponse);
+	/**
+	 * @var ScrumCard $kanbanCard
+	 */
+	if(!$kanbanCard){
+		$jsonResponse->msg = 'Invalid Kanban card load';
+		return false;
+	}
+
+	if(empty($user->rights->scrumproject->scrumcard->write)){
+		$jsonResponse->msg = 'Not enough rights';
+		return false;
+	}
+
+	if($kanbanCard->delete($user) <= 0){
+		$jsonResponse->msg = 'Error deleting scrum card : '.$kanbanCard->errorsToString();
+		return false;
+	}
+
+	$jsonResponse->result = 1;
+	return true;
+}
 
 /**
  * @param JsonResponse $jsonResponse

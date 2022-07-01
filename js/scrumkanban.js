@@ -393,13 +393,36 @@ scrumKanban = {};
 	}
 
 	o.delKanbanList = function(listName){
-		// TODO create in ajax before remove
-		o.jkanban.removeBoard(listName)
+
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban,
+			'kanban_list_id' : o.getDolListIdFromJKanbanBoardDomId(listName)
+		};
+
+		o.callKanbanInterface('removeList', sendData, function(response){
+			if(response.result > 0) {
+				o.jkanban.removeBoard(listName)
+			}
+		});
 	}
-	// var removeBoard = document.getElementById('removeBoard');
-	// removeBoard.addEventListener('click',function(){
-	// 	o.jkanban.removeBoard('_done');
-	// });
+
+
+	o.delItem = function(eid){
+
+		let item = o.jkanban.findElement(eid);
+
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban,
+			'card_id' : item.getAttribute('data-objectid')
+		};
+
+		o.callKanbanInterface('removeCard', sendData, function(response){
+			if(response.result > 0) {
+				o.jkanban.removeElement(item)
+			}
+		});
+	}
+
 
 	/**
 	 * @param $functionName
@@ -468,7 +491,8 @@ scrumKanban = {};
 		o.callKanbanInterface('getAllBoards', sendData, function(response){
 			if(response.result > 0) {
 				// recupérer les bonnes infos
-				o.jkanban.addBoards(response.data)
+				o.jkanban.addBoards(response.data.boards);
+				o.lastBoardUpdate = response.data.md5Boards;
 			}
 		});
 	}
@@ -478,8 +502,6 @@ scrumKanban = {};
 	//   WebSocket ? ou server-sent events ?
 	o.refreshAllBoards = function (autoRefresh = false){
 
-		console.log('refresh kanban');
-		console.log('boards : ' + o.jkanban.options.boards.length);
 		// todo : use o.lastBoardUpdate
 
 		let sendData = {
@@ -487,7 +509,8 @@ scrumKanban = {};
 		};
 
 		o.callKanbanInterface('getAllBoards', sendData, function(response){
-			if(response.result > 0) {
+
+			if(response.result > 0 && response.data.md5Boards != o.lastBoardUpdate) {
 
 				let boardsToDelete = [];
 
@@ -503,13 +526,14 @@ scrumKanban = {};
 
 				// recupérer les bonnes infos
 				o.jkanban.container.style.width = '';
-				o.jkanban.addBoards(response.data)
+				o.jkanban.addBoards(response.data.boards);
+				o.lastBoardUpdate = response.data.md5Boards;
 			}
 
 			if(autoRefresh){
 				setTimeout(function(){
 					o.refreshAllBoards(autoRefresh);
-				}, 15000);
+				}, 5000);
 			}
 		});
 	}
@@ -652,6 +676,8 @@ scrumKanban = {};
 				let $menuDropDown = $(this);
 				let menuDropDownId =  $menuDropDown.attr('id');
 
+				let boardId = $menuDropDown.closest('.kanban-board').attr('data-id');
+
 				let menuItems = [
 					{
 						content: o.menuIcons.documentIcon + o.langs.ShowDolCard,
@@ -678,7 +704,7 @@ scrumKanban = {};
 						content: o.menuIcons.deleteIcon + o.langs.Delete,
 						events: {
 							click: function (e) {
-								o.setEventMessage('DSL pas possible pour l\'instant', false);
+								o.deleteBoardDialog(boardId);
 							}
 							// mouseover: () => console.log("Copy Button Mouseover")
 							// You can use any event listener from here
@@ -743,7 +769,7 @@ scrumKanban = {};
 								'card-id': el.getAttribute('data-objectid')
 							};
 
-							o.callKanbanInterface('removeMeToCard', sendData, function(response){
+							o.callKanbanInterface('removeMeFromCard', sendData, function(response){
 								if(response.result > 0) {
 									// recupérer les bonnes infos
 									o.jkanban.replaceElement(el, response.data);
@@ -772,7 +798,7 @@ scrumKanban = {};
 					content: o.menuIcons.deleteIcon + o.langs.Delete,
 					events: {
 						click: function (e) {
-							o.deleteCardDialog(el);
+							o.deleteCardDialog(el.getAttribute('data-eid'));
 						}
 						// mouseover: () => console.log("Copy Button Mouseover")
 						// You can use any event listener from here
@@ -1073,11 +1099,35 @@ scrumKanban = {};
 
 
 
-	o.deleteCardDialog = function(el){
+	o.deleteCardDialog = function(eid){
 		// TODO detect type of element before
 		//  User story and scrum task can not be deleted ?
 
-		const content = '<h1 style="text-align: center;">Work in progress</h1>';
+		let content = '<h1 style="text-align: center;">Work in progress to delete ' + eid + '</h1>'
+			+ '<p>Pour l\'instant la suppression se fait sans distinction, <strong>les cards spéciales</strong> ne sont pas prisent en compte : US, US-Tâches etc...</p>'
+
+		const splitDialog = new Dialog({
+			title: o.langs.DeleteCardDialogTitle,
+			dialogClass: '--danger',
+			content: content
+		});
+
+		splitDialog.waitForUser().then((userValidate) => {
+			if(userValidate){
+				o.delItem(eid);
+			}else{
+				// user cancel
+			}
+		});
+	}
+
+	o.deleteBoardDialog = function(boardId){
+		// TODO detect type of element before
+		//  User story and scrum task can not be deleted ?
+
+		let content = '<h1 style="text-align: center;">Work in progress to delete ' + boardId + '</h1>'
+						+ '<p>Pour l\'instant la suppression se fait sans distinction, les cards présentes ne sont pas prisent en compte ni redistribuées.</p>'
+						+ '<p>De plus les règles sur la supression du backlog et du done ne sonts pas établies.</p>';
 
 
 		const splitDialog = new Dialog({
@@ -1088,8 +1138,7 @@ scrumKanban = {};
 
 		splitDialog.waitForUser().then((userValidate) => {
 			if(userValidate){
-				// user click ok
-				o.setEventMessage('Work in progress delete', false);
+				o.delKanbanList(boardId);
 			}else{
 				// user cancel
 			}
