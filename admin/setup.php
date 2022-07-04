@@ -94,69 +94,89 @@ if (!class_exists('FormSetup')) {
 }
 
 $formSetup = new FormSetup($db);
+$form = new Form($db);
+
+//
+//// Hôte
+//$item = $formSetup->newItem('NO_PARAM_JUST_TEXT');
+//$item->fieldOverride = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'];
+//$item->cssClass = 'minwidth500';
+//
+//// Setup conf MYMODULE_MYPARAM1 as a simple string input
+//$item = $formSetup->newItem('MYMODULE_MYPARAM1');
+//$item->defaultFieldValue = 'default value';
+//
+//// Setup conf MYMODULE_MYPARAM1 as a simple textarea input but we replace the text of field title
+//$item = $formSetup->newItem('MYMODULE_MYPARAM2');
+//$item->nameText = $item->getNameText().' more html text ';
+//
+//// Setup conf MYMODULE_MYPARAM3
+//$item = $formSetup->newItem('MYMODULE_MYPARAM3');
+//$item->setAsThirdpartyType();
+//
+//// Setup conf MYMODULE_MYPARAM4 : exemple of quick define write style
+//$formSetup->newItem('MYMODULE_MYPARAM4')->setAsYesNo();
+//
+//// Setup conf MYMODULE_MYPARAM5
+//$formSetup->newItem('MYMODULE_MYPARAM5')->setAsEmailTemplate('thirdparty');
+//
+//// Setup conf MYMODULE_MYPARAM6
+//$formSetup->newItem('MYMODULE_MYPARAM6')->setAsSecureKey()->enabled = 0; // disabled
+//
+//// Setup conf MYMODULE_MYPARAM7
+////$formSetup->newItem('MYMODULE_MYPARAM7')->setAsProduct();
+//
+//$formSetup->newItem('Title')->setAsTitle();
+//
+//// Setup conf MYMODULE_MYPARAM8
+//$item = $formSetup->newItem('MYMODULE_MYPARAM8');
+//$TField = array(
+//	'test01' => $langs->trans('test01'),
+//	'test02' => $langs->trans('test02'),
+//	'test03' => $langs->trans('test03'),
+//	'test04' => $langs->trans('test04'),
+//	'test05' => $langs->trans('test05'),
+//	'test06' => $langs->trans('test06'),
+//);
+//$item->setAsMultiSelect($TField);
+//$item->helpText = $langs->transnoentities('MYMODULE_MYPARAM8');
+//
+//
+//// Setup conf MYMODULE_MYPARAM9
+//$formSetup->newItem('MYMODULE_MYPARAM9')->setAsSelect($TField);
+//
+//
+//// Setup conf MYMODULE_MYPARAM10
+//$item = $formSetup->newItem('MYMODULE_MYPARAM10');
+//$item->setAsColor();
+//$item->defaultFieldValue = '#FF0000';
+//$item->nameText = $item->getNameText().' more html text ';
+//$item->fieldInputOverride = '';
+//$item->helpText = $langs->transnoentities('AnHelpMessage');
+////$item->fieldValue = '';
+////$item->fieldAttr = array() ; // fields attribute only for compatible fields like input text
+////$item->fieldOverride = false; // set this var to override field output will override $fieldInputOverride and $fieldOutputOverride too
+////$item->fieldInputOverride = false; // set this var to override field input
+////$item->fieldOutputOverride = false; // set this var to override field output
+//
 
 
 // Hôte
-$item = $formSetup->newItem('NO_PARAM_JUST_TEXT');
-$item->fieldOverride = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'];
-$item->cssClass = 'minwidth500';
+$item = $formSetup->newItem('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE');
 
-// Setup conf MYMODULE_MYPARAM1 as a simple string input
-$item = $formSetup->newItem('MYMODULE_MYPARAM1');
-$item->defaultFieldValue = 'default value';
+$sql = "SELECT code, libelle FROM  ".MAIN_DB_PREFIX."c_type_contact WHERE active=1 AND element='scrumproject_scrumcard' AND source='internal'";
+$contactsType = $db->getRows($sql);
+$TSelect = array();
+if($contactsType){
+	foreach ($contactsType as $contactType){
+		$TSelect[$contactType->code] = $langs->trans($contactType->libelle);
+		if($conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE == $contactType->code){
+			$item->fieldOutputOverride = $TSelect[$contactType->code];
+		}
+	}
+}
+$item->fieldInputOverride = $form->selectArray('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE', $TSelect, $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE);
 
-// Setup conf MYMODULE_MYPARAM1 as a simple textarea input but we replace the text of field title
-$item = $formSetup->newItem('MYMODULE_MYPARAM2');
-$item->nameText = $item->getNameText().' more html text ';
-
-// Setup conf MYMODULE_MYPARAM3
-$item = $formSetup->newItem('MYMODULE_MYPARAM3');
-$item->setAsThirdpartyType();
-
-// Setup conf MYMODULE_MYPARAM4 : exemple of quick define write style
-$formSetup->newItem('MYMODULE_MYPARAM4')->setAsYesNo();
-
-// Setup conf MYMODULE_MYPARAM5
-$formSetup->newItem('MYMODULE_MYPARAM5')->setAsEmailTemplate('thirdparty');
-
-// Setup conf MYMODULE_MYPARAM6
-$formSetup->newItem('MYMODULE_MYPARAM6')->setAsSecureKey()->enabled = 0; // disabled
-
-// Setup conf MYMODULE_MYPARAM7
-//$formSetup->newItem('MYMODULE_MYPARAM7')->setAsProduct();
-
-$formSetup->newItem('Title')->setAsTitle();
-
-// Setup conf MYMODULE_MYPARAM8
-$item = $formSetup->newItem('MYMODULE_MYPARAM8');
-$TField = array(
-	'test01' => $langs->trans('test01'),
-	'test02' => $langs->trans('test02'),
-	'test03' => $langs->trans('test03'),
-	'test04' => $langs->trans('test04'),
-	'test05' => $langs->trans('test05'),
-	'test06' => $langs->trans('test06'),
-);
-$item->setAsMultiSelect($TField);
-$item->helpText = $langs->transnoentities('MYMODULE_MYPARAM8');
-
-
-// Setup conf MYMODULE_MYPARAM9
-$formSetup->newItem('MYMODULE_MYPARAM9')->setAsSelect($TField);
-
-
-// Setup conf MYMODULE_MYPARAM10
-$item = $formSetup->newItem('MYMODULE_MYPARAM10');
-$item->setAsColor();
-$item->defaultFieldValue = '#FF0000';
-$item->nameText = $item->getNameText().' more html text ';
-$item->fieldInputOverride = '';
-$item->helpText = $langs->transnoentities('AnHelpMessage');
-//$item->fieldValue = '';
-//$item->fieldAttr = array() ; // fields attribute only for compatible fields like input text
-//$item->fieldOverride = false; // set this var to override field output will override $fieldInputOverride and $fieldOutputOverride too
-//$item->fieldInputOverride = false; // set this var to override field input
-//$item->fieldOutputOverride = false; // set this var to override field output
 
 
 $setupnotempty =+ count($formSetup->items);

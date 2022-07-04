@@ -648,7 +648,7 @@ function _checkObjectByElement($elementType, $id, $jsonResponse){
  * @return bool|void
  */
 function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false){
-	global  $user, $db;
+	global  $user, $db, $conf;
 
 	$data = GETPOST("data", "array");
 
@@ -669,6 +669,10 @@ function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false
 
 		$contactUser->fetch_optionals();
 		$typeContact = $contactUser->array_options['options_scrumproject_role'];
+	}
+
+	if(empty($typeContact) && !empty($conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE)){
+		$typeContact = $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE;
 	}
 
 
