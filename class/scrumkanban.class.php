@@ -44,7 +44,7 @@ class ScrumKanban extends CommonObject
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'scrumproject_scrumkanban';
+	public $element = 'scrumkanban';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
