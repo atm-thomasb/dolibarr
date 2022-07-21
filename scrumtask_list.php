@@ -248,7 +248,6 @@ if (empty($reshook)) {
 /*
  * View
  */
-
 $form = new Form($db);
 
 $now = dol_now();
@@ -288,6 +287,7 @@ if ($object->ismultientitymanaged == 1) {
 } else {
 	$sql .= " WHERE 1 = 1";
 }
+$sql .= ' AND rowid = '.$fk_scrum_user_story_sprint;
 
 
 

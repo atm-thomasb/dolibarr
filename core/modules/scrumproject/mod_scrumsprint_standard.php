@@ -68,7 +68,10 @@ class mod_scrumsprint_standard extends ModeleNumRefScrumSprint
 	 */
 	public function getExample()
 	{
-		return $this->prefix."0501-0001";
+		global $db;
+		include_once __DIR__.'/../../../class/scrumsprint.class.php';
+		$object = new ScrumSprint($db);
+		return $this->getNextValue($object);
 	}
 
 
@@ -89,7 +92,6 @@ class mod_scrumsprint_standard extends ModeleNumRefScrumSprint
 		$sql = "SELECT MAX(CAST(SUBSTRING(ref FROM ".$posindice.") AS SIGNED)) as max";
 		$sql .= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprint";
 		$sql .= " WHERE ref LIKE '".$db->escape($this->prefix)."____-%'";
-		$sql .= " AND fk_team = ".$object->fk_team;
 		if ($object->ismultientitymanaged == 1) {
 			$sql .= " AND entity = ".$conf->entity;
 		} elseif ($object->ismultientitymanaged == 2) {
@@ -126,8 +128,7 @@ class mod_scrumsprint_standard extends ModeleNumRefScrumSprint
 		$posindice = strlen($this->prefix) + 6;
 		$sql = "SELECT MAX(CAST(SUBSTRING(ref FROM ".$posindice.") AS SIGNED)) as max";
 		$sql .= " FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprint";
-		$sql .= " WHERE ref LIKE '".$db->escape($this->prefix)."____-%'";
-		$sql .= " AND fk_team = ".$object->fk_team;
+		$sql .= " WHERE ref LIKE '".$db->escape($this->prefix)."____-%' ";
 		if ($object->ismultientitymanaged == 1) {
 			$sql .= " AND entity = ".$conf->entity;
 		} elseif ($object->ismultientitymanaged == 2) {
@@ -135,6 +136,7 @@ class mod_scrumsprint_standard extends ModeleNumRefScrumSprint
 		}
 
 		$resql = $db->query($sql);
+
 		if ($resql)
 		{
 			$obj = $db->fetch_object($resql);
