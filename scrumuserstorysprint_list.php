@@ -735,13 +735,6 @@ print '</tr>'."\n";
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
 
-if (!empty($arrayfields['societe']['checked'])) {
-	print getTitleFieldOfList($arrayfields['societe']['label'], 0, $_SERVER['PHP_SELF'], 'societe', '', $param, '', $sortfield, $sortorder)."\n";
-}
-
-if (!empty($arrayfields['project_title']['checked'])) {
-	print getTitleFieldOfList($arrayfields['project_title']['label'], 0, $_SERVER['PHP_SELF'], 'project_title', '', $param, '', $sortfield, $sortorder)."\n";
-}
 
 foreach ($object->fields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
@@ -756,6 +749,15 @@ foreach ($object->fields as $key => $val) {
 	}
 	if (!empty($arrayfields['t.'.$key]['checked'])) {
 		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+	}
+	if ($key == "fk_scrum_sprint"){
+		if (!empty($arrayfields['societe']['checked'])) {
+			print getTitleFieldOfList($arrayfields['societe']['label'], 0, $_SERVER['PHP_SELF'], 'societe', '', $param, '', $sortfield, $sortorder)."\n";
+		}
+
+		if (!empty($arrayfields['project_title']['checked'])) {
+			print getTitleFieldOfList($arrayfields['project_title']['label'], 0, $_SERVER['PHP_SELF'], 'project_title', '', $param, '', $sortfield, $sortorder)."\n";
+		}
 	}
 }
 // Extra fields
@@ -796,30 +798,6 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 	// Show here line of result
 	print '<tr class="oddeven">';
-
-
-	if (!empty($arrayfields['societe']['checked'])) {
-		print '<td class="liste_titre">';
-		$societe = scrumProjectGetObjectByElement('societe', $obj->fk_soc);
-		if($societe){
-			/** @var Societe $societe */
-			print $societe->getNomUrl(1);
-		}
-		print '</td>';
-		$totalarray['nbfield']++;
-	}
-
-	if (!empty($arrayfields['project_title']['checked'])) {
-		print '<td class="liste_titre">';
-		$project = scrumProjectGetObjectByElement('project', $obj->fk_project);
-		if($project){
-			/** @var Project $project */
-			print $project->getNomUrl(1, '', 1);
-		}
-		print '</td>';
-		$totalarray['nbfield']++;
-	}
-
 
 	foreach ($object->fields as $key => $val) {
 		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
@@ -871,6 +849,29 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 					$totalarray['val']['t.'.$key] = 0;
 				}
 				$totalarray['val']['t.'.$key] += $object->$key;
+			}
+		}
+		if ($key == 'fk_scrum_sprint'){
+			if (!empty($arrayfields['societe']['checked'])) {
+				print '<td >';
+				$societe = scrumProjectGetObjectByElement('societe', $obj->fk_soc);
+				if($societe){
+					/** @var Societe $societe */
+					print $societe->getNomUrl(1);
+				}
+				print '</td>';
+				$totalarray['nbfield']++;
+			}
+
+			if (!empty($arrayfields['project_title']['checked'])) {
+				print '<td >';
+				$project = scrumProjectGetObjectByElement('project', $obj->fk_project);
+				if($project){
+					/** @var Project $project */
+					print $project->getNomUrl(1, '', 1);
+				}
+				print '</td>';
+				$totalarray['nbfield']++;
 			}
 		}
 	}

@@ -116,7 +116,7 @@ class ScrumUserStorySprint extends CommonObject
 		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>4, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_done' => array('type'=>'real', 'label'=>'QtyDone', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>4, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'description' => array('type'=>'text', 'label'=>'Description', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
+		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>130, 'notnull'=>0, 'visible'=>0, 'validate'=>'1',),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>140, 'notnull'=>0, 'visible'=>0, 'validate'=>'1',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),

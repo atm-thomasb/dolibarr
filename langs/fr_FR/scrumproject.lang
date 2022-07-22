@@ -142,7 +142,7 @@ StatusScrumUserStorySprintDraft = Brouillon
 StatusScrumUserStorySprintReady = Prête
 StatusScrumUserStorySprintDone = Terminée
 BusinessValue = Business value
-QtyConsumed = Qty consommée
+QtyConsumed = Qté consommée
 
 ScrumUserStorySprints = user story planifiée
 ListOfScrumUserStorys = Liste des user stories
