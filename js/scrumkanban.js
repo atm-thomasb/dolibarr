@@ -52,7 +52,8 @@ scrumKanban = {};
 		Copy:"Copier",
 		Delete:"Supprimer",
 		CardClone:"Cloner",
-		CardSplit:"Séparer",
+		CardSplit:"Découper en plusieurs cartes",
+		CardUsSplit:"Découper en tâches",
 		AssignMe:"M'assigner à la tâche",
 		UnAssignMe:"Me désengager de la tâche",
 		PressEscapeToAvoid:"Appuyer sur la touche ECHAP pour annuler",
@@ -60,7 +61,16 @@ scrumKanban = {};
 		SplitUsInTask:"Séparer l'user story en tâches scrum",
 		SplitCard:"Découper la carte",
 		CloneCard:"Cloner la carte",
-		DeleteCardDialogTitle:"Supprimer cette carte ?"
+		DeleteCardDialogTitle:"Supprimer cette carte ?",
+
+		QtyPlanned : 'Quantités planifiés',
+		QtyConsumed : 'Quantités consommées',
+		QtyRemain : 'Quantités restantes',
+		NotSplittable : 'N\'est pas découpable',
+
+		RemoveLine : 'Supprimer la ligne',
+		AddLine : 'Ajouter une ligne'
+
 	};
 
 
@@ -740,72 +750,102 @@ scrumKanban = {};
 			}
 
 			let menuDropDownId = $(el).attr('id');
+			let dataType = $(el).attr('data-type');
 
-			let menuItems = [
-				{
-					content: '<i class="fa fa-user-plus" ></i>' + o.langs.AssignMe,
-					events: {
-						click: function (e) {
-							let sendData = {
-								'fk_kanban': o.config.fk_kanban,
-								'card-id': el.getAttribute('data-objectid')
-							};
 
-							o.callKanbanInterface('assignMeToCard', sendData, function(response){
-								if(response.result > 0) {
-									// recupérer les bonnes infos
-									o.jkanban.replaceElement(el, response.data);
-								}
-							});
-						}
+			let menuItems = [];
+
+			// Assign me to card
+			menuItems.push({
+				content: '<i class="fa fa-user-plus" ></i>' + o.langs.AssignMe,
+				events: {
+					click: function (e) {
+						let sendData = {
+							'fk_kanban': o.config.fk_kanban,
+							'card-id': el.getAttribute('data-objectid')
+						};
+
+						o.callKanbanInterface('assignMeToCard', sendData, function(response){
+							if(response.result > 0) {
+								// recupérer les bonnes infos
+								o.jkanban.replaceElement(el, response.data);
+							}
+						});
 					}
-				},
-				{
-					content: '<i class="fa fa-user-minus" ></i>' + o.langs.UnAssignMe,
-					events: {
-						click: function (e) {
-							let sendData = {
-								'fk_kanban': o.config.fk_kanban,
-								'card-id': el.getAttribute('data-objectid')
-							};
+				}
+			});
 
-							o.callKanbanInterface('removeMeFromCard', sendData, function(response){
-								if(response.result > 0) {
-									// recupérer les bonnes infos
-									o.jkanban.replaceElement(el, response.data);
-								}
-							});
-						}
+			// Un assign me to card
+			menuItems.push({
+				content: '<i class="fa fa-user-minus" ></i>' + o.langs.UnAssignMe,
+				events: {
+					click: function (e) {
+						let sendData = {
+							'fk_kanban': o.config.fk_kanban,
+							'card-id': el.getAttribute('data-objectid')
+						};
+
+						o.callKanbanInterface('removeMeFromCard', sendData, function(response){
+							if(response.result > 0) {
+								// recupérer les bonnes infos
+								o.jkanban.replaceElement(el, response.data);
+							}
+						});
 					}
-				},
-				{
+				}
+			});
+
+
+			// Clone card menu : il n'est pas possible de cloner une US ou une tache : dans c'est cas là il faut spliter le temps
+			if(dataType != undefined && dataType != 'scrum-user-story' && dataType != 'scrum-user-story-task')
+			{
+				menuItems.push({
 					content: o.menuIcons.copyIcon + o.langs.CardClone,
 					events: {
 						click: function (e) {
 							o.cloneCardDialog(e);
 						}
 					}
-				},
-				{
+				});
+			}
+
+			// Split US card Dialog
+			if(dataType != undefined && dataType == 'scrum-user-story') {
+				menuItems.push({
+					content: '<i class="fa fa-columns" ></i>' + o.langs.CardUsSplit,
+					events: {
+						click: function (e) {
+							o.splitCardDialog(el);
+						}
+					}
+				});
+			}
+
+			// Split US TASK card Dialog
+			if(dataType != undefined && dataType == 'scrum-user-story-task') {
+				menuItems.push({
 					content: '<i class="fa fa-columns" ></i>' + o.langs.CardSplit,
 					events: {
 						click: function (e) {
 							o.splitCardDialog(el);
 						}
 					}
+				});
+			}
+
+			menuItems.push({
+				content: o.menuIcons.deleteIcon + o.langs.Delete,
+				events: {
+					click: function (e) {
+						o.deleteCardDialog(el.getAttribute('data-eid'));
+					}
+					// mouseover: () => console.log("Copy Button Mouseover")
+					// You can use any event listener from here
 				},
-				{
-					content: o.menuIcons.deleteIcon + o.langs.Delete,
-					events: {
-						click: function (e) {
-							o.deleteCardDialog(el.getAttribute('data-eid'));
-						}
-						// mouseover: () => console.log("Copy Button Mouseover")
-						// You can use any event listener from here
-					},
-					divider: "top" // top, bottom, top-bottom
-				}
-			];
+				divider: "top" // top, bottom, top-bottom
+			});
+
+
 
 			let tclick = new ContextMenu({
 				target: '#' + menuDropDownId,
@@ -1071,17 +1111,119 @@ scrumKanban = {};
 		}
 	}
 
+	/**
+	 *
+	 * @param {HTMLElement} el
+	 */
 	o.splitCardDialog = function(el){
 
-		// TODO detect type of element before
+		const type = el.getAttribute('data-type');
+		const objectId = el.getAttribute('data-objectid');
 
-		const content = '<h1 style="text-align: center;">Work in progress</h1>';
+		o.callKanbanInterface('getScrumCardData', {'id': objectId}, function(response){
+			if(response.result > 0) {
+				// recupérer les info de la card
+				console.log(response.data);
+				let content = '';
+				let canSplit = false;
+
+				// Géneration du formulaire
+				if(response.data.elementObject != undefined){
+
+					content+= '<div class="dialog-form-head" >'
+							+ '<span class="dialog-form-head-item">' + o.langs.QtyPlanned + ' : ' + response.data.elementObject.qty_planned + '</span>'
+							+ '<span class="dialog-form-head-item">' + o.langs.QtyConsumed + ' : ' + response.data.elementObject.qty_consumed + '</span>'
+							+ '<span class="dialog-form-head-item split-qty-remain">' + o.langs.QtyRemain + ' : ' + response.data.elementObject.qty_remain_for_split + '</span>'
+							+ '</div>'
+					;
+
+					content+='<div class="dialog-form-body" >';
+
+					canSplit = response.data.elementObject.qty_remain_for_split > 0;
+					if(canSplit){
+
+						let label = response.data.label;
+						if(response.data.elementObject.label != undefined && response.data.elementObject.label.length){
+							label = response.data.elementObject.label;
+						}
+
+						content+= '<div class="dialog-form-control  curent-split-item-line" >';
+						content+= '	<div class="dialog-form-item">';
+						content+= '		<input type="number" class="split-qty-planned" step="any" max="'+response.data.elementObject.qty_planned+'" name="curent-item-qty-planned" readonly value="'+response.data.elementObject.qty_planned+'"/>';
+						content+= '	</div>';
+						content+= '	<div class="dialog-form-item">';
+						content+= '		<input type="text" class="split-item-label"  name="curent-item-label"  data-qty_remain_for_split="' + response.data.elementObject.qty_remain_for_split + '" readonly value="'+ o.htmlEntities(label) +'" />';
+						content+= '	</div>';
+						content+= '	<div class="dialog-form-item">';
+						content+= '		<span class="dialog-form-icon-btn" id="add-split-line"><span class="btn-add fa fa-plus" title="'+o.htmlEntities(o.langs.AddLine)+'"></span></span>';
+						content+= '	</div>';
+						content+= '</div>';
 
 
-		const splitDialog = new Dialog({
-			title: o.langs.SplitCard,
-			content: content
+						content+= o.getSplitItemTpl({
+							label : label,
+							qty_planned_min: 0,
+							qty_planned_max: response.data.elementObject.qty_remain_for_split,
+							qty_planned: 0,
+						});
+
+
+					}else{
+						content+='<strong>' + o.langs.NotSplittable + '</strong>';
+					}
+
+					content+='</div>';
+				}
+				else{
+					content+='<div class="error" >Error data elementObject</div>';
+				}
+
+				const splitDialog = new Dialog({
+					title: o.langs.SplitCard,
+					content: content
+				});
+
+				splitDialog.waitForUser().then((userValidate) => {
+					if(canSplit && userValidate){
+
+					}else{
+						// user cancel
+					}
+				});
+			}
 		});
+	}
+
+	/**
+	 * @param {object} tplVars
+	 * @returns {string}
+	 */
+	o.getSplitItemTpl = function(tplVars){
+
+		tplVars = Object.assign(
+			{
+				label: '',
+				qty_planned_min: '',
+				qty_planned_max: '',
+				qty_planned: '',
+			},
+			tplVars
+		)
+
+		let content = '';
+		content+= '<div class="dialog-form-control new-split-item-line" >';
+		content+= '	<div class="dialog-form-item">';
+		content+= '		<input type="number" step="any" class="split-qty-planned"  name="new-item-qty-planned" value="' + tplVars.qty_planned + '" min="' + tplVars.qty_planned_min + '" max="' + tplVars.qty_planned_max + '"/>';
+		content+= '	</div>';
+		content+= '	<div class="dialog-form-item">';
+		content+= '		<input type="text" class="split-item-label" name="new-item-label" value="' + o.htmlEntities(tplVars.label) + '" />';
+		content+= '	</div>';
+		content+= '	<div class="dialog-form-item">';
+		content+= '		<span class="dialog-form-icon-btn btn-remove-line"><span class="fa fa-minus" title="'+o.htmlEntities(o.langs.RemoveLine)+'"></span></span>';
+		content+= '	</div>';
+		content+= '</div>';
+
+		return content;
 	}
 
 	o.cloneCardDialog = function(el){
@@ -1091,9 +1233,18 @@ scrumKanban = {};
 		const content = '<h1 style="text-align: center;">Work in progress</h1>';
 
 
-		const splitDialog = new Dialog({
+		const cloneDialog = new Dialog({
 			title: o.langs.CloneCard,
 			content: content
+		});
+
+
+		cloneDialog.waitForUser().then((userValidate) => {
+			if(userValidate){
+
+			}else{
+				// user cancel
+			}
 		});
 	}
 
@@ -1106,13 +1257,13 @@ scrumKanban = {};
 		let content = '<h1 style="text-align: center;">Work in progress to delete ' + eid + '</h1>'
 			+ '<p>Pour l\'instant la suppression se fait sans distinction, <strong>les cards spéciales</strong> ne sont pas prisent en compte : US, US-Tâches etc...</p>'
 
-		const splitDialog = new Dialog({
+		const delDialog = new Dialog({
 			title: o.langs.DeleteCardDialogTitle,
 			dialogClass: '--danger',
 			content: content
 		});
 
-		splitDialog.waitForUser().then((userValidate) => {
+		delDialog.waitForUser().then((userValidate) => {
 			if(userValidate){
 				o.delItem(eid);
 			}else{
@@ -1144,4 +1295,9 @@ scrumKanban = {};
 			}
 		});
 	}
+
+	o.htmlEntities = function(str) {
+		return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	}
+
 })(scrumKanban);

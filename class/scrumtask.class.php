@@ -1250,6 +1250,39 @@ class ScrumTask extends CommonObject
 		return false;
 	}
 
+
+	/**
+	 * get this object formatted for ajax ans json
+	 * @return stdClass
+	 */
+	public function getScrumKanBanItemObjectStd(){
+
+
+		$object = new stdClass();
+		$object->objectId = $this->id;
+		$object->ref= $this->ref;
+		$object->type = 'scrum-user-story-task';// le type dans le kanban tel que getScrumKanBanItemObjectFormatted le fait
+		$object->label = $this->label;
+		$object->element = $this->element;
+		$object->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$this->id;
+		$object->status = intval($this->status);
+		$object->statusLabel = $this->LibStatut(intval($this->status), 1);
+		$object->contactUsersAffected = $this->liste_contact(-1,'internal',1);
+
+		$object->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
+		$object->fk_scrum_user_story_sprint= $this->fk_scrum_user_story_sprint;
+		$object->qty_planned = $this->qty_planned;
+		$object->qty_consumed = $this->qty_consumed;
+
+		$object->qty_remain_for_split = 0;
+		if($this->qty_planned - $this->qty_consumed > 0){
+			$object->qty_remain_for_split = $this->qty_planned - $this->qty_consumed;
+		}
+
+		return $object;
+	}
+
+
 	/**
 	 * @param $msg
 	 * @return void

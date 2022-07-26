@@ -96,7 +96,95 @@ dialog.kanban-dialog[open]{
 }
 
 
+/* Dialog content */
 
+.dialog-form-head{
+	font-size: 0.8em;
+}
+
+.dialog-form-head-item:not(:first-child){
+	margin-left: 30px;
+}
+
+.dialog-form-head-item.split-qty-remain{
+	font-weight: bold;
+}
+
+.dialog-form-body{
+	margin-top: 10px;
+}
+
+
+.dialog-form-control{
+	margin-top: var(--dialog-padding);
+}
+
+.curent-split-item-line{
+
+}
+.new-split-item-line{
+	border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.dialog-form-icon-btn{
+	margin-bottom: 3px;
+	margin-top: 3px;
+	margin-left: 5px;
+	margin-right: 5px;
+	display: inline-block;
+	padding: 3px 8px;
+	text-align: center;
+	cursor: pointer;
+	text-decoration: none !important;
+	background-color: #f5f5f5;
+	background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#e6e6e6));
+	background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
+	background-image: -o-linear-gradient(top, #ffffff, #e6e6e6);
+	background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+	background-repeat: repeat-x;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	border: 1px solid #aaa;
+	-webkit-border-radius: 2px;
+	border-radius: 1px;
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #444;
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	/*
+	  Introduced in Internet Explorer 10.
+	  See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+	*/
+	-ms-user-select: none;
+	user-select: none;
+}
+.dialog-form-icon-btn:active{
+	background-color: #ececec;
+	background-image: -moz-linear-gradient(top, #e6e6e6, #ffffff);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#e6e6e6), to(#ffffff));
+	background-image: -webkit-linear-gradient(top, #e6e6e6, #ffffff);
+	background-image: -o-linear-gradient(top, #e6e6e6, #ffffff);
+	background-image: linear-gradient(to bottom,#e6e6e6, #ffffff);
+}
+
+
+.dialog-form-item{
+	display: inline-block;
+}
+.dialog-form-item [readonly]{
+	background-color: #efefef;
+}
+
+.split-qty-planned{
+	width: 90px;
+}
+
+.split-item-label{
+	width: 600px;
+}
 
 
 html[data-theme-color-scheme="dark"] dialog.kanban-dialog{

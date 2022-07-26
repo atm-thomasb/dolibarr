@@ -67,6 +67,9 @@ elseif ($action === 'getAllBoards') {
 elseif ($action === 'getAllItemToList') {
 	_actionAddItemToList($jsonResponse);
 }
+elseif ($action === 'getScrumCardData') {
+	_actionGetScrumCardData($jsonResponse);
+}
 elseif ($action === 'dropItemToList') {
 	_actionDropItemToList($jsonResponse);
 }
@@ -372,12 +375,41 @@ function _actionAddItemToList($jsonResponse){
 	}
 }
 
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionGetScrumCardData($jsonResponse){
+	global $db;
+
+	$data = GETPOST("data", "array");
+
+	// check kanban list data
+	if(empty($data['id'])){
+		$jsonResponse->msg = 'Need scrumcard Id';
+		return false;
+	}
+
+	$scrumCard = new ScrumCard($db);
+	$res = $scrumCard->fetch($data['id']);
+	if($res <= 0){
+		$jsonResponse->msg = 'Scrumcard fetch error';
+		return false;
+	}
+
+	$jsonResponse->result = 1;
+	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectStd();
+	return true;
+}
+
+
 /**
  * @param JsonResponse $jsonResponse
  * @return bool|void
  */
 function _actionDropItemToList($jsonResponse){
-	global $user, $langs, $db;
+	global $langs, $db;
 
 	$data = GETPOST("data", "array");
 
