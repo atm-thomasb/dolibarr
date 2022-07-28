@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- NEW : Split dialog for kanban card of type Uuser story or Scrum task *28/07/2022* - 1.1.0
+- NEW : Split dialog for kanban card of type User story or Scrum task *28/07/2022* - 1.1.0
 
 ## Version 1.0 [2020-12-25]
 
