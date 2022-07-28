@@ -170,6 +170,40 @@ dialog.kanban-dialog[open]{
 	background-image: linear-gradient(to bottom,#e6e6e6, #ffffff);
 }
 
+/* Line separation */
+hr.dialog-separator {
+
+	--border-color : rgba(0,0,0,0.2);
+
+	border: none;
+	overflow: visible;
+	box-sizing: content-box;
+	order: 0;
+	height: 1px;
+	width: 10%;
+	position: relative;
+	margin: 10px auto;
+
+	background: var(--border-color);
+}
+hr.dialog-separator:before {
+	content: "";
+	width: 4px;
+	height: 4px;
+	background: #fff;
+	display: inline-block;
+	border: 1px solid var(--border-color);
+	position: absolute;
+	top: -3px;/* un petit fallback au cas ou la virgule en css passe pas*/
+	top: -2.5px;
+	left: 50%;
+	margin: 0 0 0 -3px;
+	transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	/* IE 9 */
+	-webkit-transform: rotate(45deg);
+	/* Opera, Chrome, and Safari */
+}
 
 .dialog-form-item{
 	display: inline-block;

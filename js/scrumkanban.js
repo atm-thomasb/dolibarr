@@ -66,10 +66,14 @@ scrumKanban = {};
 		QtyPlanned : 'Quantités planifiés',
 		QtyConsumed : 'Quantités consommées',
 		QtyRemain : 'Quantités restantes',
+		QtyRemainToSplit : 'Quantités découpables',
+		AddScrumTaskLine : 'Ajouter une tâche scrum',
+		SplitScrumTask : 'Découper la tâche scrum',
 		NotSplittable : 'N\'est pas découpable',
 
 		RemoveLine : 'Supprimer la ligne',
-		AddLine : 'Ajouter une ligne'
+		AddLine : 'Ajouter une ligne',
+		QtyScrumTaskAlreadySplited: 'Quantités découpées en tâche(s) scrum '
 
 	};
 
@@ -1120,24 +1124,147 @@ scrumKanban = {};
 		const type = el.getAttribute('data-type');
 		const objectId = el.getAttribute('data-objectid');
 
+		// init quantity vars
+		let qtyPlannedCurentItem; // quantité planifiée sur la carte d'origine
+		let qtyRemain; // Quantité restante disponible sur la quantité planifiée, ex j'ai planifié 10H mais j'ai saisi 4heures de temps passé sur la tâche, j'ai donc consommé 4H sur les 10H il reste donc 6H
+
+		let lineItemCounter = 0;
+
+		/**
+		 * @param {object} tplVars
+		 * @returns {string}
+		 */
+		const getSplitItemTpl = function(tplVars){
+
+			tplVars = Object.assign(
+				{
+					label: '',
+					qty_planned_min: '',
+					qty_planned_max: '',
+					qty_planned: ''
+				},
+				tplVars
+			)
+
+			let content = '';
+			content+= '<div class="dialog-form-control new-split-item-line">';
+			content+= '	<div class="dialog-form-item">';
+			content+= '		<input type="number" step="any" class="split-qty-planned new-item-qty-planned" data-lastValue="' + tplVars.qty_planned + '"   name="new-item-qty-planned" value="' + tplVars.qty_planned + '" min="' + tplVars.qty_planned_min + '" max="' + tplVars.qty_planned_max + '"/>';
+			content+= '	</div>';
+			content+= '	<div class="dialog-form-item">';
+			content+= '		<input type="text" class="split-item-label" name="new-item-label" value="' + o.htmlEntities(tplVars.label) + '" />';
+			content+= '	</div>';
+			content+= '	<div class="dialog-form-item">';
+			content+= '		<span class="dialog-form-icon-btn btn-remove-split-line-card"><span class="fa fa-minus" title="'+o.htmlEntities(o.langs.RemoveLine)+'"></span></span>';
+			content+= '	</div>';
+			content+= '</div>';
+
+			return content;
+		}
+
+		/**
+		 * Ajoute une ligne avec prise en compte des données en cours
+		 * @param {object} tplVars
+		 */
+		const addSplitLine = function(){
+
+			lineItemCounter++;
+
+			// todo mettre à jour les données d'entrées
+			let newLine = getSplitItemTpl({
+				label: $('[name="curent-item-label"]').val(),
+				qty_planned_min: 0,
+				qty_planned_max: '',
+				qty_planned: 0,
+			});
+
+			$(newLine).appendTo('#split-line-form-container');
+		}
+
+		/**
+		 * Met à jour les quantité
+		 * @param newPlannedQtyMvt
+		 */
+		const updateSplitQty = function(newPlannedQtyMvt = 0){
+			newPlannedQtyMvt = parseFloat(newPlannedQtyMvt);
+
+			if(qtyRemain - newPlannedQtyMvt < 0){
+				newPlannedQtyMvt = qtyRemain;
+			}
+
+			qtyRemain = Math.round((qtyRemain - newPlannedQtyMvt) * 100) / 100;
+
+			if(type == 'scrum-user-story'){
+				// cas particulier des us
+				$('#split-qty-task-planned').html(qtyRemain);
+				$('#split-qty-task-planned').html(qtyPlannedCurentItem-qtyRemain);
+			}
+			else{
+				qtyPlannedCurentItem = Math.round((qtyPlannedCurentItem - newPlannedQtyMvt) * 100) / 100;
+				$('#curent-item-qty-planned').val(qtyPlannedCurentItem);
+			}
+
+			$('#split-qty-remain').html(qtyRemain);
+
+
+			return newPlannedQtyMvt; // retourne la valeur appliquée
+		}
+
+
+		// Ajout au click sur button plus d'une ligne
+		$(document).off('click', '#add-split-line'); // suppression du handler existant
+		$(document).on('click', '#add-split-line', addSplitLine);
+
+		// Fermeture au click sur le message de fermeture
+		$(document).off('click', '.btn-remove-split-line-card'); // suppression du handler existant
+		$(document).on('click', '.btn-remove-split-line-card', function() {
+			let newLineQty = $(this).closest('.new-split-item-line').find('.split-qty-planned').val();
+			updateSplitQty(-parseFloat(newLineQty));// re-alloue les quantités
+			$(this).closest('.new-split-item-line').remove();
+		});
+
+		// Update des calcules
+		$(document).off('change', '.new-item-qty-planned'); // suppression du handler existant
+		$(document).on('change', '.new-item-qty-planned', function() {
+			let newLineQty = parseFloat($(this).val());
+			let oldLineQty = parseFloat($(this).attr('data-lastValue'));
+
+			newLineQty = oldLineQty + updateSplitQty(newLineQty-oldLineQty);
+			newLineQty = Math.round((newLineQty) * 100) / 100;
+			$(this).val(newLineQty); // force la valeur saisie avec la valeur de retour de updateSplitQty
+			$(this).attr('data-lastValue', newLineQty);
+		});
+
 		o.callKanbanInterface('getScrumCardData', {'id': objectId}, function(response){
 			if(response.result > 0) {
 				// recupérer les info de la card
-				console.log(response.data);
 				let content = '';
 				let canSplit = false;
 
 				// Géneration du formulaire
 				if(response.data.elementObject != undefined){
 
-					content+= '<div class="dialog-form-head" >'
-							+ '<span class="dialog-form-head-item">' + o.langs.QtyPlanned + ' : ' + response.data.elementObject.qty_planned + '</span>'
-							+ '<span class="dialog-form-head-item">' + o.langs.QtyConsumed + ' : ' + response.data.elementObject.qty_consumed + '</span>'
-							+ '<span class="dialog-form-head-item split-qty-remain">' + o.langs.QtyRemain + ' : ' + response.data.elementObject.qty_remain_for_split + '</span>'
-							+ '</div>'
-					;
+					// mise à jour des quantités de départ
+					qtyPlannedCurentItem = parseFloat(response.data.elementObject.qty_planned);
+					qtyRemain = parseFloat(response.data.elementObject.qty_remain_for_split);
 
-					content+='<div class="dialog-form-body" >';
+
+					content+= '<div class="dialog-form-head" >';
+
+					content+= '<span class="dialog-form-head-item">' + o.langs.QtyPlanned + ' : <span id="split-qty-planned" >' + response.data.elementObject.qty_planned + '</span></span>';
+					if(type == 'scrum-user-story'){
+						content+= '<span class="dialog-form-head-item">' + o.langs.QtyScrumTaskAlreadySplited + ' : ';
+						content+= '<span id="split-qty-task-planned" >' + response.data.elementObject.qty_task_planned + '</span>';
+						content+= '</span>';
+					}
+					content+= '<span class="dialog-form-head-item">' + o.langs.QtyConsumed + ' : <span id="split-qty-consumed" >' + response.data.elementObject.qty_consumed + '</span></span>';
+					content+= '<span class="dialog-form-head-item split-qty-remain">' + o.langs.QtyRemainToSplit + ' : <span id="split-qty-remain" >' + response.data.elementObject.qty_remain_for_split + '</span></span>';
+
+					content+= '</div>';
+
+
+
+					content+='<div class="dialog-form-body" id="split-line-form-container" >';
 
 					canSplit = response.data.elementObject.qty_remain_for_split > 0;
 					if(canSplit){
@@ -1149,18 +1276,34 @@ scrumKanban = {};
 
 						content+= '<div class="dialog-form-control  curent-split-item-line" >';
 						content+= '	<div class="dialog-form-item">';
-						content+= '		<input type="number" class="split-qty-planned" step="any" max="'+response.data.elementObject.qty_planned+'" name="curent-item-qty-planned" readonly value="'+response.data.elementObject.qty_planned+'"/>';
+						let qtyPlannedvalueDisplayed = response.data.elementObject.qty_planned;
+						// if(type == 'scrum-user-story'){ qtyPlannedvalueDisplayed = ''; }
+						content+= '		<input type="number" id="curent-item-qty-planned" class="split-qty-planned" step="any" max="'+response.data.elementObject.qty_planned+'" name="curent-item-qty-planned" readonly value="'+qtyPlannedvalueDisplayed+'"/>';
 						content+= '	</div>';
+
+						let labelDislayed = label;
+						// if(type == 'scrum-user-story'){ labelDislayed = ''; }
 						content+= '	<div class="dialog-form-item">';
-						content+= '		<input type="text" class="split-item-label"  name="curent-item-label"  data-qty_remain_for_split="' + response.data.elementObject.qty_remain_for_split + '" readonly value="'+ o.htmlEntities(label) +'" />';
+						content+= '		<input type="text"  class="split-item-label"  name="curent-item-label"  data-qty_remain_for_split="' + response.data.elementObject.qty_remain_for_split + '" readonly value="'+ o.htmlEntities(labelDislayed) +'" />';
 						content+= '	</div>';
+
+
 						content+= '	<div class="dialog-form-item">';
-						content+= '		<span class="dialog-form-icon-btn" id="add-split-line"><span class="btn-add fa fa-plus" title="'+o.htmlEntities(o.langs.AddLine)+'"></span></span>';
+						content+= '		<span class="dialog-form-icon-btn" id="add-split-line">';
+						if(type == 'scrum-user-story'){
+							content+= '			<span class="btn-add fa fa-plus" title="'+o.htmlEntities(o.langs.AddScrumTaskLine)+'"></span>';
+						}else{
+							content+= '			<span class="btn-add fa fa-cut" title="'+o.htmlEntities(o.langs.SplitScrumTask)+'"></span>';
+						}
+						content+= '		</span>';
 						content+= '	</div>';
+
 						content+= '</div>';
 
 
-						content+= o.getSplitItemTpl({
+
+
+						content+= getSplitItemTpl({
 							label : label,
 							qty_planned_min: 0,
 							qty_planned_max: response.data.elementObject.qty_remain_for_split,
@@ -1186,6 +1329,16 @@ scrumKanban = {};
 				splitDialog.waitForUser().then((userValidate) => {
 					if(canSplit && userValidate){
 
+						// récupération des données de formulaire en Html5
+						let sendData = {
+							'id': objectId,
+							'form': o.serializeFormJson($(splitDialog.dialog).find('form'))
+						};
+
+						o.callKanbanInterface('splitScrumCard', sendData, function(){
+							o.refreshAllBoards();
+						});
+
 					}else{
 						// user cancel
 					}
@@ -1195,36 +1348,26 @@ scrumKanban = {};
 	}
 
 	/**
-	 * @param {object} tplVars
-	 * @returns {string}
+	 * 	A function to serialize an html form to JSON
+	 * @param {JQuery} $el
+	 * @returns {{}}
 	 */
-	o.getSplitItemTpl = function(tplVars){
+	o.serializeFormJson = function($el) {
+		var obj = {};
+		var a = $el.serializeArray();
 
-		tplVars = Object.assign(
-			{
-				label: '',
-				qty_planned_min: '',
-				qty_planned_max: '',
-				qty_planned: '',
-			},
-			tplVars
-		)
-
-		let content = '';
-		content+= '<div class="dialog-form-control new-split-item-line" >';
-		content+= '	<div class="dialog-form-item">';
-		content+= '		<input type="number" step="any" class="split-qty-planned"  name="new-item-qty-planned" value="' + tplVars.qty_planned + '" min="' + tplVars.qty_planned_min + '" max="' + tplVars.qty_planned_max + '"/>';
-		content+= '	</div>';
-		content+= '	<div class="dialog-form-item">';
-		content+= '		<input type="text" class="split-item-label" name="new-item-label" value="' + o.htmlEntities(tplVars.label) + '" />';
-		content+= '	</div>';
-		content+= '	<div class="dialog-form-item">';
-		content+= '		<span class="dialog-form-icon-btn btn-remove-line"><span class="fa fa-minus" title="'+o.htmlEntities(o.langs.RemoveLine)+'"></span></span>';
-		content+= '	</div>';
-		content+= '</div>';
-
-		return content;
-	}
+		$.each(a, function() {
+			if (obj[this.name]) {
+				if (!obj[this.name].push) {
+					obj[this.name] = [obj[this.name]];
+				}
+				obj[this.name].push(this.value || '');
+			} else {
+				obj[this.name] = this.value || '';
+			}
+		});
+		return obj;
+	};
 
 	o.cloneCardDialog = function(el){
 		// TODO detect type of element before
