@@ -34,7 +34,9 @@ scrumKanban = {};
 		interface_liveupdate_url: '../interface-liveupdate.php',
 		srumprojectModuleFolderUrl: '../',
 		fk_kanban : false,
-		token: false // to set at init
+		token: false, // to set at init
+		maxScrumTaskStepQty: 0,
+		maxScrumTaskMaxQty: 0
 	};
 
 
@@ -1130,6 +1132,26 @@ scrumKanban = {};
 
 		let lineItemCounter = 0;
 
+
+
+		const checkSplitDialogBTN = function (){
+			if(type != 'scrum-user-story'){
+				return true;
+			}
+
+			let $acceptBTN =  $('[data-btn-role="accept"]');
+			if($acceptBTN.length > 0){
+				if(qtyRemain > 0){
+					$acceptBTN.prop('disabled', true);
+					return false;
+				}else{
+					$acceptBTN.prop('disabled', false);
+				}
+			}
+
+			return true;
+		}
+
 		/**
 		 * @param {object} tplVars
 		 * @returns {string}
@@ -1141,7 +1163,8 @@ scrumKanban = {};
 					label: '',
 					qty_planned_min: '',
 					qty_planned_max: '',
-					qty_planned: ''
+					qty_planned: '',
+					maxScrumTaskStepQty: o.config.maxScrumTaskStepQty
 				},
 				tplVars
 			)
@@ -1149,7 +1172,7 @@ scrumKanban = {};
 			let content = '';
 			content+= '<div class="dialog-form-control new-split-item-line">';
 			content+= '	<div class="dialog-form-item">';
-			content+= '		<input type="number" step="any" class="split-qty-planned new-item-qty-planned" data-lastValue="' + tplVars.qty_planned + '"   name="new-item-qty-planned" value="' + tplVars.qty_planned + '" min="' + tplVars.qty_planned_min + '" max="' + tplVars.qty_planned_max + '"/>';
+			content+= '		<input type="number" step="any" class="split-qty-planned new-item-qty-planned" data-lastValue="' + tplVars.qty_planned + '"   name="new-item-qty-planned" value="' + tplVars.qty_planned + '" min="' + tplVars.qty_planned_min + '" max="' + tplVars.qty_planned_max + '" step="' + tplVars.maxScrumTaskStepQty + '"/>';
 			content+= '	</div>';
 			content+= '	<div class="dialog-form-item">';
 			content+= '		<input type="text" class="split-item-label" name="new-item-label" value="' + o.htmlEntities(tplVars.label) + '" />';
@@ -1170,15 +1193,23 @@ scrumKanban = {};
 
 			lineItemCounter++;
 
+
+			let maxQtyPlannedForLine = parseFloat(qtyRemain);
+			if(parseFloat(o.config.maxScrumTaskMaxQty) > 0 && maxQtyPlannedForLine > parseFloat(o.config.maxScrumTaskMaxQty)){
+				maxQtyPlannedForLine = parseFloat(o.config.maxScrumTaskMaxQty);
+			}
+
 			// todo mettre à jour les données d'entrées
 			let newLine = getSplitItemTpl({
 				label: $('[name="curent-item-label"]').val(),
 				qty_planned_min: 0,
-				qty_planned_max: '',
+				qty_planned_max: maxQtyPlannedForLine,
 				qty_planned: 0,
 			});
 
 			$(newLine).appendTo('#split-line-form-container');
+
+			checkSplitDialogBTN();
 		}
 
 		/**
@@ -1206,6 +1237,22 @@ scrumKanban = {};
 
 			$('#split-qty-remain').html(qtyRemain);
 
+			// mise à jour du max sur les inputs
+			$('.new-item-qty-planned').each(function( index ) {
+
+				let maxQtyPlannedForLine = parseFloat(qtyRemain);
+				if(parseFloat(o.config.maxScrumTaskMaxQty) > 0 && maxQtyPlannedForLine > parseFloat(o.config.maxScrumTaskMaxQty)){
+					maxQtyPlannedForLine = parseFloat(o.config.maxScrumTaskMaxQty);
+				}
+
+				if(maxQtyPlannedForLine < parseFloat($(this).attr('max'))){
+					maxQtyPlannedForLine = parseFloat($(this).attr('max'));
+				}
+
+				$(this).attr('max', maxQtyPlannedForLine);
+			})
+
+			checkSplitDialogBTN();
 
 			return newPlannedQtyMvt; // retourne la valeur appliquée
 		}
@@ -1301,14 +1348,17 @@ scrumKanban = {};
 						content+= '</div>';
 
 
-
-
-						content+= getSplitItemTpl({
-							label : label,
-							qty_planned_min: 0,
-							qty_planned_max: response.data.elementObject.qty_remain_for_split,
-							qty_planned: 0,
-						});
+						//
+						// let maxQtyPlannedForLine = parseFloat(response.data.elementObject.qty_remain_for_split);
+						// if(parseFloat(o.config.maxScrumTaskMaxQty) > 0 && maxQtyPlannedForLine > parseFloat(o.config.maxScrumTaskMaxQty)){
+						// 	maxQtyPlannedForLine = parseFloat(o.config.maxScrumTaskMaxQty);
+						// }
+						// content+= getSplitItemTpl({
+						// 	label : label,
+						// 	qty_planned_min: 0,
+						// 	qty_planned_max: maxQtyPlannedForLine,
+						// 	qty_planned: 0,
+						// });
 
 
 					}else{
@@ -1323,26 +1373,44 @@ scrumKanban = {};
 
 				const splitDialog = new Dialog({
 					title: o.langs.SplitCard,
-					content: content
-				});
+					content: content,
+					onAccept: function(dialog){
 
-				splitDialog.waitForUser().then((userValidate) => {
-					if(canSplit && userValidate){
+						if(canSplit && checkSplitDialogBTN()){
+							// récupération des données de formulaire en Html5
+							let sendData = {
+								'id': objectId,
+								'form': o.serializeFormJson($(splitDialog.dialog).find('form'))
+							};
 
-						// récupération des données de formulaire en Html5
-						let sendData = {
-							'id': objectId,
-							'form': o.serializeFormJson($(splitDialog.dialog).find('form'))
-						};
+							o.callKanbanInterface('splitScrumCard', sendData, function(){
+								o.refreshAllBoards();
+							});
 
-						o.callKanbanInterface('splitScrumCard', sendData, function(){
-							o.refreshAllBoards();
-						});
+							return true;
+						}
 
-					}else{
-						// user cancel
+						return false;
 					}
 				});
+
+				// utilisation par les promesses arrété pour l'instant
+				// splitDialog.waitForUser().then((userValidate) => {
+				// 	if(canSplit && userValidate){
+				// 		// récupération des données de formulaire en Html5
+				// 		let sendData = {
+				// 			'id': objectId,
+				// 			'form': o.serializeFormJson($(splitDialog.dialog).find('form'))
+				// 		};
+				//
+				// 		o.callKanbanInterface('splitScrumCard', sendData, function(){
+				// 			o.refreshAllBoards();
+				// 		});
+				//
+				// 	}else{
+				// 		// user cancel
+				// 	}
+				// });
 			}
 		});
 	}

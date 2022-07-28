@@ -32,10 +32,13 @@ ScrumProjectSetupPage = Page de configuration du module Projet Scrum
 ScrumSprintExtraFields = Attributs supplémentaires sprints
 ScrumKanbanExtraFields = Attributs supplémentaires Kanban
 ScrumUserStoryExtraFields = Attributs supplémentaires User story
-ScrumUserStorySprintExtraFields = Attributs supplémentaires User story plannifiés
+ScrumUserStorySprintExtraFields = Attributs supplémentaires User story planifiés
 ScrumCardExtraFields = Attributs supplémentaires cartes
 NumberingModules = Modèles de numérotation pour %s
 ScrumCardStage = Projet Scrum - Étapes des cartes
+
+SP_MAX_SCRUM_TASK_STEP_QTY = Granularité des quantités pour les tâches scrum et les User stories
+SP_MAX_SCRUM_TASK_MAX_QTY = Quantités maximal pouvant être affecter à une tâche scrum
 
 #
 # MENU

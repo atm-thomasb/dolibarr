@@ -16,6 +16,9 @@ class Dialog {
 				title: '',
 				dialogClass: '',
 				content: '',
+				onClose : function (){ return true; },
+				onOpen : function (){ return true; },
+				onAccept : function (){ return true; },
 				template: '<header ></header>' +
 					'<form method="dialog" data-ref="form">\n' +
 					'   <div class="body" ></div>\n' +
@@ -30,6 +33,13 @@ class Dialog {
 		this.init()
 	}
 
+	/**
+	 * @param $functionName
+	 * @returns {boolean}
+	 */
+	isCallableFunction($functionName) {
+		return window[$functionName] instanceof Function;
+	}
 
 	init() {
 
@@ -45,7 +55,25 @@ class Dialog {
 		this.dialog.querySelector('header').textContent = this.settings.title;
 
 		this.buttons.accept = this.dialog.querySelector('[data-btn-role="accept"]');
+		this.buttons.accept.addEventListener("click", (e)=>{
+			e.preventDefault(); // Cancel the native event
+			e.stopPropagation();// Don't bubble/capture the event any further
+			if(this.settings.onAccept(this)){
+				this.toggle();
+			}
+		});
+
+
+
+		this.buttons.cancel = this.dialog.querySelector('[data-btn-role="cancel"]');
 		// $(this.dialog.querySelector('header')).dragsDialog(); //TODO : faut-il le mettre ou pas ? // rend les boites de dialogue draggable
+
+		this.buttons.cancel.addEventListener("click", (e)=>{
+			e.preventDefault(); // Cancel the native event
+			e.stopPropagation();// Don't bubble/capture the event any further
+			this.toggle();
+		});
+
 
 		this.dialog.querySelector('.body').insertAdjacentHTML('afterbegin', this.settings.content);
 
@@ -79,16 +107,19 @@ class Dialog {
 
 	open(settings = {}) {
 		const dialog = Object.assign({}, this.settings, settings)
-
 		this.toggle()
 	}
 
 	toggle() {
 		if(this.dialog.hasAttribute('open')){
-			this.dialog.close();
+			if(!this.isCallableFunction(this.settings.onClose) || this.settings.onClose(this)){
+				this.dialog.close();
+			}
 		}
 		else{
-			this.dialog.showModal();
+			if(!this.isCallableFunction(this.settings.onOpen) || this.settings.onOpen(this)){
+				this.dialog.showModal();
+			}
 		}
 	}
 

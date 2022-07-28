@@ -160,14 +160,16 @@ $arrayofcss = array(
 top_htmlhead($head,  $object->ref . ' - ' . $object->label, 0, 0, $arrayofjs, $arrayofcss);
 
 $confToJs = array(
-	'MAIN_MAX_DECIMALS_TOT'		=> $conf->global->MAIN_MAX_DECIMALS_TOT,
-	'MAIN_MAX_DECIMALS_UNIT'	=> $conf->global->MAIN_MAX_DECIMALS_UNIT,
+	'MAIN_MAX_DECIMALS_TOT'		=> getDolGlobalInt('MAIN_MAX_DECIMALS_TOT'),
+	'MAIN_MAX_DECIMALS_UNIT'	=> getDolGlobalInt('MAIN_MAX_DECIMALS_UNIT'),
 	'interface_kanban_url'		=> dol_buildpath('scrumproject/interface-kanban.php',1),
 	'interface_liveupdate_url'	=> dol_buildpath('scrumproject/interface-liveupdate.php',1),
 	'js_url'					=> dol_buildpath('scrumproject/js/scrumkanban.js',1),
 	'srumprojectModuleFolderUrl'=> dol_buildpath('scrumproject/',1),
 	'fk_kanban'					=> $object->id,
-	'token'						=> newToken()
+	'token'						=> newToken(),
+	'maxScrumTaskStepQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 0),
+	'maxScrumTaskMaxQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0)
 );
 
 $jsLangs = array(
