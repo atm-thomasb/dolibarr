@@ -127,6 +127,12 @@ dialog.kanban-dialog[open]{
 }
 
 .dialog-form-icon-btn{
+
+	--bg-gradian-start: #ffffff;
+	--bg-gradian-end: #e6e6e6;
+	--border-color: #aaa;
+	--colortext: #444;
+
 	margin-bottom: 3px;
 	margin-top: 3px;
 	margin-left: 5px;
@@ -136,20 +142,19 @@ dialog.kanban-dialog[open]{
 	text-align: center;
 	cursor: pointer;
 	text-decoration: none !important;
-	background-color: #f5f5f5;
-	background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
-	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#e6e6e6));
-	background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
-	background-image: -o-linear-gradient(top, #ffffff, #e6e6e6);
-	background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+	background-color: var(--bg-gradian-end);
+	background-image: -moz-linear-gradient(top,var(--bg-gradian-start), var(--bg-gradian-end));
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(var(--bg-gradian-start)), to(var(--bg-gradian-end)));
+	background-image: -webkit-linear-gradient(top, var(--bg-gradian-start), var(--bg-gradian-end));
+	background-image: -o-linear-gradient(top, var(--bg-gradian-start), var(--bg-gradian-end));
+	background-image: linear-gradient(to bottom, var(--bg-gradian-start), var(--bg-gradian-end));
 	background-repeat: repeat-x;
-	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-	border: 1px solid #aaa;
+	border: 1px solid var(--border-color);
 	-webkit-border-radius: 2px;
 	border-radius: 1px;
 	font-weight: bold;
 	text-transform: uppercase;
-	color: #444;
+
 
 	-moz-user-select: none;
 	-khtml-user-select: none;
@@ -161,14 +166,22 @@ dialog.kanban-dialog[open]{
 	-ms-user-select: none;
 	user-select: none;
 }
+
 .dialog-form-icon-btn:active{
-	background-color: #ececec;
-	background-image: -moz-linear-gradient(top, #e6e6e6, #ffffff);
-	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#e6e6e6), to(#ffffff));
-	background-image: -webkit-linear-gradient(top, #e6e6e6, #ffffff);
-	background-image: -o-linear-gradient(top, #e6e6e6, #ffffff);
-	background-image: linear-gradient(to bottom,#e6e6e6, #ffffff);
+	--bg-gradian-start: #e6e6e6;
+	--bg-gradian-end:  #ffffff;
 }
+
+html[data-theme-color-scheme="dark"] .dialog-form-icon-btn{
+	--bg-gradian-start: rgb(44, 55, 70);
+	--bg-gradian-end: var(--bg-gradian-start);
+	--colortext: var(--general-text-color);
+	--border-color: var(--bg-gradian-start);
+}
+html[data-theme-color-scheme="dark"] .dialog-form-icon-btn:active{
+	--bg-gradian-start: rgb(26, 35, 42);
+}
+
 
 /* Line separation */
 hr.dialog-separator {
@@ -205,11 +218,22 @@ hr.dialog-separator:before {
 	/* Opera, Chrome, and Safari */
 }
 
+.dialog-form-head-number{
+	min-width: 35px;
+	display: inline-block;
+}
+
 .dialog-form-item{
 	display: inline-block;
 }
 .dialog-form-item [readonly]{
-	background-color: #efefef;
+	--inputbackgroundcolor: #efefef;
+}
+
+
+html[data-theme-color-scheme="dark"] .dialog-form-item [readonly]{
+	--inputbackgroundcolor: #535c6a;
+	--colortext: #8e96a5;
 }
 
 .split-qty-planned{
@@ -1034,6 +1058,11 @@ html[data-theme-color-scheme="dark"]{
 	--list-button-hover-bg-color: rgb(44, 55, 70);
 
 	color: var(--general-text-color);
+}
+
+html[data-theme-color-scheme="dark"] input{
+	--inputbackgroundcolor: #4c5666;
+	--colortext:#ffffff;
 }
 
 html[data-theme-color-scheme="dark"] a:link, html[data-theme-color-scheme="dark"] a:visited{

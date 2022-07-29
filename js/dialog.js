@@ -112,14 +112,13 @@ class Dialog {
 
 	toggle() {
 		if(this.dialog.hasAttribute('open')){
-			if(!this.isCallableFunction(this.settings.onClose) || this.settings.onClose(this)){
+			if(this.settings.onClose(this)){
 				this.dialog.close();
 			}
 		}
 		else{
-			if(!this.isCallableFunction(this.settings.onOpen) || this.settings.onOpen(this)){
-				this.dialog.showModal();
-			}
+			this.dialog.showModal();
+			this.settings.onOpen(this);
 		}
 	}
 

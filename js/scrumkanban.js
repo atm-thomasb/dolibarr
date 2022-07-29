@@ -720,7 +720,7 @@ scrumKanban = {};
 						content: o.menuIcons.deleteIcon + o.langs.Delete,
 						events: {
 							click: function (e) {
-								o.deleteBoardDialog(boardId);
+								o.dialogDeleteBoard(boardId);
 							}
 							// mouseover: () => console.log("Copy Button Mouseover")
 							// You can use any event listener from here
@@ -809,7 +809,7 @@ scrumKanban = {};
 					content: o.menuIcons.copyIcon + o.langs.CardClone,
 					events: {
 						click: function (e) {
-							o.cloneCardDialog(e);
+							o.dialogCloneCard(e);
 						}
 					}
 				});
@@ -821,7 +821,7 @@ scrumKanban = {};
 					content: '<i class="fa fa-columns" ></i>' + o.langs.CardUsSplit,
 					events: {
 						click: function (e) {
-							o.splitCardDialog(el);
+							o.dialogSplitCard(el);
 						}
 					}
 				});
@@ -833,7 +833,7 @@ scrumKanban = {};
 					content: '<i class="fa fa-columns" ></i>' + o.langs.CardSplit,
 					events: {
 						click: function (e) {
-							o.splitCardDialog(el);
+							o.dialogSplitCard(el);
 						}
 					}
 				});
@@ -1121,7 +1121,7 @@ scrumKanban = {};
 	 *
 	 * @param {HTMLElement} el
 	 */
-	o.splitCardDialog = function(el){
+	o.dialogSplitCard = function(el){
 
 		const type = el.getAttribute('data-type');
 		const objectId = el.getAttribute('data-objectid');
@@ -1133,19 +1133,31 @@ scrumKanban = {};
 		let lineItemCounter = 0;
 
 
-
+		/**
+		 * @returns {boolean} true if split is good or false if not
+		 * also toggle disable buttons
+		 */
 		const checkSplitDialogBTN = function (){
-			if(type != 'scrum-user-story'){
-				return true;
+
+			let $addLineBtn =  $('#add-split-line');
+			if($addLineBtn.length > 0){
+				if(qtyRemain == 0){
+					$addLineBtn.css('visibility','hidden');
+				}else{
+					$addLineBtn.css('visibility','');
+				}
 			}
 
-			let $acceptBTN =  $('[data-btn-role="accept"]');
-			if($acceptBTN.length > 0){
-				if(qtyRemain > 0){
-					$acceptBTN.prop('disabled', true);
-					return false;
-				}else{
-					$acceptBTN.prop('disabled', false);
+			//ne pas permettre l'ajout si l'us n'est pas entièrement splitée
+			if(type == 'scrum-user-story'){
+				let $acceptBtn =  $('[data-btn-role="accept"]');
+				if($acceptBtn.length > 0){
+					if(qtyRemain > 0){
+						$acceptBtn.prop('disabled', true);
+						return false;
+					}else{
+						$acceptBtn.prop('disabled', false);
+					}
 				}
 			}
 
@@ -1164,6 +1176,7 @@ scrumKanban = {};
 					qty_planned_min: '',
 					qty_planned_max: '',
 					qty_planned: '',
+					data_lastValue: 0,
 					maxScrumTaskStepQty: o.config.maxScrumTaskStepQty
 				},
 				tplVars
@@ -1172,7 +1185,7 @@ scrumKanban = {};
 			let content = '';
 			content+= '<div class="dialog-form-control new-split-item-line">';
 			content+= '	<div class="dialog-form-item">';
-			content+= '		<input type="number" step="any" class="split-qty-planned new-item-qty-planned" data-lastValue="' + tplVars.qty_planned + '"   name="new-item-qty-planned" value="' + tplVars.qty_planned + '" min="' + tplVars.qty_planned_min + '" max="' + tplVars.qty_planned_max + '" step="' + tplVars.maxScrumTaskStepQty + '"/>';
+			content+= '		<input type="number" class="split-qty-planned new-item-qty-planned" data-lastvalue="' + tplVars.data_lastValue + '"   name="new-item-qty-planned" value="' + tplVars.qty_planned + '" min="' + tplVars.qty_planned_min + '" max="' + tplVars.qty_planned_max + '" step="' + tplVars.maxScrumTaskStepQty + '" />';
 			content+= '	</div>';
 			content+= '	<div class="dialog-form-item">';
 			content+= '		<input type="text" class="split-item-label" name="new-item-label" value="' + o.htmlEntities(tplVars.label) + '" />';
@@ -1189,7 +1202,9 @@ scrumKanban = {};
 		 * Ajoute une ligne avec prise en compte des données en cours
 		 * @param {object} tplVars
 		 */
-		const addSplitLine = function(){
+		const addSplitLine = function(qty_planned_to_add = 0){
+
+			qty_planned_to_add = parseFloat(qty_planned_to_add);
 
 			lineItemCounter++;
 
@@ -1204,11 +1219,12 @@ scrumKanban = {};
 				label: $('[name="curent-item-label"]').val(),
 				qty_planned_min: 0,
 				qty_planned_max: maxQtyPlannedForLine,
-				qty_planned: 0,
+				qty_planned: qty_planned_to_add,
+				data_lastValue: 0,
 			});
 
-			$(newLine).appendTo('#split-line-form-container');
-
+			let newLineAppended = $(newLine).appendTo('#split-line-form-container');
+			newItemQuantityPlannedChange(newLineAppended.find('[name="new-item-qty-planned"]'));
 			checkSplitDialogBTN();
 		}
 
@@ -1260,7 +1276,9 @@ scrumKanban = {};
 
 		// Ajout au click sur button plus d'une ligne
 		$(document).off('click', '#add-split-line'); // suppression du handler existant
-		$(document).on('click', '#add-split-line', addSplitLine);
+		$(document).on('click', '#add-split-line', function (){
+			addSplitLine(0);
+		});
 
 		// Fermeture au click sur le message de fermeture
 		$(document).off('click', '.btn-remove-split-line-card'); // suppression du handler existant
@@ -1273,14 +1291,21 @@ scrumKanban = {};
 		// Update des calcules
 		$(document).off('change', '.new-item-qty-planned'); // suppression du handler existant
 		$(document).on('change', '.new-item-qty-planned', function() {
-			let newLineQty = parseFloat($(this).val());
-			let oldLineQty = parseFloat($(this).attr('data-lastValue'));
+			newItemQuantityPlannedChange($(this));
+		});
 
+		/**
+		 *
+		 * @param {jQuery} $el
+		 */
+		 function newItemQuantityPlannedChange($el) {
+			let newLineQty = parseFloat($el.val());
+			let oldLineQty = parseFloat($el.attr('data-lastvalue'));
 			newLineQty = oldLineQty + updateSplitQty(newLineQty-oldLineQty);
 			newLineQty = Math.round((newLineQty) * 100) / 100;
-			$(this).val(newLineQty); // force la valeur saisie avec la valeur de retour de updateSplitQty
-			$(this).attr('data-lastValue', newLineQty);
-		});
+			$el.val(newLineQty); // force la valeur saisie avec la valeur de retour de updateSplitQty
+			$el.attr('data-lastvalue', newLineQty);
+		}
 
 		o.callKanbanInterface('getScrumCardData', {'id': objectId}, function(response){
 			if(response.result > 0) {
@@ -1298,14 +1323,14 @@ scrumKanban = {};
 
 					content+= '<div class="dialog-form-head" >';
 
-					content+= '<span class="dialog-form-head-item">' + o.langs.QtyPlanned + ' : <span id="split-qty-planned" >' + response.data.elementObject.qty_planned + '</span></span>';
+					content+= '<span class="dialog-form-head-item">' + o.langs.QtyPlanned + ' : <span id="split-qty-planned" class="dialog-form-head-number"  >' + response.data.elementObject.qty_planned + '</span></span>';
 					if(type == 'scrum-user-story'){
 						content+= '<span class="dialog-form-head-item">' + o.langs.QtyScrumTaskAlreadySplited + ' : ';
-						content+= '<span id="split-qty-task-planned" >' + response.data.elementObject.qty_task_planned + '</span>';
+						content+= '<span id="split-qty-task-planned" class="dialog-form-head-number" >' + response.data.elementObject.qty_task_planned + '</span>';
 						content+= '</span>';
 					}
-					content+= '<span class="dialog-form-head-item">' + o.langs.QtyConsumed + ' : <span id="split-qty-consumed" >' + response.data.elementObject.qty_consumed + '</span></span>';
-					content+= '<span class="dialog-form-head-item split-qty-remain">' + o.langs.QtyRemainToSplit + ' : <span id="split-qty-remain" >' + response.data.elementObject.qty_remain_for_split + '</span></span>';
+					content+= '<span class="dialog-form-head-item">' + o.langs.QtyConsumed + ' : <span id="split-qty-consumed" class="dialog-form-head-number"  >' + response.data.elementObject.qty_consumed + '</span></span>';
+					content+= '<span class="dialog-form-head-item split-qty-remain">' + o.langs.QtyRemainToSplit + ' : <span id="split-qty-remain" class="dialog-form-head-number"  >' + response.data.elementObject.qty_remain_for_split + '</span></span>';
 
 					content+= '</div>';
 
@@ -1374,7 +1399,7 @@ scrumKanban = {};
 				const splitDialog = new Dialog({
 					title: o.langs.SplitCard,
 					content: content,
-					onAccept: function(dialog){
+					onAccept: function(){
 
 						if(canSplit && checkSplitDialogBTN()){
 							// récupération des données de formulaire en Html5
@@ -1391,6 +1416,22 @@ scrumKanban = {};
 						}
 
 						return false;
+					}
+					,onOpen: function(){
+
+						if(type == 'scrum-user-story' && parseFloat(o.config.maxScrumTaskMaxQty) > 0){
+							let qtyRemainToSplit = parseFloat(qtyRemain);
+							while(qtyRemainToSplit >= parseFloat(o.config.maxScrumTaskMaxQty)){
+								addSplitLine(o.config.maxScrumTaskMaxQty);
+								qtyRemainToSplit-=parseFloat(o.config.maxScrumTaskMaxQty);
+							}
+
+							if(qtyRemainToSplit>0){
+								addSplitLine(qtyRemainToSplit);
+							}
+						}
+
+						checkSplitDialogBTN();
 					}
 				});
 
@@ -1437,7 +1478,7 @@ scrumKanban = {};
 		return obj;
 	};
 
-	o.cloneCardDialog = function(el){
+	o.dialogCloneCard = function(el){
 		// TODO detect type of element before
 		//  User story and scrum task can not be cloned
 
@@ -1483,7 +1524,7 @@ scrumKanban = {};
 		});
 	}
 
-	o.deleteBoardDialog = function(boardId){
+	o.dialogDeleteBoard = function(boardId){
 		// TODO detect type of element before
 		//  User story and scrum task can not be deleted ?
 
