@@ -67,6 +67,12 @@ elseif ($action === 'getAllBoards') {
 elseif ($action === 'getAllItemToList') {
 	_actionAddItemToList($jsonResponse);
 }
+elseif ($action === 'getScrumCardData') {
+	_actionGetScrumCardData($jsonResponse);
+}
+elseif ($action === 'splitScrumCard') {
+	_actionSplitScrumCard($jsonResponse);
+}
 elseif ($action === 'dropItemToList') {
 	_actionDropItemToList($jsonResponse);
 }
@@ -372,12 +378,41 @@ function _actionAddItemToList($jsonResponse){
 	}
 }
 
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionGetScrumCardData($jsonResponse){
+	global $db;
+
+	$data = GETPOST("data", "array");
+
+	// check kanban list data
+	if(empty($data['id'])){
+		$jsonResponse->msg = 'Need scrumcard Id';
+		return false;
+	}
+
+	$scrumCard = new ScrumCard($db);
+	$res = $scrumCard->fetch($data['id']);
+	if($res <= 0){
+		$jsonResponse->msg = 'Scrumcard fetch error';
+		return false;
+	}
+
+	$jsonResponse->result = 1;
+	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectStd();
+	return true;
+}
+
+
 /**
  * @param JsonResponse $jsonResponse
  * @return bool|void
  */
 function _actionDropItemToList($jsonResponse){
-	global $user, $langs, $db;
+	global $langs, $db;
 
 	$data = GETPOST("data", "array");
 
@@ -638,6 +673,67 @@ function _checkObjectByElement($elementType, $id, $jsonResponse){
 	}
 
 	return $object;
+}
+
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|CommonObject
+ */
+function _actionSplitScrumCard($jsonResponse){
+	global $langs, $db, $user;
+
+
+	$data = GETPOST("data", "array");
+
+	if(empty($data['id'])){
+		$jsonResponse->msg = 'Need card Id';
+		return false;
+	}
+
+	$scrumCard = new ScrumCard($db);
+	if($scrumCard->fetch($data['id']) <= 0){
+		$jsonResponse->msg =  $langs->trans('RequireValidExistingElement');
+		return false;
+	}
+
+	$errors = 0;
+
+	if(empty($data['form']) || empty($data['form']['new-item-qty-planned'])){
+		$jsonResponse->msg =  $langs->trans('RequireValidSplitData');
+		return false;
+	}
+
+	if(!is_array($data['form']['new-item-qty-planned'])){
+		$data['form']['new-item-qty-planned'] = array(
+			$data['form']['new-item-qty-planned']
+		);
+	}
+
+	if(!is_array($data['form']['new-item-label'])){
+		$data['form']['new-item-label'] = array(
+			$data['form']['new-item-label']
+		);
+	}
+
+	foreach ($data['form']['new-item-qty-planned'] as $key => $qty){
+		$newCardLabel = '';
+		if(!empty($data['form']['new-item-label'][$key])){
+			$newCardLabel = $data['form']['new-item-label'][$key];
+		}
+
+		if(is_array($newCardLabel)){ $newCardLabel = '';}
+
+		$res = $scrumCard->splitCard($qty, $newCardLabel, $user);
+		if($res<=0){
+			$jsonResponse->msg =  $scrumCard->errorsToString();
+			$errors++;
+		}
+	}
+
+
+
+	return $errors==0;
 }
 
 

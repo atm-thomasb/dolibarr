@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## Version 0.1 [2020-12-25]
+- NEW : Split dialog for kanban card of type User story or Scrum task *28/07/2022* - 1.1.0
+
+## Version 1.0 [2020-12-25]
 
 - FIX : Suppression des champs qté réalisée et quantité prévue à la création d'un sprint *21/07/2022* - 1.0.9
 - FIX : Update visuel de la liste US planifiée *21/07/2022* - 1.0.8

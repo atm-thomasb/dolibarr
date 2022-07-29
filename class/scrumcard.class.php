@@ -948,6 +948,7 @@ class ScrumCard extends CommonObject
 	public function getScrumKanBanItemObjectFormatted(){
 		global $user;
 
+		// TODO : voir si $object peut être factorisé avec getScrumKanBanItemObjectStd mais attention il doit être compatible avec l'objet js des items de kanban
 		$object = new stdClass();
 		$object->id = 'scrumcard-' . $this->id; // kanban dom id
 
@@ -1093,6 +1094,56 @@ class ScrumCard extends CommonObject
 		}
 
 		$object->item = array();
+
+		return $object;
+	}
+
+
+	/**
+	 * get this object formatted for ajax ans json
+	 * @return stdClass
+	 */
+	public function getScrumKanBanItemObjectStd(){
+
+
+		$object = new stdClass();
+		$object->objectId = $this->id;
+		$object->type = 'scrum-card';// le type dans le kanban tel que getScrumKanBanItemObjectFormatted le fait
+		$object->id = 'scrumcard-' . $this->id; // kanban dom id
+		$object->label = $this->label;
+		$object->element = $this->element;
+		$object->cardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
+		$object->title = '';
+		$object->status = intval($this->status);
+		$object->statusLabel = $this->LibStatut(intval($this->status), 1);
+		$object->contactUsersAffected = $this->liste_contact(-1,'internal',1);
+
+		/**
+		 * Traitement de l'élément attaché
+		 */
+
+		$object->targetelementid = $this->fk_element;
+		$object->targetelement = $this->element_type;
+
+		$res = $this->fetchElementObject();
+		if($res){
+			$object->elementObject = false;
+			if(is_callable(array($this->elementObject, 'getScrumKanBanItemObjectStd'))){
+				$object->elementObject = $this->elementObject->getScrumKanBanItemObjectStd($this, $object);
+			}
+
+			// Si gestion de l'object sans getScrumKanBanItemObjectStd : **typiquement les objects Dolibarr**
+			if(!$object->elementObject){
+				$object->elementObject = new stdClass();
+				$object->elementObject->contactUsersAffected = $this->elementObject->liste_contact(-1,'internal', 1);
+
+				if($this->elementObject->element == 'project_task'){
+					$object->type = 'project-task';
+				}else{
+					$object->type = 'scrum-card-linked';
+				}
+			}
+		}
 
 		return $object;
 	}
@@ -1388,6 +1439,22 @@ class ScrumCard extends CommonObject
 		}
 		else{
 			$error = $db->error();
+			return false;
+		}
+	}
+
+	/**
+	 * Permet de spliter la carte en 2
+	 * @param double $qty la quantité de la nouvelle carte
+	 * @param string $newCardLabel le libelle de la nouvelle carte
+	 * @return void
+	 */
+	public function splitCard($qty, $newCardLabel, User $user){
+		$this->fetchElementObject();
+		if(is_callable(array($this->elementObject, 'splitCard'))){
+			return $this->elementObject->splitCard( $qty, $newCardLabel, $this, $user);
+		}else{
+			$this->error = 'splitCard not supported';
 			return false;
 		}
 	}

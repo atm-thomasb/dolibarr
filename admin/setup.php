@@ -95,7 +95,8 @@ if (!class_exists('FormSetup')) {
 
 $formSetup = new FormSetup($db);
 
-
+/*
+ * DEMO
 // Hôte
 $item = $formSetup->newItem('NO_PARAM_JUST_TEXT');
 $item->fieldOverride = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'];
@@ -127,6 +128,11 @@ $formSetup->newItem('MYMODULE_MYPARAM6')->setAsSecureKey()->enabled = 0; // disa
 
 $formSetup->newItem('Title')->setAsTitle();
 
+
+
+
+
+
 // Setup conf MYMODULE_MYPARAM8
 $item = $formSetup->newItem('MYMODULE_MYPARAM8');
 $TField = array(
@@ -157,6 +163,24 @@ $item->helpText = $langs->transnoentities('AnHelpMessage');
 //$item->fieldOverride = false; // set this var to override field output will override $fieldInputOverride and $fieldOutputOverride too
 //$item->fieldInputOverride = false; // set this var to override field input
 //$item->fieldOutputOverride = false; // set this var to override field output
+*/
+
+
+$item = $formSetup->newItem('SP_MAX_SCRUM_TASK_STEP_QTY');
+$item->fieldAttr = array(
+	'type' => 'number',
+	'step' => '0.01',
+	'min' => 0
+);
+
+$item = $formSetup->newItem('SP_MAX_SCRUM_TASK_MAX_QTY');
+$item->fieldAttr = array(
+	'type' => 'number',
+	'step' => getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY'),
+	'min' => 0
+);
+
+$formSetup->htmlAfterOutputForm.='<script>$(document).on("change", "#setup-SP_MAX_SCRUM_TASK_STEP_QTY", function(){$("#setup-SP_MAX_SCRUM_TASK_MAX_QTY").attr("step", $(this).val());});</script>';
 
 
 $setupnotempty =+ count($formSetup->items);

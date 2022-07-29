@@ -1250,6 +1250,40 @@ class ScrumTask extends CommonObject
 		return false;
 	}
 
+
+	/**
+	 * get this object formatted for ajax ans json
+	 * @return stdClass
+	 */
+	public function getScrumKanBanItemObjectStd(){
+
+
+		$object = new stdClass();
+		$object->objectId = $this->id;
+		$object->ref= $this->ref;
+		$object->type = 'scrum-user-story-task';// le type dans le kanban tel que getScrumKanBanItemObjectFormatted le fait
+		$object->label = $this->label;
+		$object->element = $this->element;
+		$object->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$this->id;
+		$object->status = intval($this->status);
+		$object->statusLabel = $this->LibStatut(intval($this->status), 1);
+		$object->contactUsersAffected = $this->liste_contact(-1,'internal',1);
+
+		$object->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
+		$object->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
+		$object->qty_planned = doubleval($this->qty_planned);
+		$object->qty_consumed = doubleval($this->qty_consumed);
+
+		$object->qty_remain_for_split = 0;
+		if($this->qty_planned - $this->qty_consumed > 0){
+			$object->qty_remain_for_split = $this->qty_planned - $this->qty_consumed;
+		}
+
+		return $object;
+	}
+
+
+
 	/**
 	 * @param $msg
 	 * @return void
@@ -1269,5 +1303,87 @@ class ScrumTask extends CommonObject
 		}else{
 			$this->errors[] = $msg;
 		}
+	}
+
+
+	/**
+	 * Permet de spliter la carte en 2
+	 * @param double $qty la quantité de la nouvelle carte
+	 * @param string $newCardLabel le libelle de la nouvelle carte
+	 * @param ScrumCard $scrumCard
+	 * @return bool
+	 */
+	public function splitCard($qty, $newCardLabel, ScrumCard $scrumCard, User $user ){
+
+		if(!class_exists('ScrumTask')){
+			require_once __DIR__ . '/scrumtask.class.php';
+		}
+		if(!class_exists('ScrumCard')){
+			require_once __DIR__ . '/scrumcard.class.php';
+		}
+
+		$qty = doubleval($qty);
+
+		$this->calcTimeSpent();
+
+		// Vérification de la liaison entre ScrumCard et ScrumTask
+		if($scrumCard->element_type != $this->element || $scrumCard->fk_element != $this->id ){
+			$this->error = 'Error : scrum card not linked';
+			$this->errors[] = $this->error;
+			return false;
+		}
+
+
+		// Vérification du temps restant
+		if($qty > $this->qty_planned - $this->qty_consumed ){
+			$this->error = 'Too much quantity';
+			$this->errors[] = $this->error;
+			return false;
+		}
+
+		// Ajout de la nouvelle ScrumTask
+		$newScrumTask = new ScrumTask($this->db);
+		$newScrumTask->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
+		$newScrumTask->description = $this->description;
+
+		$newScrumTask->qty_planned = $qty;
+		$newScrumTask->label = $newCardLabel;
+		if(empty($newCardLabel) || is_array($newCardLabel)){ $newScrumTask->label = $this->label;}
+
+		$resCreate = $newScrumTask->create($user);
+		if($resCreate<0){
+			$this->error = $newScrumTask->error;
+			$this->errors = array_merge($this->errors, $newScrumTask->errors);
+			return false;
+		}
+
+		// MISE A JOUR DE LA SCRUM TASK QUE L'ON SPLIT
+		$this->qty_planned-= $qty;
+		$resUpdate = $this->update($user);
+		if($resUpdate<1){
+			$this->error = 'Error updating ScrumTask : '.$this->error;
+			$this->errors = array_merge($this->errors, $this->errors);
+			return false;
+		}
+
+// Bloc deja effectué par  $newScrumTask->create
+//		// AJOUT DE LA CARD LIÉE
+//		$newScrumCard = new ScrumCard($this->db);
+//		if(empty($newCardLabel)){
+//			$newScrumCard->label = $this->label;
+//		}
+//		$newScrumCard->label = $newScrumTask->label;
+//		$newScrumCard->fk_element = $newScrumTask->id;
+//		$newScrumCard->element_type = $newScrumTask->element;
+//		$newScrumCard->fk_scrum_kanbanlist = $scrumCard->fk_scrum_kanbanlist;
+//		$newScrumCard->fk_rank = $scrumCard->fk_rank;
+//		$res = $newScrumCard->create($user);
+//		if($res<=0){
+//			$this->error = 'Error creating ScrumCard : '.$newScrumCard->error;
+//			$this->errors = array_merge($this->errors, $newScrumCard->errors);
+//			return false;
+//		}
+
+		return true;
 	}
 }
