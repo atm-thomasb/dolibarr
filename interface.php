@@ -36,144 +36,86 @@ if (!$res && file_exists($path . "../../../main.inc.php")) $res = @include($path
 if (!$res) die("Include of master fails");
 
 require_once __DIR__ . '/lib/scrumproject.lib.php';
+require_once __DIR__ . '/class/jsonResponse.class.php';
+
+if (!class_exists('Validate')) { require_once DOL_DOCUMENT_ROOT . '/core/class/validate.class.php'; }
 
 global $langs, $db, $hookmanager, $user, $mysoc;
 /**
  * @var DoliDB $db
  */
-$hookmanager->initHooks('scrumliveupdateinterface');
+$hookmanager->initHooks('scrumuserstorysprintplanwizardinterface');
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("scrumproject@scrumproject", "other", 'main'));
+$langs->loadLangs(array("scrumproject@scrumproject","scrumkanban@scrumproject", "other", 'main'));
 
 $action = GETPOST('action');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
 
+$jsonResponse = new JsonResponse();
 
-// AJOUT DE LIGNE DANS LES DOCUMENTS
-if ($action === 'liveFieldUpdate') {
-	// output
-	$jsonResponse = new stdClass();
-	_actionLiveUpdate($jsonResponse);
-	print json_encode($jsonResponse); // , JSON_PRETTY_PRINT
+
+if ($action === 'get-sprint-autocompletion') {
+	_getAutocompletionForSprint($jsonResponse, GETPOST('term'));
 }
+else{
+	$jsonResponse->msg = 'Action not found';
+}
+
+print $jsonResponse->getJsonResponse();
 
 $db->close();    // Close $db database opened handler
 
+
 /**
- * @param stdClass $jsonResponse
- * @return bool|void
+ * @param JsonResponse $jsonResponse
+ * @param string $search Search terms which will be matched against the client ref and the leaser ref
+ * @param int $minDateEnd
+ * @return array|string  Returns a sequential array of objects with 2 props: "id" (ID of the contract) and "text" (concatenated client / leaser refs)
+ *                       If the SQL query fails, return the SQL itself.
  */
-function _actionLiveUpdate(&$jsonResponse){
-	global $user, $langs;
+function _getAutocompletionForSprint(JsonResponse $jsonResponse, string $search, int $minDateEnd = 0): bool {
+	/** @var DoliDB $db */
+	global $db, $conf, $langs;
 
-	$jsonResponse = new stdClass();
-	$jsonResponse->result = 0;
-	$jsonResponse->msg = '';
-	$jsonResponse->newToken = newToken();
+	if(!class_exists('ScrumSprint')){
+		require_once __DIR__ . '/class/scrumsprint.class.php';
+	}
 
-	$element = GETPOST("element", 'aZ09');
-	$fk_element = GETPOST("fk_element", "int");
-	$field = GETPOST("field", "alphanohtml");
-	$value = GETPOST('value', 'alphanohtml');
-	$jsonResponse->value = $value;
-	$forceUpdate = GETPOST('forceUpdate', 'int');
+	$sprintStatic = new ScrumSprint($db);
 
-	// Todo use object display value like update form
-	$TAllowedObjects = array(
-		'scrumproject_scrumuserstorysprint' => array(
-			'allowedFields' => array('us_qty_planned', 'label')
-		),
-		'scrumproject_scrumsprintuser' => array(
-			'allowedFields' => array('qty_availablity', 'availablity_rate', 'qty_velocity')
-		),
-		'scrumproject_scrumkanbanlist' => array(
-			'allowedFields' => array('label')
-		)
-	);
+	$sql = /** @lang SQL */
+		'SELECT s.rowid     AS "id",'
+		. '     s.label AS "text", '
+		. '     g.nom AS "GroupName" '
+		. ' FROM '.MAIN_DB_PREFIX.$sprintStatic->table_element.' s'
+		. ' LEFT JOIN '.MAIN_DB_PREFIX.'usergroup g ON (s.fk_team = g.rowid)'
+		. ' WHERE 1 = 1 ';
 
-	// TODO use fields object rights
-	$TWriteRight = array(
-		'scrumproject_scrumuserstorysprint' => $user->rights->scrumproject->scrumuserstorysprint->write,
-		'scrumproject_scrumsprintuser' => $user->rights->scrumproject->scrumsprintuser->write,
-		'scrumproject_scrumkanbanlist' => $user->rights->scrumproject->scrumsprintuser->write,
-	);
+	if($minDateEnd > 0){
+		$sql.= ' AND s.date_start >= '. $minDateEnd.' ';
+	}
 
-
-	// Test rights
-	if ($user->socid > 0 || empty($TWriteRight[$element])) {
-		$jsonResponse->msg = $langs->transnoentities('NotEnoughRights');
-		$jsonResponse->result = -1;
+	$sql.= natural_search('s.label', $search);
+	$sql.= ' ORDER BY s.date_start ASC, s.label ASC;';
+	$TRow = $db->getRows($sql);
+	if (!$TRow) {
+		$jsonResponse->data = ['errors' => $db->lasterror(), 'sql' => $db->lastqueryerror()];
 		return false;
 	}
+	foreach ($TRow as $obj) {
 
-	// Test element
-	if (empty($TAllowedObjects[$element])) {
-		$jsonResponse->msg = $langs->transnoentities('NotAllowedObject');
-		$jsonResponse->result = -1;
-		return false;
+		$sprint = new ScrumSprint($db);
+		$sprint->fetch($obj->id);
+
+		$item = new stdClass();
+		$item->id =  $sprint->id;
+		$item->text = $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start).' '.$langs->trans('to').' '.dol_print_date($sprint->date_end);
+
+		$TRow[] = $item;
 	}
-
-	$object = scrumProjectGetObjectByElement($element, $fk_element);
-	if($object < 0){
-		$jsonResponse->msg = $langs->transnoentities('ErrorFetchingObject');
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if($object == 0){
-		$jsonResponse->msg = $langs->transnoentities('ElementNotFound');
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if(empty(($object->fields[$field]))){
-		$jsonResponse->msg = $langs->transnoentities('TargetFieldNotTargetable').' '.$field;
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if(empty(($object->fields[$field]))){
-		$jsonResponse->msg = $langs->transnoentities('TargetFieldNotTargetable');
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-	if (!empty($object->fields[$field]['validate'])
-		&& is_callable(array($object, 'validateField'))
-		&& !$object->validateField($object->fields, $field, $value)
-	) {
-		$jsonResponse->msg = $object->errorsToString();
-		$jsonResponse->result = -1;
-		return false;
-	}
-
-
-	$fieldTypeArray = explode(':', $object->fields[$field]['type']);
-	$typeField = reset($fieldTypeArray);
-	if(in_array($typeField , array('integer', 'real'))){
-		$value = price2num($value);
-		$jsonResponse->value = price($value);
-	}
-
-	// prevent useless save value
-	if(!$forceUpdate && $object->$field == $value){
-		$jsonResponse->result = 0;
-		return;
-	}
-
-	$object->$field = $value;
-
-	if($object->updateCommon($user) > 0){
-		$jsonResponse->msg = $langs->trans('Updated');
-		$jsonResponse->result = 1;
-		return true;
-	}
-	else{
-		$jsonResponse->result = -1;
-		$jsonResponse->msg = $object->errorsToString();
-		return false;
-	}
+	$jsonResponse->data = ['rows' => $TRow];
+	return true;
 }

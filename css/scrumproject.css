@@ -39,3 +39,11 @@ tr.toggle-line-display.--open{
 .scrum-project-form-toggle-target[data-display="1"] .select2-container{
 	min-width: 200px; /* fix for micro with */
 }
+
+
+/**
+ TABLE .scrum-user-story-plan-wizard
+ */
+.scrum-user-story-plan-wizard .col-scrumsprint, .scrum-user-story-plan-wizard .col-scrumsprint-qty-to-plan{
+	background-color: rgba(0,0,0,0.05);
+}
