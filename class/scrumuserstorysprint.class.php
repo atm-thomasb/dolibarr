@@ -135,6 +135,7 @@ class ScrumUserStorySprint extends CommonObject
 	public $qty_planned;
 	public $qty_consumed;
 	public $qty_done;
+	public $label;
 	public $description;
 	public $note_public;
 	public $note_private;

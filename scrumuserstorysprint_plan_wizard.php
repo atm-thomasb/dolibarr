@@ -440,7 +440,23 @@ foreach ($TQueryResults as $obj)
 
 			// Action column
 			print '<td class="nowrap center">';
-			print '<button><span class="fa fa-trash"></span></button>';
+
+
+			if($scrumUserStorySprint->canBeDeleted()){
+				print '<button '
+					.'class="btn-delete-us-planned" '
+					.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStory')).'" '
+					.'data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" '
+					.'data-fk_scrum_user_story_sprint="'.$scrumUserStorySprint->id.'" '
+					.'><span class="fa fa-trash"></span></button>';
+			}
+			else{
+				print '<button '
+					.' disabled '
+					.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStoryDisabled')).'" '
+					.'><span class="fa fa-trash-o"></span></button>';
+			}
+
 			print '</td>';
 
 			print '</tr>'."\n";
@@ -451,7 +467,7 @@ foreach ($TQueryResults as $obj)
 	}
 	else{
 
-		print '<tr class="oddeven toggle-line-display  --open" data-parent="'. $userStory->id.'">';
+		print '<tr class="oddeven toggle-line-display  --open no-record-found" data-parent="'. $userStory->id.'">';
 		print '<td colspan="'.($colspan-3).'" class="opacitymedium center">'.$langs->trans("NoRecordFound").'</td>';
 
 		// sprint
@@ -510,6 +526,7 @@ foreach ($TQueryResults as $obj)
 		.'class=" btn-add-us-planned" '
 		.'title="'.dol_escape_htmltag($langs->trans('AddPlanToUserStory')).'" '
 		.'data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" '
+		.'data-fk_scrumuserstory="'.$userStory->id.'" '
 		.'><span class="fa fa-plus"></span></button>';
 	print '</td>';
 

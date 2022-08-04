@@ -244,3 +244,6 @@ QtyToPlan = Qté à planifier
 QtySprintCanPlan =  Qté planifiable au sprint
 AddPlanToUserStory = Ajouter une plannification
 StoryPoints = Quantité
+UserStoryAlreadyPlannedForThisSprint = Cette user story est déja plannifiée pour ce sprint
+DeletePlanToUserStory = Supprimer cette plannification
+DeletePlanToUserStoryDisabled = Suppression non permise
