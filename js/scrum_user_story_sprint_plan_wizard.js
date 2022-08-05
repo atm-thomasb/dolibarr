@@ -17,7 +17,8 @@ jQuery(function ($) {
 	});
 
 
-	$('#form-scrum-user-story-plan-wizard [name="fk_scrumsprint"]').select2({
+	let sprintSelect = $('#form-scrum-user-story-plan-wizard [name="fk_scrumsprint"]');
+	sprintSelect.select2({
 		minimumInputLength: 2,
 		ajax: {
 			multiple: false,
@@ -58,6 +59,50 @@ jQuery(function ($) {
 			},
 			delay: 200,
 		},
+	});
+
+	// Fetch the preselected item, and add to the control
+	$.ajax({
+		type: 'GET',
+		dataType: 'json',
+		url: sprintSelect.attr('data-interface-url'),
+		data: {
+			action: 'get-sprint-autocompletion'
+		},
+	}).then(function (response) {
+
+		// create blank the option and append to Select2
+		let option = new Option('', '', true);
+		sprintSelect.append(option);
+
+		let select2NewData = $.map(response.data.rows, function (item) {
+
+			// create the option and append to Select2
+			let option = new Option(item.text, item.id, false, false);
+			sprintSelect.append(option);
+
+			// update des données des sprints
+			if($('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+item.id+'"]').length > 0){
+				$('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+item.id+'"]').html(item.html_sprintQtyAvailable);
+			}
+
+			return {
+				text: item.text,
+				id: item.id,
+				sprintQtyAvailable: item.sprintQtyAvailable,
+				html_sprintQtyAvailable: item.html_sprintQtyAvailable
+			};
+		});
+
+		// sprintSelect.trigger('change');
+
+		// manually trigger the `select2:select` event
+		sprintSelect.trigger({
+			type: 'select2:select',
+			params: {
+				data: select2NewData
+			}
+		});
 	});
 
 	$(document).on('change', '#form-scrum-user-story-plan-wizard [name="fk_scrumsprint"]', function(e) {

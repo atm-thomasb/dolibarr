@@ -122,11 +122,20 @@ function _getAutocompletionForSprint(JsonResponse $jsonResponse, string $search,
 	}
 
 	if($minDateEnd > 0){
-		$sql.= ' AND s.date_start >= '. $minDateEnd.' ';
+		$sql.= ' AND s.date_end >= "'. $db->idate($minDateEnd).'" ';
 	}
 
-	$sql.= natural_search('s.label', $search);
-	$sql.= ' ORDER BY s.date_start ASC, s.label ASC;';
+	if(!empty($search)){
+		$sql.= natural_search(['s.label', 's.ref'], $search);
+	}
+
+
+	$sql.= ' ORDER BY s.date_start ASC, s.label ASC';
+
+	if(!empty($search)){
+		$sql.= ' LIMIT 10;';
+	}
+
 	$TRow = $db->getRows($sql);
 	if (!$TRow) {
 		$jsonResponse->data = ['errors' => $db->lasterror(), 'sql' => $db->lastqueryerror()];
