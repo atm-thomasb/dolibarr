@@ -71,7 +71,7 @@ jQuery(function ($) {
 		},
 	}).then(function (response) {
 
-		// create blank the option and append to Select2
+		// create the empty option and append to Select2
 		let option = new Option('', '', true);
 		sprintSelect.append(option);
 

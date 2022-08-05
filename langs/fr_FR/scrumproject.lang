@@ -239,13 +239,13 @@ TypeContact_scrumproject_scrumtask_internal_PO = Product Owner
 TypeContact_scrumproject_scrumtask_internal_DEV = Développeur
 
 ScrumUserRoleForTask = Rôle par défaut
-usePlanWizard = Utiliser l'assistant de plannification
+usePlanWizard = Utiliser l'assistant de planification
 QtyToPlan = Qté à planifier
 QtyPlanned = Planifié
 QtySprintCanPlan =  Qté planifiable au sprint
 XQtySprintCanPlan =  <strong>%s</strong> planifiable(s) au sprint
 AddPlanToUserStory = Ajouter une planification
 StoryPoints = Story points (quantité)
-UserStoryAlreadyPlannedForThisSprint = Cette user story est déja plannifiée pour ce sprint
-DeletePlanToUserStory = Supprimer cette plannification
+UserStoryAlreadyPlannedForThisSprint = Cette user story est déjà planifiée pour ce sprint
+DeletePlanToUserStory = Supprimer cette planification
 DeletePlanToUserStoryDisabled = Suppression non permise
