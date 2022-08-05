@@ -1130,7 +1130,7 @@ class ScrumUserStory extends CommonObject
 		}
 
 		$out = '';
-		$out .=  '<span class="classfortooltip" title="'.$langs->trans('QtyPlanned').'" >';
+		$out .=  '<span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('QtyPlanned')).'" >';
 		if($this->qty < $this->totalTimeFromSprints->total_qty_planned){
 			$out .=  dolGetBadge(price($this->totalTimeFromSprints->total_qty_planned), '', 'danger');
 		}else{
