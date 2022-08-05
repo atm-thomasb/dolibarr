@@ -30,3 +30,4 @@ ALTER TABLE llx_scrumproject_scrumkanban ADD INDEX idx_scrumproject_scrumkanban_
 
 --ALTER TABLE llx_scrumproject_scrumkanban ADD CONSTRAINT llx_scrumproject_scrumkanban_fk_field FOREIGN KEY (fk_field) REFERENCES llx_scrumproject_myotherobject(rowid);
 
+

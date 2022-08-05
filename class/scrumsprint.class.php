@@ -365,6 +365,36 @@ class ScrumSprint extends CommonObject
 
 
 	/**
+	 * @return  string
+	 */
+	function getQtyAvailableBadge()
+	{
+		global  $langs;
+		$sprintQtyAvailable = $this->getQtyAvailable();
+
+		$label = $langs->trans('XQtySprintCanPlan', $sprintQtyAvailable);
+
+		if($sprintQtyAvailable < 0 ){
+			$out =  dolGetBadge($label, '', 'danger');
+		}
+		else{
+			$out =  $label;
+		}
+
+		return $out;
+	}
+
+
+	/**
+	 * @return  string
+	 */
+	function getQtyAvailable()
+	{
+		return $this->qty_velocity - $this->qty_planned;
+	}
+
+
+	/**
 	 * Load list of objects in memory from the database.
 	 *
 	 * @param  string      $sortorder    Sort Order

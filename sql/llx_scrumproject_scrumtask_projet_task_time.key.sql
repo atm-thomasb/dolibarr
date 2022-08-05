@@ -1,4 +1,4 @@
 
-ALTER TABLE llx_scrumproject_scrumtask_projet_task_time ADD UNIQUE( fk_projet_task_time, fk_scrumproject_scrumtask);
+ALTER TABLE llx_scrumproject_scrumtask_projet_task_time ADD UNIQUE INDEX unique_task_time_key( fk_projet_task_time, fk_scrumproject_scrumtask);
 ALTER TABLE llx_scrumproject_scrumtask_projet_task_time ADD CONSTRAINT llx_scrumproject_scrumtask_constraint FOREIGN KEY (fk_scrumproject_scrumtask) REFERENCES llx_scrumproject_scrumtask (rowid) ON DELETE CASCADE;
 ALTER TABLE llx_scrumproject_scrumtask_projet_task_time ADD CONSTRAINT llx_projet_task_time_constraint FOREIGN KEY (fk_projet_task_time) REFERENCES llx_projet_task_time (rowid) ON DELETE CASCADE;

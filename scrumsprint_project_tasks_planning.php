@@ -239,6 +239,7 @@ if ($user->socid > 0)	// Protection if external user
 
 if (GETPOST('cancel', 'alpha')) { $action = 'list'; $massaction = ''; }
 if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massaction != 'confirm_presend') { $massaction = ''; }
+if($massaction == 'usePlanWizard'){ $action = 'usePlanWizard'; }
 
 $parameters = array();
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
@@ -545,10 +546,24 @@ $reshook = $hookmanager->executeHooks('printFieldListSearchParam', $parameters, 
 $param .= $hookmanager->resPrint;
 
 // List of mass actions available
-$arrayofmassactions = array();
+$arrayofmassactions = array(
+	'usePlanWizard' => $langs->trans('usePlanWizard')
+);
 //if ($permissiontodelete) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
 if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete'))) $arrayofmassactions = array();
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
+
+
+if($action == 'usePlanWizard' && !empty($toselect)){
+	print '<form method="POST" id="goto-plan-wizard" action="'.dol_buildpath('scrumproject/scrumuserstorysprint_plan_wizard.php', 1).'">'."\n";
+	print '<input type="hidden" name="token" value="'.newToken().'">';
+	foreach ($toselect as $userStoryId) {
+		print '<input type="hidden" name="toselect['.$userStoryId.']" value="'.$userStoryId.'">';
+	}
+	print '</form>'."\n";
+	print '<script>document.forms["goto-plan-wizard"].submit();</script>';
+}
+
 
 print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 if ($optioncss != '') print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';

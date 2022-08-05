@@ -28,6 +28,8 @@ require_once __DIR__ . '/commonObjectQuickTools.trait.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
+
+
 /**
  * Class for ScrumUserStory
  */
@@ -74,6 +76,11 @@ class ScrumUserStory extends CommonObject
 	const STATUS_DONE = 3;
 	const STATUS_CANCELED = 9;
 
+	/**
+	 * Other format
+	 * @var ScrumUserStoryTotalTimeFromSprints $totalTimeFromSprints
+	 */
+	public $totalTimeFromSprints;
 
 	/**
 	 *  'type' field format ('integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]', 'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]', 'varchar(x)', 'double(24,8)', 'real', 'price', 'text', 'text:none', 'html', 'date', 'datetime', 'timestamp', 'duration', 'mail', 'phone', 'url', 'password')
@@ -113,7 +120,7 @@ class ScrumUserStory extends CommonObject
 		'fk_task' => array('type'=>'integer:Task:projet/class/task.class.php:1', 'label'=>'Task', 'enabled'=>'1', 'position'=>10, 'notnull'=>-1, 'visible'=>-1,'noteditable'=>0,'index'=>1, 'validate'=>'1',),
 		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>15, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
 		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'showoncombobox'=>'0', 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
-		'point' => array('type'=>'real', 'label'=>'Points', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'showoncombobox'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'help'=>"Help text for quantity", 'validate'=>'1',),
+		'qty' => array('type'=>'real', 'label'=>'StoryPoints', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'showoncombobox'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'help'=>"Help text for quantity", 'validate'=>'1',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
 		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
@@ -126,7 +133,7 @@ class ScrumUserStory extends CommonObject
 	public $rowid;
 	public $fk_task;
 	public $business_value;
-	public $point;
+	public $qty;
 	public $ref;
 	public $label;
 	public $description;
@@ -734,8 +741,16 @@ class ScrumUserStory extends CommonObject
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}
-		$label .= '<br>';
+		$label .= '<br/>';
 		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
+
+		$label .= '<br/>';
+		$label .= '<b>'.$langs->trans('StoryPoints').':</b> '.price($this->qty);
+
+
+		$label .= '<br/>';
+		$label .= '<strong>'.$this->label.'</strong> ';
+		$label .= '<div>'.$this->description.'</div> ';
 
 		$url = dol_buildpath('/scrumproject/scrumuserstory_card.php', 1).'?id='.$this->id;
 
@@ -1024,9 +1039,15 @@ class ScrumUserStory extends CommonObject
 
 	/**
 	 * recupère les sommes de temps consommé, produit et plannifié sur l'ensemble des sprints
-	 * @return bool|int|object
+	 * @return ScrumUserStoryTotalTimeFromSprints {nb_print, total_qty_consumed, total_qty_planned, total_qty_done}
 	 */
-	public function getTotalTimeFromSprints(){
+	public function getTotalTimeFromSprints($useCache = true){
+
+		if(!empty($useCache) && !empty($this->totalTimeFromSprints)){
+			return $this->totalTimeFromSprints;
+		}
+
+
 		$sql = 'SELECT COUNT(rowid) nb_print,  SUM(qty_consumed) total_qty_consumed, SUM(qty_planned) total_qty_planned, SUM(qty_done) total_qty_done   FROM '.MAIN_DB_PREFIX.'scrumproject_scrumuserstorysprint WHERE fk_scrum_user_story = '.$this->id;
 		$result = $this->db->getRow($sql);
 		if($result == false){
@@ -1037,7 +1058,6 @@ class ScrumUserStory extends CommonObject
 
 		return $result;
 	}
-
 
 
 	/**
@@ -1089,6 +1109,35 @@ class ScrumUserStory extends CommonObject
 		if (!empty($label)) {
 			$out = '<span class="'.$badgeClass.'" '.$title.' >'.$label.'</span>';
 		}
+
+		return $out;
+	}
+
+	/**
+	 * @param   string  $label      empty = auto (progress), string = replace output
+	 * @param   string  $tooltip    empty = auto , string = replace output
+	 * @return  string
+	 * @see getTaskProgressView()
+	 */
+	function getPlannedBadge()
+	{
+		global $conf, $langs;
+
+		$this->getTotalTimeFromSprints();
+
+		if(!is_object($this->totalTimeFromSprints)){
+			return;
+		}
+
+		$out = '';
+		$out .=  '<span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('QtyPlanned')).'" >';
+		if($this->qty < $this->totalTimeFromSprints->total_qty_planned){
+			$out .=  dolGetBadge(price($this->totalTimeFromSprints->total_qty_planned), '', 'danger');
+		}else{
+			$out .=  price($this->totalTimeFromSprints->total_qty_planned);
+		}
+		$out .=  '</span>';
+		$out .= ' / <span class="classfortooltip" title="'.$langs->trans($this->fields['qty']['label']).'" >'.price($this->qty).'</span>';
 
 		return $out;
 	}
@@ -1206,5 +1255,51 @@ class ScrumUserStory extends CommonObject
 			$this->errors[] = $msg;
 		}
 	}
+
+	/**
+	 * @return Project|false
+	 */
+	public function getProjectLinked(){
+		if(!function_exists('scrumProjectGetObjectByElement')){
+			require_once __DIR__ . '/../lib/scrumproject.lib.php';
+		}
+		$task = scrumProjectGetObjectByElement('task', $this->fk_task);
+		if(!$task){
+			return false;
+		}
+
+		return scrumProjectGetObjectByElement('project', $task->fk_project);
+	}
+
+	/**
+	 * Because one day i whish class it will implements JsonSerializable
+	 * @return array
+	 */
+	public function jsonSerialize()
+	{
+		$returnData = new stdClass();
+		foreach ($this->fields as $field => $fieldConf){
+			$returnData->$field = $this->$field;
+		}
+
+		$this->getTotalTimeFromSprints();
+		$returnData->totalTimeFromSprints = $this->totalTimeFromSprints;
+
+		$returnData->html_progressBadge = $this->getProgressBadge();
+		$returnData->html_plannedBadge = $this->getPlannedBadge();
+
+
+		return $returnData;
+	}
 }
 
+
+/**
+ * Class de définition pour la methode TotalTimeFromSprints de ScrumUserStory
+ */
+class ScrumUserStoryTotalTimeFromSprints extends stdClass{
+	public $nb_print;
+	public $total_qty_consumed;
+	public $total_qty_planned;
+	public $total_qty_done;
+}
