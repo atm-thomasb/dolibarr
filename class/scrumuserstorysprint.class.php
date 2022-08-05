@@ -47,7 +47,7 @@ class ScrumUserStorySprint extends CommonObject
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'scrumuserstorysprint';
+	public $element = 'scrumproject_scrumuserstorysprint';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
