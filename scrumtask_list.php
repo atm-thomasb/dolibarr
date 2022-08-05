@@ -248,7 +248,6 @@ if (empty($reshook)) {
 /*
  * View
  */
-
 $form = new Form($db);
 
 $now = dol_now();
@@ -288,8 +287,9 @@ if ($object->ismultientitymanaged == 1) {
 } else {
 	$sql .= " WHERE 1 = 1";
 }
-
-
+if (!empty($fk_scrum_user_story_sprint)){
+	$sql .= ' AND fk_scrum_user_story_sprint = '.$fk_scrum_user_story_sprint;
+}
 
 foreach ($search as $key => $val) {
 	if (array_key_exists($key, $object->fields)) {
@@ -370,14 +370,14 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
 	}*/
 	/* The fast and low memory method to get and count full list converts the sql into a sql count */
 	$sqlforcount = preg_replace('/^SELECT[a-z0-9\._\s\(\),]+FROM/i', 'SELECT COUNT(*) as nbtotalofrecords FROM', $sql);
-	$resql = $db->query($sqlforcount);
-	$objforcount = $db->fetch_object($resql);
-	$nbtotalofrecords = $objforcount->nbtotalofrecords;
+
+	$objforcount = $db->getRow($sqlforcount);
+	$nbtotalofrecords = !empty($objforcount)?$objforcount->nbtotalofrecords:0;
+
 	if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
 		$page = 0;
 		$offset = 0;
 	}
-	$db->free($resql);
 }
 
 // Complete request and execute it with limit
@@ -516,10 +516,13 @@ print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
 
-$newScrumTaskUrl = dol_buildpath('/scrumproject/scrumtask_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']);
+$newScrumTaskUrl = dol_buildpath('/scrumproject/scrumtask_card.php', 1).'?action=create';
+$backtopageAdd = $_SERVER['PHP_SELF'];
 if($fk_scrum_user_story_sprint>0){
 	$newScrumTaskUrl.= '&fk_scrum_user_story_sprint='.$fk_scrum_user_story_sprint;
+	$backtopageAdd.= '?fk_scrum_user_story_sprint='.$fk_scrum_user_story_sprint;
 }
+$newScrumTaskUrl.= '&backtopage='.urlencode($backtopageAdd);
 
 $newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $newScrumTaskUrl, '', $permissiontoadd);
 

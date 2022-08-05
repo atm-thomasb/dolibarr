@@ -96,7 +96,153 @@ dialog.kanban-dialog[open]{
 }
 
 
+/* Dialog content */
 
+.dialog-form-head{
+	font-size: 0.8em;
+}
+
+.dialog-form-head-item:not(:first-child){
+	margin-left: 30px;
+}
+
+.dialog-form-head-item.split-qty-remain{
+	font-weight: bold;
+}
+
+.dialog-form-body{
+	margin-top: 10px;
+}
+
+
+.dialog-form-control{
+	margin-top: var(--dialog-padding);
+}
+
+.curent-split-item-line{
+
+}
+.new-split-item-line{
+	border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.dialog-form-icon-btn{
+
+	--bg-gradian-start: #ffffff;
+	--bg-gradian-end: #e6e6e6;
+	--border-color: #aaa;
+	--colortext: #444;
+
+	margin-bottom: 3px;
+	margin-top: 3px;
+	margin-left: 5px;
+	margin-right: 5px;
+	display: inline-block;
+	padding: 3px 8px;
+	text-align: center;
+	cursor: pointer;
+	text-decoration: none !important;
+	background-color: var(--bg-gradian-end);
+	background-image: -moz-linear-gradient(top,var(--bg-gradian-start), var(--bg-gradian-end));
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(var(--bg-gradian-start)), to(var(--bg-gradian-end)));
+	background-image: -webkit-linear-gradient(top, var(--bg-gradian-start), var(--bg-gradian-end));
+	background-image: -o-linear-gradient(top, var(--bg-gradian-start), var(--bg-gradian-end));
+	background-image: linear-gradient(to bottom, var(--bg-gradian-start), var(--bg-gradian-end));
+	background-repeat: repeat-x;
+	border: 1px solid var(--border-color);
+	-webkit-border-radius: 2px;
+	border-radius: 1px;
+	font-weight: bold;
+	text-transform: uppercase;
+
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	/*
+	  Introduced in Internet Explorer 10.
+	  See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+	*/
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.dialog-form-icon-btn:active{
+	--bg-gradian-start: #e6e6e6;
+	--bg-gradian-end:  #ffffff;
+}
+
+html[data-theme-color-scheme="dark"] .dialog-form-icon-btn{
+	--bg-gradian-start: rgb(44, 55, 70);
+	--bg-gradian-end: var(--bg-gradian-start);
+	--colortext: var(--general-text-color);
+	--border-color: var(--bg-gradian-start);
+}
+html[data-theme-color-scheme="dark"] .dialog-form-icon-btn:active{
+	--bg-gradian-start: rgb(26, 35, 42);
+}
+
+
+/* Line separation */
+hr.dialog-separator {
+
+	--border-color : rgba(0,0,0,0.2);
+
+	border: none;
+	overflow: visible;
+	box-sizing: content-box;
+	order: 0;
+	height: 1px;
+	width: 10%;
+	position: relative;
+	margin: 10px auto;
+
+	background: var(--border-color);
+}
+hr.dialog-separator:before {
+	content: "";
+	width: 4px;
+	height: 4px;
+	background: #fff;
+	display: inline-block;
+	border: 1px solid var(--border-color);
+	position: absolute;
+	top: -3px;/* un petit fallback au cas ou la virgule en css passe pas*/
+	top: -2.5px;
+	left: 50%;
+	margin: 0 0 0 -3px;
+	transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	/* IE 9 */
+	-webkit-transform: rotate(45deg);
+	/* Opera, Chrome, and Safari */
+}
+
+.dialog-form-head-number{
+	min-width: 35px;
+	display: inline-block;
+}
+
+.dialog-form-item{
+	display: inline-block;
+}
+.dialog-form-item [readonly]{
+	--inputbackgroundcolor: #efefef;
+}
+
+
+html[data-theme-color-scheme="dark"] .dialog-form-item [readonly]{
+	--inputbackgroundcolor: #535c6a;
+	--colortext: #8e96a5;
+}
+
+.split-qty-planned{
+	width: 90px;
+}
+
+.split-item-label{
+	width: 600px;
+}
 
 
 html[data-theme-color-scheme="dark"] dialog.kanban-dialog{
@@ -138,7 +284,6 @@ button.kanban-btn {
 	-webkit-user-select: none;
 	touch-action: manipulation;
 }
-
 button.kanban-btn[data-btn-role="accept"]{
 	font-weight: bold;
 	--button-background-color :  var(--butactionbg);
@@ -151,6 +296,12 @@ button.kanban-btn[data-btn-role="accept"]:hover{
 	filter: saturate(100%);
 	filter: hue-rotate(5deg);
 }
+
+button.kanban-btn[disabled]{
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+
 
 button.kanban-btn[data-btn-role="cancel"]{
 	--button-background-color :  rgba(51, 51, 51, 0);
@@ -907,6 +1058,11 @@ html[data-theme-color-scheme="dark"]{
 	--list-button-hover-bg-color: rgb(44, 55, 70);
 
 	color: var(--general-text-color);
+}
+
+html[data-theme-color-scheme="dark"] input{
+	--inputbackgroundcolor: #4c5666;
+	--colortext:#ffffff;
 }
 
 html[data-theme-color-scheme="dark"] a:link, html[data-theme-color-scheme="dark"] a:visited{

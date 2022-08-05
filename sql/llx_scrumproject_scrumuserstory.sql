@@ -20,7 +20,7 @@ CREATE TABLE llx_scrumproject_scrumuserstory(
 	fk_task integer,
     fk_user_po integer NOT NULL,
 	business_value integer DEFAULT 50 NOT NULL, 
-	point real, 
+	qty real, 
 	ref varchar(128) NOT NULL, 
 	label varchar(255), 
 	description text, 

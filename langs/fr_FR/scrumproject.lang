@@ -32,10 +32,13 @@ ScrumProjectSetupPage = Page de configuration du module Projet Scrum
 ScrumSprintExtraFields = Attributs supplémentaires sprints
 ScrumKanbanExtraFields = Attributs supplémentaires Kanban
 ScrumUserStoryExtraFields = Attributs supplémentaires User story
-ScrumUserStorySprintExtraFields = Attributs supplémentaires User story plannifiés
+ScrumUserStorySprintExtraFields = Attributs supplémentaires User story planifiés
 ScrumCardExtraFields = Attributs supplémentaires cartes
 NumberingModules = Modèles de numérotation pour %s
 ScrumCardStage = Projet Scrum - Étapes des cartes
+
+SP_MAX_SCRUM_TASK_STEP_QTY = Granularité des quantités pour les tâches scrum et les User stories
+SP_MAX_SCRUM_TASK_MAX_QTY = Quantités maximal pouvant être affecter à une tâche scrum
 
 #
 # MENU
@@ -142,7 +145,7 @@ StatusScrumUserStorySprintDraft = Brouillon
 StatusScrumUserStorySprintReady = Prête
 StatusScrumUserStorySprintDone = Terminée
 BusinessValue = Business value
-QtyConsumed = Qty consommée
+QtyConsumed = Qté consommée
 
 ScrumUserStorySprints = user story planifiée
 ListOfScrumUserStorys = Liste des user stories
@@ -238,3 +241,13 @@ TypeContact_scrumproject_scrumtask_internal_DEV = Développeur
 ScrumUserRoleForTask = Rôle par défaut
 
 SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE = Contact par défaut utilisé pour l'affectation à une carte du kanban
+usePlanWizard = Utiliser l'assistant de planification
+QtyToPlan = Qté à planifier
+QtyPlanned = Planifié
+QtySprintCanPlan =  Qté planifiable au sprint
+XQtySprintCanPlan =  <strong>%s</strong> planifiable(s) au sprint
+AddPlanToUserStory = Ajouter une planification
+StoryPoints = Story points (quantité)
+UserStoryAlreadyPlannedForThisSprint = Cette user story est déjà planifiée pour ce sprint
+DeletePlanToUserStory = Supprimer cette planification
+DeletePlanToUserStoryDisabled = Suppression non permise

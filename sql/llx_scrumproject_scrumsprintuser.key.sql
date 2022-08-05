@@ -24,7 +24,7 @@ ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scr
 ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
 ALTER TABLE llx_scrumproject_scrumsprintuser ADD CONSTRAINT llx_scrumproject_scrumsprintuser_fk_user_modif FOREIGN KEY (fk_user_modif) REFERENCES llx_user(rowid);
 ALTER TABLE llx_scrumproject_scrumsprintuser ADD INDEX idx_scrumproject_scrumsprintuser_status (status);
-ALTER TABLE llx_scrumproject_scrumsprintuser ADD UNIQUE( fk_scrum_sprint, fk_user);
+ALTER TABLE llx_scrumproject_scrumsprintuser ADD UNIQUE INDEX unique_sprint_user_key ( fk_scrum_sprint, fk_user);
 
 --ALTER TABLE llx_scrumproject_scrumsprintuser ADD UNIQUE INDEX uk_scrumproject_scrumsprintuser_fieldxy(fieldx, fieldy);
 

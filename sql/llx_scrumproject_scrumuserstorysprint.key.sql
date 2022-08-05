@@ -28,4 +28,4 @@ ALTER TABLE llx_scrumproject_scrumuserstorysprint ADD CONSTRAINT llx_scrumprojec
 
 --ALTER TABLE llx_scrumproject_scrumuserstorysprint ADD CONSTRAINT llx_scrumproject_scrumuserstorysprint_fk_field FOREIGN KEY (fk_field) REFERENCES llx_scrumproject_myotherobject(rowid);
 
-ALTER TABLE llx_scrumproject_scrumuserstorysprint ADD UNIQUE( fk_scrum_user_story, fk_scrum_sprint);
+-- ALTER TABLE llx_scrumproject_scrumuserstorysprint ADD UNIQUE unique_plannif_for_sprint ( fk_scrum_user_story, fk_scrum_sprint);

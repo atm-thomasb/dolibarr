@@ -116,7 +116,8 @@ class ScrumUserStorySprint extends CommonObject
 		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>4, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_done' => array('type'=>'real', 'label'=>'QtyDone', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>4, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'description' => array('type'=>'text', 'label'=>'Description', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
+		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
+		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>130, 'notnull'=>0, 'visible'=>0, 'validate'=>'1',),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>140, 'notnull'=>0, 'visible'=>0, 'validate'=>'1',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
@@ -134,6 +135,7 @@ class ScrumUserStorySprint extends CommonObject
 	public $qty_planned;
 	public $qty_consumed;
 	public $qty_done;
+	public $label;
 	public $description;
 	public $note_public;
 	public $note_private;
@@ -146,6 +148,11 @@ class ScrumUserStorySprint extends CommonObject
 	public $model_pdf;
 	// END MODULEBUILDER PROPERTIES
 
+	/**
+	 * valeur dynamique non stocké en base ,  recupérée par $this->calcTimeTaskPlanned()
+	 * @var $qty_task_planned
+	 */
+	public $qty_task_planned;
 
 	// If this object has a subtable with lines
 
@@ -544,8 +551,13 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
-		return $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
+		$delResult =  $this->deleteCommon($user, $notrigger);
+
+		if($this->refreshSprintQuantities($user)<0){
+			return -1;
+		}
+
+		return $delResult;
 	}
 
 	/**
@@ -945,6 +957,121 @@ class ScrumUserStorySprint extends CommonObject
 		}
 	}
 
+
+
+	/**
+	 * get this object formatted for ajax ans json
+	 * @return stdClass
+	 */
+	public function getScrumKanBanItemObjectStd(){
+
+		$object = new stdClass();
+		$object->objectId = $this->id;
+		$object->ref= $this->ref;
+		$object->type = 'scrum-user-story';// le type dans le kanban tel que getScrumKanBanItemObjectFormatted le fait
+		$object->label = $this->label;
+		$object->element = $this->element;
+		$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$this->id;
+
+		$object->status = intval($this->status);
+		$object->statusLabel = $this->LibStatut(intval($this->status), 1);
+		$object->contactUsersAffected = $this->liste_contact(-1,'internal',1);
+
+		$object->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
+		$object->fk_scrum_user_story_sprint= $this->fk_scrum_user_story_sprint;
+		$object->qty_planned = doubleval($this->qty_planned);
+		$object->qty_consumed = doubleval($this->qty_consumed);
+
+		$this->calcTimeTaskPlanned();
+		$object->qty_task_planned = doubleval($this->qty_task_planned);
+
+		$object->qty_remain_for_split = 0;
+		$qtyConsumeBase = max($this->qty_task_planned, $this->qty_consumed);
+		if($this->qty_planned - $qtyConsumeBase > 0){
+			$object->qty_remain_for_split = $this->qty_planned - $qtyConsumeBase;
+		}
+
+
+		return $object;
+	}
+
+
+
+	/**
+	 * Permet de spliter l'us carte en scrum task
+	 * @param double $qty la quantité de la nouvelle carte
+	 * @param string $newCardLabel le libelle de la nouvelle carte
+	 * @param ScrumCard $scrumCard
+	 * @return bool
+	 */
+	public function splitCard($qty, $newCardLabel, ScrumCard $scrumCard, User $user ){
+
+		$qty = doubleval($qty);
+
+		if(!class_exists('ScrumTask')){
+			require_once __DIR__ . '/scrumtask.class.php';
+		}
+		if(!class_exists('ScrumCard')){
+			require_once __DIR__ . '/scrumcard.class.php';
+		}
+
+		$this->calcTimeTaskPlanned();
+
+		// Vérification de la liaison entre ScrumCard et ScrumTask
+		if($scrumCard->element_type != $this->element || $scrumCard->fk_element != $this->id ){
+			$this->error = 'Error : scrum card not linked';
+			$this->errors[] = $this->error;
+			return false;
+		}
+
+
+		// Vérification du temps restant
+		if($qty > $this->qty_planned - $this->qty_task_planned ){
+			$this->error = 'Too much quantity';
+			$this->errors[] = $this->error;
+			return false;
+		}
+
+		// Ajout de la nouvelle ScrumTask
+		$newScrumTask = new ScrumTask($this->db);
+		$newScrumTask->fk_scrum_user_story_sprint = $this->id;
+		$newScrumTask->description = $this->description;
+
+		$newScrumTask->qty_planned = $qty;
+		$newScrumTask->label = $newCardLabel;
+		if(empty($newCardLabel) || is_array($newCardLabel)){ $newScrumTask->label = $this->label;}
+
+		$resCreate = $newScrumTask->create($user);
+		if($resCreate<0){
+			$this->error = $newScrumTask->error;
+			$this->errors = array_merge($this->errors, $newScrumTask->errors);
+			return false;
+		}
+
+		// MISE A JOUR DE LA SCRUM TASK QUE L'ON SPLIT
+		$this->qty_task_planned-= $qty;
+
+// Bloc deja effectué par  $newScrumTask->create
+//		// AJOUT DE LA CARD LIÉE
+//		$newScrumCard = new ScrumCard($this->db);
+//		if(empty($newCardLabel)){
+//			$newScrumCard->label = $this->label;
+//		}
+//		$newScrumCard->label = $newScrumTask->label;
+//		$newScrumCard->fk_element = $newScrumTask->id;
+//		$newScrumCard->element_type = $newScrumTask->element;
+//		$newScrumCard->fk_scrum_kanbanlist = $scrumCard->fk_scrum_kanbanlist;
+//		$newScrumCard->fk_rank = $scrumCard->fk_rank;
+//		$res = $newScrumCard->create($user);
+//		if($res<=0){
+//			$this->error = 'Error creating ScrumCard : '.$newScrumCard->error;
+//			$this->errors = array_merge($this->errors, $newScrumCard->errors);
+//			return false;
+//		}
+
+		return true;
+	}
+
 	/**
 	 * Initialise object with example values
 	 * Id must be 0 if object instance is a specimen
@@ -1183,6 +1310,24 @@ class ScrumUserStorySprint extends CommonObject
 		if($obj){
 			$this->qty_consumed = doubleval($obj->sumTimeSpent);
 			return $this->qty_consumed;
+		}
+
+		return 0;
+	}
+
+	/**
+	 *
+	 * @return int
+	 */
+	public function calcTimeTaskPlanned(){
+
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_planned) sumTaskPlanned FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask "
+			." WHERE fk_scrum_user_story_sprint = ".intval($this->id);
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_task_planned = doubleval($obj->sumTaskPlanned);
+			return $this->qty_task_planned;
 		}
 
 		return 0;
