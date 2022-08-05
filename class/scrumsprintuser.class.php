@@ -38,15 +38,16 @@ class ScrumSprintUser extends CommonObject
 {
 	use CommonObjectQuickTools;
 
-	/**
-	 * @var string ID of module.
-	 */
-	public $module = 'scrumproject';
+
+//	/**
+//	 * @var string ID of module.
+//	 */
+//	public $module = 'scrumproject'; // already included in $this->element
 
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'scrumsprintuser';
+	public $element = 'scrumproject_scrumsprintuser';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.

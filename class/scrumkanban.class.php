@@ -36,15 +36,16 @@ require_once __DIR__ . '/../lib/scrumproject.lib.php';
  */
 class ScrumKanban extends CommonObject
 {
-	/**
-	 * @var string ID of module.
-	 */
-	public $module = 'scrumproject';
+
+//	/**
+//	 * @var string ID of module.
+//	 */
+//	public $module = 'scrumproject'; // already included in $this->element
 
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'scrumkanban';
+	public $element = 'scrumproject_scrumkanban';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
