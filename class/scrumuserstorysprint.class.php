@@ -551,8 +551,13 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
-		return $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
+		$delResult =  $this->deleteCommon($user, $notrigger);
+
+		if($this->refreshSprintQuantities($user)<0){
+			return -1;
+		}
+
+		return $delResult;
 	}
 
 	/**

@@ -214,10 +214,10 @@ llxHeader('', $title, $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
 
 
-print '<form method="POST" id="form-scrum-user-story-plan-wizard" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+print '<form method="POST" id="form-scrum-user-story-plan-wizard" >'."\n";
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="list">';
-
+print '<input type="hidden" name="interface-url" value="'.dol_buildpath('scrumproject/interface.php',1).'">';
 
 $listBtn = '';
 
@@ -271,14 +271,7 @@ foreach ($TQueryResults as $obj)
 
 	$colKey = 'us_qty_planned';
 	print '<td class="col-us-qty-planned" >';
-		$plannedWorkloadHours = $userStory->qty;
-		if($plannedWorkloadHours < $userStory->totalTimeFromSprints->total_qty_planned){
-			print dolGetBadge(price($userStory->totalTimeFromSprints->total_qty_planned), '', 'danger');
-		}else{
-			print price($userStory->totalTimeFromSprints->total_qty_planned);
-		}
-		print ' / '.price($plannedWorkloadHours);
-
+	print $userStory->getPlannedBadge();
 	print '</td>';
 
 	print '<td>';
@@ -406,7 +399,7 @@ foreach ($TQueryResults as $obj)
 
 			$liveEdit = '';
 			if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
-				$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'label', 'scrumsprintProjectTasksPlanningLiveUpdate');
+				$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'label', 'scrumUserStorySprintPlanningWizardLiveUpdate');
 			}
 			print '<td '.$liveEdit.'>';
 			print $scrumUserStorySprint->showOutputFieldQuick('label');
@@ -416,7 +409,7 @@ foreach ($TQueryResults as $obj)
 
 			$liveEdit = '';
 			if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
-				$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'qty_planned', 'scrumsprintProjectTasksPlanningLiveUpdate');
+				$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'qty_planned', 'scrumUserStorySprintPlanningWizardLiveUpdate');
 			}
 			print '<td '.$liveEdit.' >';
 			print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
@@ -433,8 +426,9 @@ foreach ($TQueryResults as $obj)
 
 
 
-			print '<td class="col-scrumsprint-qty-to-plan">';
-			print $scrumUserStorySprint->showOutputFieldQuick('qty_done');
+
+			print '<td class="col-scrumsprint-qty-to-plan" data-qty-available="'.$scrumSprint->getQtyAvailable().'" data-fk_sprint="'.$scrumSprint->id.'" >';
+			print $scrumSprint->getQtyAvailableBadge();
 			print '</td>';
 
 
@@ -444,7 +438,7 @@ foreach ($TQueryResults as $obj)
 
 			if($scrumUserStorySprint->canBeDeleted()){
 				print '<button '
-					.'class="btn-delete-us-planned" '
+					.'class="btn-delete-us-planned ajax-action" '
 					.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStory')).'" '
 					.'data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" '
 					.'data-fk_scrum_user_story_sprint="'.$scrumUserStorySprint->id.'" '
@@ -452,6 +446,7 @@ foreach ($TQueryResults as $obj)
 			}
 			else{
 				print '<button '
+					.'class="ajax-action" '
 					.' disabled '
 					.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStoryDisabled')).'" '
 					.'><span class="fa fa-trash-o"></span></button>';
@@ -523,7 +518,7 @@ foreach ($TQueryResults as $obj)
 	// Action column
 	print '<td class="nowrap center">';
 	print '<button '
-		.'class=" btn-add-us-planned" '
+		.'class=" btn-add-us-planned ajax-action" '
 		.'title="'.dol_escape_htmltag($langs->trans('AddPlanToUserStory')).'" '
 		.'data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" '
 		.'data-fk_scrumuserstory="'.$userStory->id.'" '

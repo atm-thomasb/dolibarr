@@ -1,6 +1,22 @@
 jQuery(function ($) {
 	// using $ here will be safely even jQuery.noConflict() will be enabled
 
+	let planFormSelector = '#form-scrum-user-story-plan-wizard';
+
+	$('body').on('submit', planFormSelector, function(event) {
+		event.preventDefault();
+	});
+
+
+	$('body').on('keyup keypress', planFormSelector + " input, " + planFormSelector + " button", function(e) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			$(this).closest('tr').find('.btn-add-us-planned').trigger('click');
+			return false;
+		}
+	});
+
+
 	$('#form-scrum-user-story-plan-wizard [name="fk_scrumsprint"]').select2({
 		minimumInputLength: 2,
 		ajax: {
@@ -24,12 +40,36 @@ jQuery(function ($) {
 					return [];
 				}
 				return {
-					results: $.map(response.data.rows, function (item) { return { text: item.text, id: item.id}; }),
+					results: $.map(response.data.rows, function (item) {
+
+						// update des données des sprints
+						if($('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+item.id+'"]').length > 0){
+							$('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+item.id+'"]').html(item.html_sprintQtyAvailable);
+						}
+
+						return {
+							text: item.text,
+							id: item.id,
+							sprintQtyAvailable: item.sprintQtyAvailable,
+							html_sprintQtyAvailable: item.html_sprintQtyAvailable
+						};
+					}),
 				}
 			},
 			delay: 200,
 		},
 	});
+
+	$(document).on('change', '#form-scrum-user-story-plan-wizard [name="fk_scrumsprint"]', function(e) {
+		//I create a var data and works it like an Array
+		let data = $(this).select2('data');
+
+		// grab the Array item which matchs the id
+		let dataSelected = data.find(item => item.id === $(this).val());
+
+		$(this).closest('tr').find('.col-scrumsprint-qty-to-plan').html(dataSelected.html_sprintQtyAvailable);
+	});
+
 
 	// del button click
 	$('body').on('click', '.btn-delete-us-planned', function(e) {
@@ -55,6 +95,12 @@ jQuery(function ($) {
 				if (response.result > 0) {
 					// do stuff on success
 					lineContainer.slideUp();// suppression de la list
+
+					// update des données des sprints
+					if($('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+ response.data.sprintInfos.id +'"]').length > 0){
+						$('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+ response.data.sprintInfos.id +'"]').html(response.data.sprintInfos.html_qtyAvailable);
+					}
+
 				} else if (response.result == 0) {
 					// do stuff on idle
 
@@ -65,6 +111,8 @@ jQuery(function ($) {
 				if (response.newToken != undefined) {
 					uspWiz.newToken = response.newToken;
 				}
+
+				uspWiz.reloadUserStoryInfos(lineContainer.attr('data-parent'));
 
 				if (response.msg.length > 0) {
 					uspWiz.setEventMessage(response.msg, response.result > 0 ? true : false);
@@ -116,11 +164,22 @@ jQuery(function ($) {
 						success: function(loadResponse){
 							let newLine = $($(loadResponse).find('#scrum-user-story-sprint-'+response.data.id));
 							uspWiz.initDefaultToolTipInDeep(newLine);
+
+							// il faut recharger le live edit
+							SpLiveEdit.setSPLiveEdit(newLine.find('[data-live-edit=1]'));
+
 							newLine.insertBefore('.add-line-form[data-parent="'+fk_scrumuserstory+'"]');
+
+							// update des données des sprints
+							if($('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+response.data.sprintInfos.id+'"]').length > 0){
+								$('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+response.data.sprintInfos.id+'"]').html(response.data.sprintInfos.html_qtyAvailable);
+							}
 
 							if($('.no-record-found[data-parent="'+fk_scrumuserstory+'"]').length>0){
 								$('.no-record-found[data-parent="'+fk_scrumuserstory+'"]').hide();
 							}
+
+							$('.add-line-form[data-parent="'+fk_scrumuserstory+'"]').find('.col-scrumsprint-qty-to-plan').html('');
 
 						}
 					});
@@ -141,6 +200,8 @@ jQuery(function ($) {
 				if (response.newToken != undefined) {
 					uspWiz.newToken = response.newToken;
 				}
+
+				uspWiz.reloadUserStoryInfos(fk_scrumuserstory);
 
 				if (response.msg.length > 0) {
 					uspWiz.setEventMessage(response.msg, response.result > 0 ? true : false);
@@ -163,6 +224,7 @@ jQuery(function ($) {
 
 
 		o.newToken = '';
+		o.interfaceUrl = '';
 
 		/**
 		 * Get new token
@@ -222,11 +284,67 @@ jQuery(function ($) {
 			}
 		}
 
+		o.reloadUserStoryInfos = function(fk_scrumuserstory, fk_scrumsprint = 0){
+
+			let containerLine = $('#user-story-' + fk_scrumuserstory);
+
+			$.ajax({
+				method: 'POST',
+				url: o.interfaceUrl,
+				dataType: 'json',
+				data: {
+					action : 'get-user-story-infos',
+					token: o.newToken,
+					data:{
+						fk_scrumsprint: fk_scrumsprint,
+						id : fk_scrumuserstory
+					}
+				},
+				success: function (response) {
+
+					if (response.result > 0) {
+						// do stuff on success
+						containerLine.find('.col-us-qty-planned').html(response.data.html_plannedBadge);
+
+						if(response.data.sprintInfos !== undefined){
+							// update des données des sprints
+							if($('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+response.data.sprintInfos.id+'"]').length > 0){
+								$('.col-scrumsprint-qty-to-plan[data-fk_sprint="'+response.data.sprintInfos.id+'"]').html(response.data.sprintInfos.html_qtyAvailable);
+							}
+						}
+
+						// reload des tooltip
+						uspWiz.initDefaultToolTipInDeep(containerLine);
+					}
+
+					if (response.newToken != undefined) {
+						uspWiz.newToken = response.newToken;
+					}
+
+					if (response.msg.length > 0) {
+						uspWiz.setEventMessage(response.msg, response.result > 0 ? true : false);
+					}
+				},
+				error: function (err) {
+					uspWiz.setEventMessage(uspWiz.lang.errorAjaxCall, false);
+				}
+			});
+		}
+
 	})(uspWiz);
 
-
 	uspWiz.GetNewToken();
+	uspWiz.interfaceUrl = $('#form-scrum-user-story-plan-wizard input[name="interface-url"]').val();
 });
 
 
-
+/**
+ *
+ * @param {JQuery} el
+ * @param {object} data
+ */
+function scrumUserStorySprintPlanningWizardLiveUpdate( el = null, data = null){
+	let lineContainer = el.closest('tr[data-parent]');
+	let fk_scrumstrint = lineContainer.find('.col-scrumsprint-qty-to-plan').attr('data-fk_sprint');
+	uspWiz.reloadUserStoryInfos(lineContainer.attr('data-parent'), fk_scrumstrint);
+}

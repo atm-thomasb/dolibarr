@@ -75,6 +75,9 @@ elseif ($action === 'add-us-planned-to-sprint') {
 elseif ($action === 'delete-us-planned') {
 	_actionRemoveUserStorySprint($jsonResponse);
 }
+elseif ($action === 'get-user-story-infos') {
+	_actionGetScrumUserStorySprintInfo($jsonResponse);
+}
 else{
 	$jsonResponse->msg = 'Action not found';
 }
@@ -138,7 +141,11 @@ function _getAutocompletionForSprint(JsonResponse $jsonResponse, string $search,
 
 		$item = new stdClass();
 		$item->id =  $sprint->id;
-		$item->text = $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start).' '.$langs->trans('to').' '.dol_print_date($sprint->date_end);
+		$item->text = $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start, "%d/%m/%Y").' '.$langs->trans('to').' '.dol_print_date($sprint->date_end, "%d/%m/%Y");
+
+		$item->sprintQtyAvailable = $sprint->getQtyAvailable();
+		$item->html_sprintQtyAvailable = $sprint->getQtyAvailableBadge();
+
 
 		$jsonResponse->data['rows'][] = $item;
 	}
@@ -190,6 +197,18 @@ function _actionAddScrumUserStoryPlanned($jsonResponse){
 
 		$jsonResponse->data = new stdClass(); // Todo : ajouter au besoins des infos de retours
 		$jsonResponse->data->id = $userStorySprint->id;
+
+
+		// pour des données a jour je recharge l'object
+		$scrumSprint = _checkObjectByElement('scrumproject_scrumsprint', $userStorySprint->fk_scrum_sprint, $jsonResponse);
+		/** @var $scrumSprint ScrumSprint */
+		$jsonResponse->data->sprintInfos = new stdClass();
+		$jsonResponse->data->sprintInfos->id =$scrumSprint->id;
+		$jsonResponse->data->sprintInfos->qtyAvailable = $scrumSprint->getQtyAvailable();
+		$jsonResponse->data->sprintInfos->html_qtyAvailable = $scrumSprint->getQtyAvailableBadge();
+
+
+
 		return true;
 	}
 	else{
@@ -221,9 +240,7 @@ function _actionRemoveUserStorySprint($jsonResponse){
 
 	$srumUserStorySprintId = $data['fk_scrum_user_story_sprint'];
 	$srumUserStorySprint = _checkObjectByElement('scrumproject_scrumuserstorysprint', $srumUserStorySprintId, $jsonResponse);
-	/**
-	 * @var ScrumUserStorySprint $srumUserStorySprint
-	 */
+	/** @var ScrumUserStorySprint $srumUserStorySprint */
 	if(!$srumUserStorySprint){
 		$jsonResponse->msg = 'Invalid scrum user story sprint load';
 		return false;
@@ -240,10 +257,23 @@ function _actionRemoveUserStorySprint($jsonResponse){
 		return false;
 	}
 
+	$scrumSprint = _checkObjectByElement('scrumproject_scrumsprint', $srumUserStorySprint->fk_scrum_sprint, $jsonResponse);
+
 	if($srumUserStorySprint->delete($user) <= 0){
 		$jsonResponse->msg = 'Error deleting scrum user story : '.$srumUserStorySprint->errorsToString();
 		return false;
 	}
+
+	/**
+	 * @var $scrumSprint ScrumSprint
+	 */
+	$jsonResponse->data = new stdClass();
+	$jsonResponse->data->sprintInfos = new stdClass();
+	$jsonResponse->data->sprintInfos->id = $scrumSprint->id;
+	$jsonResponse->data->sprintInfos->qtyAvailable = $scrumSprint->getQtyAvailable();
+	$jsonResponse->data->sprintInfos->html_qtyAvailable = $scrumSprint->getQtyAvailableBadge();
+
+
 
 	$jsonResponse->result = 1;
 	return true;
@@ -271,4 +301,46 @@ function _checkObjectByElement($elementType, $id, $jsonResponse){
 	}
 
 	return $object;
+}
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionGetScrumUserStorySprintInfo($jsonResponse){
+	global $db;
+
+	$data = GETPOST("data", "array");
+
+	// check kanban list data
+	if(empty($data['id'])){
+		$jsonResponse->msg = 'Need scrum user story Id';
+		return false;
+	}
+
+	$scrumUserStory = new ScrumUserStory($db);
+	$res = $scrumUserStory->fetch($data['id']);
+	if($res <= 0){
+		$jsonResponse->msg = 'ScrumUserStory fetch error';
+		return false;
+	}
+
+
+	$jsonResponse->result = 1;
+
+	$jsonResponse->data = $scrumUserStory->jsonSerialize();
+
+
+	if(!empty($data['fk_scrumsprint'])){
+		$scrumsprint = scrumProjectGetObjectByElement('scrumproject_scrumsprint', $data['fk_scrumsprint']);
+		if(!$scrumsprint){
+			$jsonResponse->data->sprintInfos = new stdClass();
+			$jsonResponse->data->sprintInfos->qtyAvailable =  $scrumsprint->getQtyAvailable();
+			$jsonResponse->data->sprintInfos->html_qtyAvailable =  $scrumsprint->getQtyAvailableBadge();
+		}
+	}
+
+
+
+	return true;
 }

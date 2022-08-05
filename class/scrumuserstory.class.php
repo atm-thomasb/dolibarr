@@ -741,8 +741,16 @@ class ScrumUserStory extends CommonObject
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}
-		$label .= '<br>';
+		$label .= '<br/>';
 		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
+
+		$label .= '<br/>';
+		$label .= '<b>'.$langs->trans('StoryPoints').':</b> '.price($this->qty);
+
+
+		$label .= '<br/>';
+		$label .= '<strong>'.$this->label.'</strong> ';
+		$label .= '<div>'.$this->description.'</div> ';
 
 		$url = dol_buildpath('/scrumproject/scrumuserstory_card.php', 1).'?id='.$this->id;
 
@@ -1033,7 +1041,13 @@ class ScrumUserStory extends CommonObject
 	 * recupère les sommes de temps consommé, produit et plannifié sur l'ensemble des sprints
 	 * @return ScrumUserStoryTotalTimeFromSprints {nb_print, total_qty_consumed, total_qty_planned, total_qty_done}
 	 */
-	public function getTotalTimeFromSprints(){
+	public function getTotalTimeFromSprints($useCache = true){
+
+		if(!empty($useCache) && !empty($this->totalTimeFromSprints)){
+			return $this->totalTimeFromSprints;
+		}
+
+
 		$sql = 'SELECT COUNT(rowid) nb_print,  SUM(qty_consumed) total_qty_consumed, SUM(qty_planned) total_qty_planned, SUM(qty_done) total_qty_done   FROM '.MAIN_DB_PREFIX.'scrumproject_scrumuserstorysprint WHERE fk_scrum_user_story = '.$this->id;
 		$result = $this->db->getRow($sql);
 		if($result == false){
@@ -1044,7 +1058,6 @@ class ScrumUserStory extends CommonObject
 
 		return $result;
 	}
-
 
 
 	/**
@@ -1096,6 +1109,35 @@ class ScrumUserStory extends CommonObject
 		if (!empty($label)) {
 			$out = '<span class="'.$badgeClass.'" '.$title.' >'.$label.'</span>';
 		}
+
+		return $out;
+	}
+
+	/**
+	 * @param   string  $label      empty = auto (progress), string = replace output
+	 * @param   string  $tooltip    empty = auto , string = replace output
+	 * @return  string
+	 * @see getTaskProgressView()
+	 */
+	function getPlannedBadge()
+	{
+		global $conf, $langs;
+
+		$this->getTotalTimeFromSprints();
+
+		if(!is_object($this->totalTimeFromSprints)){
+			return;
+		}
+
+		$out = '';
+		$out .=  '<span class="classfortooltip" title="'.$langs->trans('QtyPlanned').'" >';
+		if($this->qty < $this->totalTimeFromSprints->total_qty_planned){
+			$out .=  dolGetBadge(price($this->totalTimeFromSprints->total_qty_planned), '', 'danger');
+		}else{
+			$out .=  price($this->totalTimeFromSprints->total_qty_planned);
+		}
+		$out .=  '</span>';
+		$out .= ' / <span class="classfortooltip" title="'.$langs->trans($this->fields['qty']['label']).'" >'.price($this->qty).'</span>';
 
 		return $out;
 	}
@@ -1227,6 +1269,27 @@ class ScrumUserStory extends CommonObject
 		}
 
 		return scrumProjectGetObjectByElement('project', $task->fk_project);
+	}
+
+	/**
+	 * Because one day i whish class it will implements JsonSerializable
+	 * @return array
+	 */
+	public function jsonSerialize()
+	{
+		$returnData = new stdClass();
+		foreach ($this->fields as $field => $fieldConf){
+			$returnData->$field = $this->$field;
+		}
+
+		$this->getTotalTimeFromSprints();
+		$returnData->totalTimeFromSprints = $this->totalTimeFromSprints;
+
+		$returnData->html_progressBadge = $this->getProgressBadge();
+		$returnData->html_plannedBadge = $this->getPlannedBadge();
+
+
+		return $returnData;
 	}
 }
 
