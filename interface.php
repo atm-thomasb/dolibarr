@@ -149,7 +149,7 @@ function _getAutocompletionForSprint(JsonResponse $jsonResponse, string $search,
 		$sprint->fetch($obj->id);
 
 		$item = new stdClass();
-		$item->id =  $sprint->id;
+		$item->id = $sprint->id;
 		$item->text = $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start, "%d/%m/%Y").' '.$langs->trans('to').' '.dol_print_date($sprint->date_end, "%d/%m/%Y");
 
 		$item->sprintQtyAvailable = $sprint->getQtyAvailable();
