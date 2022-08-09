@@ -36,10 +36,11 @@ require_once __DIR__ . '/../lib/scrumproject.lib.php';
  */
 class ScrumKanban extends CommonObject
 {
-	/**
-	 * @var string ID of module.
-	 */
-	public $module = 'scrumproject';
+
+//	/**
+//	 * @var string ID of module.
+//	 */
+//	public $module = 'scrumproject'; // already included in $this->element
 
 	/**
 	 * @var string ID to identify managed object.

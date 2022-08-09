@@ -38,10 +38,11 @@ class ScrumSprintUser extends CommonObject
 {
 	use CommonObjectQuickTools;
 
-	/**
-	 * @var string ID of module.
-	 */
-	public $module = 'scrumproject';
+
+//	/**
+//	 * @var string ID of module.
+//	 */
+//	public $module = 'scrumproject'; // already included in $this->element
 
 	/**
 	 * @var string ID to identify managed object.

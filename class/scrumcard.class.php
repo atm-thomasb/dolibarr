@@ -35,10 +35,10 @@ class ScrumCard extends CommonObject
 {
 	use CommonKanban;
 
-	/**
-	 * @var string ID of module.
-	 */
-	public $module = 'scrumproject';
+//	/**
+//	 * @var string ID of module.
+//	 */
+//	public $module = 'scrumproject'; // already included in $this->element
 
 	/**
 	 * @var string ID to identify managed object.

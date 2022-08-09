@@ -239,6 +239,8 @@ TypeContact_scrumproject_scrumtask_internal_PO = Product Owner
 TypeContact_scrumproject_scrumtask_internal_DEV = Développeur
 
 ScrumUserRoleForTask = Rôle par défaut
+
+SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE = Contact par défaut utilisé pour l'affectation à une carte du kanban
 usePlanWizard = Utiliser l'assistant de planification
 QtyToPlan = Qté à planifier
 QtyPlanned = Planifié

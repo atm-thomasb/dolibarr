@@ -94,6 +94,7 @@ if (!class_exists('FormSetup')) {
 }
 
 $formSetup = new FormSetup($db);
+$form = new Form($db);
 
 /*
  * DEMO
@@ -181,6 +182,23 @@ $item->fieldAttr = array(
 );
 
 $formSetup->htmlAfterOutputForm.='<script>$(document).on("change", "#setup-SP_MAX_SCRUM_TASK_STEP_QTY", function(){$("#setup-SP_MAX_SCRUM_TASK_MAX_QTY").attr("step", $(this).val());});</script>';
+
+
+$item = $formSetup->newItem('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE');
+
+$sql = "SELECT code, libelle FROM  ".MAIN_DB_PREFIX."c_type_contact WHERE active=1 AND element='scrumproject_scrumcard' AND source='internal'";
+$contactsType = $db->getRows($sql);
+$TSelect = array();
+if($contactsType){
+	foreach ($contactsType as $contactType){
+		$TSelect[$contactType->code] = $langs->trans($contactType->libelle);
+		if($conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE == $contactType->code){
+			$item->fieldOutputOverride = $TSelect[$contactType->code];
+		}
+	}
+}
+$item->fieldInputOverride = $form->selectArray('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE', $TSelect, $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE);
+
 
 
 $setupnotempty =+ count($formSetup->items);
