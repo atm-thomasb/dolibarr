@@ -85,6 +85,10 @@ function scrumsprintPrepareHead($object)
 	$head[$h][2] = 'scrumsprintuser';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/scrumproject/scrumkanban_view.php", 1).'?id='.$object->id;
+	$head[$h][1] = $langs->trans("Kanban");
+	$head[$h][2] = 'kanban';
+	$h++;
 
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
