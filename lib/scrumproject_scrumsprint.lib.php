@@ -85,24 +85,15 @@ function scrumsprintPrepareHead($object)
 	$head[$h][2] = 'scrumsprintuser';
 	$h++;
 
-	// SELECT Kanban sprint id
-	$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."scrumproject_scrumkanban";
-	$sql .= " WHERE fk_scrum_sprint = " . $object->id;
-	$res = $db->query($sql);
 
-	if (!$res) {
-		$errors[] = $db->error();
-		setEventMessages('',$errors,'errors');
-	}
-	$obj = $db->fetch_object($res);
-
-	if (!empty($obj->rowid)){
-		$head[$h][0] = dol_buildpath("/scrumproject/scrumkanban_view.php", 1).'?id='.$obj->rowid;
-		$head[$h][1] = $langs->trans("Kanban");
+	$kanban = $object->getKanbanId();
+	if ($kanban > 0) {
+		$head[$h][0] = dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban;
+		$head[$h][1] = $langs->trans('Kanban');
 		$head[$h][2] = 'kanban';
 		$h++;
-	}else{
-		setEventMessage($langs->trans('ScrumKanbanNotDefine ').$object->label);
+	} else {
+		setEventMessage($langs->trans('ScrumKanbanNotDefine',$object->label), 'warnings');
 	}
 
 	// Show more tabs from modules
