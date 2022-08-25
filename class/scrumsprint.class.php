@@ -1253,4 +1253,24 @@ class ScrumSprint extends CommonObject
 			$this->errors[] = $msg;
 		}
 	}
+
+	/**
+	 * @return int
+	 */
+	public function getKanbanId()
+	{
+		global $db;
+
+		$sql = 'SELECT rowid FROM ' . MAIN_DB_PREFIX . 'scrumproject_scrumkanban';
+		$sql .= ' WHERE fk_scrum_sprint = ' . $this->id;
+		$res = $db->query($sql);
+
+		if (!$res) {
+			$errors[] = $db->error();
+			setEventMessages('', $errors, 'errors');
+			return -1;
+		}
+		if ($obj = $db->fetch_object($res)) return $obj->rowid;
+		return -2;
+	}
 }

@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-
+- NEW : Add Tab Kanban to Sprint card page *17/08/2022* - 1.3.0
 
 ## Version 1.2
 

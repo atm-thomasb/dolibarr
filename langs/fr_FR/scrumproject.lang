@@ -93,6 +93,7 @@ ScrumProjectUserVelocity = Vélocité par sprint scrum
 ScrumProjectUserRole = Rôle scrum
 ScrumProjectUserRolePO = Product Owner
 ScrumProjectUserRoleDEV = Developer
+ScrumKanbanNotDefine = Aucun Kanban pour le Sprint "%s"
 
 
 #
