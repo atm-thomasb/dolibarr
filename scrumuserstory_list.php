@@ -471,10 +471,8 @@ if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'pr
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
 if ($action == 'usePlanWizard' && !empty($toselect)) {
-	$fk_scrum_sprint = GETPOSTINT('fk_scrum_sprint');
 	print '<form method="POST" id="goto-plan-wizard" action="' . dol_buildpath('scrumproject/scrumuserstorysprint_plan_wizard.php', 1) . '">' . "\n";
 	print '<input type="hidden" name="token" value="' . newToken() . '">';
-	print '<input type="hidden" name="fk_scrum_sprint" value="' . $fk_scrum_sprint . '">';
 	foreach ($toselect as $userStoryId) {
 		print '<input type="hidden" name="toselect[' . $userStoryId . ']" value="' . $userStoryId . '">';
 	}
