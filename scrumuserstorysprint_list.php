@@ -248,6 +248,7 @@ $TuserStory = array();
 if($massaction == 'usePlanWizard'){
 	$action = 'usePlanWizard';
 	$sql = 'SELECT fk_scrum_user_story FROM '.MAIN_DB_PREFIX.$object->table_element;
+	$toselect = array_map("intval",$toselect);
 	$sql.= ' WHERE rowid IN ('.implode(',',$toselect).')';
 
 	$resql = $db->query($sql);
