@@ -243,6 +243,24 @@ if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massa
 	$massaction = '';
 }
 
+$TuserStory = array();
+
+if($massaction == 'usePlanWizard'){
+	$action = 'usePlanWizard';
+	$sql = 'SELECT fk_scrum_user_story FROM '.MAIN_DB_PREFIX.$object->table_element;
+	$toselect = array_map("intval",$toselect);
+	$sql.= ' WHERE rowid IN ('.implode(',',$toselect).')';
+
+	$resql = $db->query($sql);
+
+	if (!empty($resql)){
+		while ($obj = $db->fetch_object($resql)){
+			$TuserStory[$obj->fk_scrum_user_story] = $obj->fk_scrum_user_story;
+		}
+	}
+}
+
+
 $parameters = array();
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
@@ -536,6 +554,7 @@ $param .= $hookmanager->resPrint;
 
 // List of mass actions available
 $arrayofmassactions = array(
+	'usePlanWizard' => $langs->trans('usePlanWizard'),
 	//'validate'=>img_picto('', 'check', 'class="pictofixedwidth"').$langs->trans("Validate"),
 	//'generate_doc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("ReGeneratePDF"),
 	//'builddoc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("PDFMerge"),
@@ -549,6 +568,17 @@ if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'pr
 }
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
+
+if ($action == 'usePlanWizard' && !empty($toselect)) {
+	print '<form method="POST" id="goto-plan-wizard" action="' . dol_buildpath('scrumproject/scrumuserstorysprint_plan_wizard.php', 1) . '">' . "\n";
+	print '<input type="hidden" name="token" value="' . newToken() . '">';
+
+	foreach ($TuserStory as $userStoryId) {
+		print '<input type="hidden" name="toselect[' . $userStoryId . ']" value="' . $userStoryId . '">';
+	}
+	print '</form>' . "\n";
+	print '<script>document.forms["goto-plan-wizard"].submit();</script>';
+}
 
 if(empty($massaction) && false) {
 
