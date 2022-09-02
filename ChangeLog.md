@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.2
 
+- FIX : update view planif US *02/09/2022* -1.2.4
 - FIX : Update menu *17/08/2022* - 1.2.3
 - FIX : Object element name *05/08/2022* - 1.2.1
 - NEW : Planning interface for user stories *05/08/2022* - 1.2.0

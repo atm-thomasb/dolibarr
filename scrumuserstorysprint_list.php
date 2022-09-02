@@ -807,16 +807,16 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'center';
 		}
 
-		if (in_array($val['type'], array('timestamp'))) {
+		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
-		} elseif ($key == 'ref') {
+		} elseif ($key == 'fk_scrum_user_story' || $key == 'fk_scrum_sprint' || $key == 'fk_user_creat' || $key == 'fk_user_modif') {
 			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
 		}
 
 		if (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('rowid', 'status')) && empty($val['arrayofkeyval'])) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'right';
 		}
-		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
+		if (in_array($key, array('fk_project'))) $cssforfield .= ' tdoverflowmax200';
 
 		if (!empty($arrayfields['t.'.$key]['checked'])) {
 
@@ -860,7 +860,9 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 					print $societe->getNomUrl(1);
 				}
 				print '</td>';
-				$totalarray['nbfield']++;
+				if(!$i){
+					$totalarray['nbfield']++;
+				}
 			}
 
 			if (!empty($arrayfields['project_title']['checked'])) {
@@ -871,7 +873,9 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 					print $project->getNomUrl(1, '', 1);
 				}
 				print '</td>';
-				$totalarray['nbfield']++;
+				if(!$i){
+					$totalarray['nbfield']++;
+				}
 			}
 		}
 	}
