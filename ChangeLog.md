@@ -2,6 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+- NEW : Ajout de massaction pour la création de sprint *07/09/2022* - 1.5.0
 - NEW : Ajout de massaction de planification pour les US et les US planif *29/08/2022* - 1.4.0
 - NEW : Add Tab Kanban to Sprint card page *17/08/2022* - 1.3.0
 
