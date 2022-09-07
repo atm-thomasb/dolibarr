@@ -65,7 +65,12 @@ function scrumprojectAdminPrepareHead()
 	$head[$h][2] = 'scrumcard_extrafields';
 	$h++;
 
-	$head[$h][0] = dol_buildpath("/scrumproject/admin/about.php", 1);
+    $head[$h][0] = dol_buildpath('/scrumproject/admin/mass_sprint.php', 1);
+    $head[$h][1] = $langs->trans('ScrumMassSprint');
+    $head[$h][2] = 'mass_sprint';
+    $h++;
+
+    $head[$h][0] = dol_buildpath("/scrumproject/admin/about.php", 1);
 	$head[$h][1] = $langs->trans("About");
 	$head[$h][2] = 'about';
 	$h++;

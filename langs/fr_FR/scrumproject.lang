@@ -95,6 +95,11 @@ ScrumProjectUserRolePO = Product Owner
 ScrumProjectUserRoleDEV = Developer
 ScrumKanbanNotDefine = Aucun Kanban pour le Sprint "%s"
 
+#
+# ScrumMassSprint
+#
+ScrumMassSprintCreated = Nombre de sprints créés : %s
+
 
 #
 # Liste
