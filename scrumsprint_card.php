@@ -162,47 +162,71 @@ if (empty($reshook))
 		$res = $newkanban->create($user);
 
 		if($res>0){
-			setEventMessage($langs->trans('Created'));
+			//Create KanbanList on Clone
+			if ($fk_kanban > 0){
+
+				$kanbanList = New ScrumKanbanList($db);
+
+				//Récupération des ScrumKanbanList
+				$TkanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $fk_kanban));
+				$TnewKanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $newkanban->id));
+
+				//Delete list done & keep backlog
+				if (!empty($TnewKanbanList)){
+					foreach ($TnewKanbanList as $newKanbanList){
+
+						// ne pas delete backlog car contient potentiellement des card
+						if($newKanbanList->ref_code == 'backlog'){
+
+							// mise a jour du rank du backlog depuis lancien
+							foreach ($TkanbanList as $fromKanbanList){
+								if($fromKanbanList->ref_code == 'backlog') {
+									$newKanbanList->fk_rank = $fromKanbanList->fk_rank;
+									$newKanbanList->label = $fromKanbanList->label;
+									$newKanbanList->description = $fromKanbanList->description;
+									$newKanbanList->note_public = $fromKanbanList->note_public;
+									$newKanbanList->note_private = $fromKanbanList->note_private;
+
+									$newKanbanList->update($user);
+									break;
+								}
+							}
+							continue;
+						}
+
+						$resultDel = $newKanbanList->delete($user);
+						if ($resultDel < 0) {
+							setEventMessages($newKanbanList->error, $newKanbanList->errors, 'errors');
+						}
+					}
+				}
+
+				//Create new kanbanList
+				if (!empty($TkanbanList)){
+					foreach ($TkanbanList as $newKanbanList){
+						// ne pas creer le backlog car gardé précedament
+						if($newKanbanList->ref_code == 'backlog'){
+							continue;
+						}
+
+						$newKanbanList->id = 0;
+						$newKanbanList->fk_scrum_kanban = $newkanban->id;
+
+						$resultCreate = $newKanbanList->create($user);
+						if ($resultCreate < 0) {
+							setEventMessages($newKanbanList->error, $newKanbanList->errors, 'errors');
+						}
+					}
+				}
+			}
+			//Redirect to kanban
+			if ($newkanban->id > 0){
+				header('Location: ' . dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $newkanban->id);
+				exit;
+			}
+
 		}else{
 			setEventMessage($object->errorsToString(), 'errors');
-		}
-
-		//Create KanbanList on Clone
-		if ($fk_kanban > 0){
-
-			$kanbanList = New ScrumKanbanList($db);
-
-			//Récupération des ScrumKanbanList
-			$TkanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $fk_kanban));
-			$TnewKanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $newkanban->id));
-
-			//Delete list done & backlog
-			if (!empty($TnewKanbanList)){
-				foreach ($TnewKanbanList as $newKanbanList){
-					$resultDel = $newKanbanList->delete($user);
-					if ($resultDel < 0) {
-						setEventMessages($newKanbanList->error, $newKanbanList->errors, 'errors');
-					}
-				}
-			}
-
-			//Create new kanbanList
-			if (!empty($TkanbanList)){
-				foreach ($TkanbanList as $newKanbanList){
-					$newKanbanList->id = 0;
-					$newKanbanList->fk_scrum_kanban = $newkanban->id;
-
-					$resultCreate = $newKanbanList->create($user);
-					if ($resultCreate < 0) {
-						setEventMessages($newKanbanList->error, $newKanbanList->errors, 'errors');
-					}
-				}
-			}
-		}
-		//Redirect to kanban
-		if ($newkanban->id > 0){
-			header('Location: ' . dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $newkanban->id);
-			exit;
 		}
 	}
 
