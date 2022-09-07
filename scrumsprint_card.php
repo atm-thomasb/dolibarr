@@ -157,7 +157,7 @@ if (empty($reshook))
 
 		$newkanban = New ScrumKanban($db);
 		$newkanban->fk_scrum_sprint = $object->id;
-		$newkanban->status = 0;
+		$newkanban->status = ScrumKanban::STATUS_DRAFT;
 		$newkanban->label = $object->label;
 		$res = $newkanban->create($user);
 
