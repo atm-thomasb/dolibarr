@@ -50,6 +50,10 @@ NewScrumUserStory = Nouvelle User story
 ScrumUserStorySprint = User story plannifiés
 NewScrumUserStorySprint = Nouvelle plannification
 NewScrumKanban = Nouveau Kanban
+CreateNewScrumKanban = Créer nouveau Kanban
+SelectKanbanClone = Copier la structure du Kanban :
+ConfirmCreateAsk=Voulez-vous vraiment créer un kanban pour <b> %s </b> ?
+DisplayScrumKanban = Afficher Kanban
 
 LeftMenuDeveloperAvailability = Dispo RH
 

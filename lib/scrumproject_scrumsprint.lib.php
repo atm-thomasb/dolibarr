@@ -92,8 +92,6 @@ function scrumsprintPrepareHead($object)
 		$head[$h][1] = $langs->trans('Kanban');
 		$head[$h][2] = 'kanban';
 		$h++;
-	} else {
-		setEventMessage($langs->trans('ScrumKanbanNotDefine',$object->label), 'warnings');
 	}
 
 	// Show more tabs from modules
