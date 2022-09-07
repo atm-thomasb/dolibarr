@@ -98,8 +98,13 @@ ScrumKanbanNotDefine = Aucun Kanban pour le Sprint "%s"
 #
 # ScrumMassSprint
 #
+ScrumMassSprint = Sprints création en masse
 ScrumMassSprintCreated = Nombre de sprints créés : %s
-
+ScrumMassSprintCreateError = Impossible de créer un sprint
+ScrumMassSprintNumber = Numéro de sprint :
+ScrumMassSprintStartSprintWeek = Jours début de sprint :
+ScrumMassSprintEnSprintWeek = Jours fin de sprint :
+ScrumMassSprintDuration = Durée sprint en semaine :
 
 #
 # Liste

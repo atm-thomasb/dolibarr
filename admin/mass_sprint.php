@@ -203,22 +203,22 @@ print '<td>'.$object->showInputField($object->fields['date_end'], 'date_end', ''
 print '</tr>';
 
 print '<tr>';
-print '<td>'.'Numéro de sprint : '.'</td>';
+print '<td>'.$langs->trans('ScrumMassSprintNumber').'</td>';
 print '<td><input type="number" name="numsprint">'.'</td>';
 print '</tr>';
 
 print '<tr>';
-print '<td>'.'Jours début de sprint : '.'</td>';
+print '<td>'.$langs->trans('ScrumMassSprintStartSprintWeek').'</td>';
 print '<td>'.$formother->select_dayofweek('1', 'startsprintweek', 0).'</td>';
 print '</tr>';
 
 print '<tr>';
-print '<td>'.'Jours fin de sprint : '.'</td>';
+print '<td>'.$langs->trans('ScrumMassSprintEnSprintWeek').'</td>';
 print '<td>'.$formother->select_dayofweek('5', 'endsprintweek', 0).'</td>';
 print '</tr>';
 
 print '<tr>';
-print '<td>'.'Durée sprint en semaine : '.'</td>';
+print '<td>'.$langs->trans('ScrumMassSprintDuration').'</td>';
 print '<td><input type="number" name="sprintduration">'.'</td>';
 print '</tr>';
 
