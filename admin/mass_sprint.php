@@ -41,7 +41,7 @@ dol_include_once('/scrumproject/lib/scrumproject_scrumsprint.lib.php');
 $langs->loadLangs(array('errors', 'admin', 'scrumproject@scrumproject'));
 
 // Access control
-if(!$user->admin) accessforbidden();
+if(!$user->admin) accessforbidden(); // TODO : lors de la modification de l'emplacement de la page penser à changer le droit et/ou en ajouter un
 
 // Parameters
 $action = GETPOST('action', 'aZ09');
