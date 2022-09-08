@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+
+
+## Version 1.6
+
 - NEW : Ajout de massaction pour la création de sprint *07/09/2022* - 1.6.0
 - NEW : Ajout Création d'un kanban depuis sprint card avec clonage de la structure *07/09/2022* - 1.5.0
 - NEW : Ajout de massaction de planification pour les US et les US planif *29/08/2022* - 1.4.0
