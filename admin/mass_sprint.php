@@ -170,7 +170,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'tools');
 
 // Configuration header
 $head = scrumprojectAdminPrepareHead();
-print dol_get_fiche_head($head, 'mass_sprint', 'ScrumMassSprint', 0, 'scrumproject@scrumproject');
+print dol_get_fiche_head($head, 'mass_sprint', 'ScrumMassSprint', -1, 'scrumproject@scrumproject');
 
 //Content
 $form = new Form($db);
@@ -178,6 +178,16 @@ $formother = new FormOther($db);
 
 $title = $langs->trans('ScrumSprint');
 $help_url = '';
+
+
+
+print '<div class="clearboth"></div>';
+print '<div class="fichecenter">';
+
+print '<div class="fichehalfleft">';
+
+print '<fieldset>';
+print '<legend>'.$langs->trans('ScrumMassSprintParameters').'</legend>';
 
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -231,6 +241,23 @@ print '<input type="'.($backtopage ? 'submit' : 'button').'" class="button butto
 print '</div>';
 
 print '</form>';
+
+print '</fieldset>';
+
+
+print '</div>';
+
+print '<div class="fichehalfright">';
+print '<fieldset>';
+print '<legend>'.$langs->trans('ScrumMassSprintParametersHelp').'</legend>';
+print '<p>'.$langs->trans('ScrumMassSprintParametersHelpText').'</p>';
+print '</fieldset>';
+print '</div>';
+
+print '</div>'; // close fichecenter
+
+
+
 ?>
 
 <script>
@@ -243,7 +270,7 @@ print '</form>';
 
 <?php
 //Page end
-print dol_get_fiche_end();
+print dol_get_fiche_end(-1);
 llxFooter();
 $db->close();
 
