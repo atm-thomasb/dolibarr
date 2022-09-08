@@ -63,6 +63,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 dol_include_once('/scrumproject/class/scrumsprint.class.php');
 dol_include_once('/scrumproject/lib/scrumproject_scrumsprint.lib.php');
+dol_include_once('/scrumproject/class/scrumkanban.class.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "other"));
@@ -76,6 +77,7 @@ $cancel     = GETPOST('cancel', 'aZ09');
 $contextpage = GETPOST('contextpage', 'aZ') ?GETPOST('contextpage', 'aZ') : 'scrumsprintcard'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha');
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
+$fk_kanban = GETPOST('fk_kanban','int');
 //$lineid   = GETPOST('lineid', 'int');
 
 // Initialize technical objects
@@ -150,6 +152,82 @@ if (empty($reshook))
 	}
 	if($action == 'confirm_setdone' && $confirm == 'yes') {
 		$object->setStatusCommon($user, $object::STATUS_DONE, 0, 'SCRUMSPRINT_DONE');
+	}
+	if ($action == 'confirm_create_kanban'){
+
+		$newkanban = New ScrumKanban($db);
+		$newkanban->fk_scrum_sprint = $object->id;
+		$newkanban->status = ScrumKanban::STATUS_DRAFT;
+		$newkanban->label = $object->label;
+		$res = $newkanban->create($user);
+
+		if($res>0){
+			//Create KanbanList on Clone
+			if ($fk_kanban > 0){
+
+				$kanbanList = New ScrumKanbanList($db);
+
+				//Récupération des ScrumKanbanList
+				$TkanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $fk_kanban));
+				$TnewKanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $newkanban->id));
+
+				//Delete list done & keep backlog
+				if (!empty($TnewKanbanList)){
+					foreach ($TnewKanbanList as $newKanbanList){
+
+						// ne pas delete backlog car contient potentiellement des card
+						if($newKanbanList->ref_code == 'backlog'){
+
+							// mise a jour du rank du backlog depuis lancien
+							foreach ($TkanbanList as $fromKanbanList){
+								if($fromKanbanList->ref_code == 'backlog') {
+									$newKanbanList->fk_rank = $fromKanbanList->fk_rank;
+									$newKanbanList->label = $fromKanbanList->label;
+									$newKanbanList->description = $fromKanbanList->description;
+									$newKanbanList->note_public = $fromKanbanList->note_public;
+									$newKanbanList->note_private = $fromKanbanList->note_private;
+
+									$newKanbanList->update($user);
+									break;
+								}
+							}
+							continue;
+						}
+
+						$resultDel = $newKanbanList->delete($user);
+						if ($resultDel < 0) {
+							setEventMessages($newKanbanList->error, $newKanbanList->errors, 'errors');
+						}
+					}
+				}
+
+				//Create new kanbanList
+				if (!empty($TkanbanList)){
+					foreach ($TkanbanList as $newKanbanList){
+						// ne pas creer le backlog car gardé précedament
+						if($newKanbanList->ref_code == 'backlog'){
+							continue;
+						}
+
+						$newKanbanList->id = 0;
+						$newKanbanList->fk_scrum_kanban = $newkanban->id;
+
+						$resultCreate = $newKanbanList->create($user);
+						if ($resultCreate < 0) {
+							setEventMessages($newKanbanList->error, $newKanbanList->errors, 'errors');
+						}
+					}
+				}
+			}
+			//Redirect to kanban
+			if ($newkanban->id > 0){
+				header('Location: ' . dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $newkanban->id);
+				exit;
+			}
+
+		}else{
+			setEventMessage($object->errorsToString(), 'errors');
+		}
 	}
 
 
@@ -310,6 +388,27 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	$formconfirm = '';
 
+	// Create Kanban Confirmation
+	if ($action == 'createkanban') {
+
+		$kanbanObject = New ScrumKanban($db);
+		$Tkanban = $kanbanObject->fetchAll();
+		$TkanbanLabel = array();
+		if (!empty($Tkanban)){
+			foreach ($Tkanban as $fk_kanban => $kanban){
+				$TkanbanLabel[$fk_kanban] = $kanban->ref.' - '.$kanban->label;
+			}
+		}
+		$SelectKanban = Form::selectarray('fk_kanban',$TkanbanLabel,'','Structure Classique',0,0,'',0,0,0,'','minwidth200');
+
+
+		// Create an array for form
+		$formquestion = array(
+			array('type' => 'other', 'name' => 'fk_kanban', 'label' => $langs->trans('SelectKanbanClone'), 'value' => $SelectKanban),
+		);
+		$formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('CreateNewScrumKanban'), $langs->trans('ConfirmCreateAsk', $object->ref), 'confirm_create_kanban', $formquestion, 'yes', 1);
+	}
+
 	// Confirmation to delete
 	if ($action == 'delete') {
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteScrumSprint'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
@@ -437,6 +536,16 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete', '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
+
+			// Create Kanban
+			$kanban = $object->getKanbanId();
+			if ($kanban < 0) {
+				print dolGetButtonAction($langs->trans('CreateNewScrumKanban'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=createkanban&object=scrumsprint', '', $permissiontoadd);
+			}
+
+			if ($kanban > 0) {
+				print dolGetButtonAction($langs->trans('DisplayScrumKanban'), '', 'default', dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban);
+			}
 		}
 		print '</div>'."\n";
 	}
