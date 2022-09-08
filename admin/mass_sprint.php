@@ -55,6 +55,7 @@ $object = new ScrumSprint($db);
  */
 if($action == 'mass_create'){
     $Tteam = GETPOST('fk_team','array');
+    $Tteam = array_map('intval', $Tteam);
     $str_date_start = GETPOST('date_start','alpha');
     $str_date_end = GETPOST('date_end','alpha');
     $numsprint = GETPOST('numsprint','int');
@@ -228,7 +229,7 @@ print '<td>'.$formother->select_dayofweek('5', 'endsprintweek', 0).'</td>';
 print '</tr>';
 
 print '<tr>';
-print '<td>'.$langs->trans('ScrumMassSprintDuration').'</td>';
+print '<td>'.$form->textwithtooltip($langs->trans('ScrumMassSprintDuration') , $langs->trans('ScrumMassSprintDurationHelp'),2,1,img_help(1,'')).'</td>';
 print '<td><input type="number" name="sprintduration">'.'</td>';
 print '</tr>';
 
