@@ -18,7 +18,7 @@ CREATE TABLE llx_scrumproject_scrumuserstory(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	fk_task integer,
-    fk_user_po integer NOT NULL,
+    fk_user_po integer NOT NULL ,
 	business_value integer DEFAULT 50 NOT NULL, 
 	qty real, 
 	ref varchar(128) NOT NULL, 
