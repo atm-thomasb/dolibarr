@@ -466,6 +466,63 @@ class ScrumCard extends CommonObject
 		return $this->updateCommon($user, $notrigger);
 	}
 
+
+	/**
+	 * Update object into database
+	 *
+	 * @param User $user User that modifies
+	 * @param ScrumKanbanList $kanbanList
+	 * @param bool $notrigger false=launch triggers after, true=disable triggers
+	 * @param bool $noUpdate false=launch update after, true=disable update
+	 * @return int             <if KO, >0 if OK
+	 */
+	public function dropInKanbanList(User $user, ScrumKanbanList $kanbanList, $notrigger = false, $noUpdate = false)
+	{
+
+		$this->fk_scrum_kanbanlist = $kanbanList->id;
+
+		$this->status = ScrumCard::STATUS_READY;
+		if($kanbanList->ref_code == 'backlog'){
+			$this->status = ScrumCard::STATUS_DRAFT;
+		}
+		elseif($kanbanList->ref_code == 'done'){
+			$this->status = ScrumCard::STATUS_DONE;
+		}
+
+		// Impacter les objects liés
+		/**
+		 * Traitement de l'element attaché
+		 */
+		$res = $this->fetchElementObject();
+
+		if($res){
+			$elementObject = $this->elementObject;
+
+			if(is_callable(array($elementObject, 'dropInKanbanList'))){
+				$resDropForEl = $elementObject->dropInKanbanList($user, $this, $kanbanList, $notrigger, $noUpdate);
+				if($resDropForEl){
+					// todo gestion des erreurs
+				}
+			}
+//
+//			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
+//
+//			}
+//			elseif($elementObject->element == 'scrumproject_scrumtask'){
+//
+//			}
+//			elseif($elementObject->element == 'project_task'){
+//
+//			}
+		}
+
+		if($noUpdate){
+			return 0;
+		}
+
+		return $this->update($user, $notrigger);
+	}
+
 	/**
 	 * Delete object in database
 	 *
@@ -974,7 +1031,7 @@ class ScrumCard extends CommonObject
 		$object->title = '';
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
-		$status = $this->LibStatut(intval($this->status), 2);
+		$status = ''; //$this->LibStatut(intval($this->status), 2);
 		$TContactUsersAffected = $this->liste_contact(-1,'internal');
 
 		/**
@@ -1029,10 +1086,12 @@ class ScrumCard extends CommonObject
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
-				$status = '';
-				if(is_callable(array($elementObject, 'LibStatut'))){
-					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
-				}
+				// les statuts ne sont pas gérés sur l'object
+//				$status = '';
+//				if(is_callable(array($elementObject, 'LibStatut'))){
+//					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
+//				}
+
 				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
@@ -1053,6 +1112,7 @@ class ScrumCard extends CommonObject
 				$object->type = 'scrum-user-story-task';
 				$object->fk_scrum_user_story_sprint = $elementObject->fk_scrum_user_story_sprint;
 
+				// TODO : faut-il afficher le status de l'element ou de la card ?
 				if(is_callable(array($elementObject, 'LibStatut'))){
 					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
 				}

@@ -342,8 +342,8 @@ function _actionAddItemToList($jsonResponse){
 
 	$scrumCard = new ScrumCard($db);
 	$scrumCard->fk_rank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
-	_setScrumCardValuesOnDropInList($scrumCard, $kanbanList);
 
+	$scrumCard->dropInKanbanList( $user,  $kanbanList, false, true);
 
 	if(!empty($data['label'])){
 		$scrumCard->label = $data['label'];
@@ -486,19 +486,9 @@ function _actionDropItemToList($jsonResponse){
 
 			$scrumCard->fk_rank = $newRank;
 
-			_setScrumCardValuesOnDropInList($scrumCard, $kanbanList);
+			$resDrop = $scrumCard->dropInKanbanList( $user,  $kanbanList);
 
-
-			// TODO factorier avec la partie du else
-
-			// Mise à jour de la card elle même j'utilise pas l'object à cause d'un bug de rollback
-			$sqlUpdate = /* @Lang SQL */
-				' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
-				. ' SET  status='.intval($scrumCard->status).', tms=NOW(), fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
-				. ' WHERE rowid = '.intval($scrumCard->id);
-
-
-			if($db->query($sqlUpdate)){
+			if($resDrop>0){
 				$db->commit();
 				$jsonResponse->result = 1;
 				return true;
@@ -506,7 +496,7 @@ function _actionDropItemToList($jsonResponse){
 			else{
 				$db->rollback();
 				$jsonResponse->result = 0;
-				$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' .$db->error();
+				$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' .$scrumCard->errorsToString();
 				return false;
 			}
 		}
@@ -519,20 +509,10 @@ function _actionDropItemToList($jsonResponse){
 	else{
 		$newRank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
 
-
-
-		// TODO factorier avec la partie du du if dans le todo
-
 		$scrumCard->fk_rank = $newRank;
-		_setScrumCardValuesOnDropInList($scrumCard, $kanbanList);
+		$resDrop = $scrumCard->dropInKanbanList( $user,  $kanbanList);
 
-		// Mise à jour de la card elle même
-		$sqlUpdate = /* @Lang SQL */
-			' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
-			. ' SET status='.intval($scrumCard->status).', fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
-			. ' WHERE rowid = '.intval($scrumCard->id);
-
-		if($db->query($sqlUpdate)){
+		if($resDrop>0){
 			$jsonResponse->result = 1;
 			return true;
 		}

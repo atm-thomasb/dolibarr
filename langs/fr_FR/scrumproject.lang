@@ -44,6 +44,9 @@ SP_MAX_SCRUM_TASK_MAX_QTY = Quantités maximal pouvant être affecter à une tâ
 # MENU
 #
 
+ScrumTaskStatusToDo = A faire
+ScrumTaskStatusDone = Terminé
+
 
 ScrumUserStory = User story
 NewScrumUserStory = Nouvelle User story
