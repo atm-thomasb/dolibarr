@@ -223,7 +223,7 @@ function _actionGetAllBoards($jsonResponse){
 	}
 	else{
 		$jsonResponse->result = 0;
-		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $staticKanbanList->errorsToString();
+		$jsonResponse->msg = $langs->trans('Get boards error') . ' : ' . $staticKanbanList->errorsToString();
 		return false;
 	}
 }
@@ -341,10 +341,8 @@ function _actionAddItemToList($jsonResponse){
 	}
 
 	$scrumCard = new ScrumCard($db);
-	$scrumCard->fk_scrum_kanbanlist = $kanbanList->id;
-
-
 	$scrumCard->fk_rank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
+	_setScrumCardValuesOnDropInList($scrumCard, $kanbanList);
 
 
 	if(!empty($data['label'])){
@@ -373,7 +371,7 @@ function _actionAddItemToList($jsonResponse){
 	}
 	else{
 		$jsonResponse->result = 0;
-		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanList->errorsToString();
+		$jsonResponse->msg = $langs->trans('CreateError') . ' for add item to list : ' . $scrumCard->errorsToString();
 		return false;
 	}
 }
@@ -412,7 +410,7 @@ function _actionGetScrumCardData($jsonResponse){
  * @return bool|void
  */
 function _actionDropItemToList($jsonResponse){
-	global $langs, $db;
+	global $langs, $db, $user;
 
 	$data = GETPOST("data", "array");
 
@@ -486,11 +484,19 @@ function _actionDropItemToList($jsonResponse){
 				return false;
 			}
 
-			// Mise à jour de la card elle même
+			$scrumCard->fk_rank = $newRank;
+
+			_setScrumCardValuesOnDropInList($scrumCard, $kanbanList);
+
+
+			// TODO factorier avec la partie du else
+
+			// Mise à jour de la card elle même j'utilise pas l'object à cause d'un bug de rollback
 			$sqlUpdate = /* @Lang SQL */
 				' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
-				. ' SET  tms=NOW(), fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
+				. ' SET  status='.intval($scrumCard->status).', tms=NOW(), fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
 				. ' WHERE rowid = '.intval($scrumCard->id);
+
 
 			if($db->query($sqlUpdate)){
 				$db->commit();
@@ -513,10 +519,17 @@ function _actionDropItemToList($jsonResponse){
 	else{
 		$newRank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
 
+
+
+		// TODO factorier avec la partie du du if dans le todo
+
+		$scrumCard->fk_rank = $newRank;
+		_setScrumCardValuesOnDropInList($scrumCard, $kanbanList);
+
 		// Mise à jour de la card elle même
 		$sqlUpdate = /* @Lang SQL */
 			' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
-			. ' SET fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
+			. ' SET status='.intval($scrumCard->status).', fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
 			. ' WHERE rowid = '.intval($scrumCard->id);
 
 		if($db->query($sqlUpdate)){
@@ -928,4 +941,22 @@ function _actionRemoveUserToCard($jsonResponse, $userId = false){
 	$jsonResponse->result = 1;
 	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
 	return true;
+}
+
+/**
+ * @param ScrumCard $scrumCard
+ * @param ScrumKanbanList $kanbanList
+ * @return void
+ */
+function _setScrumCardValuesOnDropInList(ScrumCard $scrumCard, ScrumKanbanList $kanbanList){
+
+	$scrumCard->fk_scrum_kanbanlist = $kanbanList->id;
+
+	$scrumCard->status = ScrumCard::STATUS_READY;
+	if($kanbanList->ref_code == 'backlog'){
+		$scrumCard->status = ScrumCard::STATUS_DRAFT;
+	}
+	elseif($kanbanList->ref_code == 'done'){
+		$scrumCard->status = ScrumCard::STATUS_DONE;
+	}
 }
