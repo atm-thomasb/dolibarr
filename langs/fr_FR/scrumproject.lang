@@ -148,7 +148,7 @@ ScrumCards = cartes scrum
 ScrumCardTab = Cartes
 NewScrumCard = Nouvelle carte
 StatusScrumCardDraft = Brouillon
-StatusScrumCardReady = Prête
+StatusScrumCardReady = A faire
 StatusScrumCardDone = Terminée
 GoToScrumCards = Voir les cartes
 

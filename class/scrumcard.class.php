@@ -118,7 +118,20 @@ class ScrumCard extends CommonObject
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2,  'default' => 0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Pr&ecirc;te', '2'=>'Termin&eacute;e'),),
+		'status' => array(
+			'type'=>'smallint',
+			'label'=>'Status',
+			'enabled'=>'1',
+			'position'=>1000,
+			'notnull'=>1,
+			'visible'=>2,
+			'default' => 0,
+			'index'=>1,
+			'arrayofkeyval'=>array(
+				'0'=>'Brouillon',
+				'1'=>'ToDo',
+				'2'=>'Termin&eacute;e'
+			),),
 	);
 	public $rowid;
 	public $entity;
