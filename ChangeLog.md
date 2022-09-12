@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- FIX : Caché le status de la tache sur une carte vide *12/09/2022* - 1.7.1
 - NEW : Kanban drop card status *12/10/2022* - 1.7.0
 
 ## Version 1.6
