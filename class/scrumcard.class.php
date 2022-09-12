@@ -1031,7 +1031,7 @@ class ScrumCard extends CommonObject
 		$object->title = '';
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
-		$status = $this->LibStatut(intval($this->status), 2);
+		$status = ''; //$this->LibStatut(intval($this->status), 2);
 		$TContactUsersAffected = $this->liste_contact(-1,'internal');
 
 		/**
@@ -1086,11 +1086,11 @@ class ScrumCard extends CommonObject
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
-				// TODO : faut-il afficher le status de l'element ou de la card ?
-				$status = '';
-				if(is_callable(array($elementObject, 'LibStatut'))){
-					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
-				}
+				// les statuts ne sont pas gérés sur l'object
+//				$status = '';
+//				if(is_callable(array($elementObject, 'LibStatut'))){
+//					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
+//				}
 
 				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
