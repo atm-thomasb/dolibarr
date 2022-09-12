@@ -495,11 +495,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		if (empty($reshook))
 		{
-			if($object->status != $object::STATUS_DRAFT) {
-				print dolGetButtonAction($langs->trans('RefreshVelocity'), '', 'default', $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=refreshVelocity');
-			}
-
-			print dolGetButtonAction($langs->trans('RefreshTimes'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refreshQuantities');
 
 			// Send
 			if (empty($user->socid)) {
@@ -536,6 +531,14 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete', '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
+
+			print '<div style="clear:both; margin-top: 5px;"></div>';
+
+			if ($object->status != $object::STATUS_DRAFT) {
+				print dolGetButtonAction($langs->trans('RefreshVelocity'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=refreshVelocity');
+			}
+
+			print dolGetButtonAction($langs->trans('RefreshTimes'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=refreshQuantities');
 
 			// Create Kanban
 			$kanban = $object->getKanbanId();
