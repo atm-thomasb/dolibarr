@@ -1031,7 +1031,7 @@ class ScrumCard extends CommonObject
 		$object->title = '';
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
-		$status = $this->LibStatut(intval($this->status), 2);
+		$status = ''; //$this->LibStatut(intval($this->status), 2);
 		$TContactUsersAffected = $this->liste_contact(-1,'internal');
 
 		/**
