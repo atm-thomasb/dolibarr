@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+- NEW : Kanban drop card status *12/10/2022* - 1.7.0
 
 ## Version 1.6
 
