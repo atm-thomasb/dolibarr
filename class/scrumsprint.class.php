@@ -271,7 +271,7 @@ class ScrumSprint extends CommonObject
 							//Dispo
 							$scrumSprintUser->qty_availablity = floatval($targetUser->array_options['options_scrumproject_velocity']);
 							//Ratio
-							$scrumSprintUser->availablity_rate = floatval($targetUser->array_options['options_scrumproject_rate']);
+							$scrumSprintUser->availablity_rate = floatval($targetUser->array_options['options_scrumproject_velocity_rate']);
 
 							if($scrumSprintUser->create($user)<0){
 								setEventMessage($langs->trans('ScrumSprintUserCreateError'), 'errors');
