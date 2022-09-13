@@ -240,7 +240,57 @@ class ScrumSprint extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-		return $this->createCommon($user, $notrigger);
+		global $langs;
+		require_once __DIR__ .'/scrumsprintuser.class.php';
+
+		$res =  $this->createCommon($user, $notrigger);
+		if($res > 0){
+
+			$sql = ' SELECT ugu.fk_user  FROM ' . MAIN_DB_PREFIX .'usergroup_user as ugu'
+				. ' INNER JOIN ' . MAIN_DB_PREFIX . 'user as u ON ugu.fk_user = u.rowid'
+				. ' INNER JOIN ' . MAIN_DB_PREFIX . 'user_extrafields as ue ON ugu.fk_user = ue.fk_object'
+				. ' WHERE ugu.fk_usergroup = ' .intval($this->fk_team)
+				. ' AND u.statut = 1'
+				. ' AND ue.scrumproject_role = "DEV"';
+
+
+			$TUsers = $this->db->getRows($sql);
+
+			if($TUsers !== false){
+				foreach ($TUsers as $obj){
+
+					$targetUser = new User($this->db);
+					if($targetUser->fetch($obj->fk_user) > 0){
+
+						if($targetUser->array_options['options_scrumproject_role'] == 'DEV'){
+
+							$scrumSprintUser = new ScrumSprintUser($this->db);
+							$scrumSprintUser->fk_user = $targetUser->id;
+							$scrumSprintUser->fk_scrum_sprint = $this->id;
+							$scrumSprintUser->status = ScrumSprintUser::STATUS_DRAFT;
+							//Dispo
+							$scrumSprintUser->qty_availablity = floatval($targetUser->array_options['options_scrumproject_velocity']);
+							//Ratio
+							$scrumSprintUser->availablity_rate = floatval($targetUser->array_options['options_scrumproject_rate']);
+
+							if($scrumSprintUser->create($user)<0){
+								setEventMessage($langs->trans('ScrumSprintUserCreateError'), 'errors');
+							}
+						}
+					}
+					else{
+						setEventMessage($langs->trans('ScrumSprintUserAddedNobody'), 'errors');
+					}
+				}
+			}
+			else{
+				setEventMessage($langs->trans('ScrumSprintUserSqlError'), 'errors');
+			}
+			if (empty($TUsers)){
+				setEventMessage($langs->trans('ScrumSprintUserNoDevAssociate'), 'warning');
+			}
+		}
+		return $res;
 	}
 
 	/**

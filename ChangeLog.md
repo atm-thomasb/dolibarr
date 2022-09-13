@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+- NEW : Ajout dispo/velo des dev à la création d'un sprint *13/09/2022* - 1.9.0 
 - NEW : Mise à jour affichage page sprint card *12/09/2022* - 1.8.0
 - FIX : Caché le status de la tache sur une carte vide *12/09/2022* - 1.7.1
 - NEW : Kanban drop card status *12/10/2022* - 1.7.0

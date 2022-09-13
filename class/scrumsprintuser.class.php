@@ -136,6 +136,7 @@ class ScrumSprintUser extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
+	public $availablity_rate;
 	// END MODULEBUILDER PROPERTIES
 
 
