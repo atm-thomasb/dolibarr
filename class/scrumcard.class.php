@@ -1012,6 +1012,15 @@ class ScrumCard extends CommonObject
 	}
 
 	/**
+	 * @return void
+	 */
+	public function showTags(){
+		require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+		$form = new Form($this->db);
+		return $form->showCategories($this->id, 'scrumcard', 1);
+	}
+
+	/**
 	 * get this object formatted for jKanan
 	 * @return stdClass
 	 */
@@ -1022,6 +1031,7 @@ class ScrumCard extends CommonObject
 		$object = new stdClass();
 		$object->id = 'scrumcard-' . $this->id; // kanban dom id
 
+		$object->tags = $this->showTags();
 		$object->label = $this->label;
 		$object->type = 'scrum-card';
 		$object->class = array();     // array of additional classes
@@ -1133,7 +1143,7 @@ class ScrumCard extends CommonObject
 
 
 		$object->title.= '<div class="kanban-item__header">';
-
+		$object->title.= '<span class="kanban-item__tags">'.$object->tags.'</span>';
 		$object->title.= '</div>';
 
 
