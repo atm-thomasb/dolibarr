@@ -683,7 +683,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 	$object->setVarsFromFetchObj($obj);
 
 	// Show here line of result
-	print '<tr class="oddeven">';
+	print '<tr  class="oddeven" data-lineid="' . $obj->rowid . '" id="scrumsprintuser-'. $obj->rowid .'">';
 	foreach ($object->fields as $key => $val) {
 		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
@@ -707,11 +707,11 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 
 			$liveEdit = '';
-			if($object->statut == $object::STATUS_DRAFT && in_array($key, array('qty_availablity', 'availablity_rate', 'qty_velocity'))){
-				$liveEdit = scrumProjectGenLiveUpdateAttributes($object->element, $object->id, $key);
+			if($object->statut == $object::STATUS_DRAFT && in_array($key, array('qty_availablity', 'availablity_rate'))){
+				$liveEdit = scrumProjectGenLiveUpdateAttributes($object->element, $object->id, $key, 'scrumSprintUserGenLiveUpdateAttributes_qty_velocity');
 			}
 
-			print '<td '.$liveEdit.' '.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
+			print '<td '.$liveEdit.' '.($cssforfield ? ' class="col-'.$key.' '.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
 			} elseif ($key == 'rowid') {

@@ -3,8 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- NEW : Ajout de tag aux cards du kanban *14/09/2022* - 1.9.0
-- NEW : Mise à jour affichage page sprint card *12/09/2022* - 1.8.0
+- NEW : Ajout de tag aux cards du kanban *14/09/2022* - 1.10.0
+- FIX : Live edit update for user velocity *13/09/2022* - 1.9.1
+- NEW : Ajout d'une option pour permettre l'affichage du menu gauche du kanban *13/09/2022* - 1.9.0
+- NEW : Mise à jour de l'affichage page sprint card *12/09/2022* - 1.8.0
 - FIX : Caché le status de la tache sur une carte vide *12/09/2022* - 1.7.1
 - NEW : Kanban drop card status *12/10/2022* - 1.7.0
 

@@ -491,8 +491,22 @@ class ScrumSprintUser extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		return $this->updateCommon($user, $notrigger);
+	}
+
+
+
+	/**
+	 * Update object into database
+	 *
+	 * @param  User $user      	User that modifies
+	 * @param  bool $notrigger 	false=launch triggers after, true=disable triggers
+	 * @return int             	<0 if KO, >0 if OK
+	 */
+	public function updateCommon(User $user, $notrigger = false)
+	{
 		$this->calcVelocity();
-		$result = $this->updateCommon($user, $notrigger);
+		$result = parent::updateCommon($user, $notrigger);
 
 		if($result > 0 && !$notrigger){
 			if($this->updateSprintVelocity($user)<0){
