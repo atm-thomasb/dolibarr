@@ -200,6 +200,9 @@ if($contactsType){
 $item->fieldInputOverride = $form->selectArray('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE', $TSelect, $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE);
 
 
+// Activation du kanban
+$formSetup->newItem('SP_ENABLE_KANBAN')->setAsYesNo();
+
 
 $setupnotempty =+ count($formSetup->items);
 
