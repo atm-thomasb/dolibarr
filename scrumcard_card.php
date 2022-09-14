@@ -530,7 +530,7 @@ if (($id || $ref) && $action == 'edit')
     foreach ($categories as $c) {
         $arrayselected[] = $c->id;
     }
-    print img_picto('', 'category').Form::multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '100%', '', 'category');
+    print img_picto('', 'category').Form::multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '95%', '', 'category');
     print '</td></tr>';
 
 	// Other attributes
@@ -624,7 +624,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
 
-    // Categories
+    // Categories (tags)
     if($conf->categorie->enabled) {
         print '<tr><td class="valignmiddle">'.$langs->trans('Categories').'</td><td>';
         print $form->showCategories($object->id, 'scrumcard', 1);
