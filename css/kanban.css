@@ -805,8 +805,21 @@ nav.top-nav-bar{
 	min-height: 30px;
 }
 
-.kanban-item__status{
+.kanban-item__status, .kanban-item__tags{
 	font-size: 0.8em;
+}
+
+.kanban-item__tags .select2-container-multi-dolibarr .select2-choices-dolibarr .select2-search-choice-dolibarr:first-child{
+	margin: 0 0 2px 0px;
+}
+
+.kanban-item__tags{
+	display: block;
+	margin-bottom: 3px;
+}
+
+.kanban-item__tags:empty{
+	display: none;
 }
 
 /*.kanban-item.--alert{*/
