@@ -518,6 +518,20 @@ if (($id || $ref) && $action == 'edit')
 
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_edit.tpl.php';
+    require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+
+    //Catégories (tags)
+    print '<tr><td>'.$langs->trans('Categories').'</td>';
+    print '<td colspan="3">';
+    $cat = new Categorie($db);
+    $categories = $cat->containing($object->id, 'scrumcard');
+    $arrayselected = array();
+    $cate_arbo = $form->select_all_categories('scrumcard', '', 'parent', 64, 0, 1);
+    foreach ($categories as $c) {
+        $arrayselected[] = $c->id;
+    }
+    print img_picto('', 'category').Form::multiselectarray('categories', $cate_arbo, $arrayselected, '', 0, '', 0, '100%', '', 'category');
+    print '</td></tr>';
 
 	// Other attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_edit.tpl.php';
@@ -609,6 +623,13 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
+
+    // Categories
+    if($conf->categorie->enabled) {
+        print '<tr><td class="valignmiddle">'.$langs->trans('Categories').'</td><td>';
+        print $form->showCategories($object->id, 'scrumcard', 1);
+        print '</td></tr>';
+    }
 
 	print '</table>';
 	print '</div>';
@@ -773,6 +794,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/card_presend.tpl.php';
 }
+
+//Recall to apply JS in the right order
+?>
+    <script>
+        $( document ).ready(function () {
+            $('#categories').select2();
+        });
+    </script>
+<?php
 
 // End of page
 llxFooter();
