@@ -269,7 +269,7 @@ class ScrumSprint extends CommonObject
 							$scrumSprintUser->fk_scrum_sprint = $this->id;
 							$scrumSprintUser->status = ScrumSprintUser::STATUS_DRAFT;
 							//Dispo
-							$scrumSprintUser->qty_availablity = floatval($targetUser->array_options['options_scrumproject_velocity']);
+							$scrumSprintUser->qty_availablity = floatval($targetUser->array_options['options_scrumproject_availability']);
 							//Ratio
 							$scrumSprintUser->availablity_rate = floatval($targetUser->array_options['options_scrumproject_velocity_rate']);
 

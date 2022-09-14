@@ -210,8 +210,8 @@ class ScrumSprintUser extends CommonObject
 		if(!empty($user->id)) {
 			$this->fields['fk_user']['default'] = $user->id;
 
-			if(!empty($user->array_options['options_scrumproject_velocity'])){
-				$this->fields['qty_availablity']['default'] = round($user->array_options['options_scrumproject_velocity'], 2);
+			if(!empty($user->array_options['options_scrumproject_availability'])){
+				$this->fields['qty_availablity']['default'] = round($user->array_options['options_scrumproject_availability'], 2);
 			}
 		}
 
