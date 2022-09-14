@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- NEW : Ajout dispo/velo des dev à la création d'un sprint + extrafield scrumproject_velocity_rate*13/09/2022* - 1.10.0 
 - FIX : Live edit update for user velocity *13/09/2022* - 1.9.1
 - NEW : Ajout d'une option pour permettre l'affichage du menu gauche du kanban *13/09/2022* - 1.9.0
 - NEW : Mise à jour de l'affichage page sprint card *12/09/2022* - 1.8.0

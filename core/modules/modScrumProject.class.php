@@ -65,7 +65,7 @@ class modScrumProject extends DolibarrModules
 		$this->editor_url = 'www.atm-consulting.fr';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '1.8.0';
+		$this->version = '1.10.0';
 
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -1062,7 +1062,8 @@ class modScrumProject extends DolibarrModules
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
-		$result1=$extrafields->addExtraField('scrumproject_velocity', "ScrumProjectUserVelocity", 'double', 1000,  '24,8', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
+		$result1=$extrafields->addExtraField('scrumproject_availability', "ScrumProjectUserAvailability", 'double', 1000,  '24,8', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
+		$result3=$extrafields->addExtraField('scrumproject_velocity_rate', "ScrumProjectUserVelocityRate", 'double', 1005,  '24,2', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
 		$result2=$extrafields->addExtraField('scrumproject_role', "ScrumProjectUserRole", 'sellist', 1010, '32', 'user',      0, 0, '', array('options' => array("c_type_contact:libelle:code::active=1 AND element='scrumproject_scrumcard' AND source='internal'" => null)), 1, '', 1, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
 		//$result3=$extrafields->addExtraField('scrumproject_myattr3', "New Attr 3 label", 'varchar', 1, 10, 'bank_account', 0, 0, '', '', 1, '', 0, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
 		//$result4=$extrafields->addExtraField('scrumproject_myattr4', "New Attr 4 label", 'select',  1,  3, 'thirdparty',   0, 1, '', array('options'=>array('code1'=>'Val1','code2'=>'Val2','code3'=>'Val3')), 1,'', 0, 0, '', '', 'scrumproject@scrumproject', '$conf->scrumproject->enabled');
