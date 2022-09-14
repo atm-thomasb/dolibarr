@@ -73,3 +73,36 @@ function scrumsprintProjectTasksPlanningLiveUpdate(el, responseData){
 		});
 	}
 }
+
+
+
+/**
+ * use as callback function for liveEdit
+ * Reload project task planned time after update sprint planned time
+ * @param {jQuery} el
+ * @param responseData
+ */
+function scrumSprintUserGenLiveUpdateAttributes_qty_velocity(el, responseData){
+
+	if(el.parent().data('lineid') != undefined){
+		let lineId = el.parent().data('lineid');
+		let lineSelector = '#scrumsprintuser-' + lineId;
+
+		// set html value as imported
+		el.html(responseData.value);
+
+		let url = new URL(window.location.href);
+		if(!url.searchParams.get('search_rowid')){
+			url.searchParams.append('search_rowid', lineId);
+		}
+
+		$.ajax({
+			url:url.href,
+			type:'GET',
+			success: function(data){
+				let colSelector = lineSelector + ' .col-qty_velocity';
+				$(colSelector).html($(data).find(colSelector).html());
+			}
+		});
+	}
+}
