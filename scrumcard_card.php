@@ -796,6 +796,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 }
 
 //Recall to apply JS in the right order
+// Fix a strange behavior from dolibarr
 ?>
     <script>
         $( document ).ready(function () {
