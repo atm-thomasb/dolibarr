@@ -367,7 +367,7 @@ $myTmpObjects['ScrumSprint'] = array('includerefgeneration'=>1, 'includedocgener
 $myTmpObjects['ScrumUserStory'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
 //$myTmpObjects['ScrumUserTask'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
 $myTmpObjects['ScrumKanban'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
-$myTmpObjects['ScrumCard'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
+$myTmpObjects['ScrumCard'] = array('includerefgeneration'=>0, 'includedocgeneration'=>0);
 
 
 foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
