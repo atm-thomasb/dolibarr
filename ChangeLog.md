@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- NEW : Ajout de l'édition des tags sur une card du kanban *20/09/2022* - 1.12.0
 - NEW : Ajout de tag aux cards du kanban *14/09/2022* - 1.11.0
 - NEW : Ajout dispo/velo des dev à la création d'un sprint + extrafield scrumproject_velocity_rate*13/09/2022* - 1.10.0 
 - FIX : Live edit update for user velocity *13/09/2022* - 1.9.1
