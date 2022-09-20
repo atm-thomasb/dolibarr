@@ -1520,13 +1520,9 @@ scrumKanban = {};
 			'card-id': el.getAttribute('data-objectid')
 		};
 
-		// la liste des tags doit être dans response.data
-
 		let content = '<label>';
 			content+= '<select id="card-tags" name="tags" multiple style="width: 100%"></select>';
 			content+= '</label>';
-
-
 
 		const tagsDialog = new Dialog({
 			title: o.langs.AddRemoveTags,
@@ -1544,16 +1540,11 @@ scrumKanban = {};
 				});
 			},
 			onAccept: function(){
+				sendData.tags = $('#card-tags').val();
 
-
-				alert('test02');
-
-				sendData.tags = []; // ajout des tags du form
-
-				// todo : envoyer l'ajax de modification des tags
 				o.callKanbanInterface('updateCardTags', sendData, function(response) {
 					if (response.result > 0) {
-
+						tagsDialog.dialog.close()
 					}
 				});
 			}

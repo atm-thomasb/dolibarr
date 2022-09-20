@@ -97,6 +97,9 @@ elseif ($action === 'removeCard') {
 elseif ($action === 'getCardTags') {
     _actionGetCardTags($jsonResponse);
 }
+elseif ($action === 'updateCardTags') {
+    _actionupdateCardTags($jsonResponse);
+}
 else{
 	$jsonResponse->msg = 'Action not found';
 }
@@ -232,7 +235,7 @@ function _actionGetAllBoards($jsonResponse){
 }
 
 /**
- * @param $jsonResponse
+ * @param JsonResponse $jsonResponse
  * @return bool
  */
 function _actionGetCardTags($jsonResponse) {
@@ -282,6 +285,25 @@ function _actionGetCardTags($jsonResponse) {
     return true;
 }
 
+/**
+ *
+ *
+ * @param JsonResponse $jsonResponse
+ * @return void
+ */
+function _actionUpdateCardTags($jsonResponse) {
+    global $user, $langs, $db;
+
+    $data = GETPOST('data', 'array');
+    $jsonResponse->debug = $data;
+
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+    $scrumcard = new ScrumCard($db);
+    $scrumcard->fetch($data['card-id']);
+    $scrumcard->setCategories($data['tags']);
+
+    $jsonResponse->result = 1;
+}
 
 /**
  * @param JsonResponse $jsonResponse

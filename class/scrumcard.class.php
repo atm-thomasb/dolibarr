@@ -790,7 +790,7 @@ class ScrumCard extends CommonObject
 			if ($withpicto) {
 				require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
-				list($class, $module) = explode('@', $this->picto);
+				[$class, $module] = explode('@', $this->picto);
 				$upload_dir = $conf->$module->multidir_output[$conf->entity]."/$class/".dol_sanitizeFileName($this->ref);
 				$filearray = dol_dir_list($upload_dir, "files");
 				$filename = $filearray[0]['name'];
@@ -1542,6 +1542,12 @@ class ScrumCard extends CommonObject
 		}
 	}
 
+    /**
+     * Ajoute les categories/tags
+     *
+     * @param int[] $categories id des categories
+     * @return float|int
+     */
     public function setCategories($categories)
     {
         require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
