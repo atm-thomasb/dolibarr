@@ -57,6 +57,7 @@ if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
 
 $jsonResponse = new JsonResponse();
 
+// TODO : ajouter des droits et une vérification plus rigoureuse actuellement il n'y a pas de droit sur le kanban il faut peut-être en ajouter
 if (empty($user->rights->scrumproject->scrumcard->read)) {
     $jsonResponse->msg = $langs->trans('NotEnoughRights');
     $jsonResponse->result = 0;
