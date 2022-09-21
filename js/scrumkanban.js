@@ -72,6 +72,7 @@ scrumKanban = {};
 		AddScrumTaskLine : 'Ajouter une tâche scrum',
 		SplitScrumTask : 'Découper la tâche scrum',
 		NotSplittable : 'N\'est pas découpable',
+		AddRemoveTags : 'Ajouter/supprimer une categorie',
 
 		RemoveLine : 'Supprimer la ligne',
 		AddLine : 'Ajouter une ligne',
@@ -802,7 +803,18 @@ scrumKanban = {};
 			});
 
 
-			// Clone card menu : il n'est pas possible de cloner une US ou une tache : dans c'est cas là il faut spliter le temps
+			// Card Tags
+			menuItems.push({
+				content: '<i class="fa fa-tags" ></i>' + o.langs.AddRemoveTags,
+				events: {
+					click: function (e) {
+						o.dialogCardTags(el);
+					}
+				}
+			});
+
+
+			// Clone card menu : il n'est pas possible de cloner une US ou une tache : dans ces cas là il faut spliter le temps
 			if(dataType != undefined && dataType != 'scrum-user-story' && dataType != 'scrum-user-story-task')
 			{
 				menuItems.push({
@@ -1501,6 +1513,45 @@ scrumKanban = {};
 	}
 
 
+	o.dialogCardTags = function(el){
+
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban,
+			'card-id': el.getAttribute('data-objectid')
+		};
+
+		let content = '<label>';
+			content+= '<select id="card-tags" name="tags" multiple style="width: 100%"></select>';
+			content+= '</label>';
+
+		const tagsDialog = new Dialog({
+			title: o.langs.AddRemoveTags,
+			content: content,
+			onOpen: function(){
+				o.callKanbanInterface('getCardTags', sendData, function(response){
+					if(response.result > 0) {
+						let inputCardTags = $('#card-tags');
+						o.updateInputListOptionsMultiselect(inputCardTags, response.data.tags);
+						inputCardTags.select2({
+							dropdownParent: $('.kanban-dialog')
+						});
+						$('.kanban-dialog').css({'overflow':'visible'});
+					}
+				});
+			},
+			onAccept: function(){
+				sendData.tags = $('#card-tags').val();
+
+				o.callKanbanInterface('updateCardTags', sendData, function(response) {
+					if (response.result > 0) {
+						o.refreshAllBoards();
+						tagsDialog.dialog.close()
+					}
+				});
+			}
+		});
+	}
+
 
 	o.deleteCardDialog = function(eid){
 		// TODO detect type of element before
@@ -1550,6 +1601,42 @@ scrumKanban = {};
 
 	o.htmlEntities = function(str) {
 		return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	}
+
+	/**
+	 * add array element into select field
+	 *
+	 * @param {jQuery} target The select input jquery element
+	 * @param {array} data an array of object
+	 */
+	o.updateInputListOptionsMultiselect = function(target, data = false)
+	{
+		/* Remove all options from the select list */
+		target.empty();
+		target.prop("disabled", true);
+
+		if(Array.isArray(data))
+		{
+			/* Insert the new ones from the array above */
+			for(var i= 0; i < data.length; i++)
+			{
+				let item = data[i];
+				let newOption =  $('<option>', {
+					value: item.id,
+					text : item.label
+				});
+
+				if(item.selected > 0){
+					newOption.prop('selected', true);
+				}
+
+				target.append(newOption);
+			}
+
+			if(data.length > 0){
+				target.prop("disabled", false);
+			}
+		}
 	}
 
 })(scrumKanban);
