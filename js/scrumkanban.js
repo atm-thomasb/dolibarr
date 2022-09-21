@@ -1544,6 +1544,7 @@ scrumKanban = {};
 
 				o.callKanbanInterface('updateCardTags', sendData, function(response) {
 					if (response.result > 0) {
+						o.refreshAllBoards();
 						tagsDialog.dialog.close()
 					}
 				});
