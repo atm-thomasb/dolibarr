@@ -54,6 +54,10 @@ $action = GETPOST('action');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
+if (empty($user->rights->scrumproject->scrumcard->read)) {
+    //TODO mettre ce contenu dans un JsonResponse
+    accessforbidden('Not allowed to read scrumcard');
+}
 
 $jsonResponse = new JsonResponse();
 
