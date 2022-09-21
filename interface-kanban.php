@@ -54,15 +54,14 @@ $action = GETPOST('action');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
-if (empty($user->rights->scrumproject->scrumcard->read)) {
-    //TODO mettre ce contenu dans un JsonResponse
-    accessforbidden('Not allowed to read scrumcard');
-}
 
 $jsonResponse = new JsonResponse();
 
-
-if ($action === 'addKanbanList') {
+if (empty($user->rights->scrumproject->scrumcard->read)) {
+    $jsonResponse->msg = $langs->trans('NotEnoughRights');
+    $jsonResponse->result = 0;
+}
+elseif($action === 'addKanbanList') {
 	_actionAddList($jsonResponse);
 }
 elseif ($action === 'getAllBoards') {
@@ -118,6 +117,12 @@ $db->close();    // Close $db database opened handler
  */
 function _actionAddList($jsonResponse){
 	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 	$validate = new Validate($db, $langs);
@@ -293,10 +298,16 @@ function _actionGetCardTags($jsonResponse) {
  *
  *
  * @param JsonResponse $jsonResponse
- * @return void
+ * @return bool
  */
 function _actionUpdateCardTags($jsonResponse) {
     global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
     $data = GETPOST('data', 'array');
     $jsonResponse->debug = $data;
@@ -307,6 +318,7 @@ function _actionUpdateCardTags($jsonResponse) {
     $scrumcard->setCategories($data['tags']);
 
     $jsonResponse->result = 1;
+    return true;
 }
 
 /**
@@ -315,6 +327,12 @@ function _actionUpdateCardTags($jsonResponse) {
  */
 function _actionRemoveList($jsonResponse){
 	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$jsonResponse->result = 0;
 
@@ -360,6 +378,12 @@ function _actionRemoveList($jsonResponse){
 function _actionRemoveCard($jsonResponse){
 	global $user, $langs, $db;
 
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
+
 	$jsonResponse->result = 0;
 
 	$data = GETPOST("data", "array");
@@ -402,6 +426,12 @@ function _actionRemoveCard($jsonResponse){
  */
 function _actionAddItemToList($jsonResponse){
 	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -490,6 +520,12 @@ function _actionGetScrumCardData($jsonResponse){
  */
 function _actionDropItemToList($jsonResponse){
 	global $langs, $db, $user;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -609,7 +645,13 @@ function _actionDropItemToList($jsonResponse){
  * @return bool|void
  */
 function _actionChangeListOrder($jsonResponse){
-	global  $langs, $db;
+	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -755,6 +797,11 @@ function _checkObjectByElement($elementType, $id, $jsonResponse){
 function _actionSplitScrumCard($jsonResponse){
 	global $langs, $db, $user;
 
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -816,7 +863,13 @@ function _actionSplitScrumCard($jsonResponse){
  * @return bool|void
  */
 function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false){
-	global  $user, $db, $conf;
+	global  $user, $db, $conf, $langs;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -916,7 +969,13 @@ function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false
  * @return bool|void
  */
 function _actionRemoveUserToCard($jsonResponse, $userId = false){
-	global  $user, $db;
+	global  $user, $db, $langs;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
