@@ -98,7 +98,7 @@ elseif ($action === 'getCardTags') {
     _actionGetCardTags($jsonResponse);
 }
 elseif ($action === 'updateCardTags') {
-    _actionupdateCardTags($jsonResponse);
+    _actionUpdateCardTags($jsonResponse);
 }
 else{
 	$jsonResponse->msg = 'Action not found';
