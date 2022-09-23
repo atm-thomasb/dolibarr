@@ -1128,3 +1128,8 @@ html[data-theme-color-scheme="dark"] div.ui-tooltip.mytooltip{
 	--tooltipfontcolor : #fff;
 	--tooltipbgcolor : hsla(0, 0%, 20%, 0.9);
 }
+
+html[data-theme-color-scheme="dark"] dialog.kanban-dialog .select2-container{
+	--dialog-text-color: #656565;
+	color: var(--dialog-text-color);
+}
