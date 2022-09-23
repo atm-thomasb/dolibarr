@@ -660,6 +660,36 @@ class ScrumTask extends CommonObject
 
 
 	/**
+	 * Update object into database
+	 *
+	 * @param User $user User that modifies
+	 * @param ScrumCard $scrumCard
+	 * @param ScrumKanbanList $kanbanList
+	 * @param bool $noTrigger false=launch triggers after, true=disable triggers
+	 * @param bool $noUpdate false=launch update after, true=disable update
+	 * @return int             <if KO, >0 if OK
+	 */
+	public function dropInKanbanList(User $user, ScrumCard $scrumCard, ScrumKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
+	{
+
+		if($this->status != ScrumTask::STATUS_CANCELED){
+			$scrumCard->status = ScrumTask::STATUS_VALIDATED;
+			if($kanbanList->ref_code == 'backlog'){
+				$scrumCard->status = ScrumTask::STATUS_DRAFT;
+			}
+			elseif($kanbanList->ref_code == 'done'){
+				$scrumCard->status = ScrumTask::STATUS_DONE;
+			}
+		}
+
+		if($noUpdate){
+			return 0;
+		}
+
+		return $this->setStatusCommon($user, $scrumCard->status, $noTrigger, 'SCRUMTASK_DROPINKABANLIST');
+	}
+
+	/**
 	 *	Set draft status
 	 *
 	 *	@param	User	$user			Object user that modify
