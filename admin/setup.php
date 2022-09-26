@@ -167,12 +167,21 @@ $item->helpText = $langs->transnoentities('AnHelpMessage');
 */
 
 
+if(!isset($conf->global->SP_MAX_SCRUM_TASK_STEP_QTY)){
+	dolibarr_set_const($db, 'SP_MAX_SCRUM_TASK_STEP_QTY', 0.25);
+}
+
 $item = $formSetup->newItem('SP_MAX_SCRUM_TASK_STEP_QTY');
 $item->fieldAttr = array(
 	'type' => 'number',
 	'step' => '0.01',
 	'min' => 0
 );
+
+
+if(!isset($conf->global->SP_MAX_SCRUM_TASK_MAX_QTY)){
+	dolibarr_set_const($db, 'SP_MAX_SCRUM_TASK_MAX_QTY', 7);
+}
 
 $item = $formSetup->newItem('SP_MAX_SCRUM_TASK_MAX_QTY');
 $item->fieldAttr = array(
