@@ -1081,6 +1081,16 @@ class modScrumProject extends DolibarrModules
 		$result = $this->_load_tables('/scrumproject/sql/');
 		if ($result < 0) return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 
+
+
+		if(!isset($conf->global->SP_MAX_SCRUM_TASK_STEP_QTY)){
+			dolibarr_set_const($this->db, 'SP_MAX_SCRUM_TASK_STEP_QTY', 0.25);
+		}
+
+		if(!isset($conf->global->SP_MAX_SCRUM_TASK_MAX_QTY)){
+			dolibarr_set_const($this->db, 'SP_MAX_SCRUM_TASK_MAX_QTY', 7);
+		}
+
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
