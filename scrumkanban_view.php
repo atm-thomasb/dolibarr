@@ -257,9 +257,10 @@ $jsLangs = array(
 					}
 				}
 				?>
+					<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
 				</span>
 
-				<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
+
 				<span id="light-bulb-toggle" class="nav-button"><i class="fa fa-lightbulb" ></i></span>
 			</nav>
 		</header>

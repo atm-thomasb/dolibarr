@@ -371,8 +371,13 @@ foreach ($search as $key => $val) {
 	elseif($key == 'project_title' && $search[$key] != ''){
 		$searchCol = ['p.title', 'p.ref'];
 		$sql .= natural_search($searchCol, $search[$key]);
-	}
-	elseif (array_key_exists($key, $object->fields)) {
+	} elseif ($key == 'rowid' && $search[$key] != ''){
+		$searchCol = ['t.rowid'];
+		$sql .= natural_search($searchCol, $search[$key]);
+	} elseif ($key == 'label' && $search[$key] != '') {
+		$searchCol = ['t.label'];
+		$sql .= natural_search($searchCol, $search[$key]);
+	} elseif (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
 			continue;
 		}
