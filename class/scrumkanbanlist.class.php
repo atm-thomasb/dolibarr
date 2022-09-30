@@ -123,7 +123,7 @@ class ScrumKanbanList extends CommonObject
 	public $fk_scrum_kanban;
 	public $fk_rank;
 	public $label;
-	public $code;
+	public $ref_code;
 	public $description;
 	public $note_public;
 	public $note_private;

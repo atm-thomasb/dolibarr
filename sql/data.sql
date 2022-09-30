@@ -25,8 +25,8 @@ INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, mo
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042157,'scrumproject_scrumuserstory','internal','PO','ScrumProjectUserRolePO','1',null);
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042158,'scrumproject_scrumuserstory','internal','DEV','ScrumProjectUserRoleDEV','1',null);
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042159,'scrumuserstorysprint','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042160,'scrumuserstorysprint','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042159,'scrumproject_scrumuserstorysprint','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042160,'scrumproject_scrumuserstorysprint','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
 
 -- INSERT INTO llx_c_scrumcard_stage(rowid, code, label, position, picto, active) VALUES (1, 'BKLO','Backlog',10,'fa fa-lightbulb',1);
 -- INSERT INTO llx_c_scrumcard_stage(rowid, code, label, position, picto, active) VALUES (2, 'TODO','Todo',20,'fas fa-list',1);

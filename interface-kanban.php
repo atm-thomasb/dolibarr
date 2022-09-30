@@ -57,8 +57,12 @@ if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
 
 $jsonResponse = new JsonResponse();
 
-
-if ($action === 'addKanbanList') {
+// TODO : ajouter des droits et une vérification plus rigoureuse actuellement il n'y a pas de droit sur le kanban il faut peut-être en ajouter
+if (empty($user->rights->scrumproject->scrumcard->read)) {
+    $jsonResponse->msg = $langs->trans('NotEnoughRights');
+    $jsonResponse->result = 0;
+}
+elseif($action === 'addKanbanList') {
 	_actionAddList($jsonResponse);
 }
 elseif ($action === 'getAllBoards') {
@@ -94,6 +98,12 @@ elseif ($action === 'removeList') {
 elseif ($action === 'removeCard') {
 	_actionRemoveCard($jsonResponse);
 }
+elseif ($action === 'getCardTags') {
+    _actionGetCardTags($jsonResponse);
+}
+elseif ($action === 'updateCardTags') {
+    _actionUpdateCardTags($jsonResponse);
+}
 else{
 	$jsonResponse->msg = 'Action not found';
 }
@@ -108,6 +118,12 @@ $db->close();    // Close $db database opened handler
  */
 function _actionAddList($jsonResponse){
 	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 	$validate = new Validate($db, $langs);
@@ -223,12 +239,88 @@ function _actionGetAllBoards($jsonResponse){
 	}
 	else{
 		$jsonResponse->result = 0;
-		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $staticKanbanList->errorsToString();
+		$jsonResponse->msg = $langs->trans('Get boards error') . ' : ' . $staticKanbanList->errorsToString();
 		return false;
 	}
 }
 
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool
+ */
+function _actionGetCardTags($jsonResponse) {
+    global $user, $langs, $db;
 
+    $data = GETPOST('data', 'array');
+    $jsonResponse->debug = $data;
+
+    if(empty($data['card-id'])) {
+        $jsonResponse->msg = 'Need car Id';
+        return false;
+    }
+
+    $fk_card = $data['card-id'];
+    /** @var ScrumCard $card */
+    $card = _checkObjectByElement('scrumproject_scrumcard', $fk_card, $jsonResponse);
+    if(! $card) {
+        return false;
+    }
+
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+    $cat = new Categorie($db);
+
+    /** @var Categorie[] $categories */
+    $categories = $cat->get_all_categories('scrumcard');
+
+    $categoriesCard = $cat->containing($card->id, 'scrumcard', 'id');
+
+    $jsonResponse->data = new stdClass();
+    $jsonResponse->data->tags = []; // les tags de la card
+
+    if($categories > 0){
+        foreach($categories as $category) {
+            $tag = new stdClass();
+            $tag->id = $category->id;
+            $tag->label = $category->label;
+            $tag->selected = 0;
+            if(in_array($category->id, $categoriesCard)){
+                $tag->selected = 1;
+            }
+
+            $jsonResponse->data->tags[] = $tag;
+        }
+    }
+
+    $jsonResponse->result = 1;
+    return true;
+}
+
+/**
+ *
+ *
+ * @param JsonResponse $jsonResponse
+ * @return bool
+ */
+function _actionUpdateCardTags($jsonResponse) {
+    global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
+
+    $data = GETPOST('data', 'array');
+    $jsonResponse->debug = $data;
+
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+    $scrumcard = new ScrumCard($db);
+    $scrumcard->fetch($data['card-id']);
+    $scrumcard->setCategories($data['tags']);
+
+    $jsonResponse->result = 1;
+    return true;
+}
 
 /**
  * @param JsonResponse $jsonResponse
@@ -236,6 +328,12 @@ function _actionGetAllBoards($jsonResponse){
  */
 function _actionRemoveList($jsonResponse){
 	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$jsonResponse->result = 0;
 
@@ -281,6 +379,12 @@ function _actionRemoveList($jsonResponse){
 function _actionRemoveCard($jsonResponse){
 	global $user, $langs, $db;
 
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
+
 	$jsonResponse->result = 0;
 
 	$data = GETPOST("data", "array");
@@ -324,6 +428,12 @@ function _actionRemoveCard($jsonResponse){
 function _actionAddItemToList($jsonResponse){
 	global $user, $langs, $db;
 
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
+
 	$data = GETPOST("data", "array");
 
 	// check kanban list data
@@ -341,11 +451,9 @@ function _actionAddItemToList($jsonResponse){
 	}
 
 	$scrumCard = new ScrumCard($db);
-	$scrumCard->fk_scrum_kanbanlist = $kanbanList->id;
-
-
 	$scrumCard->fk_rank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
 
+	$scrumCard->dropInKanbanList( $user,  $kanbanList, false, true);
 
 	if(!empty($data['label'])){
 		$scrumCard->label = $data['label'];
@@ -373,7 +481,7 @@ function _actionAddItemToList($jsonResponse){
 	}
 	else{
 		$jsonResponse->result = 0;
-		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanList->errorsToString();
+		$jsonResponse->msg = $langs->trans('CreateError') . ' for add item to list : ' . $scrumCard->errorsToString();
 		return false;
 	}
 }
@@ -412,7 +520,13 @@ function _actionGetScrumCardData($jsonResponse){
  * @return bool|void
  */
 function _actionDropItemToList($jsonResponse){
-	global $langs, $db;
+	global $langs, $db, $user;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -486,13 +600,11 @@ function _actionDropItemToList($jsonResponse){
 				return false;
 			}
 
-			// Mise à jour de la card elle même
-			$sqlUpdate = /* @Lang SQL */
-				' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
-				. ' SET  tms=NOW(), fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
-				. ' WHERE rowid = '.intval($scrumCard->id);
+			$scrumCard->fk_rank = $newRank;
 
-			if($db->query($sqlUpdate)){
+			$resDrop = $scrumCard->dropInKanbanList( $user,  $kanbanList);
+
+			if($resDrop>0){
 				$db->commit();
 				$jsonResponse->result = 1;
 				return true;
@@ -500,7 +612,7 @@ function _actionDropItemToList($jsonResponse){
 			else{
 				$db->rollback();
 				$jsonResponse->result = 0;
-				$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' .$db->error();
+				$jsonResponse->msg = $langs->trans('UpdateError') . ' : ' .$scrumCard->errorsToString();
 				return false;
 			}
 		}
@@ -513,13 +625,10 @@ function _actionDropItemToList($jsonResponse){
 	else{
 		$newRank = $kanbanList->getMaxRankOfKanBanListItems() + 1;
 
-		// Mise à jour de la card elle même
-		$sqlUpdate = /* @Lang SQL */
-			' UPDATE '.MAIN_DB_PREFIX.$scrumCard->table_element
-			. ' SET fk_rank = '.intval($newRank).', fk_scrum_kanbanlist = '.intval($kanbanList->id)
-			. ' WHERE rowid = '.intval($scrumCard->id);
+		$scrumCard->fk_rank = $newRank;
+		$resDrop = $scrumCard->dropInKanbanList( $user,  $kanbanList);
 
-		if($db->query($sqlUpdate)){
+		if($resDrop>0){
 			$jsonResponse->result = 1;
 			return true;
 		}
@@ -537,7 +646,13 @@ function _actionDropItemToList($jsonResponse){
  * @return bool|void
  */
 function _actionChangeListOrder($jsonResponse){
-	global  $langs, $db;
+	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -683,6 +798,11 @@ function _checkObjectByElement($elementType, $id, $jsonResponse){
 function _actionSplitScrumCard($jsonResponse){
 	global $langs, $db, $user;
 
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -744,7 +864,13 @@ function _actionSplitScrumCard($jsonResponse){
  * @return bool|void
  */
 function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false){
-	global  $user, $db, $conf;
+	global  $user, $db, $conf, $langs;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -844,7 +970,13 @@ function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false
  * @return bool|void
  */
 function _actionRemoveUserToCard($jsonResponse, $userId = false){
-	global  $user, $db;
+	global  $user, $db, $langs;
+
+    if (empty($user->rights->scrumproject->scrumcard->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
 
 	$data = GETPOST("data", "array");
 
@@ -928,4 +1060,22 @@ function _actionRemoveUserToCard($jsonResponse, $userId = false){
 	$jsonResponse->result = 1;
 	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
 	return true;
+}
+
+/**
+ * @param ScrumCard $scrumCard
+ * @param ScrumKanbanList $kanbanList
+ * @return void
+ */
+function _setScrumCardValuesOnDropInList(ScrumCard $scrumCard, ScrumKanbanList $kanbanList){
+
+	$scrumCard->fk_scrum_kanbanlist = $kanbanList->id;
+
+	$scrumCard->status = ScrumCard::STATUS_READY;
+	if($kanbanList->ref_code == 'backlog'){
+		$scrumCard->status = ScrumCard::STATUS_DRAFT;
+	}
+	elseif($kanbanList->ref_code == 'done'){
+		$scrumCard->status = ScrumCard::STATUS_DONE;
+	}
 }

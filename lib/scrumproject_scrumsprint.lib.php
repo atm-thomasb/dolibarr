@@ -86,13 +86,13 @@ function scrumsprintPrepareHead($object)
 	$h++;
 
 
-	$kanban = $object->getKanbanId();
-	if ($kanban > 0) {
-		$head[$h][0] = dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban;
-		$head[$h][1] = $langs->trans('Kanban');
-		$head[$h][2] = 'kanban';
-		$h++;
-	}
+//	$kanban = $object->getKanbanId();
+//	if ($kanban > 0) {
+//		$head[$h][0] = dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban;
+//		$head[$h][1] = $langs->trans('Kanban');
+//		$head[$h][2] = 'kanban';
+//		$h++;
+//	}
 
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line

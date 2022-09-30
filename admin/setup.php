@@ -174,6 +174,7 @@ $item->fieldAttr = array(
 	'min' => 0
 );
 
+
 $item = $formSetup->newItem('SP_MAX_SCRUM_TASK_MAX_QTY');
 $item->fieldAttr = array(
 	'type' => 'number',
@@ -199,6 +200,9 @@ if($contactsType){
 }
 $item->fieldInputOverride = $form->selectArray('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE', $TSelect, $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE);
 
+
+// Activation du kanban
+$formSetup->newItem('SP_ENABLE_KANBAN')->setAsYesNo();
 
 
 $setupnotempty =+ count($formSetup->items);
@@ -364,7 +368,7 @@ $myTmpObjects['ScrumSprint'] = array('includerefgeneration'=>1, 'includedocgener
 $myTmpObjects['ScrumUserStory'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
 //$myTmpObjects['ScrumUserTask'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
 $myTmpObjects['ScrumKanban'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
-$myTmpObjects['ScrumCard'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
+$myTmpObjects['ScrumCard'] = array('includerefgeneration'=>0, 'includedocgeneration'=>0);
 
 
 foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {

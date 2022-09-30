@@ -13,23 +13,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-
-CREATE TABLE llx_scrumproject_scrumuserstory(
-	-- BEGIN MODULEBUILDER FIELDS
-	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	fk_task integer,
-    fk_user_po integer NOT NULL ,
-	business_value integer DEFAULT 50 NOT NULL, 
-	qty real, 
-	ref varchar(128) NOT NULL, 
-	label varchar(255), 
-	description text, 
-	date_creation datetime NOT NULL, 
-	tms timestamp, 
-	fk_user_creat integer NOT NULL, 
-	fk_user_modif integer,
-    last_main_doc varchar(255),
-    import_key varchar(14),
-	status smallint NOT NULL
-	-- END MODULEBUILDER FIELDS
-) ENGINE=innodb;
+CREATE TABLE llx_categorie_scrumcard (
+    fk_categorie integer,
+    fk_scrumcard integer,
+    import_key integer
+);

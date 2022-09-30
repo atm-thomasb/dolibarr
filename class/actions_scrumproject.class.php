@@ -304,5 +304,15 @@ class ActionsScrumProject
 		return 0;
 	}
 */
-	/* Add here any other hooked methods... */
+	public function constructCategory($parameters, $object, $hookmanager) {
+        $this->results = array(array(
+            'id' => 14,
+            'code' => 'scrumcard',
+            'cat_fk' => 'scrumcard',
+            'cat_table' => 'scrumcard',
+            'obj_class' => 'ScrumCard',
+            'obj_table' => 'scrumproject_scrumcard',
+        ));
+        return 1;
+    }
 }
