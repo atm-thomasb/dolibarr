@@ -15,6 +15,13 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.6
 
+- FIX : multiple - *29/09/2022* - 1.6.1
+ - Le masque de numérotation dans l'admin ne marche pas
+ - Les flèches de navigation font perdre le fk_sprint etc                                     (sur tab dispo rh)
+ - au moment de la transformation de taĉhe en US, les chiffres sont arrondies (4 au lieu de 3.5 et 5.25 devient 6L11                                                                                (dans projet créer une tache puis scrum boarsd … )
+ - La validation d'un sprint ne fonctionne pas (sans doute lié au problème de numérotation de la conf)
+ - La suppression d'US depuis leur card ne fonctionne pas
+
 - NEW : Ajout de massaction pour la création de sprint *07/09/2022* - 1.6.0
 - NEW : Ajout Création d'un kanban depuis sprint card avec clonage de la structure *07/09/2022* - 1.5.0
 - NEW : Ajout de massaction de planification pour les US et les US planif *29/08/2022* - 1.4.0
