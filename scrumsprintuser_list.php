@@ -473,25 +473,26 @@ if($fk_sprint > 0){
 	$param .= '&fk_sprint='.  $fk_sprint;
 
 	$sprint = new ScrumSprint($db);
-	$sprint->fetch($fk_sprint);
+	$res = $sprint->fetch($fk_sprint);
+	if ($res) {
+		$head = scrumsprintPrepareHead($sprint);
+		print dol_get_fiche_head($head, 'scrumsprintuser', $langs->trans("ScrumSprint"), -1, $sprint->picto);
 
-	$head = scrumsprintPrepareHead($sprint);
-	print dol_get_fiche_head($head, 'scrumsprintuser', $langs->trans("ScrumSprint"), -1, $sprint->picto);
+		// Object card
+		// ------------------------------------------------------------
+		$linkback = '<a href="' . dol_buildpath('/scrumproject/scrumsprint_list.php', 1) . '?restore_lastsearch_values=1' . (!empty($socid) ? '&socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
 
-	// Object card
-	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/scrumproject/scrumsprint_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+		$morehtmlref = '<div class="refidno">';
+		if (!empty($object->label)) $morehtmlref .= $object->label . '<br>';
+		$morehtmlref .= $object->showOutputField($object->fields['fk_team'], 'fk_team', $object->fk_team);
+		$morehtmlref .= '</div>';
 
-	$morehtmlref = '<div class="refidno">';
-	if(!empty($object->label)) $morehtmlref.= $object->label . '<br>';
-	$morehtmlref.= $object->showOutputField($object->fields['fk_team'], 'fk_team', $object->fk_team);
-	$morehtmlref .= '</div>';
-
-	dol_banner_tab($sprint, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+		dol_banner_tab($sprint, 'fk_sprint', $linkback, 1, 'ref', 'ref', $morehtmlref);
 
 
-	$object->fields['fk_scrum_sprint']['visible'] = 0;
-	unset($arrayfields['t.fk_scrum_sprint']);
+		$object->fields['fk_scrum_sprint']['visible'] = 0;
+		unset($arrayfields['t.fk_scrum_sprint']);
+	}
 }
 else{
 
