@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- FIX : Ajout d'une tâche provenant d'une User Story découpée dans la même colonne *12/10/2022* - 1.12.2
 - NEW : Ajout de tag/catégorie dans le left menu *22/09/2022* - 1.12.1
 - NEW : Ajout de l'édition des tags sur une card du kanban *20/09/2022* - 1.12.0
 - NEW : Ajout de tag aux cards du kanban *14/09/2022* - 1.11.0
