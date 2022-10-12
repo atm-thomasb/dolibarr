@@ -1417,7 +1417,8 @@ scrumKanban = {};
 							// récupération des données de formulaire en Html5
 							let sendData = {
 								'id': objectId,
-								'form': o.serializeFormJson($(splitDialog.dialog).find('form'))
+								'form': o.serializeFormJson($(splitDialog.dialog).find('form')),
+								'source-list-id': o.getDolListIdFromKanbanDragElement(document.querySelector('.kanban-item[data-targetelementid="'+ response.data.elementObject.objectId +'"]').parentElement),
 							};
 
 							o.callKanbanInterface('splitScrumCard', sendData, function(){
@@ -1430,7 +1431,6 @@ scrumKanban = {};
 						return false;
 					}
 					,onOpen: function(){
-
 						if(type == 'scrum-user-story' && parseFloat(o.config.maxScrumTaskMaxQty) > 0){
 							let qtyRemainToSplit = parseFloat(qtyRemain);
 							while(qtyRemainToSplit >= parseFloat(o.config.maxScrumTaskMaxQty)){
