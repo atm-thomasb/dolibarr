@@ -16,7 +16,8 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.6
 
-- FIX : multiple - *29/09/2022* - 1.6.1
+ - FIX : Calcule des lignes d'un découpage de carte à chaque clic - *11/10/2022* - 1.6.2
+ - FIX : multiple - *29/09/2022* - 1.6.1
  - Le masque de numérotation dans l'admin ne marche pas
  - Les flèches de navigation font perdre le fk_sprint etc                                     (sur tab dispo rh)
  - au moment de la transformation de taĉhe en US, les chiffres sont arrondies (4 au lieu de 3.5 et 5.25 devient 6L11                                                                                (dans projet créer une tache puis scrum boarsd … )
