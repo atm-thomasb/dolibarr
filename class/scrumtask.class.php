@@ -251,7 +251,6 @@ class ScrumTask extends CommonObject
 				foreach ($TScrumKanban as $scrumkanban){
 					$staticScrumKanbanList = new ScrumKanbanList($scrumUserStorySprint->db);
                     if(isset($this->context['fk_scrum_kanbanlist'])){
-                        $staticScrumKanbanList->fetch($this->toto);
                         $TScrumKanbanList = [$staticScrumKanbanList];
                         $customsql = 'fk_scrum_kanban = '.intval($scrumkanban->id).' AND  rowid = '.intval($this->context['fk_scrum_kanbanlist']);
                     } else {
