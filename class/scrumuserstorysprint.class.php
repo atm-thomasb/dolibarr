@@ -73,6 +73,7 @@ class ScrumUserStorySprint extends CommonObject
 
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;
+    const STATUS_DONE= 2;
 	const STATUS_CANCELED = 9;
 
 
@@ -531,8 +532,19 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
-
 		$result = $this->updateCommon($user, $notrigger);
+	}
+
+	/**
+	 * Update object into database
+	 *
+	 * @param  User $user      	User that modifies
+	 * @param  bool $notrigger 	false=launch triggers after, true=disable triggers
+	 * @return int             	<0 if KO, >0 if OK
+	 */
+	public function updateCommon(User $user, $notrigger = false)
+	{
+		$result = parent::updateCommon($user, $notrigger);
 		if($result>0 && !$notrigger){
 			if($this->refreshSprintQuantities($user)<0){
 				return -1;
@@ -541,6 +553,7 @@ class ScrumUserStorySprint extends CommonObject
 
 		return $result;
 	}
+
 
 	/**
 	 * Delete object in database

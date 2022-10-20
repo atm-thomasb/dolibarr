@@ -14,22 +14,8 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 
-CREATE TABLE llx_scrumproject_scrumuserstory(
-	-- BEGIN MODULEBUILDER FIELDS
-	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	fk_task integer,
-    fk_user_po integer NOT NULL ,
-	business_value integer DEFAULT 50 NOT NULL, 
-	qty real, 
-	ref varchar(128) NOT NULL, 
-	label varchar(255), 
-	description text, 
-	date_creation datetime NOT NULL, 
-	tms timestamp, 
-	fk_user_creat integer NOT NULL, 
-	fk_user_modif integer,
-    last_main_doc varchar(255),
-    import_key varchar(14),
-	status smallint NOT NULL
-	-- END MODULEBUILDER FIELDS
-) ENGINE=innodb;
+ALTER TABLE llx_categorie_scrumcard ADD PRIMARY KEY (fk_categorie, fk_scrumcard);
+ALTER TABLE llx_categorie_scrumcard ADD KEY idx_categorie_scrumcard_fk_categorie (fk_categorie);
+ALTER TABLE llx_categorie_scrumcard ADD KEY idx_categorie_scrumcard_fk_product (fk_scrumcard);
+
+ALTER TABLE llx_categorie_scrumcard ADD CONSTRAINT llx_categorie_scrumcard_categorie_rowid FOREIGN KEY (fk_categorie) REFERENCES llx_categorie (rowid);

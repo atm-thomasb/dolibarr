@@ -70,7 +70,8 @@ class ScrumTask extends CommonObject
 
 
 	const STATUS_DRAFT = 0;
-	const STATUS_VALIDATED = 1;
+	const STATUS_VALIDATED = 1; // is to do
+	const STATUS_DONE= 2;
 	const STATUS_CANCELED = 9;
 
 
@@ -122,7 +123,7 @@ class ScrumTask extends CommonObject
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2,),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>5, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Valid&eacute;', '9'=>'Annul&eacute;'), 'validate'=>'1', 'default' => 0),
+		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>5, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'A faire', '2'=>'Termin&eacute;', '9'=>'Annul&eacute;'), 'validate'=>'1', 'default' => 1),
 	);
 	public $rowid;
 	public $ref;
@@ -659,6 +660,36 @@ class ScrumTask extends CommonObject
 
 
 	/**
+	 * Update object into database
+	 *
+	 * @param User $user User that modifies
+	 * @param ScrumCard $scrumCard
+	 * @param ScrumKanbanList $kanbanList
+	 * @param bool $noTrigger false=launch triggers after, true=disable triggers
+	 * @param bool $noUpdate false=launch update after, true=disable update
+	 * @return int             <if KO, >0 if OK
+	 */
+	public function dropInKanbanList(User $user, ScrumCard $scrumCard, ScrumKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
+	{
+
+		if($this->status != ScrumTask::STATUS_CANCELED){
+			$scrumCard->status = ScrumTask::STATUS_VALIDATED;
+			if($kanbanList->ref_code == 'backlog'){
+				$scrumCard->status = ScrumTask::STATUS_DRAFT;
+			}
+			elseif($kanbanList->ref_code == 'done'){
+				$scrumCard->status = ScrumTask::STATUS_DONE;
+			}
+		}
+
+		if($noUpdate){
+			return 0;
+		}
+
+		return $this->setStatusCommon($user, $scrumCard->status, $noTrigger, 'SCRUMTASK_DROPINKABANLIST');
+	}
+
+	/**
 	 *	Set draft status
 	 *
 	 *	@param	User	$user			Object user that modify
@@ -882,10 +913,12 @@ class ScrumTask extends CommonObject
 			global $langs;
 			//$langs->load("scrumproject@scrumproject");
 			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
+			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ScrumTaskStatusToDo');
+			$this->labelStatus[self::STATUS_DONE] = $langs->transnoentitiesnoconv('ScrumTaskStatusDone');
 			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
 			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
+			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ScrumTaskStatusToDo');
+            $this->labelStatusShort[self::STATUS_DONE] = $langs->transnoentitiesnoconv('ScrumTaskStatusDone');
 			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
 		}
 

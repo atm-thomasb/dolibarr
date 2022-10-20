@@ -136,6 +136,7 @@ class ScrumSprintUser extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
+	public $availablity_rate;
 	// END MODULEBUILDER PROPERTIES
 
 
@@ -209,8 +210,8 @@ class ScrumSprintUser extends CommonObject
 		if(!empty($user->id)) {
 			$this->fields['fk_user']['default'] = $user->id;
 
-			if(!empty($user->array_options['options_scrumproject_velocity'])){
-				$this->fields['qty_availablity']['default'] = round($user->array_options['options_scrumproject_velocity'], 2);
+			if(!empty($user->array_options['options_scrumproject_availability'])){
+				$this->fields['qty_availablity']['default'] = round($user->array_options['options_scrumproject_availability'], 2);
 			}
 		}
 
@@ -491,8 +492,22 @@ class ScrumSprintUser extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		return $this->updateCommon($user, $notrigger);
+	}
+
+
+
+	/**
+	 * Update object into database
+	 *
+	 * @param  User $user      	User that modifies
+	 * @param  bool $notrigger 	false=launch triggers after, true=disable triggers
+	 * @return int             	<0 if KO, >0 if OK
+	 */
+	public function updateCommon(User $user, $notrigger = false)
+	{
 		$this->calcVelocity();
-		$result = $this->updateCommon($user, $notrigger);
+		$result = parent::updateCommon($user, $notrigger);
 
 		if($result > 0 && !$notrigger){
 			if($this->updateSprintVelocity($user)<0){

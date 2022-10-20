@@ -118,7 +118,20 @@ class ScrumCard extends CommonObject
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>2,  'default' => 0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Pr&ecirc;te', '2'=>'Termin&eacute;e'),),
+		'status' => array(
+			'type'=>'smallint',
+			'label'=>'Status',
+			'enabled'=>'1',
+			'position'=>1000,
+			'notnull'=>1,
+			'visible'=>2,
+			'default' => 0,
+			'index'=>1,
+			'arrayofkeyval'=>array(
+				'0'=>'Brouillon',
+				'1'=>'ToDo',
+				'2'=>'Termin&eacute;e'
+			),),
 	);
 	public $rowid;
 	public $entity;
@@ -453,6 +466,63 @@ class ScrumCard extends CommonObject
 		return $this->updateCommon($user, $notrigger);
 	}
 
+
+	/**
+	 * Update object into database
+	 *
+	 * @param User $user User that modifies
+	 * @param ScrumKanbanList $kanbanList
+	 * @param bool $notrigger false=launch triggers after, true=disable triggers
+	 * @param bool $noUpdate false=launch update after, true=disable update
+	 * @return int             <if KO, >0 if OK
+	 */
+	public function dropInKanbanList(User $user, ScrumKanbanList $kanbanList, $notrigger = false, $noUpdate = false)
+	{
+
+		$this->fk_scrum_kanbanlist = $kanbanList->id;
+
+		$this->status = ScrumCard::STATUS_READY;
+		if($kanbanList->ref_code == 'backlog'){
+			$this->status = ScrumCard::STATUS_DRAFT;
+		}
+		elseif($kanbanList->ref_code == 'done'){
+			$this->status = ScrumCard::STATUS_DONE;
+		}
+
+		// Impacter les objects liés
+		/**
+		 * Traitement de l'element attaché
+		 */
+		$res = $this->fetchElementObject();
+
+		if($res){
+			$elementObject = $this->elementObject;
+
+			if(is_callable(array($elementObject, 'dropInKanbanList'))){
+				$resDropForEl = $elementObject->dropInKanbanList($user, $this, $kanbanList, $notrigger, $noUpdate);
+				if($resDropForEl){
+					// todo gestion des erreurs
+				}
+			}
+//
+//			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
+//
+//			}
+//			elseif($elementObject->element == 'scrumproject_scrumtask'){
+//
+//			}
+//			elseif($elementObject->element == 'project_task'){
+//
+//			}
+		}
+
+		if($noUpdate){
+			return 0;
+		}
+
+		return $this->update($user, $notrigger);
+	}
+
 	/**
 	 * Delete object in database
 	 *
@@ -720,7 +790,7 @@ class ScrumCard extends CommonObject
 			if ($withpicto) {
 				require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
-				list($class, $module) = explode('@', $this->picto);
+				[$class, $module] = explode('@', $this->picto);
 				$upload_dir = $conf->$module->multidir_output[$conf->entity]."/$class/".dol_sanitizeFileName($this->ref);
 				$filearray = dol_dir_list($upload_dir, "files");
 				$filename = $filearray[0]['name'];
@@ -942,6 +1012,15 @@ class ScrumCard extends CommonObject
 	}
 
 	/**
+	 * @return void
+	 */
+	public function showTags(){
+		require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+		$form = new Form($this->db);
+		return $form->showCategories($this->id, 'scrumcard', 1);
+	}
+
+	/**
 	 * get this object formatted for jKanan
 	 * @return stdClass
 	 */
@@ -952,6 +1031,7 @@ class ScrumCard extends CommonObject
 		$object = new stdClass();
 		$object->id = 'scrumcard-' . $this->id; // kanban dom id
 
+		$object->tags = $this->showTags();
 		$object->label = $this->label;
 		$object->type = 'scrum-card';
 		$object->class = array();     // array of additional classes
@@ -961,7 +1041,7 @@ class ScrumCard extends CommonObject
 		$object->title = '';
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
-		$status = $this->LibStatut(intval($this->status), 2);
+		$status = ''; //$this->LibStatut(intval($this->status), 2);
 		$TContactUsersAffected = $this->liste_contact(-1,'internal');
 
 		/**
@@ -1016,10 +1096,12 @@ class ScrumCard extends CommonObject
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
-				$status = '';
-				if(is_callable(array($elementObject, 'LibStatut'))){
-					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
-				}
+				// les statuts ne sont pas gérés sur l'object
+//				$status = '';
+//				if(is_callable(array($elementObject, 'LibStatut'))){
+//					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
+//				}
+
 				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
@@ -1040,6 +1122,7 @@ class ScrumCard extends CommonObject
 				$object->type = 'scrum-user-story-task';
 				$object->fk_scrum_user_story_sprint = $elementObject->fk_scrum_user_story_sprint;
 
+				// TODO : faut-il afficher le status de l'element ou de la card ?
 				if(is_callable(array($elementObject, 'LibStatut'))){
 					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
 				}
@@ -1060,7 +1143,7 @@ class ScrumCard extends CommonObject
 
 
 		$object->title.= '<div class="kanban-item__header">';
-
+		$object->title.= '<span class="kanban-item__tags">'.$object->tags.'</span>';
 		$object->title.= '</div>';
 
 
@@ -1458,5 +1541,17 @@ class ScrumCard extends CommonObject
 			return false;
 		}
 	}
+
+    /**
+     * Ajoute les categories/tags
+     *
+     * @param int[] $categories id des categories
+     * @return float|int
+     */
+    public function setCategories($categories)
+    {
+        require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+        return parent::setCategoriesCommon($categories, 'scrumcard');
+    }
 
 }

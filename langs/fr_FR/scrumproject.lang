@@ -39,10 +39,14 @@ ScrumCardStage = Projet Scrum - Étapes des cartes
 
 SP_MAX_SCRUM_TASK_STEP_QTY = Granularité des quantités pour les tâches scrum et les User stories
 SP_MAX_SCRUM_TASK_MAX_QTY = Quantités maximal pouvant être affecter à une tâche scrum
+SP_ENABLE_KANBAN = Activer le menu kanban permettant l'usage de kanban hors sprint
 
 #
 # MENU
 #
+
+ScrumTaskStatusToDo = A faire
+ScrumTaskStatusDone = Terminé
 
 
 ScrumUserStory = User story
@@ -90,10 +94,15 @@ SetBackToPending = Retour à en cours
 SetBackToValid = Retour à validé
 ScrumSprintUserAdded = %s utilisateurs associés au sprint
 ScrumSprintUserAddedError = Erreur lors de l'association des utilisateurs au sprint
+ScrumSprintUserAddedNobody = Aucun utilisateur associé à l'équipe
+ScrumSprintUserCreateError = Erreur lors de la création  des disponibilités
+ScrumSprintUserNoDevAssociate = Aucun développeur associé à l'équipe
+ScrumSprintUserSqlError = Erreur lors de la requête SQL
 ScrumSprintVelocityCalculated = Vélocité calculée du sprint : %s
 ScrumSprintVelocityCalculatedError = Erreur lors du calcul de la vélocité du sprint : %s
 ScrumSprintQuantitiesCalculatedError = Erreur lors du calcul des quantités du sprint : %s
-ScrumProjectUserVelocity = Vélocité par sprint scrum
+ScrumProjectUserAvailability = Disponibilité par sprint scrum
+ScrumProjectUserVelocityRate = Ratio de vélocité
 ScrumProjectUserRole = Rôle scrum
 ScrumProjectUserRolePO = Product Owner
 ScrumProjectUserRoleDEV = Developer
@@ -148,7 +157,7 @@ ScrumCards = cartes scrum
 ScrumCardTab = Cartes
 NewScrumCard = Nouvelle carte
 StatusScrumCardDraft = Brouillon
-StatusScrumCardReady = Prête
+StatusScrumCardReady = A faire
 StatusScrumCardDone = Terminée
 GoToScrumCards = Voir les cartes
 
