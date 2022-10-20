@@ -1255,16 +1255,7 @@ scrumKanban = {};
 
 			// mise à jour du max sur les inputs
 			$('.new-item-qty-planned').each(function( index ) {
-
-				let maxQtyPlannedForLine = parseFloat(qtyRemain);
-				if(parseFloat(o.config.maxScrumTaskMaxQty) > 0 && maxQtyPlannedForLine > parseFloat(o.config.maxScrumTaskMaxQty)){
-					maxQtyPlannedForLine = parseFloat(o.config.maxScrumTaskMaxQty);
-				}
-
-				if(maxQtyPlannedForLine < parseFloat($(this).attr('max'))){
-					maxQtyPlannedForLine = parseFloat($(this).attr('max'));
-				}
-
+				let maxQtyPlannedForLine = parseFloat(o.config.maxScrumTaskMaxQty);
 				$(this).attr('max', maxQtyPlannedForLine);
 			})
 
