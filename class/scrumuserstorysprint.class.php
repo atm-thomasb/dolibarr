@@ -1054,6 +1054,7 @@ class ScrumUserStorySprint extends CommonObject
 		$newScrumTask->label = $newCardLabel;
 		if(empty($newCardLabel) || is_array($newCardLabel)){ $newScrumTask->label = $this->label;}
 
+        $newScrumTask->context['fk_scrum_kanbanlist'] = $scrumCard->fk_scrum_kanbanlist;
 		$resCreate = $newScrumTask->create($user);
 		if($resCreate<0){
 			$this->error = $newScrumTask->error;

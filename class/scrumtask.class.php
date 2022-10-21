@@ -250,7 +250,13 @@ class ScrumTask extends CommonObject
 			if(is_array($TScrumKanban) && !empty($TScrumKanban)){
 				foreach ($TScrumKanban as $scrumkanban){
 					$staticScrumKanbanList = new ScrumKanbanList($scrumUserStorySprint->db);
-					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => 'fk_scrum_kanban = '. intval($scrumkanban->id) .' AND  ref_code = \'backlog\''));
+                    if(isset($this->context['fk_scrum_kanbanlist'])){
+                        $TScrumKanbanList = [$staticScrumKanbanList];
+                        $customsql = 'fk_scrum_kanban = '.intval($scrumkanban->id).' AND  rowid = '.intval($this->context['fk_scrum_kanbanlist']);
+                    } else {
+                        $customsql = 'fk_scrum_kanban = '.intval($scrumkanban->id).' AND  ref_code = \'backlog\'';
+                    }
+					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => $customsql));
 
 					if(!empty($TScrumKanbanList) && is_array($TScrumKanbanList)){
 						$backLogList = reset($TScrumKanbanList);
@@ -835,7 +841,7 @@ class ScrumTask extends CommonObject
 			if ($withpicto) {
 				require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
-				list($class, $module) = explode('@', $this->picto);
+				[$class, $module] = explode('@', $this->picto);
 				$upload_dir = $conf->$module->multidir_output[$conf->entity]."/$class/".dol_sanitizeFileName($this->ref);
 				$filearray = dol_dir_list($upload_dir, "files");
 				$filename = $filearray[0]['name'];
