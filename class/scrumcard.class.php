@@ -1025,7 +1025,7 @@ class ScrumCard extends CommonObject
 	 * @return stdClass
 	 */
 	public function getScrumKanBanItemObjectFormatted(){
-		global $user;
+		global $user, $conf;
 
 		// TODO : voir si $object peut être factorisé avec getScrumKanBanItemObjectStd mais attention il doit être compatible avec l'objet js des items de kanban
 		$object = new stdClass();
@@ -1041,7 +1041,9 @@ class ScrumCard extends CommonObject
 		$object->title = '';
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
-		$status = ''; //$this->LibStatut(intval($this->status), 2);
+		$status = '';
+
+
 		$TContactUsersAffected = $this->liste_contact(-1,'internal');
 
 		/**
@@ -1054,6 +1056,14 @@ class ScrumCard extends CommonObject
 			$TContactUsersAffected = $elementObject->liste_contact(-1,'internal');
 			$object->element = $elementObject->element;
 			$object->targetelementid = $elementObject->id;
+
+			if(!empty($conf->global->SP_KANBAN_DISPLAY_STATUS_MODE) && is_callable(array($elementObject, 'LibStatut'))){
+				$mode = 3; // dot
+				if($conf->global->SP_KANBAN_DISPLAY_STATUS_MODE == 'badge'){
+					$mode = 2;
+				}
+				$status.= $elementObject->LibStatut(intval($elementObject->status), $mode);
+			}
 
 			if(is_callable(array($elementObject, 'getScrumKanBanItemObjectFormatted'))){
 				$objectFromElement = $elementObject->getScrumKanBanItemObjectFormatted($this, $object);
@@ -1096,11 +1106,6 @@ class ScrumCard extends CommonObject
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
-				// les statuts ne sont pas gérés sur l'object
-//				$status = '';
-//				if(is_callable(array($elementObject, 'LibStatut'))){
-//					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
-//				}
 
 				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
@@ -1122,10 +1127,6 @@ class ScrumCard extends CommonObject
 				$object->type = 'scrum-user-story-task';
 				$object->fk_scrum_user_story_sprint = $elementObject->fk_scrum_user_story_sprint;
 
-				// TODO : faut-il afficher le status de l'element ou de la card ?
-				if(is_callable(array($elementObject, 'LibStatut'))){
-					$status = $elementObject->LibStatut(intval($elementObject->status), 2);
-				}
 				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
 			elseif($elementObject->element == 'project_task'){

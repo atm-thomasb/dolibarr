@@ -201,8 +201,21 @@ if($contactsType){
 $item->fieldInputOverride = $form->selectArray('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE', $TSelect, $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE);
 
 
+
+$formSetup->newItem('SP_SETUPTITLE_KANBAN')->setAsTitle();
+
 // Activation du kanban
 $formSetup->newItem('SP_ENABLE_KANBAN')->setAsYesNo();
+
+
+
+$item = $formSetup->newItem('SP_KANBAN_DISPLAY_STATUS_MODE');
+$TField = array(
+	'' => $langs->trans('DoNotDisplayStatus'),
+	'dot' => $langs->trans('DisplayAsDotBadge'),
+	'badge' => $langs->trans('DisplayAsBadge'),
+);
+$item->setAsSelect($TField);
 
 
 $setupnotempty =+ count($formSetup->items);
