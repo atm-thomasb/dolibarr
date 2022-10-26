@@ -41,6 +41,14 @@ SP_MAX_SCRUM_TASK_STEP_QTY = Granularité des quantités pour les tâches scrum 
 SP_MAX_SCRUM_TASK_MAX_QTY = Quantités maximal pouvant être affecter à une tâche scrum
 SP_ENABLE_KANBAN = Activer le menu kanban permettant l'usage de kanban hors sprint
 
+SP_SETUPTITLE_KANBAN = Options du kanban
+SP_KANBAN_DISPLAY_STATUS_MODE = Mode d'affichage des statuts sur les cartes
+DoNotDisplayStatus = Ne pas afficher
+DisplayAsDotBadge = Badge sans texte (point)
+DisplayAsBadge = Badge avec texte
+
+
+
 #
 # MENU
 #
