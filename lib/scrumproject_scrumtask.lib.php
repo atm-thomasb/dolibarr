@@ -41,6 +41,13 @@ function scrumtaskPrepareHead($object)
 	$head[$h][2] = 'card';
 	$h++;
 
+
+	$head[$h][0] = dol_buildpath("/scrumproject/scrumtask_contact.php", 1).'?id='.$object->id;
+	$head[$h][1] = $langs->trans("Contacts");
+	$head[$h][2] = 'contact';
+	$h++;
+
+
 	if (isset($object->fields['note_public']) || isset($object->fields['note_private'])) {
 		$nbNote = 0;
 		if (!empty($object->note_private)) {

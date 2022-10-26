@@ -13,17 +13,17 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042151,'scrumproject_scrumsprint','internal','PO','ScrumProjectUserRolePO','1',null);
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042152,'scrumproject_scrumsprint','internal','DEV','ScrumProjectUserRoleDEV','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042151,'scrumproject_scrumsprint','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042152,'scrumproject_scrumsprint','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042153,'scrumproject_scrumcard','internal','PO','ScrumProjectUserRolePO','1',null);
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042154,'scrumproject_scrumcard','internal','DEV','ScrumProjectUserRoleDEV','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042153,'scrumproject_scrumcard','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042154,'scrumproject_scrumcard','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042155,'scrumproject_scrumtask','internal','PO','ScrumProjectUserRolePO','1',null);
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042156,'scrumproject_scrumtask','internal','DEV','ScrumProjectUserRoleDEV','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042155,'scrumproject_scrumtask','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042156,'scrumproject_scrumtask','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042157,'scrumproject_scrumuserstory','internal','PO','ScrumProjectUserRolePO','1',null);
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042158,'scrumproject_scrumuserstory','internal','DEV','ScrumProjectUserRoleDEV','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042157,'scrumproject_scrumuserstory','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042158,'scrumproject_scrumuserstory','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
 
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042159,'scrumproject_scrumuserstorysprint','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042160,'scrumproject_scrumuserstorysprint','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
