@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- FIX : Backport du fiw sql des longueurs de colonnes element_element *26/10/2022* - 1.12.3
+- FIX : Backport du fiw sql des longueurs de colonnes element_element *26/10/2022* - 1.13.0
 - FIX : Ajout d'une tâche provenant d'une User Story découpée dans la même colonne *12/10/2022* - 1.12.2
 - NEW : Ajout de tag/catégorie dans le left menu *22/09/2022* - 1.12.1
 - NEW : Ajout de l'édition des tags sur une card du kanban *20/09/2022* - 1.12.0
