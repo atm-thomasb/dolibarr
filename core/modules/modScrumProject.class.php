@@ -1104,6 +1104,13 @@ class modScrumProject extends DolibarrModules
 		// Permissions
 		$this->remove($options);
 
+
+		if(intval(DOL_VERSION) < 17){
+			$this->db->query('ALTER TABLE llx_element_element MODIFY COLUMN sourcetype VARCHAR(64) NOT NULL;');
+			$this->db->query('ALTER TABLE llx_element_element MODIFY COLUMN targettype VARCHAR(64) NOT NULL;');
+			$this->db->query('ALTER TABLE llx_c_type_contact MODIFY COLUMN element VARCHAR(64) NOT NULL;');
+		}
+
 		$sql = array();
 
 		return $this->_init($sql, $options);
