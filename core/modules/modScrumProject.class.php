@@ -65,7 +65,7 @@ class modScrumProject extends DolibarrModules
 		$this->editor_url = 'www.atm-consulting.fr';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '1.12.2';
+		$this->version = '1.13.0';
 
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -1103,6 +1103,13 @@ class modScrumProject extends DolibarrModules
 
 		// Permissions
 		$this->remove($options);
+
+
+		if(intval(DOL_VERSION) < 17){
+			$this->db->query('ALTER TABLE llx_element_element MODIFY COLUMN sourcetype VARCHAR(64) NOT NULL;');
+			$this->db->query('ALTER TABLE llx_element_element MODIFY COLUMN targettype VARCHAR(64) NOT NULL;');
+			$this->db->query('ALTER TABLE llx_c_type_contact MODIFY COLUMN element VARCHAR(64) NOT NULL;');
+		}
 
 		$sql = array();
 
