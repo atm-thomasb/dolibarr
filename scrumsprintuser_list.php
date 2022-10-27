@@ -483,8 +483,8 @@ if($fk_sprint > 0){
 		$linkback = '<a href="' . dol_buildpath('/scrumproject/scrumsprint_list.php', 1) . '?restore_lastsearch_values=1' . (!empty($socid) ? '&socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
 
 		$morehtmlref = '<div class="refidno">';
-		if (!empty($object->label)) $morehtmlref .= $object->label . '<br>';
-		$morehtmlref .= $object->showOutputField($object->fields['fk_team'], 'fk_team', $object->fk_team);
+		if (!empty($sprint->label)) $morehtmlref .= $sprint->label . '<br>';
+		$morehtmlref .= $sprint->showOutputField($sprint->fields['fk_team'], 'fk_team',$sprint->fk_team);
 		$morehtmlref .= '</div>';
 
 		dol_banner_tab($sprint, 'fk_sprint', $linkback, 1, 'ref', 'ref', $morehtmlref);

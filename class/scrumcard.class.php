@@ -946,7 +946,7 @@ class ScrumCard extends CommonObject
 	 * @return stdClass
 	 */
 	public function getScrumKanBanItemObjectFormatted(){
-		global $user;
+		global $user, $conf;
 
 		// TODO : voir si $object peut être factorisé avec getScrumKanBanItemObjectStd mais attention il doit être compatible avec l'objet js des items de kanban
 		$object = new stdClass();
@@ -967,7 +967,7 @@ class ScrumCard extends CommonObject
 		/**
 		 * Traitement de l'element attaché
 		 */
-		$res = $this->fetchElementObject();
+		$res = $this->fetchElementObject(1);
 
 		if($res){
 			$elementObject = $this->elementObject;
@@ -987,8 +987,8 @@ class ScrumCard extends CommonObject
 			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
-				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
-				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+				$timePlanned = $this->getTileFormatedTime($elementObject,'qty_planned');
+				$timeSpend = $this->getTileFormatedTime($elementObject,'qty_consumed');
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1025,8 +1025,9 @@ class ScrumCard extends CommonObject
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
-				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
-				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+
+				$timePlanned = $this->getTileFormatedTime($elementObject,'qty_planned');
+				$timeSpend = $this->getTileFormatedTime($elementObject,'qty_consumed');
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1073,7 +1074,7 @@ class ScrumCard extends CommonObject
 		if($useTime){
 			$object->title.= '<span class="kanban-item__time-spend">';
 //			$object->title.= '<i class="fa fa-hourglass-o"></i> ';
-			$object->title.= '<span class="kanban-item__time-consumed">'.$timeSpend.'</span> / <span class="kanban-item__time-planned">'.$timePlanned.'</span>';
+			$object->title.= '<span class="kanban-item__time-consumed">'. $timeSpend .'</span> / <span class="kanban-item__time-planned">'.$timePlanned.'</span>';
 			$object->title.= '</span>';
 		}
 		$object->title.= '<span class="kanban-item__status">'.$status.'</span>';
@@ -1457,6 +1458,34 @@ class ScrumCard extends CommonObject
 			$this->error = 'splitCard not supported';
 			return false;
 		}
+	}
+
+	/**
+	 * passage de l'heure en 100 iem vers 60 iem
+	 * @param  $elementObject
+	 * @param $hLetter
+	 * @return float|string
+	 */
+	public function getTileFormatedTime(&$elementObject, $field )
+	{
+		global $conf;
+
+		$hLetter = ($conf->global->SHOW_HOUR_DOT_LETTER) ? ':' : 'h';
+		$time = price2num($elementObject->showOutputFieldQuick($field), '2', 2);
+		$tmpTimeArr = explode('.', $time);
+		// on convertit les minutes
+		if (is_array($tmpTimeArr) && count($tmpTimeArr) > 1) {
+			//hours and minutes
+			$min = ($tmpTimeArr[1] * 60 / 100);
+			if (strlen($min) == 1) {
+				$min .= '0';
+			}
+			//
+			$time = $tmpTimeArr[0] . $hLetter . $min;
+			return $time;
+		}
+
+		return $time. $hLetter;
 	}
 
 }

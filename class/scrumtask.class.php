@@ -502,7 +502,7 @@ class ScrumTask extends CommonObject
 	}
 
 	/**
-	 * Delete object in database
+	 * object in database
 	 *
 	 * @param User $user       User that deletes
 	 * @param bool $notrigger  false=launch triggers after, true=disable triggers

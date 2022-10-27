@@ -296,7 +296,7 @@ scrumKanban = {};
 	 */
 	o.dialogIFrame = function (dialogId, url, label = '', callBackFunc = {}){
 
-
+console.log('here');
 		callBackFunc =  Object.assign({
 			open : undefined,
 			close : undefined,

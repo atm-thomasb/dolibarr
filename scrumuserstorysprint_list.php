@@ -702,22 +702,10 @@ print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwit
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
 
-	$key = 'societe';
-	if (!empty($arrayfields[$key]['checked'])) {
-		print '<td class="liste_titre">';
-		print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
-		print '</td>';
-	}
-
-	$key = 'project_title';
-	if (!empty($arrayfields[$key]['checked'])) {
-		print '<td class="liste_titre">';
-		print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
-		print '</td>';
-	}
 
 
-	foreach ($object->fields as $key => $val) {
+
+foreach ($object->fields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
 		$cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -750,6 +738,19 @@ print '<tr class="liste_titre">';
 		}
 		print '</td>';
 	}
+}
+$key = 'societe';
+if (!empty($arrayfields[$key]['checked'])) {
+	print '<td class="liste_titre">';
+	print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+	print '</td>';
+}
+
+$key = 'project_title';
+if (!empty($arrayfields[$key]['checked'])) {
+	print '<td class="liste_titre">';
+	print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+	print '</td>';
 }
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
