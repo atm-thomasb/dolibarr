@@ -11,7 +11,6 @@ All notable changes to this project will be documented in this file.
    - avoir un onglet us planifiées sur la fiche sprint
    - ordre des champs de recherche de la list des planifiées à fixer
    - le temps passé ne se recalcule pas suite suppression temps  -> Si on supprime un temps passé depuis la kanban onglet temps consommé d'une tâche SCRUM (carte) il n'est pas mis à jour sur la tache scrum. Le sprint une fois recalculé ne prend pas non plus en compte cette modification.
-   - le temps passé ne se recalcule pas suite modification temps
    - Arrondi manquant sur les chiffres (ne doit pas dépendre de la conf dolibarr)
    - Transformer les heures afficher au format numérique en format heure : 2,5 -> 02:30 (2h30)
    
