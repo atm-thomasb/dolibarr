@@ -225,9 +225,10 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		$sql .= ' FROM ' .MAIN_DB_PREFIX .'scrumproject_scrumtask_projet_task_time as spt';
 		$sql .= ' INNER JOIN '.MAIN_DB_PREFIX.'projet_task_time as Tablett ON Tablett.rowid = spt.fk_projet_task_time ';
 		$sql .= ' WHERE spt.fk_projet_task_time ='. $object->timespent_id;
-		$resql  = $this->db->query($sql);
-		if ($resql){
-			$obj = $this->db->fetch_object($resql);
+
+		$obj = $this->db->getRow($sql);
+		if ($obj){
+
 			// on declare un obj scrumtask
 			include_once __DIR__ .'/../../class/scrumtask.class.php';
 			$st = new ScrumTask($this->db);
@@ -243,6 +244,8 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 				}
 				$st->update($user);
 			}
+		}elseif ($obj === false) {
+			dol_print_error($this->db);
 		}
 	}
 
