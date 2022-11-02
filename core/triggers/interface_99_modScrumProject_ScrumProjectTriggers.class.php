@@ -119,14 +119,12 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 			case 'TASK_TIMESPENT_MODIFY':
 
 				$sql = ' SELECT SUM(task_duration) sum_duration FROM '.MAIN_DB_PREFIX.'projet_task_time WHERE fk_task='.$object->id.' AND rowid  != '.intval( $object->timespent_id);
-				$resql  = $this->db->query($sql);
+				$obj   = $this->db->getRow($sql);
 				$cumulTime = 0;
-				if ($resql){
-					while ($obj = $this->db->fetch_object($resql) ){
-						// on ne prend pas en compte la saisie enregistrée
-						if ($obj->rowid == $object->timespent_id) continue;
-						$cumulTime += $obj->task_duration;
-					}
+				if ($obj!==false){
+				      $cumulTime = $obj->sum_duration;
+				}else{
+				// todo c'est une erreur
 				}
 				$this->updateTime($object,$cumulTime,true);
 				break;
