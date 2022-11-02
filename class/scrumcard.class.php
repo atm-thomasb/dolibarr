@@ -987,8 +987,8 @@ class ScrumCard extends CommonObject
 			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
-				$timePlanned = $this->getTileFormatedTime($elementObject,'qty_planned');
-				$timeSpend = $this->getTileFormatedTime($elementObject,'qty_consumed');
+				$elementObject->showOutputFieldQuick('qty_planned');
+				$elementObject->showOutputFieldQuick('qty_consumed');
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1026,8 +1026,11 @@ class ScrumCard extends CommonObject
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
 
-				$timePlanned = $this->getTileFormatedTime($elementObject,'qty_planned');
-				$timeSpend = $this->getTileFormatedTime($elementObject,'qty_consumed');
+				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+				$timeSpend = $elementObject->showOutputFieldQuick('qty_consumed');
+
+
+
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1460,32 +1463,6 @@ class ScrumCard extends CommonObject
 		}
 	}
 
-	/**
-	 * passage de l'heure en 100 iem vers 60 iem
-	 * @param  $elementObject
-	 * @param $hLetter
-	 * @return float|string
-	 */
-	public function getTileFormatedTime(&$elementObject, $field )
-	{
-		global $conf;
 
-		$hLetter = ($conf->global->SHOW_HOUR_DOT_LETTER) ? ':' : 'h';
-		$time = price2num($elementObject->showOutputFieldQuick($field), '2', 2);
-		$tmpTimeArr = explode('.', $time);
-		// on convertit les minutes
-		if (is_array($tmpTimeArr) && count($tmpTimeArr) > 1) {
-			//hours and minutes
-			$min = ($tmpTimeArr[1] * 60 / 100);
-			if (strlen($min) == 1) {
-				$min .= '0';
-			}
-			//
-			$time = $tmpTimeArr[0] . $hLetter . $min;
-			return $time;
-		}
-
-		return $time. $hLetter;
-	}
 
 }
