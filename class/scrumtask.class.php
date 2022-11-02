@@ -490,6 +490,37 @@ class ScrumTask extends CommonObject
 	}
 
 	/**
+	 * Return HTML string to show a field into a page
+	 * Code very similar with showOutputField of extra fields
+	 *
+	 * @param  array   $val		       Array of properties of field to show
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $value          Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  $moreparam      To add more parametes on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
+	{
+		global $langs;
+		$out = '';
+
+		if($key == 'qty_planned' ||  $key == 'qty_consumed')
+		{
+			if ( !function_exists('getTileFormatedTime')) {
+				include_once __DIR__ . "/../lib/scrumproject.lib.php" ;
+			}
+			$out =  getTileFormatedTime($value) ;
+		} else{
+			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
+		return $out;
+	}
+
+
+	/**
 	 * Update object into database
 	 *
 	 * @param  User $user      User that modifies
@@ -502,7 +533,7 @@ class ScrumTask extends CommonObject
 	}
 
 	/**
-	 * Delete object in database
+	 * object in database
 	 *
 	 * @param User $user       User that deletes
 	 * @param bool $notrigger  false=launch triggers after, true=disable triggers
@@ -531,6 +562,7 @@ class ScrumTask extends CommonObject
 
 		return $this->deleteLineCommon($user, $idline, $notrigger);
 	}
+
 
 
 	/**

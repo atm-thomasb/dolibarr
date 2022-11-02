@@ -946,7 +946,7 @@ class ScrumCard extends CommonObject
 	 * @return stdClass
 	 */
 	public function getScrumKanBanItemObjectFormatted(){
-		global $user;
+		global $user, $conf;
 
 		// TODO : voir si $object peut être factorisé avec getScrumKanBanItemObjectStd mais attention il doit être compatible avec l'objet js des items de kanban
 		$object = new stdClass();
@@ -967,7 +967,7 @@ class ScrumCard extends CommonObject
 		/**
 		 * Traitement de l'element attaché
 		 */
-		$res = $this->fetchElementObject();
+		$res = $this->fetchElementObject(1);
 
 		if($res){
 			$elementObject = $this->elementObject;
@@ -987,8 +987,8 @@ class ScrumCard extends CommonObject
 			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
-				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
 				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1025,8 +1025,12 @@ class ScrumCard extends CommonObject
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
-				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
+
 				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+				$timeSpend = $elementObject->showOutputFieldQuick('qty_consumed');
+
+
+
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1073,7 +1077,7 @@ class ScrumCard extends CommonObject
 		if($useTime){
 			$object->title.= '<span class="kanban-item__time-spend">';
 //			$object->title.= '<i class="fa fa-hourglass-o"></i> ';
-			$object->title.= '<span class="kanban-item__time-consumed">'.$timeSpend.'</span> / <span class="kanban-item__time-planned">'.$timePlanned.'</span>';
+			$object->title.= '<span class="kanban-item__time-consumed">'. $timeSpend .'</span> / <span class="kanban-item__time-planned">'.$timePlanned.'</span>';
 			$object->title.= '</span>';
 		}
 		$object->title.= '<span class="kanban-item__status">'.$status.'</span>';
@@ -1458,5 +1462,7 @@ class ScrumCard extends CommonObject
 			return false;
 		}
 	}
+
+
 
 }
