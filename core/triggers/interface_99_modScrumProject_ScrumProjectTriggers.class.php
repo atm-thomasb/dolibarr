@@ -118,7 +118,7 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 				break;
 			case 'TASK_TIMESPENT_MODIFY':
 
-				$sql = ' SELECT task_duration, rowid FROM '.MAIN_DB_PREFIX.'projet_task_time WHERE fk_task='.$object->id;
+				$sql = ' SELECT SUM(task_duration) sum_duration FROM '.MAIN_DB_PREFIX.'projet_task_time WHERE fk_task='.$object->id.' AND rowid  != '.intval( $object->timespent_id);
 				$resql  = $this->db->query($sql);
 				$cumulTime = 0;
 				if ($resql){
