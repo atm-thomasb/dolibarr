@@ -987,8 +987,8 @@ class ScrumCard extends CommonObject
 			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
 				/** @var ScrumTask $elementObject */
 				$useTime = true;
-				$elementObject->showOutputFieldQuick('qty_planned');
-				$elementObject->showOutputFieldQuick('qty_consumed');
+				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
