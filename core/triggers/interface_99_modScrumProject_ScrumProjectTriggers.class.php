@@ -118,7 +118,10 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 				break;
 			case 'TASK_TIMESPENT_MODIFY':
 
-				$sql = ' SELECT SUM(task_duration) sum_duration FROM '.MAIN_DB_PREFIX.'projet_task_time WHERE fk_task='.$object->id.' AND rowid  != '.intval( $object->timespent_id);
+				$sql  = ' SELECT SUM(task_duration) sum_duration FROM '.MAIN_DB_PREFIX.'projet_task_time';
+				$sql .= ' RIGHT JOIN '.MAIN_DB_PREFIX .'scrumproject_scrumtask_projet_task_time as ssptt ON ssptt.fk_projet_task_time ='.(int) $object->id;
+				$sql .= ' WHERE fk_task='.$object->id.' AND rowid  != '.intval( $object->timespent_id);
+
 				$obj   = $this->db->getRow($sql);
 				$cumulTime = 0;
 				if ($obj!==false){
