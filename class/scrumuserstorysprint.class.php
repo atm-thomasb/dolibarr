@@ -1219,6 +1219,13 @@ class ScrumUserStorySprint extends CommonObject
 		{
 			$out = $this->getNomUrl(1);
 		}
+		elseif($key == 'qty_planned' ||  $key == 'qty_consumed')
+		{
+			if ( !function_exists('getTileFormatedTime')) {
+				include_once __DIR__ . "/../lib/scrumproject.lib.php" ;
+			}
+			$out =  getTileFormatedTime($value) ;
+		}
 		else{
 			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
 		}
