@@ -79,21 +79,40 @@ function scrumsprintPrepareHead($object)
 	$head[$h][2] = 'agenda';
 	$h++;
 
-
+	// FIX
+	$sql = " SELECT SUM(qty_velocity) qty_velocity FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($object->id);
+	$countObj = $db->getRow($sql);
+	if($countObj){
+		$out = '<span class="badge marginleftonlyshort">'. number_format((float)$countObj->qty_velocity , 0, '.', '') .' / ' . number_format((float)$object->qty_velocity , 0, '.', '') .'</span>';
+		$countObj->qty_velocity = is_null($countObj->qty_velocity) ? 0.0 : $countObj->qty_velocity;
+		if ( (float) $object->qty_velocity !== (float) $countObj->qty_velocity){
+			$out .= ' &nbsp;<span class="margin-l-3 fa fa-warning"></span>';
+		}
+		$out .= '</span>';
+	}
 	$head[$h][0] = dol_buildpath("/scrumproject/scrumsprintuser_list.php", 1).'?fk_sprint='.$object->id;
 	$head[$h][1] = $langs->trans("ScrumSprintUsersShort");
 	$head[$h][2] = 'scrumsprintuser';
 	$h++;
+	$out = "";
 
+	$kanban = $object->getKanbanId();
+	if ($kanban > 0) {
+		$head[$h][0] = dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban;
+		$head[$h][1] = $langs->trans('Kanban');
+		$head[$h][2] = 'kanban';
+		$h++;
+	}
+	require_once __DIR__.'/../class/scrumuserstorysprint.class.php';
 
-//	$kanban = $object->getKanbanId();
-//	if ($kanban > 0) {
-//		$head[$h][0] = dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban;
-//		$head[$h][1] = $langs->trans('Kanban');
-//		$head[$h][2] = 'kanban';
-//		$h++;
-//	}
-
+	$scrumUserStorySprint = new ScrumUserStorySprint($db);
+	$records =  $scrumUserStorySprint->fetchAll('','',0,0,array('fk_scrum_sprint' => $object->id));
+	$out = '<span class="badge marginleftonlyshort">'. number_format((float)count($records) , 0, '.', '') .'</span>' ;
+	// list Tâche planifées
+	$head[$h][0] = dol_buildpath("scrumproject/scrumuserstorysprint_list.php?mainmenu=project&leftmenu=scrumuserstorysprint", 1).'&search_fk_scrum_sprint='.$object->id;
+	$head[$h][1] = $langs->trans("ScrumUserStorySprintShort") . $out;
+	$head[$h][2] = 'scrumuserstorysprint';
+	$h++;
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
 	//$this->tabs = array(

@@ -105,12 +105,33 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 			dol_syslog(
 				"Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id
 			);
-
 			return call_user_func($callback, $action, $object, $user, $langs, $conf);
 		};
 
+		// Or you can execute some code here
+		switch ($action) {
+			// Users
+			case 'TASK_TIMESPENT_DELETE':
 
+				$this->updateTime($object);
 
+				break;
+			case 'TASK_TIMESPENT_MODIFY':
+
+				$sql  = ' SELECT SUM(task_duration) sum_duration FROM '.MAIN_DB_PREFIX.'projet_task_time';
+				$sql .= ' RIGHT JOIN '.MAIN_DB_PREFIX .'scrumproject_scrumtask_projet_task_time as ssptt ON ssptt.fk_projet_task_time ='.(int) $object->id;
+				$sql .= ' WHERE fk_task='.$object->id.' AND rowid  != '.intval( $object->timespent_id);
+
+				$obj   = $this->db->getRow($sql);
+				$cumulTime = 0;
+				if ($obj!==false){
+				      $cumulTime = $obj->sum_duration;
+				}else{
+				// todo c'est une erreur
+				}
+				$this->updateTime($object,$cumulTime,true);
+				break;
+		}
 
 		return 0;
 	}
@@ -190,6 +211,45 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 			}
 		}
 
+	}
+
+
+	/**
+	 * @param $object
+	 * @param $cumulTime
+	 * @param $isUpdate
+	 * @return void
+	 */
+	public function updateTime($object, $cumulTime = 0 , $isUpdate = false){
+		global $user;
+
+		// scrumttask contient le total declarée et le total consommé
+		$sql  = ' SELECT spt.fk_scrumproject_scrumtask   as ss, Tablett.task_duration as qty ';
+		$sql .= ' FROM ' .MAIN_DB_PREFIX .'scrumproject_scrumtask_projet_task_time as spt';
+		$sql .= ' INNER JOIN '.MAIN_DB_PREFIX.'projet_task_time as Tablett ON Tablett.rowid = spt.fk_projet_task_time ';
+		$sql .= ' WHERE spt.fk_projet_task_time ='. $object->timespent_id;
+
+		$obj = $this->db->getRow($sql);
+		if ($obj){
+
+			// on declare un obj scrumtask
+			include_once __DIR__ .'/../../class/scrumtask.class.php';
+			$st = new ScrumTask($this->db);
+			$res = $st->fetch($obj->ss);
+			if ($res){
+				/// on retire le temps  via function  dans qty_consummed
+				if ($isUpdate){
+
+					$st->qty_consumed =  ( ($cumulTime  / 60 / 60 ) + ( $obj->qty / 60 / 60) );
+				}else{
+
+					$st->qty_consumed =  ($st->qty_consumed - ( $obj->qty / 60 / 60) ) ;
+				}
+				$st->update($user);
+			}
+		}elseif ($obj === false) {
+			dol_print_error($this->db);
+		}
 	}
 
 }

@@ -146,7 +146,7 @@ StatusScrumSprintCancelled = Annulé
 ListOfScrumSprints = Liste des Sprints
 ProjectPlanningReportMenu = Planning projets
 ListOfSprintProjectPlanning = Planning projets/prints
-
+ScrumUserStorySprintShort=Liste des US planifiées
 #####################################################
 # ScrumCard
 #
