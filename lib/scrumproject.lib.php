@@ -420,3 +420,31 @@ function scrumProjectConvertQuantityToProjectGranularity($value){
 	$toolTip = $value.' '.$langs->trans('Hours').' / '.$quotient.' '.$langs->trans('HoursByDay').' = <strong>'.$outV.$langs->trans('shortLetterForDaysMan').'</strong>';
 	return '<span class="classfortooltip" title="'.dol_escape_htmltag($toolTip).'" >'.$value.'</span>';
 }
+
+/**
+ * passage de l'heure en 100 iem vers 60 iem
+ * @param  $elementObject
+ * @param $hLetter
+ * @return float|string
+ */
+function getTileFormatedTime($time)
+{
+	global $conf;
+
+	$hLetter = ($conf->global->SHOW_HOUR_DOT_LETTER) ? ':' : 'h';
+	$time = price2num($time, '2', 2);
+	$tmpTimeArr = explode('.', $time);
+	// on convertit les minutes
+	if (is_array($tmpTimeArr) && count($tmpTimeArr) > 1) {
+		//hours and minutes
+		$min = ($tmpTimeArr[1] * 60 / 100);
+		if (strlen($min) == 1) {
+			$min .= '0';
+		}
+		//
+		$time = $tmpTimeArr[0] . $hLetter . $min;
+		return $time;
+	}
+
+	return $time. $hLetter;
+}
