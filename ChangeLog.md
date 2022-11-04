@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## Version 1.14
+
 - FIX : Contact tab display for scrum task and scrum Us *26/10/2022* - 1.14.1
 - NEW : Option for kanban status display *26/10/2022* - 1.14.0
 - FIX : Backport du fiw sql des longueurs de colonnes element_element *26/10/2022* - 1.13.0
@@ -18,13 +22,15 @@ All notable changes to this project will be documented in this file.
 - NEW : Kanban drop card status *12/10/2022* - 1.7.0
 
 ## Version 1.6
- - FIX :  - *27/10/2022)* - 1.6.3  
-   - badge sur onglet dispo RH sur fiche sprint (ajouter nombre de lignes associées à l'onglet) + MAJ dol banner comme les autres onglets
-   - avoir un onglet us planifiées sur la fiche sprint
-   - ordre des champs de recherche de la list des planifiées à fixer
-   - le temps passé ne se recalcule pas suite suppression temps  -> Si on supprime un temps passé depuis la kanban onglet temps consommé d'une tâche SCRUM (carte) il n'est pas mis à jour sur la tache scrum. Le sprint une fois recalculé ne prend pas non plus en compte cette modification.
-   - Arrondi manquant sur les chiffres (ne doit pas dépendre de la conf dolibarr)
-   - Transformer les heures afficher au format numérique en format heure : 2,5 -> 02:30 (2h30)
+
+ - FIX : - Transformer les heures afficher au format numérique en format heure sur us card - *03/11/2022)* - 1.6.4  
+ - FIX :  - *27/10/2022)* - 1.6.3 
+     - badge sur onglet dispo RH sur fiche sprint (ajouter nombre de lignes associées à l'onglet) + MAJ dol banner comme les autres onglets
+     - avoir un onglet us planifiées sur la fiche sprint
+     - ordre des champs de recherche de la list des planifiées à fixer
+     - le temps passé ne se recalcule pas suite suppression temps  -> Si on supprime un temps passé depuis la kanban onglet temps consommé d'une tâche SCRUM (carte) il n'est pas mis à jour sur la tache scrum. Le sprint une fois recalculé ne prend pas non plus en compte cette modification.
+     - Arrondi manquant sur les chiffres (ne doit pas dépendre de la conf dolibarr)
+     - Transformer les heures afficher au format numérique en format heure : 2,5 -> 02:30 (2h30)
    
  - FIX : Calcule des lignes d'un découpage de carte à chaque clic - *11/10/2022* - 1.6.2
  - FIX : multiple - *29/09/2022* - 1.6.1
