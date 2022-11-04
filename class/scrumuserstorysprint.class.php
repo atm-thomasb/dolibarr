@@ -39,6 +39,12 @@ class ScrumUserStorySprint extends CommonObject
 
 	use CommonObjectQuickTools;
 
+	/**
+	 * Kanban contacts are sets on this object not in kanban card
+	 */
+	const OVERRIDE_KANBAN_CARD_CONTACTS = true; // Value doesn't used,  only definition is check
+
+
 //	/**
 //	 * @var string ID of module.
 //	 */
