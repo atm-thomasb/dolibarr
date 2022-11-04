@@ -918,21 +918,6 @@ function _actionRemoveUserToCard($jsonResponse, $userId = false){
 
 	$data = GETPOST("data", "array");
 
-
-	if($userId === false){
-		$userId = $user->id;
-	}elseif(empty($userId)){
-		$jsonResponse->msg = 'Need user Id';
-		return false;
-	}else{
-		$contactUser = new User($db);
-		if($contactUser->fetch($userId) <= 0){
-			$jsonResponse->msg = 'Need valid user';
-			return false;
-		}
-	}
-
-
 	// Get card id
 	if(empty($data['card-id'])){
 		$jsonResponse->msg = 'Need card Id';
@@ -945,59 +930,19 @@ function _actionRemoveUserToCard($jsonResponse, $userId = false){
 		return false;
 	}
 
-	$gCError = '';
-
 	/**
 	 * @var ScrumCard $scrumCard
 	 */
-	if($scrumCard->fk_element > 0){
-		if(!$scrumCard->fetchElementObject()){
-			$jsonResponse->msg = 'Error fectching element object';
-			return false;
-		}
-
-		$TContactUsersAffected = $scrumCard->elementObject->liste_contact(-1,'internal');
-		if($TContactUsersAffected == -1){
-			$jsonResponse->msg = 'Error removing contact : '.$scrumCard->elementObject->errorsToString();
-			return false;
-		}
-
-		foreach ($TContactUsersAffected as $contactArray){
-			if($contactArray['id'] != $userId){
-				continue;
-			}
-
-			$result = $scrumCard->elementObject->delete_contact($contactArray['rowid']);
-			if($result<0){
-				$jsonResponse->msg = 'Error delecting contact : '.$scrumCard->errorsToString();
-				return false;
-			}
-		}
+	$res = $scrumCard->removeUserToCard($user, $userId);
+	if($res){
+		$jsonResponse->result = 1;
+		$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
+		return true;
+	}else{
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $scrumCard->error;
+		return false;
 	}
-	else{
-		$TContactUsersAffected = $scrumCard->liste_contact(-1,'internal');
-		if($TContactUsersAffected == -1){
-			$jsonResponse->msg = 'Error removing contact : '.$scrumCard->errorsToString();
-			return false;
-		}
-
-		foreach ($TContactUsersAffected as $contactArray){
-
-			if($contactArray['id'] != $userId){
-				continue;
-			}
-
-			$result = $scrumCard->delete_contact($contactArray['rowid']);
-			if($result<0){
-				$jsonResponse->msg = 'Error delecting contact : '.$scrumCard->errorsToString();
-				return false;
-			}
-		}
-	}
-
-	$jsonResponse->result = 1;
-	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
-	return true;
 }
 
 /**
