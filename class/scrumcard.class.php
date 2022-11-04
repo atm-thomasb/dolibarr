@@ -1108,10 +1108,6 @@ class ScrumCard extends CommonObject
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
-				$status = '';
-				if(is_callable(array($elementObject, 'LibStatut'))){
-					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
-				}
 				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
