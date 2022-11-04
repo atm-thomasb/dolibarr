@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## Version 1.14
+
 - FIX : Contact tab display for scrum task and scrum Us *26/10/2022* - 1.14.1
 - NEW : Option for kanban status display *26/10/2022* - 1.14.0
 - FIX : Backport du fiw sql des longueurs de colonnes element_element *26/10/2022* - 1.13.0
