@@ -316,7 +316,7 @@ if ($id > 0 || !empty($ref)) {
 
 		// Duration - Time spent
 		print '<td class="nowraponall">';
-		print '<input required type="time" value="" name="timespent"  />';
+		print '<input required type="time" value="00:00" name="timespent"  />';
 		print '</td>';
 
 		// Progress declared
