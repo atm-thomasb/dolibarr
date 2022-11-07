@@ -91,7 +91,7 @@ function scrumsprintPrepareHead($object)
 		$out .= '</span>';
 	}
 	$head[$h][0] = dol_buildpath("/scrumproject/scrumsprintuser_list.php", 1).'?fk_sprint='.$object->id;
-	$head[$h][1] = $langs->trans("ScrumSprintUsersShort");
+	$head[$h][1] = $langs->trans("ScrumSprintUsersShort") . $out;
 	$head[$h][2] = 'scrumsprintuser';
 	$h++;
 	$out = "";
