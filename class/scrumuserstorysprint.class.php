@@ -1327,6 +1327,34 @@ class ScrumUserStorySprint extends CommonObject
 	 *
 	 * @return int
 	 */
+	public function calcTimeDone(){
+
+		if(!class_exists('ScrumTask')){
+			require_once __DIR__ . '/scrumtask.class.php';
+		}
+
+		// Si US done alors c'est done ;-) tout simplement, en gros je regarde pas les têches
+		if($this->status == self::STATUS_DONE){
+			$this->qty_done = $this->qty_planned;
+			return $this->qty_done;
+		}
+
+		$sql = /** @lang MySQL */ "SELECT SUM(t.qty_planned) sumTaskPlanned FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask t "
+			." WHERE t.fk_scrum_user_story_sprint = ".intval($this->id).' AND t.status = '.ScrumTask::STATUS_DONE;
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_done = doubleval($obj->sumTaskPlanned);
+			return $this->qty_done;
+		}
+
+		return 0;
+	}
+
+	/**
+	 *
+	 * @return int
+	 */
 	public function calcTimeSpent(){
 
 		$sql = /** @lang MySQL */ "SELECT SUM(qty_consumed) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask "
@@ -1380,6 +1408,50 @@ class ScrumUserStorySprint extends CommonObject
 			if (!$error && !$notrigger) {
 				// Call triggers
 				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_UPDATE_TIME_SPENT', $user);
+				if ($result < 0) {
+					$error++;
+				} //Do also here what you must do to rollback action if trigger fail
+				// End call triggers
+			}
+
+			// Commit or rollback
+			if ($error) {
+				$this->db->rollback();
+				return -1;
+			} else {
+				$this->db->commit();
+				return $this->id;
+			}
+		}
+		else {
+			$this->error = $this->db->lasterror();
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+
+	/**
+	 * @param User $user
+	 * @param      $notrigger
+	 * @return int
+	 */
+	public function updateTimeDone(User $user, $notrigger = false){
+		global $user;
+
+		$error = 0;
+		$this->db->begin();
+
+		$this->calcTimeDone();
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_done = '".$this->qty_done."' WHERE rowid=" . ((int) $this->id);
+
+		if($this->db->query($sql)){
+
+			// Triggers
+			if (!$error && !$notrigger) {
+				// Call triggers
+				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_UPDATE_TIME_DONE', $user);
 				if ($result < 0) {
 					$error++;
 				} //Do also here what you must do to rollback action if trigger fail

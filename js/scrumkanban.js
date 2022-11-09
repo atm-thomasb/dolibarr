@@ -11,6 +11,7 @@ scrumKanban = {};
 		documentIcon 	: `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right: 7px" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><rect width="15.1" height="19.6" x="5" y="2.3" /><path fill="none" d="M7.4 13.6h10M7.5 16.6h10"/></svg>`
 	}
 
+	o.debugMode = false;
 
 	/**
 	 * Store the last token of all board element
@@ -222,7 +223,11 @@ scrumKanban = {};
 
 		// init du refresh du kanban
 		setTimeout(function(){
-			o.refreshAllBoards(true);
+			if(o.debugMode != true) {
+				o.refreshAllBoards(true);
+			}else{
+				console.log("debug mode on refresh disable");
+			}
 		}, 5000);
 
 		// Open dialog for kanban item : pas d'utilisation du click fournis par le kanban pour permettre les clics sur des sous elements
