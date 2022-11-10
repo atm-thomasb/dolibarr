@@ -13,11 +13,11 @@ scrumKanban = {};
 
 
 	/**
-	 * Store the max tms of all board element 
+	 * Store the last token of all board element
 	 * used to compare with database and determine if need update
-	 * @type {number}
+	 * @type {string}
 	 */
-	o.lastBoardUpdate = 0;
+	o.lastBoardUpdateToken = '';
 
 	/**
 	 * Dolibarr token
@@ -508,7 +508,7 @@ scrumKanban = {};
 			if(response.result > 0) {
 				// recupérer les bonnes infos
 				o.jkanban.addBoards(response.data.boards);
-				o.lastBoardUpdate = response.data.md5Boards;
+				o.lastBoardUpdateToken = response.data.md5Boards;
 			}
 		});
 	}
@@ -518,7 +518,7 @@ scrumKanban = {};
 	//   WebSocket ? ou server-sent events ?
 	o.refreshAllBoards = function (autoRefresh = false){
 
-		// todo : use o.lastBoardUpdate
+		// todo : use o.lastBoardUpdateToken
 
 		let sendData = {
 			'fk_kanban': o.config.fk_kanban
@@ -526,7 +526,7 @@ scrumKanban = {};
 
 		o.callKanbanInterface('getAllBoards', sendData, function(response){
 
-			if(response.result > 0 && response.data.md5Boards != o.lastBoardUpdate) {
+			if(response.result > 0 && response.data.md5Boards != o.lastBoardUpdateToken) {
 
 				let boardsToDelete = [];
 
@@ -543,7 +543,7 @@ scrumKanban = {};
 				// recupérer les bonnes infos
 				o.jkanban.container.style.width = '';
 				o.jkanban.addBoards(response.data.boards);
-				o.lastBoardUpdate = response.data.md5Boards;
+				o.lastBoardUpdateToken = response.data.md5Boards;
 			}
 
 			if(autoRefresh){
@@ -760,46 +760,52 @@ scrumKanban = {};
 
 
 			let menuItems = [];
+			if($(el).find('.kanban-item__users[data-iam-affected=1]').length > 0){
+				// Un assign me to card
+				menuItems.push({
+					content: '<i class="fa fa-user-minus" ></i>' + o.langs.UnAssignMe,
+					events: {
+						click: function (e) {
+							let sendData = {
+								'fk_kanban': o.config.fk_kanban,
+								'card-id': el.getAttribute('data-objectid')
+							};
 
-			// Assign me to card
-			menuItems.push({
-				content: '<i class="fa fa-user-plus" ></i>' + o.langs.AssignMe,
-				events: {
-					click: function (e) {
-						let sendData = {
-							'fk_kanban': o.config.fk_kanban,
-							'card-id': el.getAttribute('data-objectid')
-						};
-
-						o.callKanbanInterface('assignMeToCard', sendData, function(response){
-							if(response.result > 0) {
-								// recupérer les bonnes infos
-								o.jkanban.replaceElement(el, response.data);
-							}
-						});
+							o.callKanbanInterface('removeMeFromCard', sendData, function(response){
+								if(response.result > 0) {
+									// recupérer les bonnes infos
+									// o.jkanban.replaceElement(el, response.data); // TODO le menu doit ce mettre à jour du coup j'utilise refreshAllBoards à la place
+									o.refreshAllBoards(false);
+								}
+							});
+						}
 					}
-				}
-			});
+				});
+			}
+			else{
+				// Assign me to card
+				menuItems.push({
+					content: '<i class="fa fa-user-plus" ></i>' + o.langs.AssignMe,
+					events: {
+						click: function (e) {
+							let sendData = {
+								'fk_kanban': o.config.fk_kanban,
+								'card-id': el.getAttribute('data-objectid')
+							};
 
-			// Un assign me to card
-			menuItems.push({
-				content: '<i class="fa fa-user-minus" ></i>' + o.langs.UnAssignMe,
-				events: {
-					click: function (e) {
-						let sendData = {
-							'fk_kanban': o.config.fk_kanban,
-							'card-id': el.getAttribute('data-objectid')
-						};
-
-						o.callKanbanInterface('removeMeFromCard', sendData, function(response){
-							if(response.result > 0) {
-								// recupérer les bonnes infos
-								o.jkanban.replaceElement(el, response.data);
-							}
-						});
+							o.callKanbanInterface('assignMeToCard', sendData, function(response){
+								if(response.result > 0) {
+									// recupérer les bonnes infos
+									// o.jkanban.replaceElement(el, response.data); // TODO le menu doit ce mettre à jour du coup j'utilise refreshAllBoards à la place
+									o.refreshAllBoards(false);
+								}
+							});
+						}
 					}
-				}
-			});
+				});
+			}
+
+
 
 
 			// Card Tags

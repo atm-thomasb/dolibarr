@@ -37,6 +37,11 @@ class ScrumTask extends CommonObject
 
 	use CommonObjectQuickTools;
 
+	/**
+	 * Kanban contacts are sets on this object not in kanban card
+	 */
+	const OVERRIDE_KANBAN_CARD_CONTACTS = true; // Value doesn't used,  only definition is check
+
 //	/**
 //	 * @var string ID of module.
 //	 */
@@ -113,7 +118,7 @@ class ScrumTask extends CommonObject
 		'fk_scrum_user_story_sprint' => array('type'=>'integer:ScrumUserStorySprint:scrumproject/class/scrumuserstorysprint.class.php:1', 'label'=>'ScrumUserStorySprint', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumuserstorysprint.rowid', 'validate'=>'1',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
 		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'fk_user_dev' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserDEV', 'enabled'=>'1', 'position'=>55, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
+//		'fk_user_dev' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserDEV', 'enabled'=>'1', 'position'=>55, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
 		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'description' => array('type'=>'html', 'label'=>'Description', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>3, 'validate'=>'1',),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>0, 'validate'=>'1',),
