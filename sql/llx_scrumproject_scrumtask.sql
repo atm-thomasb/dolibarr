@@ -19,7 +19,7 @@ CREATE TABLE llx_scrumproject_scrumtask(
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
 	fk_scrum_user_story_sprint integer,
-    fk_user_dev integer,
+--     fk_user_dev integer,
     label varchar(255),
 	description text, 
 	note_public text, 
