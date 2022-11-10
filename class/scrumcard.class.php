@@ -1053,7 +1053,9 @@ class ScrumCard extends CommonObject
 
 		if($res){
 			$elementObject = $this->elementObject;
-			$TContactUsersAffected = $elementObject->liste_contact(-1,'internal');
+			if(defined( get_class($this->elementObject).'::OVERRIDE_KANBAN_CARD_CONTACTS' )) {
+				$TContactUsersAffected = $elementObject->liste_contact(-1, 'internal');
+			}
 			$object->element = $elementObject->element;
 			$object->targetelementid = $elementObject->id;
 
@@ -1106,10 +1108,6 @@ class ScrumCard extends CommonObject
 				$object->cardUrl = dol_buildpath('/scrumproject/scrumuserstorysprint_card.php',1).'?id='.$elementObject->id;
 				$object->type = 'scrum-user-story';
 
-				$status = '';
-				if(is_callable(array($elementObject, 'LibStatut'))){
-					$status.= $elementObject->LibStatut(intval($elementObject->status), 2);
-				}
 				$status.= '<span class="highlight-scrum-task prevent-card-click" ></span>';
 			}
 			elseif($elementObject->element == 'scrumproject_scrumtask'){
@@ -1170,14 +1168,21 @@ class ScrumCard extends CommonObject
 		// Afficher les contacts de la carte et/ou object attaché (user story, taches etcc)
 		if(!empty($TContactUsersAffected)){
 			include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-			$object->title.= '<span class="kanban-item__users">';
+
+			$userImgList = '';
+			$curentUserIsAffected = 0;
 			foreach ($TContactUsersAffected as $contactUserAffected){
+
+				if($contactUserAffected['id'] == $user->id){
+					$curentUserIsAffected = 1;
+				}
+
 				$userAffected = new User($this->db);
 				if($userAffected->fetch($contactUserAffected['id']) > 0){
-					$object->title.= self::getUserImg($userAffected, 'kanban-item__user');
+					$userImgList.= '<span class="kanban-item__users_img" data-user-id="'.$contactUserAffected['id'].'" >'.self::getUserImg($userAffected, 'kanban-item__user').'</span>';
 				}
 			}
-			$object->title.= '</span>';
+			$object->title.= '<span class="kanban-item__users" data-iam-affected="'.$curentUserIsAffected.'">'.$userImgList.'</span>';
 		}
 
 		$object->item = array();
@@ -1558,4 +1563,172 @@ class ScrumCard extends CommonObject
         return parent::setCategoriesCommon($categories, 'scrumcard');
     }
 
+
+	/**
+	 * @param int|bool     $userId
+	 * @param bool         $toggle if contact already prevent it remove it
+	 * @return bool|void
+	 */
+	public function assignUserToCard($user, $userId = false, $toggle = false){
+		global  $conf, $langs;
+
+		if (empty($user->rights->scrumproject->scrumcard->write)) {
+			$this->error = $langs->trans('NotEnoughRights');
+			return false;
+		}
+
+		if($userId === false){
+			$userId = $user->id;
+			$user->fetch_optionals();
+			$typeContact = $user->array_options['options_scrumproject_role'];
+		}elseif(empty($userId)){
+			$this->error = 'Need user Id';
+			return false;
+		}else{
+			$contactUser = new User($this->db);
+			if($contactUser->fetch($userId) <= 0){
+				$this->error = 'Need valid user';
+				return false;
+			}
+
+			$contactUser->fetch_optionals();
+			$typeContact = $contactUser->array_options['options_scrumproject_role'];
+		}
+
+		if(empty($typeContact) && !empty($conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE)){
+			$typeContact = $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE;
+		}
+
+
+		// Get card id
+		if(empty($this->id)){
+			$this->error = 'Need card Id';
+			return false;
+		}
+
+		if($this->fk_element > 0 && !$this->fetchElementObject()) {
+			$this->error = 'Error fectching element object';
+			return false;
+		}
+
+		if($this->fk_element > 0 && defined( get_class($this->elementObject).'::OVERRIDE_KANBAN_CARD_CONTACTS' )){
+
+			$typeContactId = $this::getInternalContactIdFromCode($typeContact, $this->elementObject);
+			if(!$typeContactId){
+				$this->error = 'Error contact type '.$typeContact.' not found for '.$this->elementObject->element;
+				return false;
+			}
+
+			$result = $this->elementObject->add_contact($userId, $typeContactId,'internal');
+			if($result<0){
+				$this->error = 'Error adding contact : '.$this->elementObject->errorsToString();
+				return false;
+			}
+
+			if($toggle && $result == 0){
+				return $this->removeUserToCard($user, $userId);
+			}
+		}
+		else{
+			$typeContactId = $this::getInternalContactIdFromCode($typeContact, $this);
+			if(!$typeContactId){
+				$this->error = 'Error contact type '.$typeContact.' not found for scrum card';
+				return false;
+			}
+
+			$result = $this->add_contact($userId, $typeContactId,'internal');
+			if($result<0){
+				$this->error = 'Error adding contact : '.$this->errorsToString();
+				return false;
+			}
+
+			if($toggle && $result == 0){
+				return $this->removeUserToCard($user, $userId);
+			}
+		}
+
+		return true;
+	}
+
+
+
+	/**
+	 * @param int|bool         $userId
+	 * @return bool|void
+	 */
+	function removeUserToCard($user, $userId = false){
+		global $langs;
+
+		if (empty($user->rights->scrumproject->scrumcard->write)) {
+			$this->error = $langs->trans('NotEnoughRights');
+			return false;
+		}
+
+		if($userId === false){
+			$userId = $user->id;
+		}elseif(empty($userId)){
+			$this->error = 'Need user Id';
+			return false;
+		}else{
+			$contactUser = new User($this->db);
+			if($contactUser->fetch($userId) <= 0){
+				$this->error = 'Need valid user';
+				return false;
+			}
+		}
+
+		// Get card id
+		if(empty($this->id)){
+			$this->error = 'Need card Id';
+			return false;
+		}
+
+		if($this->fk_element > 0 && !$this->fetchElementObject()) {
+			$this->error = 'Error fectching element object';
+			return false;
+		}
+
+		if($this->fk_element > 0 && defined( get_class($this->elementObject).'::OVERRIDE_KANBAN_CARD_CONTACTS' )){
+
+			$TContactUsersAffected = $this->elementObject->liste_contact(-1,'internal');
+			if($TContactUsersAffected == -1){
+				$this->error = 'Error removing contact : '.$this->elementObject->errorsToString();
+				return false;
+			}
+
+			foreach ($TContactUsersAffected as $contactArray){
+				if($contactArray['id'] != $userId){
+					continue;
+				}
+
+				$result = $this->elementObject->delete_contact($contactArray['rowid']);
+				if($result<0){
+					$this->error = 'Error delecting contact : '.$this->errorsToString();
+					return false;
+				}
+			}
+		}
+		else{
+			$TContactUsersAffected = $this->liste_contact(-1,'internal');
+			if($TContactUsersAffected == -1){
+				$this->error = 'Error removing contact : '.$this->errorsToString();
+				return false;
+			}
+
+			foreach ($TContactUsersAffected as $contactArray){
+
+				if($contactArray['id'] != $userId){
+					continue;
+				}
+
+				$result = $this->delete_contact($contactArray['rowid']);
+				if($result<0){
+					$this->error = 'Error deleting contact : '.$this->errorsToString();
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 }

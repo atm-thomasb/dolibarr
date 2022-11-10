@@ -874,30 +874,6 @@ function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false
 
 	$data = GETPOST("data", "array");
 
-
-	if($userId === false){
-		$userId = $user->id;
-		$user->fetch_optionals();
-		$typeContact = $user->array_options['options_scrumproject_role'];
-	}elseif(empty($userId)){
-		$jsonResponse->msg = 'Need user Id';
-		return false;
-	}else{
-		$contactUser = new User($db);
-		if($contactUser->fetch($userId) <= 0){
-			$jsonResponse->msg = 'Need valid user';
-			return false;
-		}
-
-		$contactUser->fetch_optionals();
-		$typeContact = $contactUser->array_options['options_scrumproject_role'];
-	}
-
-	if(empty($typeContact) && !empty($conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE)){
-		$typeContact = $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE;
-	}
-
-
 	// Get card id
 	if(empty($data['card-id'])){
 		$jsonResponse->msg = 'Need card Id';
@@ -909,57 +885,19 @@ function _actionAssignUserToCard($jsonResponse, $userId = false, $toggle = false
 	if(!$scrumCard){
 		return false;
 	}
-
-	$gCError = '';
-
 	/**
 	 * @var ScrumCard $scrumCard
 	 */
-	if($scrumCard->fk_element > 0){
-		if(!$scrumCard->fetchElementObject()){
-			$jsonResponse->msg = 'Error fectching element object';
-			return false;
-		}
-		$typeContactId = $scrumCard::getInternalContactIdFromCode($typeContact, $scrumCard->elementObject);
-		if(!$typeContactId){
-			$jsonResponse->msg = 'Error contact type '.$typeContact.' not found for '.$scrumCard->elementObject->element;
-			return false;
-		}
-
-		$jsonResponse->debug = $typeContactId;
-		$result = $scrumCard->elementObject->add_contact($userId, $typeContactId,'internal');
-		if($result<0){
-			$jsonResponse->msg = 'Error adding contact : '.$scrumCard->elementObject->errorsToString();
-			return false;
-		}
-
-		if($toggle && $result == 0){
-			return _actionRemoveUserToCard($jsonResponse, $userId);
-		}
+	$res = $scrumCard->assignUserToCard($user, $userId, $toggle);
+	if($res){
+		$jsonResponse->result = 1;
+		$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
+		return true;
+	}else{
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $scrumCard->error;
+		return false;
 	}
-	else{
-		$typeContactId = $scrumCard::getInternalContactIdFromCode($typeContact, $scrumCard);
-		if(!$typeContactId){
-			$jsonResponse->msg = 'Error contact type '.$typeContact.' not found for scrum card';
-			return false;
-		}
-		$jsonResponse->debug = $typeContactId;
-		$result = $scrumCard->add_contact($userId, $typeContactId,'internal');
-		if($result<0){
-			$jsonResponse->msg = 'Error adding contact : '.$scrumCard->errorsToString();
-			return false;
-		}
-
-		if($toggle && $result == 0){
-			return _actionRemoveUserToCard($jsonResponse, $userId);
-		}
-	}
-
-
-
-	$jsonResponse->result = 1;
-	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
-	return true;
 }
 
 
@@ -980,21 +918,6 @@ function _actionRemoveUserToCard($jsonResponse, $userId = false){
 
 	$data = GETPOST("data", "array");
 
-
-	if($userId === false){
-		$userId = $user->id;
-	}elseif(empty($userId)){
-		$jsonResponse->msg = 'Need user Id';
-		return false;
-	}else{
-		$contactUser = new User($db);
-		if($contactUser->fetch($userId) <= 0){
-			$jsonResponse->msg = 'Need valid user';
-			return false;
-		}
-	}
-
-
 	// Get card id
 	if(empty($data['card-id'])){
 		$jsonResponse->msg = 'Need card Id';
@@ -1007,59 +930,19 @@ function _actionRemoveUserToCard($jsonResponse, $userId = false){
 		return false;
 	}
 
-	$gCError = '';
-
 	/**
 	 * @var ScrumCard $scrumCard
 	 */
-	if($scrumCard->fk_element > 0){
-		if(!$scrumCard->fetchElementObject()){
-			$jsonResponse->msg = 'Error fectching element object';
-			return false;
-		}
-
-		$TContactUsersAffected = $scrumCard->elementObject->liste_contact(-1,'internal');
-		if($TContactUsersAffected == -1){
-			$jsonResponse->msg = 'Error removing contact : '.$scrumCard->elementObject->errorsToString();
-			return false;
-		}
-
-		foreach ($TContactUsersAffected as $contactArray){
-			if($contactArray['id'] != $userId){
-				continue;
-			}
-
-			$result = $scrumCard->elementObject->delete_contact($contactArray['rowid']);
-			if($result<0){
-				$jsonResponse->msg = 'Error delecting contact : '.$scrumCard->errorsToString();
-				return false;
-			}
-		}
+	$res = $scrumCard->removeUserToCard($user, $userId);
+	if($res){
+		$jsonResponse->result = 1;
+		$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
+		return true;
+	}else{
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $scrumCard->error;
+		return false;
 	}
-	else{
-		$TContactUsersAffected = $scrumCard->liste_contact(-1,'internal');
-		if($TContactUsersAffected == -1){
-			$jsonResponse->msg = 'Error removing contact : '.$scrumCard->errorsToString();
-			return false;
-		}
-
-		foreach ($TContactUsersAffected as $contactArray){
-
-			if($contactArray['id'] != $userId){
-				continue;
-			}
-
-			$result = $scrumCard->delete_contact($contactArray['rowid']);
-			if($result<0){
-				$jsonResponse->msg = 'Error delecting contact : '.$scrumCard->errorsToString();
-				return false;
-			}
-		}
-	}
-
-	$jsonResponse->result = 1;
-	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
-	return true;
 }
 
 /**
