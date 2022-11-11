@@ -86,7 +86,9 @@ scrumKanban = {};
 
 		RemoveLine : 'Supprimer la ligne',
 		AddLine : 'Ajouter une ligne',
-		QtyScrumTaskAlreadySplited: 'Quantités découpées en tâche(s) scrum '
+		QtyScrumTaskAlreadySplited: 'Quantités découpées en tâche(s) scrum ',
+
+		SprintResume:"Résumé du sprint",
 
 	};
 
@@ -260,6 +262,10 @@ scrumKanban = {};
 		// init Highlight backround
 		o.initHighlight();
 
+		// Open dialog for kanban resume
+		$(document).on('click','#kanban-resume-btn', function() {
+			o.sprintResumeDialog();
+		})
 
 		// TODO : bon pour l'instant ça marche pas
 		//  Doit normalement permettre de scroll les liste en même temps que l'on fait un drag and drop
@@ -367,6 +373,24 @@ scrumKanban = {};
 
 		$target.dialog('open');
 	};
+
+	o.sprintResumeDialog = function(){
+		let resumeDialog = new Dialog({
+			title: o.langs.SprintResume,
+			content: "",
+			onOpen: function(){
+				let sendData = {
+					'fk_kanban': o.config.fk_kanban
+				};
+
+				o.callKanbanInterface('getSprintResumeData', sendData, function(response){
+					resumeDialog.setContent(response.data.html);
+				});
+
+				return true;
+			}
+		});
+	}
 
 
 	o.addKanbanList = function(listName){
@@ -593,6 +617,7 @@ scrumKanban = {};
 					$(preTargetQuery +'[data-field="qty_planned"]').html(response.data.sprintInfos.qty_planned);
 					$(preTargetQuery +'[data-field="qty_done"]').html(response.data.sprintInfos.qty_done);
 					$(preTargetQuery +'[data-field="qty_consumed"]').html(response.data.sprintInfos.qty_consumed);
+					$(preTargetQuery +'[data-field="qty_us_planned_done"]').html(response.data.sprintInfos.qty_us_planned_done);
 				}
 				// refresh resume
 			}

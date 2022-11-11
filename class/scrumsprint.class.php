@@ -1244,8 +1244,9 @@ class ScrumSprint extends CommonObject
 
 
 	/**
+	 * Permet de lancer une requette d'update avec tout les triggers
 	 * @param User $user
-	 * @param string $sql
+	 * @param string $sql the SQL UPDATE query
 	 * @param string $tiggerName
 	 * @param bool $notrigger
 	 * @return int
@@ -1322,5 +1323,116 @@ class ScrumSprint extends CommonObject
 		}
 		if ($obj = $db->fetch_object($res)) return $obj->rowid;
 		return -2;
+	}
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 * @return int
+	 */
+	public function displayUsersProgress($userIds = array()){
+		global $langs;
+
+		include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+
+		$out = '';
+		$data = $this->calcUserProgress($userIds);
+
+		if($data === false || !is_array($data)){
+			return false;
+		}
+
+		if(empty($data)){
+			$out.= $langs->trans('NoData');
+		}else{
+			$out.= '<table class="sprint-resume-table">';
+
+			$out.= '<thead>';
+			$out.= '<tr>';
+			$out.= '	<th colspan="2"></th>';
+			$out.= '	<th><span title="'.dol_escape_htmltag($langs->trans('TimeSpentHelp')).'">'.$langs->trans('TimeSpent').'</span></th>';
+			$out.= '	<th><span title="'.dol_escape_htmltag($langs->trans('TimePlannedDoneHelp')).'">'.$langs->trans('TimePlannedDone').'</span></th>';
+			$out.= '	<th><span title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
+			$out.= '</tr>';
+			$out.= '</thead>';
+
+
+			$out.= '<tbody>';
+			foreach ($data as $item){
+				$cUser = scrumProjectGetObjectByElement('user', $item->fk_user);
+				/** @var User $cUser */
+				if(!$cUser){
+					$out.= '<tr><th colspan="2" class="error">'.$langs->trans('Error').'</th></tr>';
+					continue;
+				}
+
+				//sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+				//			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone
+
+				$out.= '<tr>';
+				$out.= '	<th>';
+				$out.= '		<span class="sprint-resume-user-img" data-user-id="';
+				$out.= 				$cUser->id.'" >'.Form::showphoto('userphoto', $cUser, 0, 0, 0, 'sprint-resume-user-img__pic', '', '', 1);
+				$out.= '		</span>';
+				$out.= '	</th>';
+
+				$out.= '	<th>';
+				$out.= 			$cUser->getFullName($langs);
+				$out.= '	</th>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= getTileFormatedTime($item->sumTimeSpent) ;
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= getTileFormatedTime($item->sumTimeDone) ;
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= getTileFormatedTime($item->sumTimePlanned) ;
+				$out.= '	</td>';
+				$out.= '</tr>';
+			}
+			$out.= '</tbody>';
+			$out.= '</table>';
+		}
+
+
+
+		return $out;
+	}
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 *
+	 * @param array $userIds
+	 * @return false|array
+	 */
+	public function calcUserProgress($userIds = array()){
+
+		if(!is_array($userIds)){
+			return false;
+		}
+
+		if(!class_exists('ScrumTask')){ require_once __DIR__ .'/scrumtask.class.php';}
+
+		$sql = /** @lang MySQL */
+			"SELECT ec.fk_socpeople fk_user, SUM(st.qty_consumed) sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask st "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint usp ON(st.fk_scrum_user_story_sprint = usp.rowid) "
+			." JOIN ".MAIN_DB_PREFIX."element_contact ec ON(ec.element_id = st.rowid) "
+			." JOIN ".MAIN_DB_PREFIX."c_type_contact tc ON(ec.fk_c_type_contact = tc.rowid AND tc.element = 'scrumproject_scrumtask') "
+			." WHERE usp.fk_scrum_sprint = ".intval($this->id)
+			." AND tc.source = 'internal'";
+
+		if(!empty($userIds)){
+			$userIds = array_map('intval', $userIds);
+			$sql.= ' AND ec.fk_socpeople IN ('.implode(',',$userIds).')';
+		}
+
+		$sql.= " GROUP BY ec.fk_socpeople";
+
+
+		return $this->db->getRows($sql);
 	}
 }

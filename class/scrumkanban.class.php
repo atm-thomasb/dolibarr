@@ -1168,31 +1168,26 @@ class ScrumKanban extends CommonObject
 
 		return $error;
 	}
+
+	/**
+	 *
+	 * @return int
+	 */
+	public function calcUsPlannedInList($ref_code = 'done'){
+
+		// TODO : changer les calculs et les baser sur le status des US et non les colonnes du kanban si les statuts des us refont leurs apparition
+
+		$sql = /** @lang MySQL */ "SELECT SUM(usp.qty_planned) sumPlanned "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint usp "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumcard c ON (c.fk_element = usp.rowid AND c.element_type = 'scrumproject_scrumuserstorysprint' )"
+			." WHERE  usp.fk_scrum_sprint = ".intval($this->fk_scrum_sprint)
+			." AND  c.fk_scrum_kanbanlist IN (SELECT l.rowid FROM ".MAIN_DB_PREFIX."scrumproject_scrumkanbanlist l WHERE l.ref_code = '".$this->db->escape($ref_code)."')  ";
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			return doubleval($obj->sumPlanned);
+		}
+
+		return false;
+	}
 }
-
-
-require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
-
-///**
-// * Class ScrumKanbanLine. You can also remove this and generate a CRUD class for lines objects.
-// */
-//class ScrumKanbanLine extends CommonObjectLine
-//{
-//	// To complete with content of an object ScrumKanbanLine
-//	// We should have a field rowid, fk_scrumkanban and position
-//
-//	/**
-//	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-//	 */
-//	public $isextrafieldmanaged = 0;
-//
-//	/**
-//	 * Constructor
-//	 *
-//	 * @param DoliDb $db Database handler
-//	 */
-//	public function __construct(DoliDB $db)
-//	{
-//		$this->db = $db;
-//	}
-//}

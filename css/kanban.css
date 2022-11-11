@@ -5,7 +5,7 @@
 	--box-border-radius : 2px;
 	--box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 	--default-space-size: 10px;
-	--default-block-background-color : rgba(234,234,234,0.87);
+	--default-block-background-color : rgba(234,234,234,1);
 	--default-strong-color : #223058;
 
 	--box-text-color : var(--general-text-color);
@@ -606,7 +606,7 @@ nav.top-nav-bar{
 }
 
 
-#addkanbancol{
+#addkanbancol, #kanban-resume-btn{
 	margin-left: 40px;
 }
 
@@ -757,20 +757,21 @@ nav.top-nav-bar{
 	bottom: 0;
 }
 
-.kanban-item__user{
+.kanban-item__user, .sprint-resume-user-img__pic{
 	--user-image-size : 32px;
 	max-height: var(--user-image-size);
 	border-radius: var(--user-image-size);
-
-	margin-right: calc(var(--user-image-size)/-2);
-	margin-bottom: -3px;
-
 	background: #949494;
 	border:3px solid #ededed;
-	transition: margin-right 0.2s ease-in-out;
+}
 
+.kanban-item__user{
+	margin-right: calc(var(--user-image-size)/-2);
+	margin-bottom: -3px;
+	transition: margin-right 0.2s ease-in-out;
 	z-index: 5;
 }
+
 .kanban-item__users:hover .kanban-item__user, .kanban-item__users:hover .kanban-item__user:last-child:not(:only-child){
 	margin-right: -2px;
 }
@@ -1086,7 +1087,7 @@ html[data-theme-color-scheme="dark"] .scrumkanban-page .kanban-item{
 	background-color: var(--kanban-item-backgroud-color);
 }
 
-html[data-theme-color-scheme="dark"] .scrumkanban-page .kanban-item__user {
+html[data-theme-color-scheme="dark"] .scrumkanban-page :where(.kanban-item__user,.sprint-resume-user-img__pic) {
 	background: #3d3d3d;
 	border: 3px solid #2f2f2f;
 }

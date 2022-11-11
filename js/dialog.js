@@ -19,6 +19,7 @@ class Dialog {
 				onClose : function (){ return true; },
 				onOpen : function (){ return true; },
 				onAccept : function (){ return true; },
+				// TODO : reprendre les modifs effectuées sur le module cookiesBlender pour wordpress (dont le travail sur les traductions)
 				template: '<header ></header>' +
 					'<form method="dialog" data-ref="form">\n' +
 					'   <div class="body" ></div>\n' +
@@ -74,9 +75,7 @@ class Dialog {
 			this.toggle();
 		});
 
-
-		this.dialog.querySelector('.body').insertAdjacentHTML('afterbegin', this.settings.content);
-
+		this.setContent(this.settings.content);
 
 		// la dialogue est détruite à la fermeture
 		this.dialog.addEventListener("close", () => {
@@ -103,6 +102,10 @@ class Dialog {
 			}
 		})
 		this.toggle()
+	}
+
+	setContent(content){
+		this.dialog.querySelector('.body').insertAdjacentHTML('afterbegin', content);
 	}
 
 	open(settings = {}) {

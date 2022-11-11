@@ -234,6 +234,13 @@ $jsLangs = array(
 						print '</span>';
 
 
+						$fieldK = 'qty_consumed';
+						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans($scrumSprint->fields[$fieldK]['label'])).'" >';
+						print '<span class="fa fa-hourglass-o" ></span>';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+						print $scrumSprint->showOutputFieldQuick($fieldK);
+						print '</span>';
+						print '</span>';
 
 						$fieldK = 'qty_done';
 						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans($scrumSprint->fields[$fieldK]['label'])).'" >';
@@ -244,12 +251,18 @@ $jsLangs = array(
 						print '</span>';
 
 
-						$fieldK = 'qty_consumed';
-						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans($scrumSprint->fields[$fieldK]['label'])).'" >';
-						print '<span class="fa fa-hourglass-o" ></span>';
-						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
-						print $scrumSprint->showOutputFieldQuick($fieldK);
+						// get US done in this kanban
+						print '<span class="kanban-header__item"  data-ktooltip="'.dol_escape_htmltag($langs->trans('UserStoryPlannedDone')).'" >';
+						print '<span class="fa fa-check-double" ></span>';
+						print '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="qty_us_planned_done" >';
+						print $object->calcUsPlannedInList('done');
 						print '</span>';
+						print '</span>';
+
+
+						// get US done in this kanban
+						print '<span class="nav-button" id="kanban-resume-btn"  >';
+						print '<span class="fa fa-dashboard" ></span>';
 						print '</span>';
 
 					}else{

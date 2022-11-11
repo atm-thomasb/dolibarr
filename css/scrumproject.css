@@ -50,3 +50,32 @@ button.ajax-action{
 .scrum-user-story-plan-wizard .col-scrumsprint, .scrum-user-story-plan-wizard .col-scrumsprint-qty-to-plan{
 	background-color: rgba(0,0,0,0.05);
 }
+
+
+.sprint-resume-table{
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.sprint-resume-table tbody :where(td,th) {
+	padding: 5px;
+	vertical-align: center;
+}
+
+
+.sprint-resume-table tbody tr:nth-child(even){
+	background: rgba(0,0,0,0.05);
+}
+
+.sprint-resume-table tbody tr:hover{
+	background: rgba(0, 37, 152, 0.1);
+}
+
+
+.sprint-resume-table tbody tr:not(:first-child) :where(td,th) {
+	border-top: 1px solid rgba(0,0,0,0.1);
+}
+.sprint-resume-col{
+	border-left: 1px solid rgba(0,0,0,0.1);
+}
+
