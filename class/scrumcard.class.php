@@ -1176,7 +1176,7 @@ class ScrumCard extends CommonObject
 
 
 		// Afficher les contacts de la carte et/ou object attaché (user story, taches etcc)
-		if(!empty($TContactUsersAffected)){
+		if(!empty($TContactUsersAffected) && is_array($TContactUsersAffected)){
 			include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 			$userImgList = '';
@@ -1705,7 +1705,7 @@ class ScrumCard extends CommonObject
 		if($this->fk_element > 0 && defined( get_class($this->elementObject).'::OVERRIDE_KANBAN_CARD_CONTACTS' )){
 
 			$TContactUsersAffected = $this->elementObject->liste_contact(-1,'internal');
-			if($TContactUsersAffected == -1){
+			if($TContactUsersAffected == -1 || !is_array($TContactUsersAffected)){
 				$this->error = 'Error removing contact : '.$this->elementObject->errorsToString();
 				return false;
 			}
@@ -1724,7 +1724,7 @@ class ScrumCard extends CommonObject
 		}
 		else{
 			$TContactUsersAffected = $this->liste_contact(-1,'internal');
-			if($TContactUsersAffected == -1){
+			if($TContactUsersAffected == -1 || !is_array($TContactUsersAffected)){
 				$this->error = 'Error removing contact : '.$this->errorsToString();
 				return false;
 			}
