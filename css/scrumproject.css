@@ -57,9 +57,8 @@ button.ajax-action{
 	border-collapse: collapse;
 }
 
-.sprint-resume-table tbody :where(td,th) {
+.sprint-resume-table :where(td,th) {
 	padding: 5px;
-	vertical-align: center;
 }
 
 
@@ -72,10 +71,18 @@ button.ajax-action{
 }
 
 
-.sprint-resume-table tbody tr:not(:first-child) :where(td,th) {
+.sprint-resume-table tbody :where(td,th) {
 	border-top: 1px solid rgba(0,0,0,0.1);
 }
 .sprint-resume-col{
 	border-left: 1px solid rgba(0,0,0,0.1);
 }
 
+.sprint-goal-ratio-ok{
+	color: #0ca30a;
+}
+
+
+.productivity-badge-icon{
+	color: #cbaa00;
+}

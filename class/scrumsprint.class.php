@@ -269,9 +269,9 @@ class ScrumSprint extends CommonObject
 							$scrumSprintUser->fk_scrum_sprint = $this->id;
 							$scrumSprintUser->status = ScrumSprintUser::STATUS_DRAFT;
 							//Dispo
-							$scrumSprintUser->qty_availablity = floatval($targetUser->array_options['options_scrumproject_availability']);
+							$scrumSprintUser->qty_availability = floatval($targetUser->array_options['options_scrumproject_availability']);
 							//Ratio
-							$scrumSprintUser->availablity_rate = floatval($targetUser->array_options['options_scrumproject_velocity_rate']);
+							$scrumSprintUser->availability_rate = floatval($targetUser->array_options['options_scrumproject_velocity_rate']);
 
 							if($scrumSprintUser->create($user)<0){
 								setEventMessage($langs->trans('ScrumSprintUserCreateError'), 'errors');
@@ -1349,9 +1349,13 @@ class ScrumSprint extends CommonObject
 			$out.= '<thead>';
 			$out.= '<tr>';
 			$out.= '	<th colspan="2"></th>';
-			$out.= '	<th><span title="'.dol_escape_htmltag($langs->trans('TimeSpentHelp')).'">'.$langs->trans('TimeSpent').'</span></th>';
-			$out.= '	<th><span title="'.dol_escape_htmltag($langs->trans('TimePlannedDoneHelp')).'">'.$langs->trans('TimePlannedDone').'</span></th>';
-			$out.= '	<th><span title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span>'.$langs->trans('QtyAvailability').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span>'.$langs->trans('QtyVelocity').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeSpentHelp')).'">'.$langs->trans('TimeSpent').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimePlannedDoneHelp')).'">'.$langs->trans('TimePlannedDone').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('ProductivityRealHelp')).'">'.$langs->trans('ProductivityReal').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col" colspan="2"><span title="'.dol_escape_htmltag($langs->trans('ProductivityGoalHelp')).'">'.$langs->trans('ProductivityGoal').'</span></th>';
 			$out.= '</tr>';
 			$out.= '</thead>';
 
@@ -1365,8 +1369,45 @@ class ScrumSprint extends CommonObject
 					continue;
 				}
 
-				//sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
-				//			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone
+
+
+				// Calcule de la productivité
+				$productivityRatio = 0;
+				if($item->sumTimeSpent > 0){
+					$productivityRatio = round($item->sumTimeDone / $item->sumTimeSpent , 2);
+				}
+
+				// Calcule des objectifs
+				$productivityGoalRatio = 0;
+				if($item->userQtyVelocity > 0){
+					$productivityGoalRatio = round($item->sumTimeDone / $item->userQtyVelocity , 2);
+				}
+
+				if($productivityGoalRatio>=1){
+					$productivityGoalRatioDisplay = '<span class="badge badge-success">' . ($productivityGoalRatio * 100) . '%</span>';
+				}elseif($productivityGoalRatio<0.8){
+					$productivityGoalRatioDisplay = '<span class="badge badge-danger">' . ($productivityGoalRatio * 100) . '%</span>';
+				}else{
+					$productivityGoalRatioDisplay = '<span class="badge badge-warning">' . ($productivityGoalRatio * 100) . '%</span>';
+				}
+
+				$achievementBadge = '';
+				$starClass = 'fa-star-o';
+				if($item->userAvailabilityRate>1){
+					$starClass = 'fa-star';
+				}
+
+				if($productivityGoalRatio>=1.75){
+					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
+					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.' fa-2x"></span>';
+					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
+				}elseif($productivityGoalRatio>=1.5){
+					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
+					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
+				}elseif($productivityGoalRatio>=1.1){
+					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
+				}
+
 
 				$out.= '<tr>';
 				$out.= '	<th>';
@@ -1380,6 +1421,15 @@ class ScrumSprint extends CommonObject
 				$out.= '	</th>';
 
 				$out.= '	<td class="center sprint-resume-col">';
+				$out.= 			getTileFormatedTime($item->userQtyAvailability) ;
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= 			getTileFormatedTime($item->userQtyVelocity) ;
+				$out.= ' 		<small title="'.dol_escape_htmltag($langs->trans('AvailabilityRateHelp')).'">('.($item->userAvailabilityRate * 100) . '%'.')</small>';
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
 				$out.= getTileFormatedTime($item->sumTimeSpent) ;
 				$out.= '	</td>';
 
@@ -1390,6 +1440,19 @@ class ScrumSprint extends CommonObject
 				$out.= '	<td class="center sprint-resume-col">';
 				$out.= getTileFormatedTime($item->sumTimePlanned) ;
 				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= ($productivityRatio * 100) . '%';
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= $productivityGoalRatioDisplay;
+				$out.= '	</td>';
+
+				$out.= '	<td class="center ">';
+				$out.= $achievementBadge;
+				$out.= '	</td>';
+
 				$out.= '</tr>';
 			}
 			$out.= '</tbody>';
@@ -1414,6 +1477,7 @@ class ScrumSprint extends CommonObject
 		}
 
 		if(!class_exists('ScrumTask')){ require_once __DIR__ .'/scrumtask.class.php';}
+		if(!class_exists('ScrumSprintUser')){ require_once __DIR__ .'/scrumsprintuser.class.php';}
 
 		$sql = /** @lang MySQL */
 			"SELECT ec.fk_socpeople fk_user, SUM(st.qty_consumed) sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
@@ -1432,7 +1496,24 @@ class ScrumSprint extends CommonObject
 
 		$sql.= " GROUP BY ec.fk_socpeople";
 
+		$data = $this->db->getRows($sql);
+		if($data){
+			foreach ($data as $item){
 
-		return $this->db->getRows($sql);
+				$item->userQtyAvailability 	= 0;
+				$item->userAvailabilityRate 	= 0;
+				$item->userQtyVelocity 		= 0;
+
+				$sprintUser = new ScrumSprintUser($this->db);
+				if($sprintUser->fetchFromSprintAndUser(intval($this->id), intval($item->fk_user)) > 0){
+					$item->userQtyAvailability 	= $sprintUser->qty_availability;
+					$item->userAvailabilityRate 	= $sprintUser->availability_rate;
+					$item->userQtyVelocity 		= $sprintUser->qty_velocity;
+				}
+			}
+		}
+
+		return $data;
 	}
+
 }

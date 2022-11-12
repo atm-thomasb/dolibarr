@@ -708,7 +708,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 
 			$liveEdit = '';
-			if($object->statut == $object::STATUS_DRAFT && in_array($key, array('qty_availablity', 'availablity_rate'))){
+			if($object->statut == $object::STATUS_DRAFT && in_array($key, array('qty_availability', 'availability_rate'))){
 				$liveEdit = scrumProjectGenLiveUpdateAttributes($object->element, $object->id, $key, 'scrumSprintUserGenLiveUpdateAttributes_qty_velocity');
 			}
 

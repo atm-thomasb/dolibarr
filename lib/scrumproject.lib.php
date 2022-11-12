@@ -437,10 +437,8 @@ function getTileFormatedTime($time)
 	// on convertit les minutes
 	if (is_array($tmpTimeArr) && count($tmpTimeArr) > 1) {
 		//hours and minutes
-		$min = ($tmpTimeArr[1] * 60 / 100);
-		if (strlen($min) == 1) {
-			$min .= '0';
-		}
+		$min = round(($tmpTimeArr[1] * 60 / 100));
+		$min = str_pad($min, 2, 0, STR_PAD_LEFT);
 		//
 		$time = $tmpTimeArr[0] . $hLetter . $min;
 		return $time;

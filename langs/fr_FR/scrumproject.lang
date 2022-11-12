@@ -115,6 +115,10 @@ ScrumProjectUserRole = Rôle scrum
 ScrumProjectUserRolePO = Product Owner
 ScrumProjectUserRoleDEV = Developer
 ScrumKanbanNotDefine = Aucun Kanban pour le Sprint "%s"
+ProductivityReal = Productivité réel
+ProductivityRealHelp = Productivité calculé sur la base des temps saisies
+ProductivityGoal = Objectif
+ProductivityGoalHelp = Productivité calculé sur la base du temps de vélocité disponible
 
 #
 # ScrumMassSprint
@@ -230,10 +234,10 @@ us_qty_consumed = P.Consommé
 us_qty_consumed_help = Temps consommé par l'équipe pour les user story affectées à ce sprint
 us_qty_done = P.Livrable
 us_qty_done_help = Temps planifié livrable
-QtyAvailablity = Disponibilité
-QtyAvailablityHelp = Disponibilité disponibilité réel, la valeur par défaut peut être modifiée pour chaque utilisateur sur sa fiche.
-AvailablityRate = Ratio de vélocité
-AvailablityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité x Ratio de vélocité = Vélocité
+QtyAvailability = Disponibilité
+QtyAvailabilityHelp = Disponibilité réel, la valeur par défaut peut être modifiée pour chaque utilisateur sur sa fiche.
+AvailabilityRate = Ratio de vélocité
+AvailabilityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité x Ratio de vélocité = Vélocité
 ScrumTask = Tâche scrum
 ScrumTasks = Tâches scrum
 ScrumSprintTime = Temps consommé

@@ -3,7 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+- FIX : Time display error  *09/11/2022* - 1.16.1
+- NEW : Add Kanban sprint dashBoard *09/11/2022* - 1.16.0
+- FIX : Database col rename for llx_scrumproject_scrumsprintuser *09/11/2022* - 1.15.0  
+  Change qty_availablity -> qty_availability  
+  Change availablity_rate -> availability_rate 
 
 ## Version 1.14
 

@@ -77,6 +77,22 @@ dialog.kanban-dialog :where(header, footer, .body){
 	padding: 10px var(--dialog-padding);
 }
 
+dialog.kanban-dialog .body .sprint-resume-table{
+	margin-left:  calc( var(--dialog-padding) * -1 );
+	margin-right:  calc( var(--dialog-padding) * -1 );
+	width: calc(100% + var(--dialog-padding) * 2);
+}
+
+dialog.kanban-dialog .body .sprint-resume-table tr :where(td:first-child,th:first-child){
+	padding-left: calc(var(--dialog-padding) * 2);
+}
+
+dialog.kanban-dialog .body .sprint-resume-table tr :where(td,th):last-child{
+	padding-right: calc(var(--dialog-padding) * 2);
+}
+
+
+
 dialog.kanban-dialog :where(header){
 	border-bottom: 1px solid rgba(0,0,0,0.1);
 }
@@ -181,6 +197,11 @@ html[data-theme-color-scheme="dark"] .dialog-form-icon-btn{
 html[data-theme-color-scheme="dark"] .dialog-form-icon-btn:active{
 	--bg-gradian-start: rgb(26, 35, 42);
 }
+
+html[data-theme-color-scheme="dark"] .productivity-badge-icon{
+	color: #ffe100;
+}
+
 
 
 /* Line separation */
