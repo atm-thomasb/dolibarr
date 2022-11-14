@@ -109,6 +109,7 @@ class modScrumProject extends DolibarrModules
 				   'data' => array(
 				       'projecttaskcard',
 				       'category',
+					   'scrumtaskcard'
 				   ),
 			),
 			// Set this to 1 if features of module are opened to external users
