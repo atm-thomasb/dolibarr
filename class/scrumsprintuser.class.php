@@ -1241,6 +1241,49 @@ class ScrumSprintUser extends CommonObject
 
 		return $out;
 	}
+
+	/**
+	 * Retourne le nombre de jours d'absence qui impactent sur la planification
+	 * @param bool $notPlannedOnly return only days where user is sick or not planned leave
+	 * @return float
+	 */
+	public function getLeaveDays($notPlannedOnly = false){
+
+		// TODO : Si utilisation du module absence de Dolibarr utiliser la class Holiday et la methode verifDateHolidayCP (mais voir si une requete ne peut pas faire mieux car comment dire...
+
+		// TODO : Si utilisation du module absence ATM
+
+		return 0;
+	}
+
+	/**
+	 * Retourne le nombre de jours de travail restant avant la fin du sprint
+	 * @return float number of workable days | -1 for error
+	 */
+	public function getRemainingWorkDays($country_code = ''){
+
+		$sprint = scrumProjectGetObjectByElement('scrumproject_scrumsprint', $this->fk_scrum_sprint);
+		/**
+		 * @var ScrumSprint $sprint
+		 */
+
+		if(empty($sprint->date_end)){
+			return -1;
+		}
+
+		if($sprint->date_end < time()){
+			return 0;
+		}
+
+		$numOpenDays =  num_open_day(time(), $sprint->date_end, '', 1, 0, $country_code);
+		if(!is_int($numOpenDays)){
+			return -1;
+		}
+
+		$userLeaveDays = $this->getLeaveDays();
+
+		return $numOpenDays - $userLeaveDays;
+	}
 }
 
 

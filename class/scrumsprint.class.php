@@ -1505,14 +1505,20 @@ class ScrumSprint extends CommonObject
 			foreach ($data as $item){
 
 				$item->userQtyAvailability 	= 0;
-				$item->userAvailabilityRate 	= 0;
+				$item->userAvailabilityRate = 0;
 				$item->userQtyVelocity 		= 0;
+
+				$item->userRemainingWorkDays = 0;
+				$item->userNotPlannedLeaveDays = 0;
 
 				$sprintUser = new ScrumSprintUser($this->db);
 				if($sprintUser->fetchFromSprintAndUser(intval($this->id), intval($item->fk_user)) > 0){
 					$item->userQtyAvailability 	= $sprintUser->qty_availability;
-					$item->userAvailabilityRate 	= $sprintUser->availability_rate;
+					$item->userAvailabilityRate = $sprintUser->availability_rate;
 					$item->userQtyVelocity 		= $sprintUser->qty_velocity;
+
+					$item->userRemainingWorkDays= $sprintUser->getRemainingWorkDays();
+					$item->userNotPlannedLeaveDays= $sprintUser->getLeaveDays(true);
 				}
 			}
 		}
