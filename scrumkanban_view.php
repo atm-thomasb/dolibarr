@@ -257,6 +257,7 @@ $jsLangs = array(
 					}
 				}
 				?>
+					<!-- TODO : déplacer le bouton en dehors de #kanban-header-scrum-sprint-resume -->
 					<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
 				</span>
 

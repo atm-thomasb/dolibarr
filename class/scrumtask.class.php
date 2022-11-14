@@ -733,6 +733,49 @@ class ScrumTask extends CommonObject
 	}
 
 	/**
+	 *	Set to a status
+	 *
+	 *	@param	User	$user			Object user that modify
+	 *  @param	int		$status			New status to set (often a constant like self::STATUS_XXX)
+	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
+	 *  @param  string  $triggercode    Trigger code to use
+	 *	@return	int						<0 if KO, >0 if OK
+	 */
+	public function setStatusCommon($user, $status, $notrigger = 0, $triggercode = '')
+	{
+		$this->db->begin();
+		$error=0;
+
+		$res = parent::setStatusCommon($user, $status, $notrigger, $triggercode);
+		if($res>0){
+			if($this->status = ScrumTask::STATUS_DONE){
+				// UPDATE PARENT SCRUM USER STORY FOR SPRINT
+				require_once __DIR__ . '/scrumuserstorysprint.class.php';
+
+				$scrumUserStorySprint = new ScrumUserStorySprint($this->db);
+				if($scrumUserStorySprint->fetch($this->fk_scrum_user_story_sprint)>0){
+					if($scrumUserStorySprint->updateTimeDone($user, $notrigger)<0){
+						$this->setErrorMsg($scrumUserStorySprint->errorsToString());
+						$error++;
+					}
+				}else{
+					$this->setErrorMsg('failFetchingScrumUserStorySprint to update qty done field');
+					$error++;
+				}
+			}
+		}
+
+		if (!$error) {
+			$this->status = $status;
+			$this->db->commit();
+			return 1;
+		} else {
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+	/**
 	 *	Set draft status
 	 *
 	 *	@param	User	$user			Object user that modify
