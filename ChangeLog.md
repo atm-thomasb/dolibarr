@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 ## Version 1.14
 
 - FIX : filter soc and thirdparty *09/11/2022* - 1.14.8
-- FIX : umdate time on kanban  *09/11/2022* - 1.14.7
+- FIX : update time on kanban  *09/11/2022* - 1.14.7
 - FIX : remove statut card on scrumcard_card.php *09/11/2022* - 1.14.6
 - FIX : label on US planned *09/11/2022* - 1.14.5
 - FIX : move butNewKanban to first position *09/11/2022* - 1.14.4
