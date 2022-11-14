@@ -999,6 +999,7 @@ class ScrumUserStorySprint extends CommonObject
 		$object->fk_scrum_user_story_sprint= $this->fk_scrum_user_story_sprint;
 		$object->qty_planned = doubleval($this->qty_planned);
 		$object->qty_consumed = doubleval($this->qty_consumed);
+		$object->qty_done = doubleval($this->qty_done);
 
 		$this->calcTimeTaskPlanned();
 		$object->qty_task_planned = doubleval($this->qty_task_planned);
@@ -1239,7 +1240,7 @@ class ScrumUserStorySprint extends CommonObject
 		{
 			$out = $this->getNomUrl(1);
 		}
-		elseif($key == 'qty_planned' ||  $key == 'qty_consumed')
+		elseif($key == 'qty_planned' ||  $key == 'qty_consumed' ||  $key == 'qty_done')
 		{
 			if ( !function_exists('getTileFormatedTime')) {
 				include_once __DIR__ . "/../lib/scrumproject.lib.php" ;
@@ -1327,6 +1328,28 @@ class ScrumUserStorySprint extends CommonObject
 	 *
 	 * @return int
 	 */
+	public function calcTimeDone(){
+
+		if(!class_exists('ScrumTask')){
+			require_once __DIR__ . '/scrumtask.class.php';
+		}
+
+		$sql = /** @lang MySQL */ "SELECT SUM(t.qty_planned) sumTaskPlanned FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask t "
+			." WHERE t.fk_scrum_user_story_sprint = ".intval($this->id).' AND t.status = '.ScrumTask::STATUS_DONE;
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_done = doubleval($obj->sumTaskPlanned);
+			return $this->qty_done;
+		}
+
+		return 0;
+	}
+
+	/**
+	 *
+	 * @return int
+	 */
 	public function calcTimeSpent(){
 
 		$sql = /** @lang MySQL */ "SELECT SUM(qty_consumed) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask "
@@ -1361,10 +1384,11 @@ class ScrumUserStorySprint extends CommonObject
 
 	/**
 	 * @param User $user
-	 * @param      $notrigger
+	 * @param bool $notrigger
+	 * @param bool $noRefreshSprint
 	 * @return int
 	 */
-	public function updateTimeSpent(User $user, $notrigger = false){
+	public function updateTimeSpent(User $user, $notrigger = false, $noRefreshSprint = false){
 		global $user;
 
 		$error = 0;
@@ -1376,10 +1400,63 @@ class ScrumUserStorySprint extends CommonObject
 
 		if($this->db->query($sql)){
 
+			if(!$noRefreshSprint && $this->refreshSprintQuantities($user) < 1){
+				$error++;
+			}
+
 			// Triggers
 			if (!$error && !$notrigger) {
 				// Call triggers
 				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_UPDATE_TIME_SPENT', $user);
+				if ($result < 0) {
+					$error++;
+				} //Do also here what you must do to rollback action if trigger fail
+				// End call triggers
+			}
+
+			// Commit or rollback
+			if ($error) {
+				$this->db->rollback();
+				return -1;
+			} else {
+				$this->db->commit();
+				return $this->id;
+			}
+		}
+		else {
+			$this->error = $this->db->lasterror();
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+
+	/**
+	 * @param User $user
+	 * @param bool $notrigger
+	 * @param bool $noRefreshSprint
+	 * @return int
+	 */
+	public function updateTimeDone(User $user, $notrigger = false, $noRefreshSprint = false){
+		global $user;
+
+		$error = 0;
+		$this->db->begin();
+
+		$this->calcTimeDone();
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_done = '".$this->qty_done."' WHERE rowid=" . ((int) $this->id);
+
+		if($this->db->query($sql)){
+
+			if(!$noRefreshSprint && $this->refreshSprintQuantities($user) < 1){
+				$error++;
+			}
+
+			// Triggers
+			if (!$error && !$notrigger) {
+				// Call triggers
+				$result = $this->call_trigger('SCRUMUSERSTORYSPRINT_UPDATE_TIME_DONE', $user);
 				if ($result < 0) {
 					$error++;
 				} //Do also here what you must do to rollback action if trigger fail
@@ -1425,7 +1502,7 @@ class ScrumUserStorySprint extends CommonObject
 	}
 
 	/**
-	 * @return void
+	 * @return int
 	 */
 	public function refreshSprintQuantities($user){
 		if($this->fk_scrum_sprint > 0){

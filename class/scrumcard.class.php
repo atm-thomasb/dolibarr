@@ -1025,7 +1025,7 @@ class ScrumCard extends CommonObject
 	 * @return stdClass
 	 */
 	public function getScrumKanBanItemObjectFormatted(){
-		global $user, $conf;
+		global $user, $conf, $langs;
 
 		// TODO : voir si $object peut être factorisé avec getScrumKanBanItemObjectStd mais attention il doit être compatible avec l'objet js des items de kanban
 		$object = new stdClass();
@@ -1041,6 +1041,7 @@ class ScrumCard extends CommonObject
 		$object->title = '';
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
+		$timeDone = false;
 		$status = '';
 
 
@@ -1067,6 +1068,9 @@ class ScrumCard extends CommonObject
 				$status.= $elementObject->LibStatut(intval($elementObject->status), $mode);
 			}
 
+			/**
+			 * OVERRIDE FROM ELEMENT
+			 */
 			if(is_callable(array($elementObject, 'getScrumKanBanItemObjectFormatted'))){
 				$objectFromElement = $elementObject->getScrumKanBanItemObjectFormatted($this, $object);
 				if($objectFromElement){
@@ -1077,10 +1081,11 @@ class ScrumCard extends CommonObject
 
 
 			if($elementObject->element == 'scrumproject_scrumuserstorysprint'){
-				/** @var ScrumTask $elementObject */
+				/** @var ScrumUserStorySprint $elementObject */
 				$useTime = true;
-				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
-				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+				$timeSpend	= $elementObject->showOutputFieldQuick('qty_consumed');
+				$timePlanned= $elementObject->showOutputFieldQuick('qty_planned');
+				$timeDone	= $elementObject->showOutputFieldQuick('qty_done');
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1158,7 +1163,12 @@ class ScrumCard extends CommonObject
 		if($useTime){
 			$object->title.= '<span class="kanban-item__time-spend">';
 //			$object->title.= '<i class="fa fa-hourglass-o"></i> ';
-			$object->title.= '<span class="kanban-item__time-consumed">'.$timeSpend.'</span> / <span class="kanban-item__time-planned">'.$timePlanned.'</span>';
+			$object->title.= '<span class="kanban-item__time-consumed" title="'.dol_escape_htmltag($langs->trans('QtyConsumed')).'"><span class="fa fa-hourglass-o"></span> '.$timeSpend.'</span>';
+			if($timeDone !== false){
+				$object->title.= ' <span class="kanban-item__time-done" title="'.dol_escape_htmltag($langs->trans('QtyDone')).'"><span class="fa fa-check"></span> '.$timeDone.'</span>';
+			}
+			$object->title.= ' <span class="kanban-item__time-planned" title="'.dol_escape_htmltag($langs->trans('QtyPlanned')).'"><span class="fa fa-calendar-check-o"></span> '.$timePlanned.'</span>';
+
 			$object->title.= '</span>';
 		}
 		$object->title.= '<span class="kanban-item__status">'.$status.'</span>';
@@ -1166,7 +1176,7 @@ class ScrumCard extends CommonObject
 
 
 		// Afficher les contacts de la carte et/ou object attaché (user story, taches etcc)
-		if(!empty($TContactUsersAffected)){
+		if(!empty($TContactUsersAffected) && is_array($TContactUsersAffected)){
 			include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 			$userImgList = '';
@@ -1192,7 +1202,7 @@ class ScrumCard extends CommonObject
 
 
 	/**
-	 * get this object formatted for ajax ans json
+	 * get this object formatted for ajax and json
 	 * @return stdClass
 	 */
 	public function getScrumKanBanItemObjectStd(){
@@ -1220,6 +1230,10 @@ class ScrumCard extends CommonObject
 		$res = $this->fetchElementObject();
 		if($res){
 			$object->elementObject = false;
+
+			/**
+			 * OVERRIDE FROM ELEMENT
+			 */
 			if(is_callable(array($this->elementObject, 'getScrumKanBanItemObjectStd'))){
 				$object->elementObject = $this->elementObject->getScrumKanBanItemObjectStd($this, $object);
 			}
@@ -1691,7 +1705,7 @@ class ScrumCard extends CommonObject
 		if($this->fk_element > 0 && defined( get_class($this->elementObject).'::OVERRIDE_KANBAN_CARD_CONTACTS' )){
 
 			$TContactUsersAffected = $this->elementObject->liste_contact(-1,'internal');
-			if($TContactUsersAffected == -1){
+			if($TContactUsersAffected == -1 || !is_array($TContactUsersAffected)){
 				$this->error = 'Error removing contact : '.$this->elementObject->errorsToString();
 				return false;
 			}
@@ -1710,7 +1724,7 @@ class ScrumCard extends CommonObject
 		}
 		else{
 			$TContactUsersAffected = $this->liste_contact(-1,'internal');
-			if($TContactUsersAffected == -1){
+			if($TContactUsersAffected == -1 || !is_array($TContactUsersAffected)){
 				$this->error = 'Error removing contact : '.$this->errorsToString();
 				return false;
 			}
