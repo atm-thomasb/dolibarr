@@ -365,11 +365,7 @@ if($fk_project > 0){
 foreach ($search as $key => $val) {
 
 	if($key == 'project_title' && $search[$key] != ''){
-		$searchCol = ['s.nom', 's.ref_ext', 's.code_client'];
-		$sql .= natural_search($searchCol, $search[$key]);
-	}
-	elseif($key == 'project_title' && $search[$key] != ''){
-		$searchCol = ['p.title', 'p.ref'];
+		$searchCol = ['p.ref'];
 		$sql .= natural_search($searchCol, $search[$key]);
 	} elseif ($key == 'rowid' && $search[$key] != ''){
 		$searchCol = ['t.rowid'];
@@ -377,7 +373,11 @@ foreach ($search as $key => $val) {
 	} elseif ($key == 'label' && $search[$key] != '') {
 		$searchCol = ['t.label'];
 		$sql .= natural_search($searchCol, $search[$key]);
-	} elseif (array_key_exists($key, $object->fields)) {
+	} elseif ($key == 'societe' && $search[$key] != '') {
+		$searchCol = ['s.nom'];
+		$sql .= natural_search($searchCol, $search[$key]);
+	}
+	elseif (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
 			continue;
 		}

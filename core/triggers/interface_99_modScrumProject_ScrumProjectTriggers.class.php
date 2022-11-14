@@ -110,26 +110,34 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 
 		// Or you can execute some code here
 		switch ($action) {
-			// Users
 			case 'TASK_TIMESPENT_DELETE':
-
 				$this->updateTime($object);
-
 				break;
 			case 'TASK_TIMESPENT_MODIFY':
+				//requête pour remonter l'id scrumtask attribuée à la saisie des temps
+				$sql = /** @lang MySQL */
+					"SELECT fk_scrumproject_scrumtask as id"
+					. " FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time"
+					. " WHERE fk_projet_task_time = ".$object->timespent_id;
+				$obj  = $this->db->getRow($sql);
+				if ($obj !== false){
+					// on selectionne toutes les entrées à l'execption de celle traitée
+					$sql = /** @lang MySQL */
+					  " SELECT DISTINCT ssptt.rowid, SUM(ptt.task_duration) sum_duration FROM ".MAIN_DB_PREFIX."projet_task_time as ptt"
+					. " INNER JOIN ".MAIN_DB_PREFIX ."scrumproject_scrumtask_projet_task_time as ssptt ON ssptt.fk_projet_task_time = ptt.rowid"
+					. " WHERE "
+					. "  ptt.fk_task=".$object->id
+					. " AND ssptt.fk_scrumproject_scrumtask =".$obj->id
+					. " AND ssptt.fk_projet_task_time  != ".$object->timespent_id;
 
-				$sql  = ' SELECT SUM(task_duration) sum_duration FROM '.MAIN_DB_PREFIX.'projet_task_time';
-				$sql .= ' RIGHT JOIN '.MAIN_DB_PREFIX .'scrumproject_scrumtask_projet_task_time as ssptt ON ssptt.fk_projet_task_time ='.(int) $object->id;
-				$sql .= ' WHERE fk_task='.$object->id.' AND rowid  != '.intval( $object->timespent_id);
-
-				$obj   = $this->db->getRow($sql);
-				$cumulTime = 0;
-				if ($obj!==false){
-				      $cumulTime = $obj->sum_duration;
-				}else{
-				// todo c'est une erreur
+					$obj2  = $this->db->getRow($sql);
+					if ($obj2 !== false) {
+						$cumulTime = $obj2->sum_duration;
+						$this->updateTime($object, $cumulTime, true);
+					}else{
+						dol_syslog("No time on obj2 in :  ".__FILE__. " on TASK_TIMESPENT_MODIFY trigger. last query : ".$this->db->lastquery);
+					}
 				}
-				$this->updateTime($object,$cumulTime,true);
 				break;
 		}
 

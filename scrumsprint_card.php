@@ -496,6 +496,17 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		if (empty($reshook))
 		{
 
+			// Create Kanban
+			$kanban = $object->getKanbanId();
+			if ($kanban < 0) {
+				print dolGetButtonAction($langs->trans('CreateNewScrumKanban'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=createkanban&object=scrumsprint', '', $permissiontoadd);
+			}
+
+			if ($kanban > 0) {
+
+				print dolGetButtonAction($langs->trans('DisplayScrumKanban'), '', '', dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban);
+			}
+
 			// Send
 			if (empty($user->socid)) {
 				print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init#formmailbeforetitle');
@@ -540,15 +551,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			print dolGetButtonAction($langs->trans('RefreshTimes'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=refreshQuantities');
 
-			// Create Kanban
-			$kanban = $object->getKanbanId();
-			if ($kanban < 0) {
-				print dolGetButtonAction($langs->trans('CreateNewScrumKanban'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=createkanban&object=scrumsprint', '', $permissiontoadd);
-			}
 
-			if ($kanban > 0) {
-				print dolGetButtonAction($langs->trans('DisplayScrumKanban'), '', 'default', dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban);
-			}
 		}
 		print '</div>'."\n";
 	}
