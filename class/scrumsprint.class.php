@@ -1361,51 +1361,55 @@ class ScrumSprint extends CommonObject
 
 
 			$out.= '<tbody>';
-			foreach ($data as $item){
+			foreach ($data as $item) {
 				$cUser = scrumProjectGetObjectByElement('user', $item->fk_user);
 				/** @var User $cUser */
-				if(!$cUser){
-					$out.= '<tr><th colspan="2" class="error">'.$langs->trans('Error').'</th></tr>';
+				if (!$cUser) {
+					$out .= '<tr><th colspan="2" class="error">' . $langs->trans('Error') . '</th></tr>';
 					continue;
 				}
 
 
-
 				// Calcule de la productivité
 				$productivityRatio = 0;
-				if($item->sumTimeSpent > 0){
-					$productivityRatio = round($item->sumTimeDone / $item->sumTimeSpent , 2);
+				if ($item->sumTimeSpent > 0) {
+					$productivityRatio = round($item->sumTimeDone / $item->sumTimeSpent, 2);
 				}
 
 				// Calcule des objectifs
 				$productivityGoalRatio = 0;
-				if($item->userQtyVelocity > 0){
-					$productivityGoalRatio = round($item->sumTimeDone / $item->userQtyVelocity , 2);
+				if ($item->userQtyVelocity > 0) {
+					$productivityGoalRatio = round($item->sumTimeDone / $item->userQtyVelocity, 2);
 				}
 
-				if($productivityGoalRatio>=1){
-					$productivityGoalRatioDisplay = '<span class="badge badge-success">' . ($productivityGoalRatio * 100) . '%</span>';
-				}elseif($productivityGoalRatio<0.8){
-					$productivityGoalRatioDisplay = '<span class="badge badge-danger">' . ($productivityGoalRatio * 100) . '%</span>';
-				}else{
-					$productivityGoalRatioDisplay = '<span class="badge badge-warning">' . ($productivityGoalRatio * 100) . '%</span>';
-				}
-
+				$productivityGoalRatioDisplay = '';
 				$achievementBadge = '';
-				$starClass = 'fa-star-o';
-				if($item->userAvailabilityRate>1){
-					$starClass = 'fa-star';
-				}
+				if ($item->userQtyVelocity > 0){
 
-				if($productivityGoalRatio>=1.75){
-					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
-					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.' fa-2x"></span>';
-					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
-				}elseif($productivityGoalRatio>=1.5){
-					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
-					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
-				}elseif($productivityGoalRatio>=1.1){
-					$achievementBadge.= '<span class="productivity-badge-icon fa '.$starClass.'"></span>';
+					if ($productivityGoalRatio >= 1) {
+						$productivityGoalRatioDisplay = '<span class="badge badge-success">' . ($productivityGoalRatio * 100) . '%</span>';
+					} elseif ($productivityGoalRatio < 0.8) {
+						$productivityGoalRatioDisplay = '<span class="badge badge-danger">' . ($productivityGoalRatio * 100) . '%</span>';
+					} else {
+						$productivityGoalRatioDisplay = '<span class="badge badge-warning">' . ($productivityGoalRatio * 100) . '%</span>';
+					}
+
+					$starClass = 'fa-star-o';
+					if ($item->userAvailabilityRate > 1) {
+						$starClass = 'fa-star';
+					}
+
+					if ($productivityGoalRatio >= 1.75) {
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . ' fa-2x"></span>';
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+					} elseif ($productivityGoalRatio >= 1.5) {
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+					} elseif ($productivityGoalRatio >= 1.1) {
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+					}
+
 				}
 
 
