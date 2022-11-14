@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+require_once __DIR__ . '/../backport/v16/core/lib/functions.lib.php';
+
 /**
  * \file    scrumproject/lib/scrumproject.lib.php
  * \ingroup scrumproject
