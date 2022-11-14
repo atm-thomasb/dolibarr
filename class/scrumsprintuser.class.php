@@ -1249,9 +1249,13 @@ class ScrumSprintUser extends CommonObject
 	 */
 	public function getLeaveDays($notPlannedOnly = false){
 
-		// TODO : Si utilisation du module absence de Dolibarr utiliser la class Holiday et la methode verifDateHolidayCP (mais voir si une requete ne peut pas faire mieux car comment dire...
+		if(!getDolGlobalInt('SP_USE_LEAVE_DAYS')){
+			return 0;
+		}
 
-		// TODO : Si utilisation du module absence ATM
+		// TODO 1.1 : utilisation du module absence de Dolibarr utiliser la class Holiday et la methode verifDateHolidayCP (mais voir si une requete ne peut pas faire mieux car comment dire...
+
+		// TODO 1.2 : Si utilisation du module absence ATM ne pas le faire et reprendre depuis le todo 1.1
 
 		return 0;
 	}
@@ -1267,16 +1271,16 @@ class ScrumSprintUser extends CommonObject
 		 * @var ScrumSprint $sprint
 		 */
 
-		if(empty($sprint->date_end)){
+		if(intval($sprint->date_end) <= 0){
 			return -1;
 		}
 
-		if($sprint->date_end < time()){
+		if(intval($sprint->date_end) < time()){
 			return 0;
 		}
 
-		$numOpenDays =  num_open_day(time(), $sprint->date_end, '', 1, 0, $country_code);
-		if(!is_int($numOpenDays)){
+		$numOpenDays =  num_open_day(time(), $sprint->date_end, 0, 1, 0, $country_code);
+		if(!is_float($numOpenDays) && !is_int($numOpenDays)){
 			return -1;
 		}
 
@@ -1284,6 +1288,21 @@ class ScrumSprintUser extends CommonObject
 
 		return $numOpenDays - $userLeaveDays;
 	}
+
+
+	/**
+	 * Converti des jours de travail en heures
+	 * @param $nbDays
+	 * @return float|int
+	 */
+	public function convertWorkingDayToHours($nbDays = 0){
+
+		// TODO : prendre en compte une valeur lié a l'utilisateur au lieux de celle par default, voir pour ajouter cette valeur à cet object vu que au final c'est lié à l'utilisateur et au sprint...
+
+		$defaultNbWorkingHoursByDay = getDolGlobalString('SP_DEFAULT_NB_WORKING_HOURS_BY_DAY', 7);
+		return abs($nbDays * floatval($defaultNbWorkingHoursByDay));
+	}
+
 }
 
 

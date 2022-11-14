@@ -226,6 +226,37 @@ $TField = array(
 $item->setAsSelect($TField);
 
 
+
+
+
+
+
+
+
+
+
+
+/**
+ * ------------------------
+ * OPTIONS EXPERIMENTALES
+ * ------------------------
+ */
+$item = $formSetup->newItem('scrumProjectLabOptions')->setAsTitle();
+$item->helpText = $langs->trans('scrumProjectLabOptionsHelp');
+
+// prise en compte des absences (maladie)
+$item = $formSetup->newItem('SP_USE_LEAVE_DAYS')->setAsYesNo();
+$item->helpText = $langs->trans('SP_USE_LEAVE_DAYS_HELP');
+
+// Ajout de la gamification et Achievement
+$item = $formSetup->newItem('SP_USE_ACHIEVEMENTS')->setAsYesNo();
+
+
+
+
+
+
+
 $setupnotempty =+ count($formSetup->items);
 
 

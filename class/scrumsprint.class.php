@@ -1350,10 +1350,15 @@ class ScrumSprint extends CommonObject
 			$out.= '<tr>';
 			$out.= '	<th colspan="2"></th>';
 			$out.= '	<th class="center sprint-resume-col"><span>'.$langs->trans('QtyAvailability').'</span></th>';
-			$out.= '	<th class="center sprint-resume-col"><span>'.$langs->trans('QtyVelocity').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('QtyVelocityHelp')).'">'.$langs->trans('QtyVelocity').'</span></th>';
+
+			if(getDolGlobalInt('SP_USE_LEAVE_DAYS')) {
+				$out .= '	<th class="center sprint-resume-col"><span>' . $langs->trans('QtyLeaveDays') . '</span></th>';
+			}
 			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeSpentHelp')).'">'.$langs->trans('TimeSpent').'</span></th>';
 			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimePlannedDoneHelp')).'">'.$langs->trans('TimePlannedDone').'</span></th>';
-			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
+//			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('RemainVelocityHelp')).'">'.$langs->trans('RemainVelocity').'</span></th>';
 			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('ProductivityRealHelp')).'">'.$langs->trans('ProductivityReal').'</span></th>';
 			$out.= '	<th class="center sprint-resume-col" colspan="2"><span title="'.dol_escape_htmltag($langs->trans('ProductivityGoalHelp')).'">'.$langs->trans('ProductivityGoal').'</span></th>';
 			$out.= '</tr>';
@@ -1369,7 +1374,6 @@ class ScrumSprint extends CommonObject
 					continue;
 				}
 
-
 				// Calcule de la productivité
 				$productivityRatio = 0;
 				if ($item->sumTimeSpent > 0) {
@@ -1381,6 +1385,21 @@ class ScrumSprint extends CommonObject
 				if ($item->userQtyVelocity > 0) {
 					$productivityGoalRatio = round($item->sumTimeDone / $item->userQtyVelocity, 2);
 				}
+
+				// Restant à produire pour atteindre l'objectif utilisateur
+				$remainToProd = $item->userQtyVelocity - $item->sumTimePlanned;
+				if($remainToProd < 0){ $remainToProd = 0; }
+
+				// Calcule de la vélocité réelle restante basée sur les jours ouvrés restants, les absences et le ratio de vélocité du sprint pour cet utilisateur
+				$remainVelocityReal = 0;
+				if($item->userRemainingWorkHours>=0){
+					$remainVelocityReal = round($item->userRemainingWorkHours * $item->userAvailabilityRate, 2);
+				}
+
+				// La vélocité théorique se base uniquement sur la saisie
+				$remainVelocityTheoretical =  $item->userQtyVelocity - $item->sumTimeSpent;
+				if($remainVelocityTheoretical < 0){ $remainVelocityTheoretical = 0; }
+
 
 				$productivityGoalRatioDisplay = '';
 				$achievementBadge = '';
@@ -1433,6 +1452,12 @@ class ScrumSprint extends CommonObject
 				$out.= ' 		<small title="'.dol_escape_htmltag($langs->trans('AvailabilityRateHelp')).'">('.($item->userAvailabilityRate * 100) . '%'.')</small>';
 				$out.= '	</td>';
 
+				if(getDolGlobalInt('SP_USE_LEAVE_DAYS')){
+					$out.= '	<td class="center sprint-resume-col">';
+					$out.= 			$item->userNotPlannedLeaveDays . ' ' . $langs->trans('Days') ;
+					$out.= '	</td>';
+				}
+
 				$out.= '	<td class="center sprint-resume-col">';
 				$out.= getTileFormatedTime($item->sumTimeSpent) ;
 				$out.= '	</td>';
@@ -1441,8 +1466,18 @@ class ScrumSprint extends CommonObject
 				$out.= getTileFormatedTime($item->sumTimeDone) ;
 				$out.= '	</td>';
 
+//				$out.= '	<td class="center sprint-resume-col">';
+//				$out.= getTileFormatedTime($item->sumTimePlanned) ;
+//				$out.= '	</td>';
+
 				$out.= '	<td class="center sprint-resume-col">';
-				$out.= getTileFormatedTime($item->sumTimePlanned) ;
+
+				if($remainToProd > $remainVelocityReal){
+					// display alert
+					$alertText = $langs->trans('WarningMissingRealVelocityAccordingToEndDate', $item->userRemainingWorkDays,  getTileFormatedTime($remainToProd));
+					$out.= '<span class="fa fa-warning" title="'.dol_escape_htmltag($alertText).'" ></span> ';
+				}
+				$out.= getTileFormatedTime($remainVelocityTheoretical) ;
 				$out.= '	</td>';
 
 				$out.= '	<td class="center sprint-resume-col">';
@@ -1454,7 +1489,9 @@ class ScrumSprint extends CommonObject
 				$out.= '	</td>';
 
 				$out.= '	<td class="center ">';
-				$out.= $achievementBadge;
+				if(getDolGlobalInt('SP_USE_ACHIEVEMENTS')){
+					$out.= $achievementBadge;
+				}
 				$out.= '	</td>';
 
 				$out.= '</tr>';
@@ -1517,8 +1554,22 @@ class ScrumSprint extends CommonObject
 					$item->userAvailabilityRate = $sprintUser->availability_rate;
 					$item->userQtyVelocity 		= $sprintUser->qty_velocity;
 
-					$item->userRemainingWorkDays= $sprintUser->getRemainingWorkDays();
-					$item->userNotPlannedLeaveDays= $sprintUser->getLeaveDays(true);
+					// calcule des heures et jours restant disponibles
+					$item->userRemainingWorkDays	= $sprintUser->getRemainingWorkDays();
+					if($item->userRemainingWorkDays>=0){
+						$item->userRemainingWorkHours	= $sprintUser->convertWorkingDayToHours($item->userRemainingWorkDays);
+					}else{
+						$item->userRemainingWorkHours	= -1;
+					}
+
+					// Calcules des heures et jours perdus suite à un arrêt de travail imprévu
+					$item->userNotPlannedLeaveDays	= $sprintUser->getLeaveDays(true);
+					if($item->userNotPlannedLeaveDays>=0){
+						$item->userNotPlannedLeaveHours	= $sprintUser->convertWorkingDayToHours($item->userNotPlannedLeaveDays);
+					}else{
+						$item->userNotPlannedLeaveHours	= -1;
+					}
+
 				}
 			}
 		}
