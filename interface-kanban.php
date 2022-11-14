@@ -201,7 +201,6 @@ function _actionGetAllBoards($jsonResponse){
 	global $user, $langs, $db;
 
 	$data = GETPOST("data", "array");
-	$validate = new Validate($db, $langs);
 
 	if(empty($data['fk_kanban'])){
 		$jsonResponse->msg = 'Need Kanban Id';
@@ -226,7 +225,24 @@ function _actionGetAllBoards($jsonResponse){
 		$jsonResponse->data = new stdClass();
 
 		$jsonResponse->data->boards = array();
+		$jsonResponse->data->sprintInfos = false;
 
+		if(!empty($kanban->fk_scrum_sprint)){
+			require_once __DIR__ . '/class/scrumsprint.class.php';
+			$scrumSprint = new ScrumSprint($db);
+			if ($scrumSprint->fetch($kanban->fk_scrum_sprint) > 0){
+				$jsonResponse->data->sprintInfos = new stdClass();
+				$jsonResponse->data->sprintInfos->date_start = $scrumSprint->showOutputFieldQuick('date_start');
+				$jsonResponse->data->sprintInfos->date_end = $scrumSprint->showOutputFieldQuick('date_end');
+				$jsonResponse->data->sprintInfos->qty_velocity = $scrumSprint->showOutputFieldQuick('qty_velocity');
+				$jsonResponse->data->sprintInfos->qty_planned = $scrumSprint->showOutputFieldQuick('qty_planned');
+				$jsonResponse->data->sprintInfos->qty_done = $scrumSprint->showOutputFieldQuick('qty_done');
+				$jsonResponse->data->sprintInfos->qty_consumed = $scrumSprint->showOutputFieldQuick('qty_consumed');
+			}else{
+				$jsonResponse->result = 0;
+				$jsonResponse->msg = $langs->trans('Get sprint error') . ' : ' . $scrumSprint->errorsToString();
+			}
+		}
 
 		// All listes stored in databases
 		foreach ($kanbanLists as $kanbanList){

@@ -9,8 +9,10 @@ scrumKanban = {};
 		downloadIcon 	: `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" style="margin-right: 7px; position: relative; top: -1px" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
 		deleteIcon 		: `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right: 7px" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
 		documentIcon 	: `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right: 7px" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><rect width="15.1" height="19.6" x="5" y="2.3" /><path fill="none" d="M7.4 13.6h10M7.5 16.6h10"/></svg>`
-	}
+	};
 
+	o.debugMode = false;
+	console.log("To activate kanban debug mode set : scrumKanban.debugMode = 1; ");
 
 	/**
 	 * Store the last token of all board element
@@ -24,6 +26,14 @@ scrumKanban = {};
 	 * @type {string}
 	 */
 	o.newToken = '';
+
+	/**
+	 * Flag used to temporary block refresh kanban
+	 * @type {number}
+	 */
+	o.holdRefreshFlag = 0;
+
+
 
 	/**
 	 * Congig par défaut, les valeurs sont écrasées lors du chargement de la page en fonction de la configuration transmise
@@ -113,7 +123,6 @@ scrumKanban = {};
 				o.addDropDownItemContextMenu(el, e);
 			},
 			dropEl: function(el, target, source, sibling){
-
 				let sendData = {
 					'fk_kanban': o.config.fk_kanban,
 					'source-list-id': o.getDolListIdFromKanbanDragElement(source),
@@ -126,13 +135,16 @@ scrumKanban = {};
 					// do stuff ?
 				});
 
+				o.releaseRefresh();
 				o.clearView();
 			},
 			dragendEl : function (el) {
 				// callback when any board's item stop drag
 				// o.setEventMessage('Work in progress drag end el', false);
+				o.releaseRefresh();
 			},
 			dragBoard        : function (el, source) {
+				o.holdRefresh();
 				// callback when any board stop drag
 
 				// // a cause d'un bug d'affichage j'enlève le footer lors du déplacement
@@ -156,9 +168,11 @@ scrumKanban = {};
 				// // reaffiche le bouton du footer
 				// let boardSelector = el.getAttribute('data-id');
 				// $('.kanban-board[data-id=' + boardSelector + '] footer').slideDown();
+				o.releaseRefresh();
 			},
 			dragendBoard     : function (el) {
 
+				o.releaseRefresh();
 			},
 			buttonClick: function(el, boardId) {
 				// callback when the board's button is clicked
@@ -286,6 +300,26 @@ scrumKanban = {};
 		// kanbanAddForms.forEach(addFormItem => {
 		// 	addFormItem.remove();
 		// });
+	}
+
+	/**
+	 * désactive le refresh du kanban
+	 */
+	o.holdRefresh = function(){
+		if(o.debugMode) {
+			console.log("holdRefresh");
+		}
+		o.holdRefreshFlag = 1;
+	}
+
+	/**
+	 * réactive le refresh du kanban
+	 */
+	o.releaseRefresh = function(){
+		if(o.debugMode) {
+			console.log("releaseRefresh");
+		}
+		o.holdRefreshFlag = 0;
 	}
 
 	/**
@@ -518,7 +552,12 @@ scrumKanban = {};
 	//   WebSocket ? ou server-sent events ?
 	o.refreshAllBoards = function (autoRefresh = false){
 
-		// todo : use o.lastBoardUpdateToken
+		if(o.holdRefreshFlag > 0){
+			if(o.debugMode) {
+				console.log("refresh skip flag holdRefreshFlag is " + o.holdRefreshFlag );
+			}
+			return;
+		}
 
 		let sendData = {
 			'fk_kanban': o.config.fk_kanban
@@ -531,12 +570,12 @@ scrumKanban = {};
 				let boardsToDelete = [];
 
 				// get all boards
-				o.jkanban.options.boards.forEach(function(board, indexKey){
+				o.jkanban.options.boards.forEach(function (board, indexKey) {
 					boardsToDelete.push(board.id);
 				});
 
 				// remove board
-				boardsToDelete.forEach(function(boardId, indexKey){
+				boardsToDelete.forEach(function (boardId, indexKey) {
 					o.jkanban.removeBoard(boardId);
 				});
 
@@ -544,11 +583,27 @@ scrumKanban = {};
 				o.jkanban.container.style.width = '';
 				o.jkanban.addBoards(response.data.boards);
 				o.lastBoardUpdateToken = response.data.md5Boards;
+
+				if (response.data.sprintInfos){
+					let preTargetQuery = '#kanban-header-scrum-sprint-resume .kanban-header__item__value[data-element="scrumproject_scrumsprint"]';
+
+					$(preTargetQuery +'[data-field="date_start"]').html(response.data.sprintInfos.date_start);
+					$(preTargetQuery +'[data-field="date_end"]').html(response.data.sprintInfos.date_end);
+					$(preTargetQuery +'[data-field="qty_velocity"]').html(response.data.sprintInfos.qty_velocity);
+					$(preTargetQuery +'[data-field="qty_planned"]').html(response.data.sprintInfos.qty_planned);
+					$(preTargetQuery +'[data-field="qty_done"]').html(response.data.sprintInfos.qty_done);
+					$(preTargetQuery +'[data-field="qty_consumed"]').html(response.data.sprintInfos.qty_consumed);
+				}
+				// refresh resume
 			}
 
 			if(autoRefresh){
 				setTimeout(function(){
-					o.refreshAllBoards(autoRefresh);
+					if(!o.debugMode) {
+						o.refreshAllBoards(true);
+					}else{
+						console.log("debug mode on : auto-refresh disable");
+					}
 				}, 5000);
 			}
 		});
