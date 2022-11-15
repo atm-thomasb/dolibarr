@@ -1338,7 +1338,7 @@ class ScrumSprint extends CommonObject
 		$data = $this->calcUserProgress($userIds);
 
 		if($data === false || !is_array($data)){
-			return false;
+			return $this->error;
 		}
 
 		if(empty($data)){
@@ -1363,6 +1363,7 @@ class ScrumSprint extends CommonObject
 			$out.= '	<th class="center sprint-resume-col" colspan="2"><span title="'.dol_escape_htmltag($langs->trans('ProductivityGoalHelp')).'">'.$langs->trans('ProductivityGoal').'</span></th>';
 			$out.= '</tr>';
 			$out.= '</thead>';
+
 
 
 			$out.= '<tbody>';
@@ -1520,26 +1521,54 @@ class ScrumSprint extends CommonObject
 		if(!class_exists('ScrumTask')){ require_once __DIR__ .'/scrumtask.class.php';}
 		if(!class_exists('ScrumSprintUser')){ require_once __DIR__ .'/scrumsprintuser.class.php';}
 
-		$sql = /** @lang MySQL */
-			"SELECT ec.fk_socpeople fk_user, SUM(st.qty_consumed) sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
-			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
-			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask st "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint usp ON(st.fk_scrum_user_story_sprint = usp.rowid) "
-			." JOIN ".MAIN_DB_PREFIX."element_contact ec ON(ec.element_id = st.rowid) "
-			." JOIN ".MAIN_DB_PREFIX."c_type_contact tc ON(ec.fk_c_type_contact = tc.rowid AND tc.element = 'scrumproject_scrumtask') "
-			." WHERE usp.fk_scrum_sprint = ".intval($this->id)
-			." AND tc.source = 'internal'";
 
 		if(!empty($userIds)){
 			$userIds = array_map('intval', $userIds);
-			$sql.= ' AND ec.fk_socpeople IN ('.implode(',',$userIds).')';
 		}
 
-		$sql.= " GROUP BY ec.fk_socpeople";
+
+
+//		$sql = /** @lang MySQL */
+//			"SELECT ec.fk_socpeople fk_user, SUM(st.qty_consumed) sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+//			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+//			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask st "
+//			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint usp ON(st.fk_scrum_user_story_sprint = usp.rowid) "
+//			." LEFT JOIN ".MAIN_DB_PREFIX."element_contact ec ON(ec.element_id = st.rowid) "
+//			." LEFT JOIN ".MAIN_DB_PREFIX."c_type_contact tc ON(ec.fk_c_type_contact = tc.rowid AND tc.element = 'scrumproject_scrumtask') "
+//			." WHERE 1 = 1  "
+//			." AND usp.fk_scrum_sprint = ".intval($this->id)
+//			." AND tc.source = 'internal'";
+
+			$sql = /** @lang MySQL */
+			"SELECT sUser.fk_user fk_user, SUM(ptt.task_duration)  sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser sUser "
+			." JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON(sUser.fk_user = ptt.fk_user) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint AND USsprint.fk_scrum_sprint = sUser.fk_scrum_sprint) "
+			." WHERE sUser.fk_scrum_sprint = ".intval($this->id)
+			;
+
+		if(!empty($userIds)){
+			$userIds = array_map('intval', $userIds);
+			$sql.= ' AND sUser.fk_user IN ('.implode(',',$userIds).')';
+		}
+
+		$sql.= " GROUP BY sUser.fk_user";
 
 		$data = $this->db->getRows($sql);
+
+		if($data === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+
 		if($data){
 			foreach ($data as $item){
+
+				$item->sumTimeSpent = $item->sumTimeSpent / 3600;
 
 				$item->userQtyAvailability 	= 0;
 				$item->userAvailabilityRate = 0;
