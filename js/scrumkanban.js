@@ -375,20 +375,16 @@ scrumKanban = {};
 	};
 
 	o.sprintResumeDialog = function(){
-		let resumeDialog = new Dialog({
-			title: o.langs.SprintResume,
-			content: "",
-			onOpen: function(){
-				let sendData = {
-					'fk_kanban': o.config.fk_kanban
-				};
 
-				o.callKanbanInterface('getSprintResumeData', sendData, function(response){
-					resumeDialog.setContent(response.data.html);
-				});
+		let sendData = {
+			'fk_kanban': o.config.fk_kanban
+		};
 
-				return true;
-			}
+		o.callKanbanInterface('getSprintResumeData', sendData, function(response){
+			let resumeDialog = new Dialog({
+				title: o.langs.SprintResume,
+				content: response.data.html
+			});
 		});
 	}
 
