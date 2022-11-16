@@ -133,6 +133,8 @@ SP_USE_LEAVE_DAYS_HELP = En développement
 
 RemainVelocity = Vélocité restante
 RemainVelocityHelp = Basé sur la saisie
+UserWasntPlannedOnSprint = L'utilisateur n'est pas planifié
+UserWasntPlannedOnSprintShort = Non planifié
 
 #
 # ScrumMassSprint

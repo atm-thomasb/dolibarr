@@ -1335,7 +1335,7 @@ class ScrumSprint extends CommonObject
 		include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 		$out = '';
-		$data = $this->calcUserProgress($userIds);
+		$data = $this->getSprintUsersProgress($userIds);
 
 		if($data === false || !is_array($data)){
 			return $this->error;
@@ -1442,6 +1442,9 @@ class ScrumSprint extends CommonObject
 
 				$out.= '	<th>';
 				$out.= 			$cUser->getFullName($langs);
+				if(empty($item->userWasPlanned)){
+					$out.= 		'<br/>'.dolGetBadge($langs->trans('UserWasntPlannedOnSprintShort'), '', 'warning');
+				}
 				$out.= '	</th>';
 
 				$out.= '	<td class="center sprint-resume-col">';
@@ -1512,22 +1515,200 @@ class ScrumSprint extends CommonObject
 	 * @param array $userIds
 	 * @return false|array
 	 */
-	public function calcUserProgress($userIds = array()){
+	public function getSprintUsersProgress(){
 
-		if(!is_array($userIds)){
+		if(!class_exists('ScrumSprintUser')){ require_once __DIR__ .'/scrumsprintuser.class.php';}
+
+		// Récupération de la liste des utilisateurs affectés au sprint
+		$usersAffectedList = $this->getPlannedUsersIdList();
+		if($usersAffectedList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		$TUsersAlreadyTreated = array();
+		$dataAbstract = array();
+
+		if($usersAffectedList){
+			foreach ($usersAffectedList as $userId){
+				$userStats = $this->calcUserProgress($userId);
+				$userStats->userWasPlanned = 1;
+
+				$TUsersAlreadyTreated[] = $userId;
+				$dataAbstract[$userId] = $userStats;
+			}
+		}
+
+		// Récupération de la liste des utilisateurs NON affectés au sprint mais pour lesquels du temps est saisis
+		$usersNotAffectedList = $this->getNotPlannedUsersIdListButWithTimeSpend($TUsersAlreadyTreated);
+		if($usersNotAffectedList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		if($usersNotAffectedList){
+			foreach ($usersNotAffectedList as $userId){
+				$userStats = $this->calcUserProgress($userId);
+				$userStats->userWasPlanned = 0;
+
+				$TUsersAlreadyTreated[] = $userId;
+				$dataAbstract[$userId] = $userStats;
+			}
+		}
+
+		return $dataAbstract;
+	}
+
+
+	/**
+	 * return list of planned user ids
+	 * @return array|false
+	 */
+	public function getNotPlannedUsersIdListButWithTimeSpend($excludedUsersIds = array()){
+
+		if(empty($excludedUsersIds)){
+			$excludedUsersIds = $this->getPlannedUsersIdList();
+		}
+
+		// récupération des utilisateurs avec des temps saisis mais qui normalement ne font pas parties du sprint
+		$sql = /** @lang MySQL */
+			"SELECT ptt.fk_user  "
+			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
+			." WHERE "
+			." ptt.fk_user NOT IN (".implode(',', $excludedUsersIds).')'
+			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
+		;
+
+		$sqlObjList = $this->db->getRows($sql);
+
+		if($sqlObjList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		$TUsersIds = array();
+
+		if($sqlObjList){
+			foreach ($sqlObjList as $objUsers){
+				$TUsersIds[] = $objUsers->fk_user;
+			}
+		}
+
+		return $TUsersIds;
+	}
+
+	/**
+	 * return list of planned user ids
+	 * @return array|false
+	 */
+	public function getPlannedUsersIdList(){
+		// Récupération de la liste des utilisateurs affectés au sprint
+		$sql = /** @lang MySQL */
+			"SELECT sUser.fk_user fk_user "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser sUser "
+			." WHERE sUser.fk_scrum_sprint = ".intval($this->id)
+		;
+
+		$usersAffectedList = $this->db->getRows($sql);
+
+		if($usersAffectedList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		$TUsersIds = array();
+
+		if($usersAffectedList){
+			foreach ($usersAffectedList as $objUsers){
+				$TUsersIds[] = $objUsers->fk_user;
+			}
+		}
+
+		return $TUsersIds;
+	}
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 *
+	 * @param int $userId
+	 * @return false|stdClass
+	 */
+	public function calcUserProgress($userId){
+
+		$userId = intval($userId);
+
+		if($userId<=0){
 			return false;
 		}
 
 		if(!class_exists('ScrumTask')){ require_once __DIR__ .'/scrumtask.class.php';}
 		if(!class_exists('ScrumSprintUser')){ require_once __DIR__ .'/scrumsprintuser.class.php';}
 
+		$sql = /** @lang MySQL */
+			"SELECT SUM(ptt.task_duration)  sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
+			." WHERE "
+			." ptt.fk_user = ".$userId
+			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
+		;
 
-		if(!empty($userIds)){
-			$userIds = array_map('intval', $userIds);
+
+		$item = $this->db->getRow($sql);
+
+		if($item === false){
+			$this->error= $this->db->error();
+			return false;
 		}
 
+		$item->fk_user = $userId;
+		$item->sumTimeSpent = $item->sumTimeSpent / 3600;
 
+		$item->userQtyAvailability 	= 0;
+		$item->userAvailabilityRate = 0;
+		$item->userQtyVelocity 		= 0;
 
+		$item->userRemainingWorkDays = 0;
+		$item->userNotPlannedLeaveDays = 0;
+
+		$sprintUser = new ScrumSprintUser($this->db);
+		if($sprintUser->fetchFromSprintAndUser(intval($this->id), intval($item->fk_user)) > 0){
+			$item->userQtyAvailability 	= $sprintUser->qty_availability;
+			$item->userAvailabilityRate = $sprintUser->availability_rate;
+			$item->userQtyVelocity 		= $sprintUser->qty_velocity;
+
+			// calcule des heures et jours restant disponibles
+			$item->userRemainingWorkDays	= $sprintUser->getRemainingWorkDays();
+			if($item->userRemainingWorkDays>=0){
+				$item->userRemainingWorkHours	= $sprintUser->convertWorkingDayToHours($item->userRemainingWorkDays);
+			}else{
+				$item->userRemainingWorkHours	= -1;
+			}
+
+			// Calcules des heures et jours perdus suite à un arrêt de travail imprévu
+			$item->userNotPlannedLeaveDays	= $sprintUser->getLeaveDays(true);
+			if($item->userNotPlannedLeaveDays>=0){
+				$item->userNotPlannedLeaveHours	= $sprintUser->convertWorkingDayToHours($item->userNotPlannedLeaveDays);
+			}else{
+				$item->userNotPlannedLeaveHours	= -1;
+			}
+		}
+
+		return $item;
+	}
+
+//	/**
+//	 * @return void
+//	 */
+//	public function getUsersIdAffectedToScrumTask(){
+//		TODO je garde la query au chaud pour justement travailler sur une extraction des utilisateurs affecté à une card ou autre éléménent
+//		  c'était à la base la requete de calcUserProgress mais ce n'était pas bon car se basait justement que sur les contacts
 //		$sql = /** @lang MySQL */
 //			"SELECT ec.fk_socpeople fk_user, SUM(st.qty_consumed) sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
 //			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
@@ -1538,72 +1719,7 @@ class ScrumSprint extends CommonObject
 //			." WHERE 1 = 1  "
 //			." AND usp.fk_scrum_sprint = ".intval($this->id)
 //			." AND tc.source = 'internal'";
+//	}
 
-			$sql = /** @lang MySQL */
-			"SELECT sUser.fk_user fk_user, SUM(ptt.task_duration)  sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
-			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
-			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser sUser "
-			." JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON(sUser.fk_user = ptt.fk_user) "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint AND USsprint.fk_scrum_sprint = sUser.fk_scrum_sprint) "
-			." WHERE sUser.fk_scrum_sprint = ".intval($this->id)
-			;
-
-		if(!empty($userIds)){
-			$userIds = array_map('intval', $userIds);
-			$sql.= ' AND sUser.fk_user IN ('.implode(',',$userIds).')';
-		}
-
-		$sql.= " GROUP BY sUser.fk_user";
-
-		$data = $this->db->getRows($sql);
-
-		if($data === false){
-			$this->error= $this->db->error();
-			return false;
-		}
-
-
-		if($data){
-			foreach ($data as $item){
-
-				$item->sumTimeSpent = $item->sumTimeSpent / 3600;
-
-				$item->userQtyAvailability 	= 0;
-				$item->userAvailabilityRate = 0;
-				$item->userQtyVelocity 		= 0;
-
-				$item->userRemainingWorkDays = 0;
-				$item->userNotPlannedLeaveDays = 0;
-
-				$sprintUser = new ScrumSprintUser($this->db);
-				if($sprintUser->fetchFromSprintAndUser(intval($this->id), intval($item->fk_user)) > 0){
-					$item->userQtyAvailability 	= $sprintUser->qty_availability;
-					$item->userAvailabilityRate = $sprintUser->availability_rate;
-					$item->userQtyVelocity 		= $sprintUser->qty_velocity;
-
-					// calcule des heures et jours restant disponibles
-					$item->userRemainingWorkDays	= $sprintUser->getRemainingWorkDays();
-					if($item->userRemainingWorkDays>=0){
-						$item->userRemainingWorkHours	= $sprintUser->convertWorkingDayToHours($item->userRemainingWorkDays);
-					}else{
-						$item->userRemainingWorkHours	= -1;
-					}
-
-					// Calcules des heures et jours perdus suite à un arrêt de travail imprévu
-					$item->userNotPlannedLeaveDays	= $sprintUser->getLeaveDays(true);
-					if($item->userNotPlannedLeaveDays>=0){
-						$item->userNotPlannedLeaveHours	= $sprintUser->convertWorkingDayToHours($item->userNotPlannedLeaveDays);
-					}else{
-						$item->userNotPlannedLeaveHours	= -1;
-					}
-
-				}
-			}
-		}
-
-		return $data;
-	}
 
 }
