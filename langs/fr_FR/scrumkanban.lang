@@ -2,4 +2,4 @@ NewList = Nouvelle liste
 NewCard = Nouvelle carte
 KanbanBackLogList = Backlog
 KanbanDoneList = Done
-UserStoryPlannedDone = Somme des users stories réalisées
+UserStoryPlannedDone = Quantité livrable (Somme des users stories réalisées)
