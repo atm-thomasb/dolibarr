@@ -319,3 +319,4 @@ TimeSpent = Saisie
 TimeEngagedHelp = Correspond à la somme des temps planifiés des tâches sur lesquelles l'utilisateur en contact.
 TimePlannedDoneHelp = Somme des temps planifiés correspondant aux tâches terminées.
 TimeSpentHelp = correspond à la somme des temps saisis par l'utilisateur.
+MoreTimeSpendsThanAvailability = Temps saisi %s supérieur au temps disponible %s.

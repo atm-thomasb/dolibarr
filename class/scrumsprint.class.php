@@ -1464,6 +1464,10 @@ class ScrumSprint extends CommonObject
 
 				$out.= '	<td class="center sprint-resume-col">';
 				$out.= getTileFormatedTime($item->sumTimeSpent) ;
+				if($item->sumTimeSpent > $item->userQtyAvailability){
+					$alertText = $langs->trans('MoreTimeSpendsThanAvailability', getTileFormatedTime($item->sumTimeSpent),  getTileFormatedTime($item->userQtyAvailability));
+					$out.= ' <span class="fa fa-warning" title="'.dol_escape_htmltag($alertText).'" ></span> ';
+				}
 				$out.= '	</td>';
 
 				$out.= '	<td class="center sprint-resume-col">';
