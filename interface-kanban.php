@@ -74,6 +74,9 @@ elseif ($action === 'getAllItemToList') {
 elseif ($action === 'getScrumCardData') {
 	_actionGetScrumCardData($jsonResponse);
 }
+elseif ($action === 'getSprintResumeData') {
+	_actionGetSprintResumeData($jsonResponse);
+}
 elseif ($action === 'splitScrumCard') {
 	_actionSplitScrumCard($jsonResponse);
 }
@@ -202,6 +205,12 @@ function _actionGetAllBoards($jsonResponse){
 
 	$data = GETPOST("data", "array");
 
+	if (empty($user->rights->scrumproject->scrumsprint->read)) {
+		$jsonResponse->msg = $langs->trans('NotEnoughRights');
+		$jsonResponse->result = 0;
+		return false;
+	}
+
 	if(empty($data['fk_kanban'])){
 		$jsonResponse->msg = 'Need Kanban Id';
 		return false;
@@ -238,6 +247,7 @@ function _actionGetAllBoards($jsonResponse){
 				$jsonResponse->data->sprintInfos->qty_planned = $scrumSprint->showOutputFieldQuick('qty_planned');
 				$jsonResponse->data->sprintInfos->qty_done = $scrumSprint->showOutputFieldQuick('qty_done');
 				$jsonResponse->data->sprintInfos->qty_consumed = $scrumSprint->showOutputFieldQuick('qty_consumed');
+				$jsonResponse->data->sprintInfos->qty_us_planned_done = $kanban->calcUsPlannedInList('done');
 			}else{
 				$jsonResponse->result = 0;
 				$jsonResponse->msg = $langs->trans('Get sprint error') . ' : ' . $scrumSprint->errorsToString();
@@ -527,6 +537,49 @@ function _actionGetScrumCardData($jsonResponse){
 
 	$jsonResponse->result = 1;
 	$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectStd();
+	return true;
+}
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionGetSprintResumeData($jsonResponse){
+	global $user, $langs, $db;
+
+	if (empty($user->rights->scrumproject->scrumsprint->read)) {
+		$jsonResponse->msg = $langs->trans('NotEnoughRights');
+		$jsonResponse->result = 0;
+		return false;
+	}
+
+	$jsonResponse->result = 0;
+
+	$data = GETPOST("data", "array");
+
+	if(empty($data['fk_kanban'])){
+		$jsonResponse->msg = 'Need Kanban Id';
+		return false;
+	}
+
+	$fk_kanban = $data['fk_kanban'];
+	$kanban = _checkObjectByElement('scrumproject_scrumkanban', $fk_kanban, $jsonResponse);
+	/** @var ScrumKanban $kanban */
+	if(!$kanban){
+		return false;
+	}
+
+	$sprint = _checkObjectByElement('scrumproject_scrumsprint', $kanban->fk_scrum_sprint, $jsonResponse);
+	if(!$sprint){
+		return false;
+	}
+
+
+	$jsonResponse->data = new stdClass();
+	$jsonResponse->data->html = $sprint->displayUsersProgress();
+
+
+	$jsonResponse->result = 1;
 	return true;
 }
 

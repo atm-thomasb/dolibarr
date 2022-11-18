@@ -50,3 +50,39 @@ button.ajax-action{
 .scrum-user-story-plan-wizard .col-scrumsprint, .scrum-user-story-plan-wizard .col-scrumsprint-qty-to-plan{
 	background-color: rgba(0,0,0,0.05);
 }
+
+
+.sprint-resume-table{
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.sprint-resume-table :where(td,th) {
+	padding: 5px;
+}
+
+
+.sprint-resume-table tbody tr:nth-child(even){
+	background: rgba(0,0,0,0.05);
+}
+
+.sprint-resume-table tbody tr:hover{
+	background: rgba(0, 37, 152, 0.1);
+}
+
+
+.sprint-resume-table tbody :where(td,th) {
+	border-top: 1px solid rgba(0,0,0,0.1);
+}
+.sprint-resume-col{
+	border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+.sprint-goal-ratio-ok{
+	color: #0ca30a;
+}
+
+
+.productivity-badge-icon{
+	color: #cbaa00;
+}

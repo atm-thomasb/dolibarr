@@ -269,9 +269,9 @@ class ScrumSprint extends CommonObject
 							$scrumSprintUser->fk_scrum_sprint = $this->id;
 							$scrumSprintUser->status = ScrumSprintUser::STATUS_DRAFT;
 							//Dispo
-							$scrumSprintUser->qty_availablity = floatval($targetUser->array_options['options_scrumproject_availability']);
+							$scrumSprintUser->qty_availability = floatval($targetUser->array_options['options_scrumproject_availability']);
 							//Ratio
-							$scrumSprintUser->availablity_rate = floatval($targetUser->array_options['options_scrumproject_velocity_rate']);
+							$scrumSprintUser->availability_rate = floatval($targetUser->array_options['options_scrumproject_velocity_rate']);
 
 							if($scrumSprintUser->create($user)<0){
 								setEventMessage($langs->trans('ScrumSprintUserCreateError'), 'errors');
@@ -1244,8 +1244,9 @@ class ScrumSprint extends CommonObject
 
 
 	/**
+	 * Permet de lancer une requette d'update avec tout les triggers
 	 * @param User $user
-	 * @param string $sql
+	 * @param string $sql the SQL UPDATE query
 	 * @param string $tiggerName
 	 * @param bool $notrigger
 	 * @return int
@@ -1323,4 +1324,406 @@ class ScrumSprint extends CommonObject
 		if ($obj = $db->fetch_object($res)) return $obj->rowid;
 		return -2;
 	}
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 * @return int
+	 */
+	public function displayUsersProgress($userIds = array()){
+		global $langs;
+
+		include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+
+		$out = '';
+		$data = $this->getSprintUsersProgress($userIds);
+
+		if($data === false || !is_array($data)){
+			return $this->error;
+		}
+
+		if(empty($data)){
+			$out.= $langs->trans('NoData');
+		}else{
+			$out.= '<table class="sprint-resume-table">';
+
+			$out.= '<thead>';
+			$out.= '<tr>';
+			$out.= '	<th colspan="2"></th>';
+			$out.= '	<th class="center sprint-resume-col"><span>'.$langs->trans('QtyAvailability').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('QtyVelocityHelp')).'">'.$langs->trans('QtyVelocity').'</span></th>';
+
+			if(getDolGlobalInt('SP_USE_LEAVE_DAYS')) {
+				$out .= '	<th class="center sprint-resume-col"><span>' . $langs->trans('QtyLeaveDays') . '</span></th>';
+			}
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeSpentHelp')).'">'.$langs->trans('TimeSpent').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimePlannedDoneHelp')).'">'.$langs->trans('TimePlannedDone').'</span></th>';
+//			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('RemainVelocityHelp')).'">'.$langs->trans('RemainVelocity').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('ProductivityRealHelp')).'">'.$langs->trans('ProductivityReal').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col" colspan="2"><span title="'.dol_escape_htmltag($langs->trans('ProductivityGoalHelp')).'">'.$langs->trans('ProductivityGoal').'</span></th>';
+			$out.= '</tr>';
+			$out.= '</thead>';
+
+
+
+			$out.= '<tbody>';
+			foreach ($data as $item) {
+				$cUser = scrumProjectGetObjectByElement('user', $item->fk_user);
+				/** @var User $cUser */
+				if (!$cUser) {
+					$out .= '<tr><th colspan="2" class="error">' . $langs->trans('Error') . '</th></tr>';
+					continue;
+				}
+
+				// Calcule de la productivité
+				$productivityRatio = 0;
+				if ($item->sumTimeSpent > 0) {
+					$productivityRatio = round($item->sumTimeDone / $item->sumTimeSpent, 2);
+				}
+
+				// Calcule des objectifs
+				$productivityGoalRatio = 0;
+				if ($item->userQtyVelocity > 0) {
+					$productivityGoalRatio = round($item->sumTimeDone / $item->userQtyVelocity, 2);
+				}
+
+				// Restant à produire pour atteindre l'objectif utilisateur
+				$remainToProd = $item->userQtyVelocity - $item->sumTimePlanned;
+				if($remainToProd < 0){ $remainToProd = 0; }
+
+				// Calcule de la vélocité réelle restante basée sur les jours ouvrés restants, les absences et le ratio de vélocité du sprint pour cet utilisateur
+				$remainVelocityReal = 0;
+				if($item->userRemainingWorkHours>=0){
+					$remainVelocityReal = round($item->userRemainingWorkHours * $item->userAvailabilityRate, 2);
+				}
+
+				// La vélocité théorique se base uniquement sur la saisie
+				$remainVelocityTheoretical =  $item->userQtyVelocity - $item->sumTimeSpent;
+				if($remainVelocityTheoretical < 0){ $remainVelocityTheoretical = 0; }
+
+
+				$productivityGoalRatioDisplay = '';
+				$achievementBadge = '';
+				if ($item->userQtyVelocity > 0){
+
+					if ($productivityGoalRatio >= 1) {
+						$productivityGoalRatioDisplay = '<span class="badge badge-success">' . ($productivityGoalRatio * 100) . '%</span>';
+					} elseif ($productivityGoalRatio < 0.8) {
+						$productivityGoalRatioDisplay = '<span class="badge badge-danger">' . ($productivityGoalRatio * 100) . '%</span>';
+					} else {
+						$productivityGoalRatioDisplay = '<span class="badge badge-warning">' . ($productivityGoalRatio * 100) . '%</span>';
+					}
+
+					$starClass = 'fa-star-o';
+					if ($item->userAvailabilityRate > 1) {
+						$starClass = 'fa-star';
+					}
+
+					if ($productivityGoalRatio >= 1.75) {
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . ' fa-2x"></span>';
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+					} elseif ($productivityGoalRatio >= 1.5) {
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+					} elseif ($productivityGoalRatio >= 1.1) {
+						$achievementBadge .= '<span class="productivity-badge-icon fa ' . $starClass . '"></span>';
+					}
+
+				}
+
+
+				$out.= '<tr>';
+				$out.= '	<th>';
+				$out.= '		<span class="sprint-resume-user-img" data-user-id="';
+				$out.= 				$cUser->id.'" >'.Form::showphoto('userphoto', $cUser, 0, 0, 0, 'sprint-resume-user-img__pic', '', '', 1);
+				$out.= '		</span>';
+				$out.= '	</th>';
+
+				$out.= '	<th>';
+				$out.= 			$cUser->getFullName($langs);
+				if(empty($item->userWasPlanned)){
+					$out.= 		'<br/>'.dolGetBadge($langs->trans('UserWasntPlannedOnSprintShort'), '', 'warning');
+				}
+				$out.= '	</th>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= 			getTileFormatedTime($item->userQtyAvailability) ;
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= 			getTileFormatedTime($item->userQtyVelocity) ;
+				$out.= ' 		<small title="'.dol_escape_htmltag($langs->trans('AvailabilityRateHelp')).'">('.($item->userAvailabilityRate * 100) . '%'.')</small>';
+				$out.= '	</td>';
+
+				if(getDolGlobalInt('SP_USE_LEAVE_DAYS')){
+					$out.= '	<td class="center sprint-resume-col">';
+					$out.= 			$item->userNotPlannedLeaveDays . ' ' . $langs->trans('Days') ;
+					$out.= '	</td>';
+				}
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= getTileFormatedTime($item->sumTimeSpent) ;
+				if($item->sumTimeSpent > $item->userQtyAvailability){
+					$alertText = $langs->trans('MoreTimeSpendsThanAvailability', getTileFormatedTime($item->sumTimeSpent),  getTileFormatedTime($item->userQtyAvailability));
+					$out.= ' <span class="fa fa-warning" title="'.dol_escape_htmltag($alertText).'" ></span> ';
+				}
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= getTileFormatedTime($item->sumTimeDone) ;
+				$out.= '	</td>';
+
+//				$out.= '	<td class="center sprint-resume-col">';
+//				$out.= getTileFormatedTime($item->sumTimePlanned) ;
+//				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+
+				if($remainToProd > $remainVelocityReal){
+					// display alert
+					$alertText = $langs->trans('WarningMissingRealVelocityAccordingToEndDate', $item->userRemainingWorkDays,  getTileFormatedTime($remainToProd));
+					$out.= '<span class="fa fa-warning" title="'.dol_escape_htmltag($alertText).'" ></span> ';
+				}
+				$out.= getTileFormatedTime($remainVelocityTheoretical) ;
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= ($productivityRatio * 100) . '%';
+				$out.= '	</td>';
+
+				$out.= '	<td class="center sprint-resume-col">';
+				$out.= $productivityGoalRatioDisplay;
+				$out.= '	</td>';
+
+				$out.= '	<td class="center ">';
+				if(getDolGlobalInt('SP_USE_ACHIEVEMENTS')){
+					$out.= $achievementBadge;
+				}
+				$out.= '	</td>';
+
+				$out.= '</tr>';
+			}
+			$out.= '</tbody>';
+			$out.= '</table>';
+		}
+
+
+
+		return $out;
+	}
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 *
+	 * @param array $userIds
+	 * @return false|array
+	 */
+	public function getSprintUsersProgress(){
+
+		if(!class_exists('ScrumSprintUser')){ require_once __DIR__ .'/scrumsprintuser.class.php';}
+
+		// Récupération de la liste des utilisateurs affectés au sprint
+		$usersAffectedList = $this->getPlannedUsersIdList();
+		if($usersAffectedList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		$TUsersAlreadyTreated = array();
+		$dataAbstract = array();
+
+		if($usersAffectedList){
+			foreach ($usersAffectedList as $userId){
+				$userStats = $this->calcUserProgress($userId);
+				$userStats->userWasPlanned = 1;
+
+				$TUsersAlreadyTreated[] = $userId;
+				$dataAbstract[$userId] = $userStats;
+			}
+		}
+
+		// Récupération de la liste des utilisateurs NON affectés au sprint mais pour lesquels du temps est saisis
+		$usersNotAffectedList = $this->getNotPlannedUsersIdListButWithTimeSpend($TUsersAlreadyTreated);
+		if($usersNotAffectedList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		if($usersNotAffectedList){
+			foreach ($usersNotAffectedList as $userId){
+				$userStats = $this->calcUserProgress($userId);
+				$userStats->userWasPlanned = 0;
+
+				$TUsersAlreadyTreated[] = $userId;
+				$dataAbstract[$userId] = $userStats;
+			}
+		}
+
+		return $dataAbstract;
+	}
+
+
+	/**
+	 * return list of planned user ids
+	 * @return array|false
+	 */
+	public function getNotPlannedUsersIdListButWithTimeSpend($excludedUsersIds = array()){
+
+		if(empty($excludedUsersIds)){
+			$excludedUsersIds = $this->getPlannedUsersIdList();
+		}
+
+		// récupération des utilisateurs avec des temps saisis mais qui normalement ne font pas parties du sprint
+		$sql = /** @lang MySQL */
+			"SELECT ptt.fk_user  "
+			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
+			." WHERE "
+			." ptt.fk_user NOT IN (".implode(',', $excludedUsersIds).')'
+			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
+		;
+
+		$sqlObjList = $this->db->getRows($sql);
+
+		if($sqlObjList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		$TUsersIds = array();
+
+		if($sqlObjList){
+			foreach ($sqlObjList as $objUsers){
+				$TUsersIds[] = $objUsers->fk_user;
+			}
+		}
+
+		return $TUsersIds;
+	}
+
+	/**
+	 * return list of planned user ids
+	 * @return array|false
+	 */
+	public function getPlannedUsersIdList(){
+		// Récupération de la liste des utilisateurs affectés au sprint
+		$sql = /** @lang MySQL */
+			"SELECT sUser.fk_user fk_user "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser sUser "
+			." WHERE sUser.fk_scrum_sprint = ".intval($this->id)
+		;
+
+		$usersAffectedList = $this->db->getRows($sql);
+
+		if($usersAffectedList === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		$TUsersIds = array();
+
+		if($usersAffectedList){
+			foreach ($usersAffectedList as $objUsers){
+				$TUsersIds[] = $objUsers->fk_user;
+			}
+		}
+
+		return $TUsersIds;
+	}
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 *
+	 * @param int $userId
+	 * @return false|stdClass
+	 */
+	public function calcUserProgress($userId){
+
+		$userId = intval($userId);
+
+		if($userId<=0){
+			return false;
+		}
+
+		if(!class_exists('ScrumTask')){ require_once __DIR__ .'/scrumtask.class.php';}
+		if(!class_exists('ScrumSprintUser')){ require_once __DIR__ .'/scrumsprintuser.class.php';}
+
+		$sql = /** @lang MySQL */
+			"SELECT SUM(ptt.task_duration)  sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
+			." WHERE "
+			." ptt.fk_user = ".$userId
+			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
+		;
+
+
+		$item = $this->db->getRow($sql);
+
+		if($item === false){
+			$this->error= $this->db->error();
+			return false;
+		}
+
+		$item->fk_user = $userId;
+		$item->sumTimeSpent = $item->sumTimeSpent / 3600;
+
+		$item->userQtyAvailability 	= 0;
+		$item->userAvailabilityRate = 0;
+		$item->userQtyVelocity 		= 0;
+
+		$item->userRemainingWorkDays = 0;
+		$item->userNotPlannedLeaveDays = 0;
+
+		$sprintUser = new ScrumSprintUser($this->db);
+		if($sprintUser->fetchFromSprintAndUser(intval($this->id), intval($item->fk_user)) > 0){
+			$item->userQtyAvailability 	= $sprintUser->qty_availability;
+			$item->userAvailabilityRate = $sprintUser->availability_rate;
+			$item->userQtyVelocity 		= $sprintUser->qty_velocity;
+
+			// calcule des heures et jours restant disponibles
+			$item->userRemainingWorkDays	= $sprintUser->getRemainingWorkDays();
+			if($item->userRemainingWorkDays>=0){
+				$item->userRemainingWorkHours	= $sprintUser->convertWorkingDayToHours($item->userRemainingWorkDays);
+			}else{
+				$item->userRemainingWorkHours	= -1;
+			}
+
+			// Calcules des heures et jours perdus suite à un arrêt de travail imprévu
+			$item->userNotPlannedLeaveDays	= $sprintUser->getLeaveDays(true);
+			if($item->userNotPlannedLeaveDays>=0){
+				$item->userNotPlannedLeaveHours	= $sprintUser->convertWorkingDayToHours($item->userNotPlannedLeaveDays);
+			}else{
+				$item->userNotPlannedLeaveHours	= -1;
+			}
+		}
+
+		return $item;
+	}
+
+//	/**
+//	 * @return void
+//	 */
+//	public function getUsersIdAffectedToScrumTask(){
+//		TODO je garde la query au chaud pour justement travailler sur une extraction des utilisateurs affecté à une card ou autre éléménent
+//		  c'était à la base la requete de calcUserProgress mais ce n'était pas bon car se basait justement que sur les contacts
+//		$sql = /** @lang MySQL */
+//			"SELECT ec.fk_socpeople fk_user, SUM(st.qty_consumed) sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+//			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+//			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask st "
+//			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint usp ON(st.fk_scrum_user_story_sprint = usp.rowid) "
+//			." LEFT JOIN ".MAIN_DB_PREFIX."element_contact ec ON(ec.element_id = st.rowid) "
+//			." LEFT JOIN ".MAIN_DB_PREFIX."c_type_contact tc ON(ec.fk_c_type_contact = tc.rowid AND tc.element = 'scrumproject_scrumtask') "
+//			." WHERE 1 = 1  "
+//			." AND usp.fk_scrum_sprint = ".intval($this->id)
+//			." AND tc.source = 'internal'";
+//	}
+
+
 }

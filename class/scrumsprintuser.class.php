@@ -115,8 +115,8 @@ class ScrumSprintUser extends CommonObject
 		// fk_user_role : c'est le role en temps que contact, la valeur par défaut est à récupérer sur les extrafields de l'utilisateur todo : ajouter l'extrafield du user role par défaut
 		'fk_user_role' => array('type'=>'integer:', 'label'=>'ScrumUserRoleForTask', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'c_type_contact.rowid', 'validate'=>'1',),
 		'fk_user' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'User', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'user.rowid',),
-		'qty_availablity' => array('type'=>'real', 'label'=>'QtyAvailablity', 'help' => 'QtyAvailablityHelp', 'enabled'=>'1', 'position'=>80, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
-		'availablity_rate' => array('type'=>'real', 'label'=>'AvailablityRate', 'help' => 'AvailablityRateHelp', 'enabled'=>'1', 'position'=>90, 'notnull'=>1, 'visible'=>1, 'default'=>'1', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'qty_availability' => array('type'=>'real', 'label'=>'QtyAvailability', 'help' => 'QtyAvailabilityHelp', 'enabled'=>'1', 'position'=>80, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
+		'availability_rate' => array('type'=>'real', 'label'=>'AvailabilityRate', 'help' => 'AvailabilityRateHelp', 'enabled'=>'1', 'position'=>90, 'notnull'=>1, 'visible'=>1, 'default'=>'1', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>5, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
@@ -130,13 +130,14 @@ class ScrumSprintUser extends CommonObject
 	public $fk_user_role;
 	public $fk_user;
 	public $qty_velocity;
+	public $qty_availability;
 	public $date_creation;
 	public $tms;
 	public $fk_user_creat;
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
-	public $availablity_rate;
+	public $availability_rate;
 	// END MODULEBUILDER PROPERTIES
 
 
@@ -211,7 +212,7 @@ class ScrumSprintUser extends CommonObject
 			$this->fields['fk_user']['default'] = $user->id;
 
 			if(!empty($user->array_options['options_scrumproject_availability'])){
-				$this->fields['qty_availablity']['default'] = round($user->array_options['options_scrumproject_availability'], 2);
+				$this->fields['qty_availability']['default'] = round($user->array_options['options_scrumproject_availability'], 2);
 			}
 		}
 
@@ -383,6 +384,26 @@ class ScrumSprintUser extends CommonObject
 	public function fetch($id, $ref = null)
 	{
 		$result = $this->fetchCommon($id, $ref);
+		if ($result > 0 && !empty($this->table_element_line)) {
+			$this->fetchLines();
+		}
+		return $result;
+	}
+
+	/**
+	 * Load object in memory from the database
+	 *
+	 * @param $fk_scrum_sprint
+	 * @param $fk_user
+	 * @return int         <if KO, 0 if not found, >0 if OK
+	 */
+	public function fetchFromSprintAndUser($fk_scrum_sprint, $fk_user)
+	{
+		if (empty($fk_scrum_sprint) && empty($fk_user) && empty($morewhere)) {
+			return -1;
+		}
+
+		$result = $this->fetchCommon(null, null, ' AND fk_scrum_sprint = '. (int)$fk_scrum_sprint . ' AND fk_user = ' . (int)$fk_user );
 		if ($result > 0 && !empty($this->table_element_line)) {
 			$this->fetchLines();
 		}
@@ -1126,13 +1147,13 @@ class ScrumSprintUser extends CommonObject
 
 	public function calcVelocity(){
 
-		if(empty($this->availablity_rate)){
-			$this->availablity_rate = 1;
+		if(empty($this->availability_rate)){
+			$this->availability_rate = 1;
 		}
 
-		$this->availablity_rate = doubleval($this->availablity_rate);
-		$this->qty_availablity = doubleval($this->qty_availablity);
-		$this->qty_velocity = $this->qty_availablity * $this->availablity_rate;
+		$this->availability_rate = doubleval($this->availability_rate);
+		$this->qty_availability = doubleval($this->qty_availability);
+		$this->qty_velocity = $this->qty_availability * $this->availability_rate;
 
 		return  $this->qty_velocity;
 	}
@@ -1220,6 +1241,68 @@ class ScrumSprintUser extends CommonObject
 
 		return $out;
 	}
+
+	/**
+	 * Retourne le nombre de jours d'absence qui impactent sur la planification
+	 * @param bool $notPlannedOnly return only days where user is sick or not planned leave
+	 * @return float
+	 */
+	public function getLeaveDays($notPlannedOnly = false){
+
+		if(!getDolGlobalInt('SP_USE_LEAVE_DAYS')){
+			return 0;
+		}
+
+		// TODO 1.1 : utilisation du module absence de Dolibarr utiliser la class Holiday et la methode verifDateHolidayCP (mais voir si une requete ne peut pas faire mieux car comment dire...
+
+		// TODO 1.2 : Si utilisation du module absence ATM ne pas le faire et reprendre depuis le todo 1.1
+
+		return 0;
+	}
+
+	/**
+	 * Retourne le nombre de jours de travail restant avant la fin du sprint
+	 * @return float number of workable days | -1 for error
+	 */
+	public function getRemainingWorkDays($country_code = ''){
+
+		$sprint = scrumProjectGetObjectByElement('scrumproject_scrumsprint', $this->fk_scrum_sprint);
+		/**
+		 * @var ScrumSprint $sprint
+		 */
+
+		if(intval($sprint->date_end) <= 0){
+			return -1;
+		}
+
+		if(intval($sprint->date_end) < time()){
+			return 0;
+		}
+
+		$numOpenDays =  num_open_day(time(), $sprint->date_end, 0, 1, 0, $country_code);
+		if(!is_float($numOpenDays) && !is_int($numOpenDays)){
+			return -1;
+		}
+
+		$userLeaveDays = $this->getLeaveDays();
+
+		return $numOpenDays - $userLeaveDays;
+	}
+
+
+	/**
+	 * Converti des jours de travail en heures
+	 * @param $nbDays
+	 * @return float|int
+	 */
+	public function convertWorkingDayToHours($nbDays = 0){
+
+		// TODO : prendre en compte une valeur lié a l'utilisateur au lieux de celle par default, voir pour ajouter cette valeur à cet object vu que au final c'est lié à l'utilisateur et au sprint...
+
+		$defaultNbWorkingHoursByDay = getDolGlobalString('SP_DEFAULT_NB_WORKING_HOURS_BY_DAY', 7);
+		return abs($nbDays * floatval($defaultNbWorkingHoursByDay));
+	}
+
 }
 
 

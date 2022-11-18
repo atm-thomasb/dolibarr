@@ -184,6 +184,14 @@ $item->fieldAttr = array(
 
 $formSetup->htmlAfterOutputForm.='<script>$(document).on("change", "#setup-SP_MAX_SCRUM_TASK_STEP_QTY", function(){$("#setup-SP_MAX_SCRUM_TASK_MAX_QTY").attr("step", $(this).val());});</script>';
 
+$item = $formSetup->newItem('SP_DEFAULT_NB_WORKING_HOURS_BY_DAY');
+$item->fieldAttr = array(
+	'type' => 'number',
+	'step' => '0.01',
+	'min' => 0,
+	'max' => 24
+);
+$item->helpText = $langs->trans('SP_DEFAULT_NB_WORKING_HOURS_BY_DAY_HELP');
 
 $item = $formSetup->newItem('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE');
 
@@ -216,6 +224,37 @@ $TField = array(
 	'badge' => $langs->trans('DisplayAsBadge'),
 );
 $item->setAsSelect($TField);
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * ------------------------
+ * OPTIONS EXPERIMENTALES
+ * ------------------------
+ */
+$item = $formSetup->newItem('scrumProjectLabOptions')->setAsTitle();
+$item->helpText = $langs->trans('scrumProjectLabOptionsHelp');
+
+// prise en compte des absences (maladie)
+$item = $formSetup->newItem('SP_USE_LEAVE_DAYS')->setAsYesNo();
+$item->helpText = $langs->trans('SP_USE_LEAVE_DAYS_HELP');
+
+// Ajout de la gamification et Achievement
+$item = $formSetup->newItem('SP_USE_ACHIEVEMENTS')->setAsYesNo();
+
+
+
+
+
 
 
 $setupnotempty =+ count($formSetup->items);

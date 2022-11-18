@@ -87,7 +87,7 @@ function _actionLiveUpdate(&$jsonResponse){
 			'allowedFields' => array('us_qty_planned', 'label')
 		),
 		'scrumproject_scrumsprintuser' => array(
-			'allowedFields' => array('qty_availablity', 'availablity_rate', 'qty_velocity')
+			'allowedFields' => array('qty_availability', 'availability_rate', 'qty_velocity')
 		),
 		'scrumproject_scrumkanbanlist' => array(
 			'allowedFields' => array('label')
