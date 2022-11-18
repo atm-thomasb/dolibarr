@@ -7,6 +7,7 @@
 	--default-space-size: 10px;
 	--default-block-background-color : rgba(234,234,234,1);
 	--default-strong-color : #223058;
+	--user-image-size : 32px;
 
 	--box-text-color : var(--general-text-color);
 	--box-text-color-hover : #444444;
@@ -778,25 +779,34 @@ nav.top-nav-bar{
 	bottom: 0;
 }
 
-.kanban-item__user, .sprint-resume-user-img__pic{
-	--user-image-size : 32px;
+.kanban-item__users_img{
+	margin-right: calc(var(--user-image-size)/-2);
+	transition: margin-right 0.2s ease-in-out;
+}
+
+.kanban-item__user{
+	max-height: var(--user-image-size);
+	border-radius: var(--user-image-size);
+
+	margin-bottom: -3px;
+
+	background: #949494;
+	border:3px solid #ededed;
+
+	z-index: 5;
+}
+
+.sprint-resume-user-img__pic{
 	max-height: var(--user-image-size);
 	border-radius: var(--user-image-size);
 	background: #949494;
 	border:3px solid #ededed;
 }
 
-.kanban-item__user{
-	margin-right: calc(var(--user-image-size)/-2);
-	margin-bottom: -3px;
-	transition: margin-right 0.2s ease-in-out;
-	z-index: 5;
-}
-
-.kanban-item__users:hover .kanban-item__user, .kanban-item__users:hover .kanban-item__user:last-child:not(:only-child){
+.kanban-item__users:hover .kanban-item__users_img, .kanban-item__users:hover .kanban-item__users_img:last-child:not(:only-child){
 	margin-right: -2px;
 }
-.kanban-item__user:last-child, .kanban-item__users:hover .kanban-item__user:last-child{
+.kanban-item__users_img:last-child, .kanban-item__users:hover .kanban-item__users_img:last-child{
 	margin-right: 3px;
 }
 
