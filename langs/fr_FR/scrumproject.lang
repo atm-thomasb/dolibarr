@@ -253,9 +253,9 @@ us_qty_consumed_help = Temps consommé par l'équipe pour les user story affect�
 us_qty_done = P.Livrable
 us_qty_done_help = Temps planifié livrable
 QtyAvailability = Disponibilité
-QtyAvailabilityHelp = Disponibilité réel, la valeur par défaut peut être modifiée pour chaque utilisateur sur sa fiche.
+QtyAvailabilityHelp = Disponibilité réelle, la valeur par défaut peut être modifiée pour chaque utilisateur sur sa fiche.
 AvailabilityRate = Ratio de vélocité
-AvailabilityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité x Ratio de vélocité = Vélocité
+AvailabilityRateHelp = Ratio utilisé pour le caclul de vélocité : Disponibilité × Ratio de vélocité = Vélocité
 ScrumTask = Tâche scrum
 ScrumTasks = Tâches scrum
 ScrumSprintTime = Temps consommé
