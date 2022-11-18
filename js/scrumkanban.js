@@ -88,7 +88,7 @@ scrumKanban = {};
 		AddLine : 'Ajouter une ligne',
 		QtyScrumTaskAlreadySplited: 'Quantités découpées en tâche(s) scrum ',
 
-		SprintResume:"Résumé du sprint",
+		SprintResume: 'Résumé du sprint',
 
 	};
 
