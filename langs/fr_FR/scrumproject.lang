@@ -118,10 +118,10 @@ ScrumProjectUserRole = Rôle scrum
 ScrumProjectUserRolePO = Product Owner
 ScrumProjectUserRoleDEV = Developer
 ScrumKanbanNotDefine = Aucun Kanban pour le Sprint "%s"
-ProductivityReal = Productivité réel
-ProductivityRealHelp = Productivité calculé sur la base des temps saisies
+ProductivityReal = Productivité réelle
+ProductivityRealHelp = Productivité calculée sur la base des temps saisies
 ProductivityGoal = Objectif
-ProductivityGoalHelp = Productivité calculé sur la base du temps de vélocité disponible
+ProductivityGoalHelp = Productivité calculée sur la base du temps de vélocité disponible
 QtyLeaveDays = Jours d'absence
 QtyLeaveDaysHelp = La quantité d'absences imprévues en jours
 
