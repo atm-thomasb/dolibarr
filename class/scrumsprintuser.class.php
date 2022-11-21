@@ -1279,6 +1279,10 @@ class ScrumSprintUser extends CommonObject
 			return 0;
 		}
 
+		if(!function_exists('num_open_day')){
+			include_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+		}
+
 		$numOpenDays =  num_open_day(time(), $sprint->date_end, 0, 1, 0, $country_code);
 		if(!is_float($numOpenDays) && !is_int($numOpenDays)){
 			return -1;

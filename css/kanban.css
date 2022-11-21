@@ -777,11 +777,18 @@ nav.top-nav-bar{
 	overflow: hidden;
 	right: 0;
 	bottom: 0;
+	direction: rtl;
 }
 
 .kanban-item__users_img{
-	margin-right: calc(var(--user-image-size)/-2);
+	--n : 0px;
+	--offset-margin-img: calc(calc(var(--user-image-size)/-2)  - var(--n));
+	margin-right: var(--offset-margin-img);
 	transition: margin-right 0.2s ease-in-out;
+}
+
+.kanban-item__users_img:nth-child(n+4){
+	--n : var(--user-image-size)/3;
 }
 
 .kanban-item__user{
@@ -803,10 +810,10 @@ nav.top-nav-bar{
 	border:3px solid #ededed;
 }
 
-.kanban-item__users:hover .kanban-item__users_img, .kanban-item__users:hover .kanban-item__users_img:last-child:not(:only-child){
+.kanban-item__users:hover .kanban-item__users_img, .kanban-item__users:hover .kanban-item__users_img:first-child:not(:only-child){
 	margin-right: -2px;
 }
-.kanban-item__users_img:last-child, .kanban-item__users:hover .kanban-item__users_img:last-child{
+.kanban-item__users_img:first-child, .kanban-item__users:hover .kanban-item__users_img:first-child{
 	margin-right: 3px;
 }
 
