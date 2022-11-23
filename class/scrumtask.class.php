@@ -236,10 +236,10 @@ class ScrumTask extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-		$resultcreate = $this->createCommon($user, $notrigger);
+//		var_dump($this);exit;
+//		$resultcreate = $this->createCommon($user, $notrigger);
 
 		//$resultvalidate = $this->validate($user, $notrigger);
-
 
 		// Kanban
 		if(!class_exists('ScrumKanban')){ require_once __DIR__ .'/scrumkanban.class.php'; }
@@ -262,7 +262,6 @@ class ScrumTask extends CommonObject
                         $customsql = 'fk_scrum_kanban = '.intval($scrumkanban->id).' AND  ref_code = \'backlog\'';
                     }
 					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => $customsql));
-
 					if(!empty($TScrumKanbanList) && is_array($TScrumKanbanList)){
 						$backLogList = reset($TScrumKanbanList);
 
@@ -271,7 +270,10 @@ class ScrumTask extends CommonObject
 						$card->fk_element = $this->id;
 						$card->element_type = $this->element;
 						$card->fk_scrum_kanbanlist = $backLogList->id;
+
+
 						// TODO placer la tache sous son us
+						$rank = $card->getUserStorySprintRank($backLogList->id, $this->fk_scrum_user_story_sprint);
 						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
 						$res = $card->create($user, $notrigger);
 						if($res<=0){
