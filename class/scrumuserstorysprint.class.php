@@ -302,7 +302,7 @@ class ScrumUserStorySprint extends CommonObject
 						$card->fk_element = $this->id;
 						$card->element_type = $this->element;
 						$card->fk_scrum_kanbanlist = $backLogList->id;
-						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems()+1;
 						$res = $card->create($user, $notrigger);
 						if($res<=0){
 							$this->errors[] = $card->errorsToString();

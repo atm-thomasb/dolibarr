@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- NEW : Create task in kanban just after US *24/11/2022* - 1.17.0
 - FIX : Fatal error missing lib *21/11/2022* - 1.16.4
 - FIX : css img card position *21/11/2022* - 1.16.3
 - FIX : missing backport V16 function  *14/11/2022* - 1.16.2

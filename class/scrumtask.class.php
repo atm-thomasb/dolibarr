@@ -236,8 +236,7 @@ class ScrumTask extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-//		var_dump($this);exit;
-//		$resultcreate = $this->createCommon($user, $notrigger);
+		$resultcreate = $this->createCommon($user, $notrigger);
 
 		//$resultvalidate = $this->validate($user, $notrigger);
 
@@ -271,12 +270,17 @@ class ScrumTask extends CommonObject
 						$card->element_type = $this->element;
 						$card->fk_scrum_kanbanlist = $backLogList->id;
 
-
-						// TODO placer la tache sous son us
+						//Gestion du rang
 						$rank = $card->getUserStorySprintRank($backLogList->id, $this->fk_scrum_user_story_sprint);
-						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+						if($rank > 0) {
+							$newRank = $rank++;
+							$card->updateAllCardRankAfterRank($newRank);
+							$card->fk_rank = $newRank;
+						}
+						else $card->fk_rank = $backLogList->getMaxRankOfKanBanListItems()+1;
+
 						$res = $card->create($user, $notrigger);
-						if($res<=0){
+						if($res<=0) {
 							$this->errors[] = $card->errorsToString();
 							$resultcreate = $res;
 						}

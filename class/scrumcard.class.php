@@ -1568,14 +1568,29 @@ class ScrumCard extends CommonObject
 	/**
 	 * @param int $fk_backlogList
 	 * @param int $fk_scrum_user_story_sprint
-	 * @return void
+	 * @return int <0 if KO >0 if OK
 	 */
 	public function getUserStorySprintRank($fk_backlogList, $fk_scrum_user_story_sprint) {
 		$sql = 'SELECT fk_rank FROM '.MAIN_DB_PREFIX.'scrumproject_scrumcard WHERE fk_scrum_kanbanlist="'.$fk_backlogList.'" AND element_type="scrumproject_scrumuserstorysprint" AND fk_element="'.$fk_scrum_user_story_sprint.'"';
 		$rank = $this->db->getRow($sql);
 
-		var_dump($sql, $rank);exit;
-		return $rank;
+		if(!empty($rank)) return $rank->fk_rank;
+		else return -1;
+	}
+
+	/**
+	 * @param int $fk_rank
+	 * @return int
+	 */
+	public function updateAllCardRankAfterRank($fk_rank) {
+		$sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET tms=NOW(), fk_rank = (fk_rank +1)
+		 		WHERE fk_scrum_kanbanlist ='.intval($this->fk_scrum_kanbanlist).' AND fk_rank > '.intval($fk_rank).';';
+		$resUp = $this->db->query($sql);
+		if(! $resUp) {
+			$this->error = $this->db->lasterror();
+			return -1;
+		}
+		else return 1;
 	}
 
     /**
