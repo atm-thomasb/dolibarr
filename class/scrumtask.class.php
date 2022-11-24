@@ -240,7 +240,6 @@ class ScrumTask extends CommonObject
 
 		//$resultvalidate = $this->validate($user, $notrigger);
 
-
 		// Kanban
 		if(!class_exists('ScrumKanban')){ require_once __DIR__ .'/scrumkanban.class.php'; }
 		if(!class_exists('ScrumKanbanList')){ require_once __DIR__ .'/scrumkanbanlist.class.php'; }
@@ -262,7 +261,6 @@ class ScrumTask extends CommonObject
                         $customsql = 'fk_scrum_kanban = '.intval($scrumkanban->id).' AND  ref_code = \'backlog\'';
                     }
 					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => $customsql));
-
 					if(!empty($TScrumKanbanList) && is_array($TScrumKanbanList)){
 						$backLogList = reset($TScrumKanbanList);
 
@@ -271,10 +269,18 @@ class ScrumTask extends CommonObject
 						$card->fk_element = $this->id;
 						$card->element_type = $this->element;
 						$card->fk_scrum_kanbanlist = $backLogList->id;
-						// TODO placer la tache sous son us
-						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems();
+
+						//Gestion du rang
+						$rank = $card->getCardRankByElement($backLogList->id, 'scrumproject_scrumuserstorysprint', $this->fk_scrum_user_story_sprint);
+						if($rank > 0) {
+							$newRank = $rank++;
+							$card->updateAllCardRankAfterRank($newRank);
+							$card->fk_rank = $newRank;
+						}
+						else $card->fk_rank = $backLogList->getMaxRankOfKanBanListItems()+1;
+
 						$res = $card->create($user, $notrigger);
-						if($res<=0){
+						if($res<=0) {
 							$this->errors[] = $card->errorsToString();
 							$resultcreate = $res;
 						}
