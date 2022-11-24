@@ -1242,10 +1242,10 @@ class ScrumUserStorySprint extends CommonObject
 		}
 		elseif($key == 'qty_planned' ||  $key == 'qty_consumed' ||  $key == 'qty_done')
 		{
-			if ( !function_exists('getTileFormatedTime')) {
+			if ( !function_exists('convertFloatHourToHoursMins')) {
 				include_once __DIR__ . "/../lib/scrumproject.lib.php" ;
 			}
-			$out =  getTileFormatedTime($value) ;
+			$out =  convertFloatHourToHoursMins($value,$langs) ;
 		}
 		else{
 			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);

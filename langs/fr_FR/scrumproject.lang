@@ -96,6 +96,7 @@ MyWidgetDescription = Description de mon widget
 SprintLabel = Titre
 SprintTeam = Équipe scrum
 QtyVelocity = Vélocité disponible
+QtyVelocityHelp = Vélocité disponible = Disponibilité x Ratio de vélocité
 QtyPlanned = Qté planifiée
 QtyDone = Qté réalisée
 RefreshVelocity = Mettre à jour la vélocité disponible
@@ -320,3 +321,5 @@ TimeEngagedHelp = Correspond à la somme des temps planifiés des tâches dont l
 TimePlannedDoneHelp = Somme des temps planifiés correspondant aux tâches terminées.
 TimeSpentHelp = Correspond à la somme des temps saisis par l'utilisateur.
 MoreTimeSpendsThanAvailability = Temps saisi %s supérieur au temps disponible %s.
+
+SP_FormatQtyHourShort = %02dh%02d

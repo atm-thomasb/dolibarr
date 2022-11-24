@@ -33,7 +33,10 @@ scrumKanban = {};
 	 */
 	o.holdRefreshFlag = 0;
 
-
+	o.lastMouseY = 0;
+	o.lastMouseX = 0;
+	o.mouseDirrectionY = 0; // -1 down 0 idle 1 up
+	o.mouseDirrectionX = 0; // -1 down 0 idle 1 up
 
 	/**
 	 * Congig par défaut, les valeurs sont écrasées lors du chargement de la page en fonction de la configuration transmise
@@ -233,6 +236,68 @@ scrumKanban = {};
 			// ]
 		});
 
+
+		document.addEventListener('mousemove', function (e) {
+
+			if(o.lastMouseY == e.pageY){
+				o.mouseDirrectionY = 0; // no move
+			}else if(o.lastMouseY < e.pageY){
+				o.mouseDirrectionY = -1; // go down
+			}else{
+				o.mouseDirrectionY = 1; // go up
+			}
+			if(o.lastMouseX == e.pageX){
+				o.mouseDirrectionX = 0; // no move
+			}else if(o.lastMouseX < e.pageX){
+				o.mouseDirrectionX = 1; // go right
+			}else{
+				o.mouseDirrectionX = -1; // go Left
+			}
+
+			o.lastMouseY = e.pageY;
+			o.lastMouseX = e.pageX;
+
+		}, false);
+
+
+		// Gestion du scroll auto
+		o.jkanban.drake.on("shadow", function(el, container, source) {
+			let isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
+			if(isSmoothScrollSupported) {
+
+				let edgeOffsetContainer = container.offsetWidth;
+				let edgeOffsetYItem = el.offsetHeight;
+
+
+				if(el.nextSibling != undefined &&  window.innerHeight - edgeOffsetYItem * 2 < o.lastMouseY ){
+					el.nextSibling.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+				}else if(el.previousSibling != undefined && o.lastMouseY < edgeOffsetYItem * 3){
+					el.previousSibling.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+				}
+
+				// Déplacement X entre les listes
+				if(container.nextSibling != undefined && window.innerWidth - edgeOffsetContainer < o.lastMouseX  && o.mouseDirrectionX > 0) {
+					container.nextSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+				}else if(container.previousSibling != undefined && o.lastMouseX < edgeOffsetContainer  && o.mouseDirrectionX < 0 ) {
+					container.previousSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+				}
+			}
+		});
+
+
+		o.jkanban.drakeBoard.on("shadow", function(el, container, source) {
+			let isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style
+			if(isSmoothScrollSupported) {
+				let edgeOffsetContainer = el.offsetWidth;
+
+				if(el.nextSibling != undefined && window.innerWidth - edgeOffsetContainer < o.lastMouseX ) {
+					el.nextSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
+				}else if(el.previousSibling != undefined && o.lastMouseX < edgeOffsetContainer ) {
+					el.previousSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
+				}
+			}
+		});
+
 		// Get all board
 		o.getAllBoards();
 
@@ -282,6 +347,8 @@ scrumKanban = {};
 		// 		}
 		// 	}
 		// );
+
+
 	};
 
 
@@ -383,8 +450,13 @@ scrumKanban = {};
 		o.callKanbanInterface('getSprintResumeData', sendData, function(response){
 			let resumeDialog = new Dialog({
 				title: o.langs.SprintResume,
-				content: response.data.html
+				content: response.data.html,
+				onOpen : function (){
+
+				}
 			});
+
+			o.initToolTip($(resumeDialog.dialog).find('.classfortooltip'));
 		});
 	}
 
@@ -399,6 +471,16 @@ scrumKanban = {};
 			if(response.result > 0) {
 				// recupérer les bonnes infos
 				o.jkanban.addBoards([response.data])
+
+				let AddedList = document.querySelector('.kanban-board[data-id="'+response.data.id+'"]');
+
+				if(isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style) {
+					AddedList.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+				}
+
+				// get focus to title : note c'est dommage mais le focus fait perdre l'animation du scroll
+				let boardTitleSelector = '.kanban-list-label-field';
+				document.querySelector('.kanban-board[data-id="'+response.data.id+'"] ' + boardTitleSelector).click();
 			}
 		});
 	}
@@ -418,6 +500,13 @@ scrumKanban = {};
 			if(response.result > 0) {
 				// recupérer les bonnes infos
 				o.jkanban.addElement( listName, response.data);
+
+				// Scroll vers
+				let AddedCard = document.querySelector('.kanban-board[data-id="'+ listName +'"] .kanban-item[data-eid="'+response.data.id+'"]');
+				let isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
+				if(isSmoothScrollSupported) {
+					AddedCard.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+				}
 			}
 		});
 	}
@@ -735,11 +824,13 @@ scrumKanban = {};
 				liveEditInterfaceUrl: o.config.interface_liveupdate_url
 			});
 
+			o.holdRefresh();
 			SpLiveEdit.setSPLiveEdit($(this));
 			$(this).trigger('focus');
 		});
 
 		$(document).on('blur',boardTitleSelector+'.live-edit', function(){
+			o.releaseRefresh();
 			return SpLiveEdit.removeSPLiveEdit($(this));
 		});
 	}

@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- FIX : Hours qty conversion to time display  *24/11/2022* - 1.19.1
+- NEW : Add total on kanban sprint dashboard  *24/11/2022* - 1.19.0
+- NEW : Ux improuvement allow card scroll on drag  *24/11/2022* - 1.18.0
 - NEW : Create task in kanban just after US *24/11/2022* - 1.17.0
 - FIX : Fatal error missing lib *21/11/2022* - 1.16.4
 - FIX : css img card position *21/11/2022* - 1.16.3

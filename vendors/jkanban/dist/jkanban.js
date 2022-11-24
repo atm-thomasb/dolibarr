@@ -10,6 +10,7 @@
 //Require dragula
 var dragula = require('dragula');
 
+
 (function () {
   this.jKanban = function () {
     var self = this

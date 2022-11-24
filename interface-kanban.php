@@ -182,7 +182,6 @@ function _actionAddList($jsonResponse){
 
 
 	if($kanbanList->create($user) > 0){
-		$jsonResponse->msg = $langs->trans('Created');
 		$jsonResponse->result = 1;
 
 		$jsonResponse->data = $kanbanList->getKanBanListObjectFormatted();
@@ -500,7 +499,6 @@ function _actionAddItemToList($jsonResponse){
 
 
 	if($scrumCard->create($user) > 0){
-		$jsonResponse->msg = $langs->trans('Created');
 		$jsonResponse->result = 1;
 		$jsonResponse->data = $scrumCard->getScrumKanBanItemObjectFormatted();
 		return true;

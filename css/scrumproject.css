@@ -58,7 +58,8 @@ button.ajax-action{
 }
 
 .sprint-resume-table :where(td,th) {
-	padding: 5px;
+	padding: 5px 10px;
+	min-width: 32px;
 }
 
 
@@ -85,4 +86,21 @@ button.ajax-action{
 
 .productivity-badge-icon{
 	color: #cbaa00;
+}
+
+.sprint-resume-table :where(tfoot .total)  {
+	border-top: 2px solid rgba(0,0,0,0.2);
+	background: rgba(0,0,0,0.02);
+}
+
+.sprint-resume-table :where(tfoot .total) :where(td,th) {
+	padding: 10px 10px;
+}
+
+.inline-spaced-item:not(:first-child) {
+	margin-left: 20px;
+}
+
+.sprint-resume-text-section{
+	margin: 20px 0;
 }

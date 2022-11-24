@@ -1335,6 +1335,50 @@ class ScrumSprint extends CommonObject
 		include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 		$out = '';
+
+
+		$out.= '<div class="sprint-resume-text-section">';
+
+		$out.= '<span class="inline-spaced-item"  >';
+		$out.= $this->showOutputFieldQuick('label');
+		$out.= '</span>';
+
+		$out.= '<span class="inline-spaced-item"  >';
+		$out.= '<span class="fa fa-calendar-alt" ></span> ';
+		$fieldK = 'date_start';
+		$out.= $this->showOutputFieldQuick($fieldK);
+		$out.= ' - ';
+		$fieldK = 'date_end';
+		$out.= $this->showOutputFieldQuick($fieldK);
+		$out.= '</span>';
+
+		$fieldK = 'qty_velocity';
+		$out.= '<span class="inline-spaced-item classfortooltip"  title="'.dol_escape_htmltag($langs->trans($this->fields[$fieldK]['label'])).'" >';
+		$out.= '<span class="fa fa-running" ></span> ';
+		$out.= $this->showOutputFieldQuick($fieldK);
+		$out.= '</span>';
+
+		$fieldK = 'qty_planned';
+		$out.= '<span class="inline-spaced-item classfortooltip"  title="'.dol_escape_htmltag($langs->trans($this->fields[$fieldK]['label'])).'" >';
+		$out.= '<span class="fa fa-calendar-check-o" ></span> ';
+		$out.= $this->showOutputFieldQuick($fieldK);
+		$out.= '</span>';
+
+
+		$fieldK = 'qty_consumed';
+		$out.= '<span class="inline-spaced-item classfortooltip"  title="'.dol_escape_htmltag($langs->trans($this->fields[$fieldK]['label'])).'" >';
+		$out.= '<span class="fa fa-hourglass-o" ></span> ';
+		$out.= $this->showOutputFieldQuick($fieldK);
+		$out.= '</span>';
+
+		$fieldK = 'qty_done';
+		$out.= '<span class="inline-spaced-item classfortooltip"  title="'.dol_escape_htmltag($langs->trans($this->fields[$fieldK]['label'])).'" >';
+		$out.= '<span class="fa fa-check" ></span> ';
+		$out.= $this->showOutputFieldQuick($fieldK);
+		$out.= '</span>';
+
+		$out.= '</div>';
+
 		$data = $this->getSprintUsersProgress($userIds);
 
 		if($data === false || !is_array($data)){
@@ -1350,21 +1394,28 @@ class ScrumSprint extends CommonObject
 			$out.= '<tr>';
 			$out.= '	<th colspan="2"></th>';
 			$out.= '	<th class="center sprint-resume-col"><span>'.$langs->trans('QtyAvailability').'</span></th>';
-			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('QtyVelocityHelp')).'">'.$langs->trans('QtyVelocity').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('QtyVelocityHelp')).'">'.$langs->trans('QtyVelocity').'</span></th>';
 
 			if(getDolGlobalInt('SP_USE_LEAVE_DAYS')) {
 				$out .= '	<th class="center sprint-resume-col"><span>' . $langs->trans('QtyLeaveDays') . '</span></th>';
 			}
-			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeSpentHelp')).'">'.$langs->trans('TimeSpent').'</span></th>';
-			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimePlannedDoneHelp')).'">'.$langs->trans('TimePlannedDone').'</span></th>';
-//			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
-			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('RemainVelocityHelp')).'">'.$langs->trans('RemainVelocity').'</span></th>';
-			$out.= '	<th class="center sprint-resume-col"><span title="'.dol_escape_htmltag($langs->trans('ProductivityRealHelp')).'">'.$langs->trans('ProductivityReal').'</span></th>';
-			$out.= '	<th class="center sprint-resume-col" colspan="2"><span title="'.dol_escape_htmltag($langs->trans('ProductivityGoalHelp')).'">'.$langs->trans('ProductivityGoal').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('TimeSpentHelp')).'">'.$langs->trans('TimeSpent').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('TimePlannedDoneHelp')).'">'.$langs->trans('TimePlannedDone').'</span></th>';
+//			$out.= '	<th class="center sprint-resume-col"><span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('TimeEngagedHelp')).'">'.$langs->trans('TimeEngaged').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('RemainVelocityHelp')).'">'.$langs->trans('RemainVelocity').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col"><span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('ProductivityRealHelp')).'">'.$langs->trans('ProductivityReal').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col" colspan="2"><span class="classfortooltip" title="'.dol_escape_htmltag($langs->trans('ProductivityGoalHelp')).'">'.$langs->trans('ProductivityGoal').'</span></th>';
 			$out.= '</tr>';
 			$out.= '</thead>';
 
 
+			$total = new stdClass();
+			$total->userQtyAvailability = 0;
+			$total->userQtyVelocity = 0;
+			$total->userNotPlannedLeaveDays = 0;
+			$total->remainVelocityTheoretical = 0;
+			$total->sumTimeSpent = 0;
+			$total->sumTimeDone = 0;
 
 			$out.= '<tbody>';
 			foreach ($data as $item) {
@@ -1433,6 +1484,15 @@ class ScrumSprint extends CommonObject
 				}
 
 
+				// addition pour les totaux
+				$total->userQtyAvailability+= $item->userQtyAvailability;
+				$total->userQtyVelocity+= $item->userQtyVelocity;
+				$total->userNotPlannedLeaveDays+= $item->userNotPlannedLeaveDays;
+				$total->sumTimeSpent+= $item->sumTimeSpent;
+				$total->sumTimeDone+= $item->sumTimeDone;
+				$total->remainVelocityTheoretical+= $remainVelocityTheoretical;
+
+
 				$out.= '<tr>';
 				$out.= '	<th>';
 				$out.= '		<span class="sprint-resume-user-img" data-user-id="';
@@ -1448,12 +1508,12 @@ class ScrumSprint extends CommonObject
 				$out.= '	</th>';
 
 				$out.= '	<td class="center sprint-resume-col">';
-				$out.= 			getTileFormatedTime($item->userQtyAvailability) ;
+				$out.= 			convertFloatHourToHoursMins($item->userQtyAvailability, $langs) ;
 				$out.= '	</td>';
 
 				$out.= '	<td class="center sprint-resume-col">';
-				$out.= 			getTileFormatedTime($item->userQtyVelocity) ;
-				$out.= ' 		<small title="'.dol_escape_htmltag($langs->trans('AvailabilityRateHelp')).'">('.($item->userAvailabilityRate * 100) . '%'.')</small>';
+				$out.= 			convertFloatHourToHoursMins($item->userQtyVelocity, $langs) ;
+				$out.= ' 		<small class="classfortooltip"  title="'.dol_escape_htmltag($langs->trans('AvailabilityRateHelp')).'">('.($item->userAvailabilityRate * 100) . '%'.')</small>';
 				$out.= '	</td>';
 
 				if(getDolGlobalInt('SP_USE_LEAVE_DAYS')){
@@ -1463,15 +1523,15 @@ class ScrumSprint extends CommonObject
 				}
 
 				$out.= '	<td class="center sprint-resume-col">';
-				$out.= getTileFormatedTime($item->sumTimeSpent) ;
+				$out.= convertFloatHourToHoursMins($item->sumTimeSpent, $langs) ;
 				if($item->sumTimeSpent > $item->userQtyAvailability){
-					$alertText = $langs->trans('MoreTimeSpendsThanAvailability', getTileFormatedTime($item->sumTimeSpent),  getTileFormatedTime($item->userQtyAvailability));
-					$out.= ' <span class="fa fa-warning" title="'.dol_escape_htmltag($alertText).'" ></span> ';
+					$alertText = $langs->trans('MoreTimeSpendsThanAvailability', convertFloatHourToHoursMins($item->sumTimeSpent, $langs),  convertFloatHourToHoursMins($item->userQtyAvailability, $langs));
+					$out.= ' <span class="fa fa-warning classfortooltip"  title="'.dol_escape_htmltag($alertText).'" ></span> ';
 				}
 				$out.= '	</td>';
 
 				$out.= '	<td class="center sprint-resume-col">';
-				$out.= getTileFormatedTime($item->sumTimeDone) ;
+				$out.= convertFloatHourToHoursMins($item->sumTimeDone, $langs) ;
 				$out.= '	</td>';
 
 //				$out.= '	<td class="center sprint-resume-col">';
@@ -1482,10 +1542,10 @@ class ScrumSprint extends CommonObject
 
 				if($remainToProd > $remainVelocityReal){
 					// display alert
-					$alertText = $langs->trans('WarningMissingRealVelocityAccordingToEndDate', $item->userRemainingWorkDays,  getTileFormatedTime($remainToProd));
-					$out.= '<span class="fa fa-warning" title="'.dol_escape_htmltag($alertText).'" ></span> ';
+					$alertText = $langs->trans('WarningMissingRealVelocityAccordingToEndDate', $item->userRemainingWorkDays,  convertFloatHourToHoursMins($remainToProd, $langs));
+					$out.= '<span class="fa fa-warning classfortooltip" title="'.dol_escape_htmltag($alertText).'" ></span> ';
 				}
-				$out.= getTileFormatedTime($remainVelocityTheoretical) ;
+				$out.= convertFloatHourToHoursMins($remainVelocityTheoretical, $langs) ;
 				$out.= '	</td>';
 
 				$out.= '	<td class="center sprint-resume-col">';
@@ -1505,7 +1565,38 @@ class ScrumSprint extends CommonObject
 				$out.= '</tr>';
 			}
 			$out.= '</tbody>';
+
+
+			$out.= '<tfoot>';
+			$out.= '<tr class="total">';
+			$out.= '	<th colspan="2">'.$langs->trans('Total').'</th>';
+
+
+
+			$out.= '	<th class="center sprint-resume-col">'.convertFloatHourToHoursMins($total->userQtyAvailability, $langs).'</th>';
+			$out.= '	<th class="center sprint-resume-col">'.convertFloatHourToHoursMins($total->userQtyVelocity, $langs).'</th>';
+
+			if(getDolGlobalInt('SP_USE_LEAVE_DAYS')) {
+				$out .= '	<th class="center sprint-resume-col"><span>' . $total->userNotPlannedLeaveDays . ' ' . $langs->trans('Days')  . '</span></th>';
+			}
+			$out.= '	<th class="center sprint-resume-col">'.convertFloatHourToHoursMins($total->sumTimeSpent,$langs).'</th>';
+			$out.= '	<th class="center sprint-resume-col">'.convertFloatHourToHoursMins($total->sumTimeDone,$langs).'</th>';
+//			$out.= '	<th class="center sprint-resume-col">'.$langs->trans('TimeEngaged').'</span></th>';
+			$out.= '	<th class="center sprint-resume-col">'.convertFloatHourToHoursMins($total->remainVelocityTheoretical,$langs).'</th>';
+			$out.= '	<th class="center sprint-resume-col">';
+			// Calcule des objectifs
+			$TotalTeamProductivity = 0;
+			if ($total->sumTimeSpent > 0) {
+				$TotalTeamProductivity = round($total->sumTimeDone / $total->sumTimeSpent, 2)*100;
+			}
+			$out.= $TotalTeamProductivity.'%';
+			$out.= '	</th>';
+			$out.= '	<th class="center sprint-resume-col" colspan="2"></th>';
+			$out.= '</tr>';
+			$out.= '</tfoot>';
+
 			$out.= '</table>';
+
 		}
 
 

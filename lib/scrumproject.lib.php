@@ -423,28 +423,37 @@ function scrumProjectConvertQuantityToProjectGranularity($value){
 	return '<span class="classfortooltip" title="'.dol_escape_htmltag($toolTip).'" >'.$value.'</span>';
 }
 
-/**
- * passage de l'heure en 100 iem vers 60 iem
- * @param  $elementObject
- * @param $hLetter
- * @return float|string
- */
-function getTileFormatedTime($time)
-{
-	global $conf;
 
-	$hLetter = ($conf->global->SHOW_HOUR_DOT_LETTER) ? ':' : 'h';
-	$time = price2num($time, '2', 2);
-	$tmpTimeArr = explode('.', $time);
-	// on convertit les minutes
-	if (is_array($tmpTimeArr) && count($tmpTimeArr) > 1) {
-		//hours and minutes
-		$min = round(($tmpTimeArr[1] * 60 / 100));
-		$min = str_pad($min, 2, 0, STR_PAD_LEFT);
-		//
-		$time = $tmpTimeArr[0] . $hLetter . $min;
-		return $time;
+/** Passage de l'heure en 100 iem vers 60 iem
+ * @param float $floatHours
+ * @param Translate $outputLang
+ * @param string|false $format
+ * @return string|null
+ */
+function convertFloatHourToHoursMins($floatHours, $outputLang, $format = false) {
+	$minutesToConv =  $floatHours * 60;
+	return convertMinutesHourToHoursMins($minutesToConv, $outputLang, $format);
+}
+
+
+/**
+ * @param int $minutesToConv
+ * @param Translate $outputLang
+ * @param string|false $format
+ * @return string|void
+ */
+function convertMinutesHourToHoursMins($minutesToConv, $outputLang, $format = false) {
+
+	if ($minutesToConv < 1) {
+		return;
 	}
 
-	return $time. $hLetter;
+	$hours = floor($minutesToConv / 60);
+	$minutes = floor($minutesToConv % 60);
+
+	if($format ===  false){
+		return ($outputLang->trans("SP_FormatQtyHourShort", $hours, $minutes) != "SP_FormatQtyHourShort" ? $outputLang->trans("SP_FormatQtyHourShort", $hours, $minutes) : sprintf('%02dh%02d', $hours, $minutes));
+	}else{
+		return sprintf($format, $hours, $minutes);
+	}
 }
