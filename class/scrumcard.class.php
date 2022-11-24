@@ -1566,14 +1566,14 @@ class ScrumCard extends CommonObject
 	}
 
 	/**
-	 * @param int $fk_backlogList
-	 * @param int $fk_scrum_user_story_sprint
-	 * @return int <0 if KO >0 if OK
+	 * @param int 		$fk_list
+	 * @param string 	$element_type
+	 * @param int 		$fk_element
+	 * @return int <if KO >0 if OK
 	 */
-	public function getUserStorySprintRank($fk_backlogList, $fk_scrum_user_story_sprint) {
-		$sql = 'SELECT fk_rank FROM '.MAIN_DB_PREFIX.'scrumproject_scrumcard WHERE fk_scrum_kanbanlist="'.$fk_backlogList.'" AND element_type="scrumproject_scrumuserstorysprint" AND fk_element="'.$fk_scrum_user_story_sprint.'"';
+	public function getCardRankByElement($fk_list, $element_type, $fk_element) {
+		$sql = 'SELECT fk_rank FROM '.MAIN_DB_PREFIX.'scrumproject_scrumcard WHERE fk_scrum_kanbanlist="'.intval($fk_list).'" AND element_type="'.$this->db->escape($element_type).'" AND fk_element="'.intval($fk_element).'"';
 		$rank = $this->db->getRow($sql);
-
 		if(!empty($rank)) return $rank->fk_rank;
 		else return -1;
 	}
@@ -1582,7 +1582,10 @@ class ScrumCard extends CommonObject
 	 * @param int $fk_rank
 	 * @return int
 	 */
-	public function updateAllCardRankAfterRank($fk_rank) {
+	public function updateAllCardRankAfterRank($fk_rank = false) {
+
+		if($fk_rank===false) $fk_rank = $this->fk_rank;
+
 		$sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET tms=NOW(), fk_rank = (fk_rank +1)
 		 		WHERE fk_scrum_kanbanlist ='.intval($this->fk_scrum_kanbanlist).' AND fk_rank > '.intval($fk_rank).';';
 		$resUp = $this->db->query($sql);

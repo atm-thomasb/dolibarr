@@ -271,7 +271,7 @@ class ScrumTask extends CommonObject
 						$card->fk_scrum_kanbanlist = $backLogList->id;
 
 						//Gestion du rang
-						$rank = $card->getUserStorySprintRank($backLogList->id, $this->fk_scrum_user_story_sprint);
+						$rank = $card->getCardRankByElement($backLogList->id, 'scrumproject_scrumuserstorysprint', $this->fk_scrum_user_story_sprint);
 						if($rank > 0) {
 							$newRank = $rank++;
 							$card->updateAllCardRankAfterRank($newRank);
