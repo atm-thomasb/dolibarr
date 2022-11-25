@@ -308,6 +308,25 @@ jQuery(document).ready(function() {
 </script>';
 
 
+dol_include_once('/scrumProject/class/scrumkanban.class.php');
+$scrumKanban = new ScrumKanban($db);
+$res  = $scrumKanban->fetch($object->id);
+$nUrl = $res > 0 ? $scrumKanban->getNomUrl(1) : '';
+
+$kanban = $object->getKanbanId();
+if ($object->getKanbanId() > 0 ) {
+?>
+	<script>
+		$(document).ready(function () {
+
+			$('<tr class="kanban-tr"><td class="kanban-title"><?php echo $langs->trans("kanban"); ?></td></tr>').insertAfter('.field_date_end');
+			$('<td><?php echo $nUrl;?></td>').insertAfter('.kanban-title');
+		});
+
+	</script>
+<?php
+}
+
 // Part to create
 if ($action == 'create')
 {
@@ -500,11 +519,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$kanban = $object->getKanbanId();
 			if ($kanban < 0) {
 				print dolGetButtonAction($langs->trans('CreateNewScrumKanban'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=createkanban&object=scrumsprint', '', $permissiontoadd);
-			}
-
-			if ($kanban > 0) {
-
-				print dolGetButtonAction($langs->trans('DisplayScrumKanban'), '', '', dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban);
 			}
 
 			// Send
