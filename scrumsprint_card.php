@@ -313,7 +313,6 @@ $scrumKanban = new ScrumKanban($db);
 $res  = $scrumKanban->fetch($object->id);
 $nUrl = $res > 0 ? $scrumKanban->getNomUrl(1) : '';
 
-$kanban = $object->getKanbanId();
 if ($object->getKanbanId() > 0 ) {
 ?>
 	<script>
