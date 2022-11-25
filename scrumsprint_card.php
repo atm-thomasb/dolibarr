@@ -308,7 +308,7 @@ jQuery(document).ready(function() {
 </script>';
 
 
-dol_include_once('/scrumProject/class/scrumkanban.class.php');
+
 $scrumKanban = new ScrumKanban($db);
 $res  = $scrumKanban->fetch($object->id);
 $nUrl = $res > 0 ? $scrumKanban->getNomUrl(1) : '';
