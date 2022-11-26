@@ -292,39 +292,6 @@ $title = $langs->trans("ScrumSprint");
 $help_url = '';
 llxHeader('', $title, $help_url);
 
-// Example : Adding jquery code
-print '<script type="text/javascript" language="javascript">
-jQuery(document).ready(function() {
-	function init_myfunc()
-	{
-		jQuery("#myid").removeAttr(\'disabled\');
-		jQuery("#myid").attr(\'disabled\',\'disabled\');
-	}
-	init_myfunc();
-	jQuery("#mybutton").click(function() {
-		init_myfunc();
-	});
-});
-</script>';
-
-
-
-$scrumKanban = new ScrumKanban($db);
-$res  = $scrumKanban->fetch($object->id);
-$nUrl = $res > 0 ? $scrumKanban->getNomUrl(1) : '';
-
-if ($object->getKanbanId() > 0 &&!empty($nUrl) ) {
-?>
-	<script>
-		$(document).ready(function () {
-
-			$('<tr class="kanban-tr"><td class="kanban-title"><?php echo $langs->trans("kanban"); ?></td></tr>').insertAfter('.field_date_end');
-			$('<td><?php echo $nUrl;?></td>').insertAfter('.kanban-title');
-		});
-
-	</script>
-<?php
-}
 
 // Part to create
 if ($action == 'create')
@@ -499,6 +466,37 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '</div>';
 
 	print '<div class="clearboth"></div>';
+
+
+	/*
+	 * Ajoute le kanban dans la fiche
+	 */
+	$jsData = new stdClass();
+	$jsData->kanbansGetNomUrls = array();
+	$jsData->langs = new stdClass();
+	$jsData->langs->kanban = $langs->trans("kanban");
+
+	$scrumKanbanStatic = new ScrumKanban($db);
+	$TScrumKanbans = $scrumKanbanStatic->fetchAll( '', '',0,  0, array('fk_scrum_sprint' => $object->id));
+	if(is_array($TScrumKanbans) && !empty($TScrumKanbans)){
+
+		foreach ($TScrumKanbans as $scrumKanban){
+			$jsData->kanbansGetNomUrls[]=$scrumKanban->getNomUrl(1);
+		}
+
+		?>
+		<script>
+			$(document).ready(function () {
+				if($('.field_date_end').length) {
+					let jsData = <?php print json_encode($jsData); ?>;
+					console.log($('.field_date_end').length, jsData);
+					let kanbanTableRow = '<tr class="kanban-tr"><td class="kanban-title">' + jsData.langs.kanban + '</td><td>' + jsData.kanbansGetNomUrls.join(", ") + '</td></tr>';
+					$(kanbanTableRow).insertAfter('.field_date_end');
+				}
+			});
+		</script>
+		<?php
+	}
 
 	print dol_get_fiche_end();
 
