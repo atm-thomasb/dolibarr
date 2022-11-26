@@ -292,21 +292,6 @@ $title = $langs->trans("ScrumSprint");
 $help_url = '';
 llxHeader('', $title, $help_url);
 
-// Example : Adding jquery code
-print '<script type="text/javascript" language="javascript">
-jQuery(document).ready(function() {
-	function init_myfunc()
-	{
-		jQuery("#myid").removeAttr(\'disabled\');
-		jQuery("#myid").attr(\'disabled\',\'disabled\');
-	}
-	init_myfunc();
-	jQuery("#mybutton").click(function() {
-		init_myfunc();
-	});
-});
-</script>';
-
 
 // Part to create
 if ($action == 'create')
@@ -482,6 +467,36 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	print '<div class="clearboth"></div>';
 
+
+	/*
+	 * Ajoute le kanban dans la fiche
+	 */
+	$jsData = new stdClass();
+	$jsData->kanbansGetNomUrls = array();
+	$jsData->langs = new stdClass();
+	$jsData->langs->kanban = $langs->trans("kanban");
+
+	$scrumKanbanStatic = new ScrumKanban($db);
+	$TScrumKanbans = $scrumKanbanStatic->fetchAll( '', '',0,  0, array('fk_scrum_sprint' => $object->id));
+	if(is_array($TScrumKanbans) && !empty($TScrumKanbans)){
+
+		foreach ($TScrumKanbans as $scrumKanban){
+			$jsData->kanbansGetNomUrls[]=$scrumKanban->getNomUrl(1);
+		}
+
+		?>
+		<script>
+			$(document).ready(function () {
+				if($('.field_date_end').length) {
+					let jsData = <?php print json_encode($jsData); ?>;
+					let kanbanTableRow = '<tr class="kanban-tr"><td class="kanban-title">' + jsData.langs.kanban + '</td><td>' + jsData.kanbansGetNomUrls.join(", ") + '</td></tr>';
+					$(kanbanTableRow).insertAfter('.field_date_end');
+				}
+			});
+		</script>
+		<?php
+	}
+
 	print dol_get_fiche_end();
 
 
@@ -500,11 +515,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$kanban = $object->getKanbanId();
 			if ($kanban < 0) {
 				print dolGetButtonAction($langs->trans('CreateNewScrumKanban'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=createkanban&object=scrumsprint', '', $permissiontoadd);
-			}
-
-			if ($kanban > 0) {
-
-				print dolGetButtonAction($langs->trans('DisplayScrumKanban'), '', '', dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban);
 			}
 
 			// Send

@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.14
 
+- FIX : Suppréssion du bouton afficher kanban et ajout getnomurl du scrumkanban sous date de fin - *25/11/2022* - 1.14.10
 - FIX : Pagination ScrumSprint page *25/11/2022* - 1.14.9
 - FIX : filter soc and thirdparty *09/11/2022* - 1.14.8
 - FIX : update time on kanban  *09/11/2022* - 1.14.7
