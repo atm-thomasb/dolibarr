@@ -489,7 +489,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$(document).ready(function () {
 				if($('.field_date_end').length) {
 					let jsData = <?php print json_encode($jsData); ?>;
-					console.log($('.field_date_end').length, jsData);
 					let kanbanTableRow = '<tr class="kanban-tr"><td class="kanban-title">' + jsData.langs.kanban + '</td><td>' + jsData.kanbansGetNomUrls.join(", ") + '</td></tr>';
 					$(kanbanTableRow).insertAfter('.field_date_end');
 				}
