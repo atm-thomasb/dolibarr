@@ -569,7 +569,66 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
-		$delResult =  $this->deleteCommon($user, $notrigger);
+		if(!class_exists('ScrumCard')){ require_once __DIR__ . '/scrumcard.class.php'; }
+		$staticsScrumCard = new ScrumCard($this->db);
+		if($staticsScrumCard->deleteAllFromElement($user, $this->element, $this->id, $notrigger)<0){
+			$this->error = $staticsScrumCard->error;
+			$this->errors[] = array_merge($this->errors,  $staticsScrumCard->errors);
+			return -1;
+		}
+
+		return $this->deleteCommon($user, $notrigger);
+	}
+
+	/**
+	 * On scrumCard delete this object if affected
+	 *
+	 * @param ScrumCard $scrumTask the scrum card how run this kanban trigger
+	 * @param User      $user      User that deletes
+	 * @param bool      $notrigger false=launch triggers after, true=disable triggers
+	 * @return int             <0 if KO, >0 if OK
+	 */
+	public function onScrumCardDelete(ScrumCard $scrumTask, User $user, $notrigger = false)
+	{
+		return $this->deleteCommon($user, $notrigger);
+	}
+
+	/**
+	 * Delete object in database
+	 *
+	 * @param 	User 	$user       			User that deletes
+	 * @param 	bool 	$notrigger  			false=launch triggers after, true=disable triggers
+	 * @param	int		$forcechilddeletion		0=no, 1=Force deletion of children
+	 * @return 	int             				<=0 if KO, 0=Nothing done because object has child, >0 if OK
+	 */
+	public function deleteCommon(User $user, $notrigger = false, $forcechilddeletion = 0)
+	{
+		global $langs;
+
+		if(!class_exists('ScrumTask')){ require_once __DIR__ . '/scrumtask.class.php'; }
+		$staticsScrumTask = new ScrumTask($this->db);
+		$scrumTasks = $staticsScrumTask->fetchAll('','', 0, 0, array('fk_scrum_user_story_sprint' => $this->id));
+		if(!is_array($scrumTasks)){
+			$this->error = $langs->trans('ErrorOnFetchingAllScrumTask');
+			$this->errors[] = $this->error;
+			return -1;
+		}
+		elseif (!empty($scrumTasks)){
+			$this->db->begin();
+			foreach ($scrumTasks as $scrumTask){
+				if($scrumTask->delete($user, $notrigger)<0){
+					$this->error = $scrumTask->error;
+					$this->errors[] = array_merge($this->errors,  $scrumTask->errors);
+					$this->db->rollback();
+					return -1;
+				}
+			}
+			$this->db->commit();
+		}
+
+
+
+		$delResult =  parent::deleteLineCommon($user, $notrigger, $forcechilddeletion);
 
 		if($this->refreshSprintQuantities($user)<0){
 			return -1;

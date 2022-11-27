@@ -385,7 +385,7 @@ class ScrumCard extends CommonObject
 	 * @param  int         $offset       Offset
 	 * @param  array       $filter       Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
 	 * @param  string      $filtermode   Filter mode (AND or OR)
-	 * @return array|int                 int <0 if KO, array of pages if OK
+	 * @return self[]|int                 int <0 if KO, array of pages if OK
 	 */
 	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
 	{
@@ -532,10 +532,55 @@ class ScrumCard extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
+		global $langs;
+
+		if($this->fetchElementObject()){
+			if(is_callable(array($this->elementObject, 'onScrumCardDelete'))){
+				if($this->elementObject->onScrumCardDelete( $this, $user, $notrigger)<0){
+					$this->errors[] = $langs->trans('ErrorWithCardLinkedElement').' : '.$this->elementObject->error;
+					return -1;
+				}
+			}
+		}
+
 		unset($this->fk_element); // avoid conflict with standard Dolibarr comportment
 
 		return $this->deleteCommon($user, $notrigger);
 		//return $this->deleteCommon($user, $notrigger, 1);
+	}
+
+	/**
+	 * Delete object in database
+	 *
+	 * @param User $user       User that deletes
+	 * @param bool $notrigger  false=launch triggers after, true=disable triggers
+	 * @return int             <0 if KO, >0 if OK
+	 */
+	public function deleteAllFromElement(User $user, $element_type, $fk_element, $notrigger = false)
+	{
+		global $langs;
+
+		$scrumCards = $this->fetchAll('','', 0, 0, array('fk_element'=>$fk_element, 'element_type' => $element_type));
+		if(!is_array($scrumCards)){
+			$this->error = $langs->trans('ErrorOnFetchingAllScrumCardsAffectedToElement', $element_type);
+			$this->errors[] = $this->error;
+			return -1;
+		}
+		elseif (!empty($scrumCards)){
+			$this->db->begin();
+			foreach ($scrumCards as $scrumCard){
+				if($scrumCard->delete($user, $notrigger)<0){
+					$this->error = $scrumCard->error;
+					$this->errors[] = array_merge($this->errors,  $scrumCard->errors);
+					$this->db->rollback();
+					return -1;
+				}
+			}
+			$this->db->commit();
+		}
+
+
+		return 1;
 	}
 
 	/**
