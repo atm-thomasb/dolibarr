@@ -105,10 +105,10 @@ class ActionsScrumProject
 		$langs->load('scrumproject@scrumproject');
 
 		$img = '<img src="'.dol_buildpath('scrumproject/img/object_scrumuserstorysprint.png',1).'" >';
-		$this->results['scrumproject_scrumtask'] = $img.' '.$langs->trans('ScrumTaskMailModel');
+		$this->results['scrumtask'] = $img.' '.$langs->trans('ScrumTaskMailModel');
 
 		$img = '<span class="fa fa-lightbulb" style="color: #cb4f24;"></span>';
-		$this->results['scrumproject_scrumuserstorysprint'] = $img.' '.$langs->trans('ScrumUserStoryMailModel');
+		$this->results['scrumuserstorysprint'] = $img.' '.$langs->trans('ScrumUserStoryMailModel');
 
 		return 0;
 	}
