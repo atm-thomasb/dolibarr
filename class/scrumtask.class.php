@@ -1407,6 +1407,17 @@ class ScrumTask extends CommonObject
 		return $object;
 	}
 
+	/**
+	 * @param $scrumCard ScrumCard
+	 * @param $object stdClass
+	 * @return void
+	 */
+	public function getScrumKanBanItemObjectFormatted($scrumCard,$object){
+
+		$object->cardTimeUrl = dol_buildpath('/scrumproject/scrumtask_time_list.php',1).'?id='.$this->id;
+		return null;
+	}
+
 
 
 	/**
