@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-
+- NEW : Kanban, add addTime on menu list Task *30/11/2022* - 1.20.0
 
 
 ## Version 1.19
