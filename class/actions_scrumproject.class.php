@@ -88,6 +88,33 @@ class ActionsScrumProject
 		return 0;
 	}
 
+
+
+	/**
+	 * elementList Method Hook Call
+	 *
+	 * @param array $parameters parameters
+	 * @param Object &$object Object to use hooks on
+	 * @param string &$action Action code on calling page ('create', 'edit', 'view', 'add', 'update', 'delete'...)
+	 * @param object $hookmanager class instance
+	 * @return void
+	 */
+	public function emailElementlist($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
+		$langs->load('scrumproject@scrumproject');
+
+		$img = '<img src="'.dol_buildpath('scrumproject/img/object_scrumuserstorysprint.png',1).'" >';
+		$this->results['scrumproject_scrumtask'] = $img.' '.$langs->trans('ScrumTaskMailModel');
+
+		$img = '<span class="fa fa-lightbulb" style="color: #cb4f24;"></span>';
+		$this->results['scrumproject_scrumuserstorysprint'] = $img.' '.$langs->trans('ScrumUserStoryMailModel');
+
+		return 0;
+	}
+
+
+
 	/**
 	 * @param $parameters
 	 * @param $object
