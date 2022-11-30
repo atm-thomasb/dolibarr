@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- NEW : Add model email possibility *30/11/2022* - 1.20.0
+- NEW : Add substitution *30/11/2022* - 1.22.0
+- NEW : Add model email possibility *30/11/2022* - 1.21.0
 
 ## Version 1.19
 
