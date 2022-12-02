@@ -17,7 +17,7 @@ function scrumproject_completesubstitutionarray(&$substitutionarray, $langs, $ob
 	}
 
 	if($object->element == 'scrumproject_scrumtask' ) {
-		if(function_exists('scrumProjectGetObjectByElement')){
+		if(!function_exists('scrumProjectGetObjectByElement')){
 			require_once __DIR__ . '/../../lib/scrumproject.lib.php';
 		}
 
