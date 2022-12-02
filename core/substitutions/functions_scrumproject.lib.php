@@ -45,7 +45,7 @@ function completeSubstitutionFromScrumUserStorySprint(&$substitutionarray, $lang
 
 	if($object->fk_scrum_user_story > 0){
 
-		if(function_exists('scrumProjectGetObjectByElement')){
+		if(!function_exists('scrumProjectGetObjectByElement')){
 			require_once __DIR__ . '/../../lib/scrumproject.lib.php';
 		}
 
