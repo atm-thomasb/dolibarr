@@ -77,6 +77,8 @@ scrumKanban = {};
 		SplitCard:"Découper la carte",
 		CloneCard:"Cloner la carte",
 		DeleteCardDialogTitle:"Supprimer cette carte ?",
+		ConfirmDeleteKanbanCard:"Êtes-vous sûr de vouloir supprimer cette carte ?",
+		MessageScrumCardDelete:"La suppression d'une tâche planifiée n'est possible que si ses tâches ne contienent aucune saisie de temps",
 
 		QtyPlanned : 'Quantités planifiés',
 		QtyConsumed : 'Quantités consommées',
@@ -1739,8 +1741,8 @@ scrumKanban = {};
 		// TODO detect type of element before
 		//  User story and scrum task can not be deleted ?
 
-		let content = '<h1 style="text-align: center;">Work in progress to delete ' + eid + '</h1>'
-			+ '<p>Pour l\'instant la suppression se fait sans distinction, <strong>les cards spéciales</strong> ne sont pas prisent en compte : US, US-Tâches etc...</p>'
+		let content = '<h1 style="text-align: center;"> '+o.langs.ConfirmDeleteKanbanCard+'</h1>'
+			+ '<p>'+o.langs.MessageScrumCardDelete+'</p>'
 
 		const delDialog = new Dialog({
 			title: o.langs.DeleteCardDialogTitle,

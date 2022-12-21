@@ -245,12 +245,19 @@ class ScrumUserStorySprint extends CommonObject
 	 * @return bool
 	 */
 	public function canBeDeleted(){
-		$obj = $this->db->getRow('SELECT COUNT(rowid) nb FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask WHERE fk_scrum_user_story_sprint = '.$this->id);
-		if($obj !== false){
-			return !(intval($obj->nb)>0);
-		}
+		global $db;
+		dol_include_once('/scrumproject/class/scrumtask.class.php');
+		$scrumTask = new ScrumTask($db);
+		$TscrumTask = $scrumTask->fetchAll('','',0,0,array('fk_scrum_user_story_sprint'=>$this->id));
 
-		return false;
+		if (!empty($TscrumTask)){
+			foreach ($TscrumTask as $task){
+				if (!$task->canBeDeleted()){
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 
