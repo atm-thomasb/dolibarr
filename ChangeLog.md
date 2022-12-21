@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 - NEW : Delete cascade from kanban *20/12/2022* - 1.23.0
 
+## Version 1.22
+
+- FIX : fix scrumuserstorysprint_import_wizard page filter columns *07/12/2022* - 1.22.1
+- NEW : Add substitution *30/11/2022* - 1.22.0
+- NEW : Add model email possibility *30/11/2022* - 1.21.0
+- NEW : Kanban, add addTime on menu list Task *30/11/2022* - 1.20.0
 
 ## Version 1.19
 

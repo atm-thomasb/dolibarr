@@ -92,6 +92,7 @@ scrumKanban = {};
 		QtyScrumTaskAlreadySplited: 'Quantités découpées en tâche(s) scrum ',
 
 		SprintResume: 'Résumé du sprint',
+		SprintTaskAddTime: 'Saisir du temps'
 
 	};
 
@@ -973,8 +974,25 @@ scrumKanban = {};
 				});
 			}
 
-
-
+			//Saisir du temp dans une tâche
+			if(el.getAttribute('data-type') != undefined && el.getAttribute('data-type') =='scrum-user-story-task'){
+				// Un assign me to card
+				menuItems.push({
+					content: '<i class="fa fa-hourglass-o" ></i>' + o.langs.SprintTaskAddTime,
+					events: {
+						click: function (e) {
+							//dialog iFrame redirection vers le temps consommé de la carte
+							if(el.getAttribute('data-cardTimeUrl') != undefined){
+								let label = '';
+								if(el.getAttribute('data-label') != undefined){
+									label = el.getAttribute('data-label');
+								}
+								o.dialogIFrame(el.getAttribute('data-eid'), el.getAttribute('data-cardTimeUrl'), label);
+							}
+						}
+					}
+				});
+			}
 
 			// Card Tags
 			menuItems.push({
