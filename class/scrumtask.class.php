@@ -567,7 +567,6 @@ class ScrumTask extends CommonObject
 		if(!$this->canBeDeleted()){
 			return -1;
 		}
-
 		if(!class_exists('ScrumCard')){ require_once __DIR__ . '/scrumcard.class.php'; }
 		$staticsScrumCard = new ScrumCard($this->db);
 		if($staticsScrumCard->deleteAllFromElement($user, $this->element, $this->id, $notrigger)<0){
@@ -590,10 +589,11 @@ class ScrumTask extends CommonObject
 	 */
 	public function onScrumCardDelete(ScrumCard $scrumCard, User $user, $notrigger = false)
 	{
+		global $langs;
 		if(!$this->canBeDeleted()){
+			$this->error = $langs->trans('ErrorTimeOnScrumTask');
 			return -1;
 		}
-
 		return $this->deleteCommon($user, $notrigger);
 	}
 
@@ -1318,13 +1318,15 @@ class ScrumTask extends CommonObject
 	 * Retourn le nombre de lignes de saisie de temps
 	 * @return int
 	 */
-	public function countTimeSpentLines(){
+	public function countTimeSpentLines()
+	{
 
-		$sql = /** @lang MySQL */ "SELECT COUNT(pttl.rowid) nb FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "
-			." WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id);
+		$sql = /** @lang MySQL */
+			'SELECT COUNT(pttl.rowid) nb FROM ' . MAIN_DB_PREFIX . 'scrumproject_scrumtask_projet_task_time pttl '
+			. ' WHERE pttl.fk_scrumproject_scrumtask = ' . intval($this->id);
 		$obj = $this->db->getRow($sql);
-		if($obj){
-			return $this->nb;
+		if ($obj) {
+			return $obj->nb;
 		}
 		return 0;
 	}

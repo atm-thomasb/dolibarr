@@ -577,7 +577,8 @@ scrumKanban = {};
 
 		o.callKanbanInterface('removeCard', sendData, function(response){
 			if(response.result > 0) {
-				o.jkanban.removeElement(item)
+				o.jkanban.removeElement(item);
+				o.refreshAllBoards();
 			}
 		});
 	}

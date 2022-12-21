@@ -326,3 +326,5 @@ SP_FormatQtyHourShort = %02dh%02d
 CantDeleteTaskWhenTimeAlreadySpent = Il n'est pas possible de supprimer car du temps saisi est associé.
 ErrorOnFetchingAllScrumCardsAffectedToTask = Une erreur c'est produite lors de la récupération de la liste des cartes kanban associées à la tâche scrum
 ErrorOnFetchingAllScrumCardsAffectedToElement = Une erreur c'est produite lors de la récupération de la liste des cartes kanban associées à l'objet
+ErrorTimeOnScrumUserStorySprint = Impossible de supprimer une tâche planifiée ayant une quantité consommée
+ErrorTimeOnScrumTask = Impossible de supprimer une tâche ayant du temps consommé

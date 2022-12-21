@@ -590,7 +590,12 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function onScrumCardDelete(ScrumCard $scrumTask, User $user, $notrigger = false)
 	{
-		return $this->deleteCommon($user, $notrigger);
+		global $langs;
+		if ($this->canBeDeleted()){
+			return $this->deleteCommon($user, $notrigger);
+		}
+		$this->error = $langs->trans('ErrorTimeOnScrumUserStorySprint');
+		return -1;
 	}
 
 	/**
@@ -624,11 +629,12 @@ class ScrumUserStorySprint extends CommonObject
 				}
 			}
 			$this->db->commit();
+			return 1;
 		}
 
 
 
-		$delResult =  parent::deleteLineCommon($user, $notrigger, $forcechilddeletion);
+		$delResult =  parent::deleteCommon($user, $notrigger, $forcechilddeletion);
 
 		if($this->refreshSprintQuantities($user)<0){
 			return -1;

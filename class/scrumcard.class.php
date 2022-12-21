@@ -411,7 +411,7 @@ class ScrumCard extends CommonObject
 				} elseif ($key == 'customsql') {
 					$sqlwhere[] = $value;
 				} elseif (strpos($value, '%') === false) {
-					$sqlwhere[] = $key.' IN ('.$this->db->sanitize($this->db->escape($value)).')';
+					$sqlwhere[] = $key.' IN ("'.$this->db->sanitize($this->db->escape($value)).'")';
 				} else {
 					$sqlwhere[] = $key.' LIKE \'%'.$this->db->escape($value).'%\'';
 				}
@@ -532,12 +532,12 @@ class ScrumCard extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
-		global $langs;
+		global  $db,$langs;
 
 		if($this->fetchElementObject()){
 			if(is_callable(array($this->elementObject, 'onScrumCardDelete'))){
 				if($this->elementObject->onScrumCardDelete( $this, $user, $notrigger)<0){
-					$this->errors[] = $langs->trans('ErrorWithCardLinkedElement').' : '.$this->elementObject->error;
+					$this->errors[] = $this->elementObject->error;
 					return -1;
 				}
 			}
