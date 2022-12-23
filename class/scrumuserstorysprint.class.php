@@ -28,6 +28,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 require_once __DIR__ .'/scrumuserstory.class.php';
 require_once __DIR__ .'/scrumsprint.class.php';
 require_once __DIR__ . '/commonObjectQuickTools.trait.php';
+require_once __DIR__ .'/scrumtask.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -246,7 +247,6 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function canBeDeleted(){
 		global $db;
-		dol_include_once('/scrumproject/class/scrumtask.class.php');
 		$scrumTask = new ScrumTask($db);
 		$TscrumTask = $scrumTask->fetchAll('','',0,0,array('fk_scrum_user_story_sprint'=>$this->id));
 

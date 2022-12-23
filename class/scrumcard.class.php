@@ -411,7 +411,7 @@ class ScrumCard extends CommonObject
 				} elseif ($key == 'customsql') {
 					$sqlwhere[] = $value;
 				} elseif (strpos($value, '%') === false) {
-					$sqlwhere[] = $key.' IN ("'.$this->db->sanitize($this->db->escape($value)).'")';
+					$sqlwhere[] = $key.' IN ('.$this->db->sanitize($this->db->escape($value)).')';
 				} else {
 					$sqlwhere[] = $key.' LIKE \'%'.$this->db->escape($value).'%\'';
 				}
@@ -560,7 +560,7 @@ class ScrumCard extends CommonObject
 	{
 		global $langs;
 
-		$scrumCards = $this->fetchAll('','', 0, 0, array('fk_element'=>$fk_element, 'element_type' => $element_type));
+		$scrumCards = $this->fetchAll('','', 0, 0, array('fk_element'=>$fk_element, 'customsql' => 'element_type="'. $element_type.'"'));
 		if(!is_array($scrumCards)){
 			$this->error = $langs->trans('ErrorOnFetchingAllScrumCardsAffectedToElement', $element_type);
 			$this->errors[] = $this->error;
