@@ -28,6 +28,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 require_once __DIR__ .'/scrumuserstory.class.php';
 require_once __DIR__ .'/scrumsprint.class.php';
 require_once __DIR__ . '/commonObjectQuickTools.trait.php';
+require_once __DIR__ .'/scrumtask.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -245,12 +246,18 @@ class ScrumUserStorySprint extends CommonObject
 	 * @return bool
 	 */
 	public function canBeDeleted(){
-		$obj = $this->db->getRow('SELECT COUNT(rowid) nb FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask WHERE fk_scrum_user_story_sprint = '.$this->id);
-		if($obj !== false){
-			return !(intval($obj->nb)>0);
-		}
+		global $db;
+		$scrumTask = new ScrumTask($db);
+		$TscrumTask = $scrumTask->fetchAll('','',0,0,array('fk_scrum_user_story_sprint'=>$this->id));
 
-		return false;
+		if (!empty($TscrumTask)){
+			foreach ($TscrumTask as $task){
+				if (!$task->canBeDeleted()){
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 
@@ -569,7 +576,72 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
-		$delResult =  $this->deleteCommon($user, $notrigger);
+		if(!class_exists('ScrumCard')){ require_once __DIR__ . '/scrumcard.class.php'; }
+		$staticsScrumCard = new ScrumCard($this->db);
+		if($staticsScrumCard->deleteAllFromElement($user, $this->element, $this->id, $notrigger)<0){
+			$this->error = $staticsScrumCard->error;
+			$this->errors[] = array_merge($this->errors,  $staticsScrumCard->errors);
+			return -1;
+		}
+
+		return $this->deleteCommon($user, $notrigger);
+	}
+
+	/**
+	 * On scrumCard delete this object if affected
+	 *
+	 * @param ScrumCard $scrumTask the scrum card how run this kanban trigger
+	 * @param User      $user      User that deletes
+	 * @param bool      $notrigger false=launch triggers after, true=disable triggers
+	 * @return int             <0 if KO, >0 if OK
+	 */
+	public function onScrumCardDelete(ScrumCard $scrumTask, User $user, $notrigger = false)
+	{
+		global $langs;
+		if ($this->canBeDeleted()){
+			return $this->deleteCommon($user, $notrigger);
+		}
+		$this->error = $langs->trans('ErrorTimeOnScrumUserStorySprint');
+		return -1;
+	}
+
+	/**
+	 * Delete object in database
+	 *
+	 * @param 	User 	$user       			User that deletes
+	 * @param 	bool 	$notrigger  			false=launch triggers after, true=disable triggers
+	 * @param	int		$forcechilddeletion		0=no, 1=Force deletion of children
+	 * @return 	int             				<=0 if KO, 0=Nothing done because object has child, >0 if OK
+	 */
+	public function deleteCommon(User $user, $notrigger = false, $forcechilddeletion = 0)
+	{
+		global $langs;
+
+		if(!class_exists('ScrumTask')){ require_once __DIR__ . '/scrumtask.class.php'; }
+		$staticsScrumTask = new ScrumTask($this->db);
+		$scrumTasks = $staticsScrumTask->fetchAll('','', 0, 0, array('fk_scrum_user_story_sprint' => $this->id));
+		if(!is_array($scrumTasks)){
+			$this->error = $langs->trans('ErrorOnFetchingAllScrumTask');
+			$this->errors[] = $this->error;
+			return -1;
+		}
+		elseif (!empty($scrumTasks)){
+			$this->db->begin();
+			foreach ($scrumTasks as $scrumTask){
+				if($scrumTask->delete($user, $notrigger)<0){
+					$this->error = $scrumTask->error;
+					$this->errors[] = array_merge($this->errors,  $scrumTask->errors);
+					$this->db->rollback();
+					return -1;
+				}
+			}
+			$this->db->commit();
+			return 1;
+		}
+
+
+
+		$delResult =  parent::deleteCommon($user, $notrigger, $forcechilddeletion);
 
 		if($this->refreshSprintQuantities($user)<0){
 			return -1;

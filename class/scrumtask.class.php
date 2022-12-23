@@ -559,8 +559,57 @@ class ScrumTask extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = false)
 	{
+		global $langs;
+
+		/**
+		 * TODO : Lors de la mise à jours de cette methode vérifier aussi onScrumCardDelete au cas ou
+		 */
+		if(!$this->canBeDeleted()){
+			return -1;
+		}
+		if(!class_exists('ScrumCard')){ require_once __DIR__ . '/scrumcard.class.php'; }
+		$staticsScrumCard = new ScrumCard($this->db);
+		if($staticsScrumCard->deleteAllFromElement($user, $this->element, $this->id, $notrigger)<0){
+			$this->error = $staticsScrumCard->error;
+			$this->errors[] = array_merge($this->errors,  $staticsScrumCard->errors);
+			return -1;
+		}
+
+		return  $this->deleteCommon($user, $notrigger);
+	}
+
+
+	/**
+	 * On scrumCard delete this scrumTask if affected
+	 *
+	 * @param ScrumCard $scrumCard the scrum card how run this kanban trigger
+	 * @param User      $user      User that deletes
+	 * @param bool      $notrigger false=launch triggers after, true=disable triggers
+	 * @return int             <0 if KO, >0 if OK
+	 */
+	public function onScrumCardDelete(ScrumCard $scrumCard, User $user, $notrigger = false)
+	{
+		global $langs;
+		if(!$this->canBeDeleted()){
+			$this->error = $langs->trans('ErrorTimeOnScrumTask');
+			return -1;
+		}
 		return $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
+	}
+
+	/**
+	 * Check if object can be deleted
+	 * @return bool
+	 */
+	public function canBeDeleted(){
+		global $langs;
+		if($this->countTimeSpentLines()>0){
+			$this->error = $langs->trans('CantDeleteTaskWhenTimeAlreadySpent');
+			$this->errors[] = $this->error;
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -1247,7 +1296,7 @@ class ScrumTask extends CommonObject
 	}
 
 	/**
-	 *
+	 * Retourne la somme des temps saisis sur cette tache scrum
 	 * @return int
 	 */
 	public function calcTimeSpent(){
@@ -1262,6 +1311,23 @@ class ScrumTask extends CommonObject
 			return $this->qty_consumed;
 		}
 
+		return 0;
+	}
+
+	/**
+	 * Retourn le nombre de lignes de saisie de temps
+	 * @return int
+	 */
+	public function countTimeSpentLines()
+	{
+
+		$sql = /** @lang MySQL */
+			'SELECT COUNT(pttl.rowid) nb FROM ' . MAIN_DB_PREFIX . 'scrumproject_scrumtask_projet_task_time pttl '
+			. ' WHERE pttl.fk_scrumproject_scrumtask = ' . intval($this->id);
+		$obj = $this->db->getRow($sql);
+		if ($obj) {
+			return $obj->nb;
+		}
 		return 0;
 	}
 

@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-
+- NEW : Delete cascade from kanban *20/12/2022* - 1.23.0
 
 ## Version 1.22
 
