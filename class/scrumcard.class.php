@@ -1095,16 +1095,7 @@ class ScrumCard extends CommonObject
 				$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $elementObject->fk_scrum_user_story);
 
 				if($us ){
-					$object->label = $us->label;
-
-//					/** @var Task $elementObject */
-//					$task = scrumProjectGetObjectByElement('task', $us->fk_task);
-//					if($task){
-//						$object->label = $task->label; // les us plannifiées n'ont pas de libellé
-//					}
-//					else{
-//						$object->label = '<span class="error">Task Error</span>';
-//					}
+					$object->label = !empty($elementObject->label)?$elementObject->label:$us->label;
 				}
 				else{
 					$object->label = '<span class="error">US Error</span>';
