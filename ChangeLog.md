@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+- NEW : Display company on card *02/01/2022* - 1.24.0
 - NEW : Delete cascade from kanban *20/12/2022* - 1.23.0
 
 ## Version 1.22
