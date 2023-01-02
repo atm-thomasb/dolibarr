@@ -1067,6 +1067,9 @@ class ScrumUserStorySprint extends CommonObject
 		$object->statusLabel = $this->LibStatut(intval($this->status), 1);
 		$object->contactUsersAffected = $this->liste_contact(-1,'internal',1);
 
+		$object->socid = $this->getSocIdAssociated();
+
+
 		$object->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
 		$object->fk_scrum_user_story_sprint= $this->fk_scrum_user_story_sprint;
 		$object->qty_planned = doubleval($this->qty_planned);
@@ -1087,6 +1090,75 @@ class ScrumUserStorySprint extends CommonObject
 	}
 
 
+	/**
+	 * @param $scrumCard ScrumCard
+	 * @param $object stdClass
+	 * @return void
+	 */
+	public function getScrumKanBanItemObjectFormatted($scrumCard,$object){
+
+		$object->socid = $this->getSocIdAssociated();
+		return null;
+	}
+
+	/**
+	 * @return false|int
+	 */
+	public function getSocIdAssociated(){
+		return self::staticGetSocIdAssociated($this->db, $this->id);
+	}
+
+	/**
+	 * @return false|int
+	 */
+	public static function staticGetSocIdAssociated($db, $fk_scrum_user_story_sprint){
+
+		$sql = 'SELECT ussp.fk_scrum_user_story FROM '.MAIN_DB_PREFIX.'scrumproject_scrumuserstorysprint ussp  WHERE ussp.rowid = '.intval($fk_scrum_user_story_sprint);
+		$obj = $db->getRow($sql);
+		if($obj === false){
+			return false;
+		}
+
+		$fk_scrum_user_story = intval($obj->fk_scrum_user_story);
+		if(empty($fk_scrum_user_story)){
+			return 0;
+		}
+
+		$sql = 'SELECT us.fk_task FROM '.MAIN_DB_PREFIX.'scrumproject_scrumuserstory us  WHERE us.rowid = '.intval($fk_scrum_user_story);
+		$obj = $db->getRow($sql);
+		if($obj === false){
+			return false;
+		}
+
+		$fkTask = intval($obj->fk_task);
+		if(empty($fkTask)){
+			return 0;
+		}
+
+		$sql = 'SELECT pt.fk_projet FROM '.MAIN_DB_PREFIX.'projet_task pt WHERE pt.rowid = '.$fkTask;
+		$obj = $db->getRow($sql);
+		if($obj === false){
+			return false;
+		}
+
+		$fkProject = intval($obj->fk_projet);
+		if(empty($fkProject)){
+			return 0;
+		}
+
+		$sql = 'SELECT p.fk_soc FROM '.MAIN_DB_PREFIX.'projet p WHERE p.rowid = '.$fkProject;
+		$obj = $db->getRow($sql);
+		if($obj === false){
+			return false;
+		}
+
+		$socId = $obj->fk_soc;
+		if(empty($socId)){
+			return 0;
+		}
+
+		return $socId;
+	}
 
 	/**
 	 * Permet de spliter l'us carte en scrum task
