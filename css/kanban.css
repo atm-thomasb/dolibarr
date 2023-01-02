@@ -852,6 +852,11 @@ nav.top-nav-bar{
 	min-height: 30px;
 }
 
+.kanban-item__company{
+	font-size: 0.8em;
+	display: block;
+}
+
 .kanban-item__status, .kanban-item__tags{
 	font-size: 0.8em;
 }

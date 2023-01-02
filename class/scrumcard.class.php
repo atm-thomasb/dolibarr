@@ -1081,6 +1081,7 @@ class ScrumCard extends CommonObject
 		$object->type = 'scrum-card';
 		$object->class = array();     // array of additional classes
 		$object->element = $this->element;
+		$object->socid = 0;
 		$object->cardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
 		$object->objectId = $this->id;
 		$object->title = '';
@@ -1200,6 +1201,14 @@ class ScrumCard extends CommonObject
 
 
 		$object->title.= '<div class="kanban-item__body">';
+
+		if(!empty($object->socid)){
+			$company = new Societe($this->db);
+			if($company->fetch($object->socid)>0){
+				$object->title.= '<span class="kanban-item__company">'.$company->name.'</span>';
+			}
+		}
+
 		$object->title.= '<span class="kanban-item__label">'.$object->label.'</span>';
 		$object->title.= '</div>';
 
