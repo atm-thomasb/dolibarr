@@ -153,6 +153,21 @@ function _actionLiveUpdate(&$jsonResponse){
 
 	$fieldTypeArray = explode(':', $object->fields[$field]['type']);
 	$typeField = reset($fieldTypeArray);
+
+	if(in_array($typeField , array('real'))){
+
+		// Dans le cas des heures stockées en float
+		if(strpos($value, 'h') !== false || strpos($value, 'H') !== false || strpos($value, ':') !== false  ){
+			$value = str_replace("h", "H", $value);
+			$value = str_replace(":", "H", $value);
+			$pos = strpos($value, 'H');
+			$h = floatval(substr($value, 0, $pos));
+			$m = floatval(substr($value, $pos+1));
+			$value = $h+round($m/60,6);
+		}
+	}
+
+
 	if(in_array($typeField , array('integer', 'real'))){
 		$value = price2num($value);
 		$jsonResponse->value = price($value);
