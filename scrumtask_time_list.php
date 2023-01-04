@@ -77,6 +77,7 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
+require_once __DIR__ . '/class/scrumcard.class.php';
 require_once __DIR__ . '/class/scrumtask.class.php';
 require_once __DIR__ . '/class/scrumuserstory.class.php';
 require_once __DIR__ . '/class/scrumuserstorysprint.class.php';
@@ -309,9 +310,41 @@ if ($id > 0 || !empty($ref)) {
 
 		print '</td>';
 
+
+
+		$note = isset($_POST['timespent_note']) ? $_POST['timespent_note'] : $object->label;
+
+
+		$scrumCardStatic = new ScrumCard($db);
+		$TScrumCard = $scrumCardStatic->fetchAll( '','', 0, 0, array('fk_element' => $object->id, 'customsql' => 'element_type IN ("'.$db->escape($object->element).'")'));
+		if(is_array($TScrumCard)){
+			$TConcat = array();
+			foreach ($TScrumCard as $scrumCard){
+				$tCats = $scrumCard->getCategoriesCommon('scrumcard');
+				if(is_array($tCats)){
+					foreach ($tCats as $catID){
+						if(isset($TConcat[$catID])){ continue; }
+						$cat = new Categorie($db);
+						if($cat->fetch($catID)>0){
+							if(!empty($cat->array_options['options_scrumproject_time_prefill'])) {
+								$TConcat[$catID] = $cat->label;
+							}
+						}
+					}
+				}
+
+				if(!empty($TConcat)){
+					$note = implode(' - ', $TConcat). ' - '.$note;
+				}
+			}
+		}
+
+
+
+
 		// Note
 		print '<td>';
-		print '<textarea name="timespent_note" class="maxwidth100onsmartphone" rows="'.ROWS_2.'">'.($_POST['timespent_note'] ? $_POST['timespent_note'] : '').'</textarea>';
+		print '<textarea name="timespent_note" class="maxwidth100onsmartphone" rows="'.ROWS_2.'">'.$note.'</textarea>';
 		print '</td>';
 
 		// Duration - Time spent

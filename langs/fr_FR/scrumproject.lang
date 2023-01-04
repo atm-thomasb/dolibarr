@@ -22,6 +22,9 @@ ModuleScrumProjectName = Projet Scrum
 # Module description 'ModuleScrumProjectDesc'
 ModuleScrumProjectDesc = Ajoute des fonctionnalités au module projet pour de la gestion avec la méthode Scrum
 
+scrumTimePrefillExtraFieldLabel = ScrumProject : Utiliser comme prefix lors de la saisie de temps
+scrumTimePrefillExtraFieldLabelHelp = Lors de la saisie de temps sur une tâche scrum utilisant ce tag alors la note contiendra le libellé du tag
+
 #
 # Page d'administration
 #
