@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.22
 
+- FIX : Can't split card from kanban when overspend *07/01/2023* - 1.22.1
 - FIX : Can't validate a scrumsprintuser card beacause ref column doesn't exist for table scrumproject_scrumsprintuser *23/12/2022* - 1.22.2
 - FIX : fix scrumuserstorysprint_import_wizard page filter columns *07/12/2022* - 1.22.1
 - NEW : Add substitution *30/11/2022* - 1.22.0

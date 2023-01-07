@@ -51,6 +51,9 @@ DisplayAsBadge = Badge avec texte
 SP_USE_ACHIEVEMENTS = Activer la gamification
 SP_USE_ACHIEVEMENTS_HELP = Ajoute quelques icônes de type achievement comme dans les jeux vidéos
 
+SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND = Ne pas permettre la découpe de tâche scrum (kanban) en dessous du temps déjà consommé
+
+RequireValidSplitData = Les données de découpes sont invalides
 
 #
 # MENU

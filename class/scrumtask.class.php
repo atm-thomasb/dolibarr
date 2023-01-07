@@ -1466,7 +1466,10 @@ class ScrumTask extends CommonObject
 		$object->qty_consumed = doubleval($this->qty_consumed);
 
 		$object->qty_remain_for_split = 0;
-		if($this->qty_planned - $this->qty_consumed > 0){
+		if(getDolGlobalInt('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND', 0) == 0){
+			$object->qty_remain_for_split = $object->qty_planned;
+		}
+		elseif($this->qty_planned - $this->qty_consumed > 0){
 			$object->qty_remain_for_split = $this->qty_planned - $this->qty_consumed;
 		}
 
