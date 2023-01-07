@@ -26,6 +26,7 @@
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 require_once __DIR__ . '/commonObjectQuickTools.trait.php';
+require_once __DIR__ . '/scrumuserstorysprint.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
@@ -1455,6 +1456,7 @@ class ScrumTask extends CommonObject
 		$object->type = 'scrum-user-story-task';// le type dans le kanban tel que getScrumKanBanItemObjectFormatted le fait
 		$object->label = $this->label;
 		$object->element = $this->element;
+		$object->socid = 0;
 		$object->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$this->id;
 		$object->status = intval($this->status);
 		$object->statusLabel = $this->LibStatut(intval($this->status), 1);
@@ -1482,12 +1484,18 @@ class ScrumTask extends CommonObject
 	 * @return void
 	 */
 	public function getScrumKanBanItemObjectFormatted($scrumCard,$object){
-
+		$object->socid = $this->getSocIdAssociated();
 		$object->cardTimeUrl = dol_buildpath('/scrumproject/scrumtask_time_list.php',1).'?id='.$this->id;
 		return null;
 	}
 
 
+	/**
+	 * @return false|int
+	 */
+	public function getSocIdAssociated(){
+		return ScrumUserStorySprint::staticGetSocIdAssociated($this->db, $this->fk_scrum_user_story_sprint);
+	}
 
 	/**
 	 * @param $msg

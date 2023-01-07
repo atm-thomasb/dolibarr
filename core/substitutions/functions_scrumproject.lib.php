@@ -43,6 +43,16 @@ function completeSubstitutionFromScrumUserStorySprint(&$substitutionarray, $lang
 	$substitutionarray['__PROJECT_THIRDPARTY_NAME__'] = ''; // TODO reprendre le format standard de dolibarr pour les substitutions de thirdparty
 
 
+	$substitutionarray['__USPLANNED_LABEL__'] = $object->showOutputFieldQuick('label');
+	$substitutionarray['__USPLANNED_QTY_PLANNED__'] = $object->showOutputFieldQuick('qty_planned');
+	$substitutionarray['__USPLANNED_QTY_CONSUMED__'] = $object->showOutputFieldQuick('qty_consumed');
+	$substitutionarray['__USPLANNED_QTY_DONE__'] = $object->showOutputFieldQuick('qty_done');
+	$substitutionarray['__USPLANNED_DESCRIPTION__'] = $object->showOutputFieldQuick('description');
+
+
+	$substitutionarray['__US_LABEL__'] = '';
+	$substitutionarray['__US_DESCRIPTION__'] = '';
+
 	if($object->fk_scrum_user_story > 0){
 
 		if(!function_exists('scrumProjectGetObjectByElement')){
@@ -51,6 +61,18 @@ function completeSubstitutionFromScrumUserStorySprint(&$substitutionarray, $lang
 
 		$userStory = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $object->fk_scrum_user_story);
 		if($userStory){
+			/**
+			 * @var ScrumUserStory $userStory
+			 */
+			$substitutionarray['__US_LABEL__'] = $userStory->showOutputFieldQuick('label');
+			$substitutionarray['__US_DESCRIPTION__'] = $userStory->showOutputFieldQuick('description');
+
+			// lorsqu'une US plannifié na pas de label c'est qu'elle utilise celui défini sur l'US
+			if(empty($substitutionarray['__USPLANNED_LABEL__']) && !empty($substitutionarray['__US_LABEL__'])){
+				$substitutionarray['__USPLANNED_LABEL__'] = $substitutionarray['__US_LABEL__'];
+			}
+
+
 			if($userStory->fk_task > 0 && $task = scrumProjectGetObjectByElement('projet_task', $userStory->fk_task)){
 				/** @var Task $task  */
 				$substitutionarray['__PROJECT_TASK_REF__'] = $task->ref;
