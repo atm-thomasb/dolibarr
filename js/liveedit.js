@@ -123,8 +123,13 @@ jQuery(function ($) {
 				success: function (data) {
 					if(data.result > 0) {
 						// do stuff on success
+						let callbackRes = 0;
 						if(conf.callback.success != undefined){
-							o.callBackFunction(conf.callback.success , el, data);
+							callbackRes = o.callBackFunction(conf.callback.success , el, data);
+						}
+
+						if(callbackRes==0 || !callbackRes){
+							el.html(data.displayValue);
 						}
 					}
 					else if(data.result == 0) {

@@ -79,6 +79,7 @@ function _actionLiveUpdate(&$jsonResponse){
 	$field = GETPOST("field", "alphanohtml");
 	$value = GETPOST('value', 'alphanohtml');
 	$jsonResponse->value = $value;
+	$jsonResponse->displayValue = $value;
 	$forceUpdate = GETPOST('forceUpdate', 'int');
 
 	// Todo use object display value like update form
@@ -180,9 +181,13 @@ function _actionLiveUpdate(&$jsonResponse){
 	}
 
 	$object->$field = $value;
+	if(is_callable(array($object, 'showOutputField'))){
+		$jsonResponse->displayValue = $object->showOutputField($object->fields[$field], $field, $object->{$field});
+	}
+
 
 	if($object->updateCommon($user) > 0){
-		$jsonResponse->msg = $langs->trans('Updated');
+//		$jsonResponse->msg = $langs->trans('Updated'); // remove because create spam
 		$jsonResponse->result = 1;
 		return true;
 	}
