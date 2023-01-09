@@ -324,6 +324,8 @@ function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheBy
 		return false;
 	}
 
+
+
 	if(empty($TScrumProjectGetObjectFromCache[$objetClassName][$fk_object])){
 		$object = new $objetClassName($db);
 		if($object->fetch($fk_object, false) <= 0)
@@ -332,7 +334,11 @@ function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheBy
 		}
 
 		if(is_array($TScrumProjectGetObjectFromCache[$objetClassName]) && count($TScrumProjectGetObjectFromCache[$objetClassName]) >= $maxCacheByType){
-			array_shift($TScrumProjectGetObjectFromCache[$objetClassName]);
+			// les clés sont importantes je veux être sûr de les préserver c'est pourquoi je n'utilise plus array_shift
+			foreach ($TScrumProjectGetObjectFromCache[$objetClassName] as $TCacheKey => $TCacheVal){
+				unset($TScrumProjectGetObjectFromCache[$objetClassName][$TCacheKey]);
+				if(count($TScrumProjectGetObjectFromCache[$objetClassName]) <= $maxCacheByType){ break; }
+			}
 		}
 
 		$TScrumProjectGetObjectFromCache[$objetClassName][$fk_object] = $object;
