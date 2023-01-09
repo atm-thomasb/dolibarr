@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - NEW : Ajout extrafield sur catégorie pour faire apparaitre le tag catégorie *04/01/2022* - 1.26.0  
-  -> lors du pre-remplissage des notes de saisi de temps sur les tâches   
-- NEW : Pre-remplissage des notes de saisi de temps sur les tâches *04/01/2022* - 1.25.0
+  -> lors du préremplissage des notes de saisie de temps sur les tâches   
+- NEW : Préremplissage des notes de saisie de temps sur les tâches *04/01/2022* - 1.25.0
 
 ## Version 1.24
 
