@@ -12,7 +12,8 @@ scrumKanban = {};
 	};
 
 	o.debugMode = false;
-	console.log("To activate kanban debug mode set : scrumKanban.debugMode = 1; ");
+
+	console.log("To activate kanban debug mode set : scrumKanban.setDebugMod(true); ");
 
 	/**
 	 * Store the last token of all board element
@@ -91,7 +92,7 @@ scrumKanban = {};
 
 		RemoveLine : 'Supprimer la ligne',
 		AddLine : 'Ajouter une ligne',
-		QtyScrumTaskAlreadySplited: 'Quantités découpées en tâche(s) scrum ',
+		QtyScrumTaskAlreadySplitted: 'Quantités découpées en tâche(s) scrum ',
 
 		SprintResume: 'Résumé du sprint',
 		SprintTaskAddTime: 'Saisir du temps'
@@ -1345,7 +1346,8 @@ scrumKanban = {};
 		const checkSplitDialogBTN = function (){
 
 			let $addLineBtn =  $('#add-split-line');
-			if($addLineBtn.length > 0){
+
+			if($addLineBtn.length > 0 ){
 				if(qtyRemain == 0){
 					$addLineBtn.css('visibility','hidden');
 				}else{
@@ -1521,7 +1523,7 @@ scrumKanban = {};
 
 					content+= '<span class="dialog-form-head-item">' + o.langs.QtyPlanned + ' : <span id="split-qty-planned" class="dialog-form-head-number"  >' + response.data.elementObject.qty_planned + '</span></span>';
 					if(type == 'scrum-user-story'){
-						content+= '<span class="dialog-form-head-item">' + o.langs.QtyScrumTaskAlreadySplited + ' : ';
+						content+= '<span class="dialog-form-head-item">' + o.langs.QtyScrumTaskAlreadySplitted + ' : ';
 						content+= '<span id="split-qty-task-planned" class="dialog-form-head-number" >' + response.data.elementObject.qty_task_planned + '</span>';
 						content+= '</span>';
 					}
@@ -1822,5 +1824,43 @@ scrumKanban = {};
 			}
 		}
 	}
+
+	/**
+	 * Display help in console log
+	 */
+	o.help = function (){
+
+		console.group(
+			"%cHELP",
+			"background-color: #95cf04 ; color: #ffffff ; font-weight: bold ; padding: 4px ;"
+		);
+
+			console.log( "Show this help : %cscrumKanban.help();","font-weight: bold ;");
+
+			console.group("Activate kanban debug mode : %cscrumKanban.setDebugMod(true);","font-weight: bold ;");
+
+				console.log( "If Debug mod is On : add log and Kanban auto-refresh will be disable ");
+
+			console.groupEnd();
+
+
+		console.groupEnd();
+	}
+
+	/**
+	 * Set debugMod
+	 */
+	o.setDebugMod = function (value = true){
+		if(value){
+			o.debugMode = true;
+			console.log('%cActivate kanban debug mode',
+				"background-color: #e0005a ; color: #ffffff ; font-weight: bold ; padding: 4px ;");
+			o.help();
+		}else{
+			o.debugMode = false;
+			console.log('Disable kanban debug mode');
+		}
+	}
+
 
 })(scrumKanban);
