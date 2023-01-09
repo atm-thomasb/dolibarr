@@ -1094,7 +1094,8 @@ class ScrumKanbanList extends CommonObject
 		$object->test = $staticScrumCard->errorsToString();
 		if(is_array($scrumCards)){
 			foreach ($scrumCards as $scrumCard){
-				$object->item[] = $scrumCard->getScrumKanBanItemObjectFormatted();
+				$item = $scrumCard->getScrumKanBanItemObjectFormatted();
+				$object->item[] = $item;
 			}
 		}
 

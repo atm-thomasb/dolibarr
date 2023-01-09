@@ -94,7 +94,8 @@ scrumKanban = {};
 		QtyScrumTaskAlreadySplited: 'Quantités découpées en tâche(s) scrum ',
 
 		SprintResume: 'Résumé du sprint',
-		SprintTaskAddTime: 'Saisir du temps'
+		SprintTaskAddTime: 'Saisir du temps',
+		DisplayCardCard: 'Afficher la fiche de cette carte'
 
 	};
 
@@ -976,6 +977,7 @@ scrumKanban = {};
 				});
 			}
 
+
 			//Saisir du temp dans une tâche
 			if(el.getAttribute('data-type') != undefined && el.getAttribute('data-type') =='scrum-user-story-task'){
 				// Un assign me to card
@@ -1043,6 +1045,24 @@ scrumKanban = {};
 					}
 				});
 			}
+
+
+
+			if(el.getAttribute('data-scrumCardUrl') != undefined) {
+				menuItems.push({
+					content: '<i class="fa fa-file" ></i>' + o.langs.DisplayCardCard,
+					events: {
+						click: function (e) {
+							let label = '';
+							if (el.getAttribute('data-label') != undefined) {
+								label = el.getAttribute('data-label');
+							}
+							o.dialogIFrame(el.getAttribute('data-objectid'), el.getAttribute('data-scrumCardUrl') , label);
+						}
+					}
+				});
+			}
+
 
 			menuItems.push({
 				content: o.menuIcons.deleteIcon + o.langs.Delete,
