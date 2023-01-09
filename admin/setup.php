@@ -225,7 +225,7 @@ $TField = array(
 );
 $item->setAsSelect($TField);
 
-// Ne pas permettre le split de tâche si le temps et consomé
+// Ne pas permettre le split de tâche si le temps est consommé
 $formSetup->newItem('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND')->setAsYesNo();
 
 
