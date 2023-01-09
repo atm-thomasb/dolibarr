@@ -148,6 +148,10 @@ scrumKanban = {};
 				o.releaseRefresh();
 				o.clearView();
 			},
+			dragEl : function (el) {
+				// callback when any board's item are dragged
+				o.holdRefresh();
+			},
 			dragendEl : function (el) {
 				// callback when any board's item stop drag
 				// o.setEventMessage('Work in progress drag end el', false);
