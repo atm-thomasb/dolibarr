@@ -672,7 +672,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
 
-	$project = _getObjectFromCache('Project', $obj->fk_project);
+	$project = scrumProjectGetObjectFromCache('Project', $obj->fk_project);
 	/**
 	 * @var Project $project
 	 */
@@ -810,36 +810,3 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 // End of page
 llxFooter();
 $db->close();
-
-
-
-/**
- * copier de la class list view helper de webPassword
- * @param $objetClassName
- * @param $fk_object
- * @return bool|CommonObject
- */
-function _getObjectFromCache($objetClassName, $fk_object){
-	global $db, $TListViewObjectCache;
-
-	if(!class_exists($objetClassName)){
-		// TODO : Add error log here
-		return false;
-	}
-
-	if(empty($TListViewObjectCache[$objetClassName][$fk_object])){
-		$object = new $objetClassName($db);
-		if($object->fetch($fk_object, false) <= 0)
-		{
-			return false;
-		}
-
-		$TListViewObjectCache[$objetClassName][$fk_object] = $object;
-	}
-	else{
-		$object = $TListViewObjectCache[$objetClassName][$fk_object];
-	}
-
-	return $object;
-}
-
