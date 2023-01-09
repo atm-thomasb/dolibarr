@@ -1083,6 +1083,7 @@ class ScrumCard extends CommonObject
 		$object->element = $this->element;
 		$object->socid = 0;
 		$object->cardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
+		$object->scrumCardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
 		$object->objectId = $this->id;
 		$object->title = '';
 		$useTime = false;
@@ -1451,15 +1452,15 @@ class ScrumCard extends CommonObject
 
 		$this->compatibleElementList = array();
 
-		if(!empty($conf->societe->enabled)){
+		if (!empty($conf->societe->enabled)) {
 			$this->compatibleElementList['societe'] = array(
-				'label' 	=> $langs->trans('Societe'),
-				'class' 	=> 'Societe',
+				'label' => $langs->trans('Societe'),
+				'class' => 'Societe',
 				'classfile' => 'societe/class/societe.class.php',
 			);
 		}
 
-		if(!empty($conf->resource->enabled)){
+		if (!empty($conf->resource->enabled)) {
 
 			$this->compatibleElementList['dolresource'] = array(
 				'label' => $langs->trans('Resource'),
@@ -1470,15 +1471,29 @@ class ScrumCard extends CommonObject
 		}
 
 
-		if(!empty($conf->projet->enabled)) {
+		if (!empty($conf->projet->enabled)) {
 			$this->compatibleElementList['task'] = array(
 				'label' => $langs->trans('Task'),
 				'class' => 'Task',
 				'classfile' => 'projet/class/task.class.php',
 				'overrideFkElementType' => 'integer:Task:projet/class/task.class.php:1',
 			);
+		}
 
+		if ($this->element_type == 'scrumproject_scrumtask'){
+			$this->compatibleElementList['scrumproject_scrumtask'] = array(
+				'label' => $langs->trans('ScrumTask'),
+				'class' => 'ScrumTask',
+				'classfile' => 'scrumproject/class/scrumtask.class.php',
+			);
+		}
 
+		if ($this->element_type == 'scrumproject_scrumuserstorysprint'){
+			$this->compatibleElementList['scrumproject_scrumuserstorysprint'] = array(
+				'label' => $langs->trans('ScrumUserStorySprint'),
+				'class' => 'ScrumUserStorySprint',
+				'classfile' => 'scrumproject/class/ScrumUserStorySprint.class.php',
+			);
 		}
 
 		// Call triggers for the "security events" log
@@ -1565,6 +1580,7 @@ class ScrumCard extends CommonObject
 		}
 
 		$this->elementObject = scrumProjectGetObjectByElement($this->element_type, $this->fk_element);
+
 		if($this->elementObject !== false){
 			return 1;
 		}

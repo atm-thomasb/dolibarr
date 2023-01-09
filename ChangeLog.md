@@ -7,11 +7,12 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.24
 
+- FIX : **IMPORTANT Cache fix** *09/01/2023* - 1.24.5
 - FIX : Live update fix missing display return after update *08/01/2023* - 1.24.4
 - FIX : Can't split card from kanban when overspend *07/01/2023* - 1.24.3
-- FIX : Missing substitution *04/01/2022* - 1.24.2
-- FIX : Live update for time qty in text *02/01/2022* - 1.24.1
-- NEW : Display company on card *02/01/2022* - 1.24.0
+- FIX : Missing substitution *04/01/2023* - 1.24.2
+- FIX : Live update for time qty in text *02/01/2023* - 1.24.1
+- NEW : Display company on card *02/01/2023* - 1.24.0
 - NEW : Delete cascade from kanban *20/12/2022* - 1.23.0
 
 ## Version 1.22
