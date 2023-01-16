@@ -15,9 +15,9 @@
 
 
 CREATE TABLE llx_scrumproject_scrumtask(
-	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
+	ref varchar(128) DEFAULT '(PROV)' NOT NULL,
+    prod_calc SET('count','notcount','onlyspent') NOT NULL DEFAULT 'count',
 	fk_scrum_user_story_sprint integer,
 --     fk_user_dev integer,
     label varchar(255),
@@ -33,5 +33,4 @@ CREATE TABLE llx_scrumproject_scrumtask(
 	import_key varchar(14),
     last_main_doc varchar(255),
     status smallint NOT NULL
-	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

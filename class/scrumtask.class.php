@@ -109,7 +109,6 @@ class ScrumTask extends CommonObject
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
@@ -118,6 +117,7 @@ class ScrumTask extends CommonObject
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'validate'=>'1', 'comment'=>"Reference of object"),
 		'fk_scrum_user_story_sprint' => array('type'=>'integer:ScrumUserStorySprint:scrumproject/class/scrumuserstorysprint.class.php:1', 'label'=>'ScrumUserStorySprint', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumuserstorysprint.rowid', 'validate'=>'1',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
+		'prod_calc' => array('type'=>'varchar(10)', 'label'=>'ProductivityCalcMod', 'enabled'=>'1', 'position'=>35, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'arrayofkeyval'=>array('count'=>'ProductivityCalcModCount','onlyspent'=>'ProductivityCalcModOnlySpent','notcount'=>'ProductivityCalcModNotCount',), 'validate'=>'1', 'default' => 'count'),
 		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 //		'fk_user_dev' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserDEV', 'enabled'=>'1', 'position'=>55, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
 		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>1, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
@@ -146,7 +146,7 @@ class ScrumTask extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
-	// END MODULEBUILDER PROPERTIES
+	public $prod_calc;
 
 
 	// If this object has a subtable with lines
@@ -1558,6 +1558,7 @@ class ScrumTask extends CommonObject
 		$newScrumTask = new ScrumTask($this->db);
 		$newScrumTask->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
 		$newScrumTask->description = $this->description;
+		$newScrumTask->prod_calc = $this->prod_calc;
 
 		$newScrumTask->qty_planned = $qty;
 		$newScrumTask->label = $newCardLabel;
@@ -1598,5 +1599,71 @@ class ScrumTask extends CommonObject
 //		}
 
 		return true;
+	}
+
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 *
+	 * @param int $userId
+	 * @return false|stdClass
+	 */
+	public function calcUserProgress($userId){
+		$item = new stdClass();
+		$item->sumTimeSpent = 0;
+		$item->sumTimeDone = 0;
+
+		$sumTimeSpent = $this->getTimeSpent(0);
+		if($sumTimeSpent === false){
+			return false;
+		}
+
+		$userTimeSpent = $this->getTimeSpent($userId);
+		if($userTimeSpent === false){
+			return false;
+		}
+
+		// un moyen simple de detecter si une autre personne à saisi du temps
+		if($this->qty_consumed != $userTimeSpent){
+			// il y a plus d'une personne qui à saisi
+			if($this->qty_consumed > $this->qty_planned){
+
+			}else{
+
+			}
+		}else{
+			//
+		}
+
+
+
+		return $item;
+	}
+
+
+	/**
+	 * Calcule et retourne un résumé de la progression par Utilisateur
+	 *
+	 * @param int $userId
+	 * @return false|stdClass
+	 */
+	public function getTimeSpent($userId = 0 ){
+
+		$sql = /** @lang MySQL */
+			"SELECT SUM(ptt.task_duration) sumTimeSpent  "
+			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+			." WHERE  "
+			." st_ptt.fk_scrumproject_scrumtask = ".intval($this->id)
+			. ($userId>0 ? " AND ptt.fk_user = ".$userId : '')
+		;
+
+		$obj = $this->db->getRow($sql);
+		if($obj === false){
+			$this->error = $this->db->error();
+			return false;
+		}
+
+		return $obj->sumTimeSpent;
 	}
 }

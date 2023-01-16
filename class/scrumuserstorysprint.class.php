@@ -112,7 +112,6 @@ class ScrumUserStorySprint extends CommonObject
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
@@ -120,6 +119,7 @@ class ScrumUserStorySprint extends CommonObject
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>2, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id", 'showoncombobox' => 1),
 		'fk_scrum_user_story' => array('type'=>'integer:ScrumUserStory:scrumproject/class/scrumuserstory.class.php:1', 'label'=>'ScrumUserStory', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumuserstory.rowid', 'validate'=>'1',),
 		'fk_scrum_sprint' => array('type'=>'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1', 'label'=>'ScrumSprint', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'scrumproject_scrumsprint.rowid', 'validate'=>'1',),
+		'default_prod_calc' => array('type'=>'varchar(10)', 'label'=>'DefaultProductivityCalcMod', 'enabled'=>'1', 'position'=>30, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'arrayofkeyval'=>array('count'=>'ProductivityCalcModCount','onlyspent'=>'ProductivityCalcModOnlySpent','notcount'=>'ProductivityCalcModNotCount',), 'validate'=>'1', 'default' => 'count'),
 		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
 		'qty_planned' => array('type'=>'real', 'label'=>'QtyPlanned', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_consumed' => array('type'=>'real', 'label'=>'QtyConsumed', 'enabled'=>'1', 'position'=>105, 'notnull'=>0, 'visible'=>4, 'noteditable'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
@@ -154,7 +154,7 @@ class ScrumUserStorySprint extends CommonObject
 	public $last_main_doc;
 	public $import_key;
 	public $model_pdf;
-	// END MODULEBUILDER PROPERTIES
+	public $default_prod_calc;
 
 	/**
 	 * valeur dynamique non stocké en base ,  recupérée par $this->calcTimeTaskPlanned()
@@ -1199,6 +1199,7 @@ class ScrumUserStorySprint extends CommonObject
 		$newScrumTask = new ScrumTask($this->db);
 		$newScrumTask->fk_scrum_user_story_sprint = $this->id;
 		$newScrumTask->description = $this->description;
+		$newScrumTask->prod_calc = $this->default_prod_calc;
 
 		$newScrumTask->qty_planned = $qty;
 		$newScrumTask->label = $newCardLabel;
