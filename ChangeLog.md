@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.24
 
+- FIX : Extrafields make list fail on scrumuserstory_list.php *16/01/2023* - 1.24.7
 - FIX : Disable board refresh when user drag an element *09/01/2023* - 1.24.6
 - FIX : **IMPORTANT Cache fix** *09/01/2023* - 1.24.5
 - FIX : Live update fix missing display return after update *08/01/2023* - 1.24.4

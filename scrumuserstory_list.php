@@ -264,12 +264,11 @@ $morecss = array();
 // Build and execute select
 // --------------------------------------------------------------------
 $sql = 'SELECT ';
-$TfieldsSelcet = array();
+$TFieldsSelect = array();
 foreach ($object->fields as $key => $val) {
-	$TfieldsSelcet[] = 't.'.$key;
+	$TFieldsSelect[] = 't.'.$key;
 }
-
-$sql .=  implode(',', $TfieldsSelcet);
+$sql .=  implode(',', $TFieldsSelect);
 
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
