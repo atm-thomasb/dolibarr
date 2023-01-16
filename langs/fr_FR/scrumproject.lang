@@ -334,3 +334,4 @@ ErrorOnFetchingAllScrumCardsAffectedToTask = Une erreur c'est produite lors de l
 ErrorOnFetchingAllScrumCardsAffectedToElement = Une erreur c'est produite lors de la récupération de la liste des cartes kanban associées à l'objet
 ErrorTimeOnScrumUserStorySprint = Impossible de supprimer une tâche planifiée ayant une quantité consommée
 ErrorTimeOnScrumTask = Impossible de supprimer une tâche ayant du temps consommé
+Confirmed = Confirmé

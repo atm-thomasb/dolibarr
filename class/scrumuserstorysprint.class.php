@@ -544,7 +544,7 @@ class ScrumUserStorySprint extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
-		$result = $this->updateCommon($user, $notrigger);
+		return  $this->updateCommon($user, $notrigger);
 	}
 
 	/**
