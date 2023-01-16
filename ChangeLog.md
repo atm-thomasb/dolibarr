@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.24
 
+- FIX : Submenu open behavior *16/01/2023* - 1.24.10
 - FIX : RH status langs *16/01/2023* - 1.24.9
 - FIX : Extrafields make list fail on scrumuserstory_list.php *16/01/2023* - 1.24.8
 - FIX : ScrumUserStorySprint update return value *09/01/2023* - 1.24.7

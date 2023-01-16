@@ -65,7 +65,7 @@ class modScrumProject extends DolibarrModules
 		$this->editor_url = 'www.atm-consulting.fr';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '1.24.9';
+		$this->version = '1.24.10';
 
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -459,7 +459,7 @@ class modScrumProject extends DolibarrModules
 			'titre'=>'List',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumsprintlist',
-			'url'=>'/scrumproject/scrumsprint_list.php?mainmenu=project&leftmenu=scrumsprint',
+			'url'=>'/scrumproject/scrumsprint_list.php?mainmenu=project&leftmenu=scrumsprintlist',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
@@ -484,7 +484,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprint\'',
+			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
 			'perms'=>'$user->rights->scrumproject->scrumsprint->read',
 			'target'=>'',
@@ -504,7 +504,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprint\'',
+			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
 			'perms'=>'$user->rights->scrumproject->scrumsprint->read',
 			'target'=>'',
@@ -524,7 +524,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprint\'',
+			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
 			'perms'=>'$user->rights->scrumproject->scrumsprint->read',
 			'target'=>'',
@@ -544,7 +544,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprint\'',
+			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
 			'perms'=>'$user->rights->scrumproject->scrumsprint->read',
 			'target'=>'',
@@ -559,7 +559,7 @@ class modScrumProject extends DolibarrModules
 			'type'=>'left',
 			'titre'=>'LeftMenuDeveloperAvailability',
 			'mainmenu'=>'project',
-			'leftmenu'=>'scrumsprintlist',
+			'leftmenu'=>'scrumsprintrhlist',
 			'url'=>'/scrumproject/scrumsprintuser_list.php?mainmenu=project&leftmenu=scrumsprint',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
