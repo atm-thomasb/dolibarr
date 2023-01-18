@@ -1060,9 +1060,24 @@ class ScrumCard extends CommonObject
 	 * @return void
 	 */
 	public function showTags(){
-		require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
-		$form = new Form($this->db);
-		return $form->showCategories($this->id, 'scrumcard', 1);
+		require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+
+		$cat = new Categorie($this->db);
+		$categories = $cat->containing($this->id, 'scrumcard');
+
+		$toprint = array();
+		foreach ($categories as $c) {
+			$ways = $c->print_all_ways(' &gt;&gt; ', 'none', 0, 1);
+			foreach ($ways as $way) {
+				$title = "";
+				if(strlen($c->description)>0){
+					$title = ' title="'.dol_escape_htmltag($c->description).'" ';
+				}
+				$toprint[] = '<li '.$title.' class="select2-search-choice-dolibarr noborderoncategories classfortooltip "'.($c->color ? ' style="background: #'.$c->color.';"' : ' style="background: #bbb"').'>'.$way.'</li>';
+			}
+		}
+
+		return '<div class="select2-container-multi-dolibarr"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
 	}
 
 	/**
