@@ -1482,16 +1482,32 @@ class ScrumUserStorySprint extends CommonObject
 			require_once __DIR__ . '/scrumtask.class.php';
 		}
 
+		$qtyDone = 0;
 		$sql = /** @lang MySQL */ "SELECT SUM(t.qty_planned) sumTaskPlanned FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask t "
-			." WHERE t.fk_scrum_user_story_sprint = ".intval($this->id).' AND t.status = '.ScrumTask::STATUS_DONE;
+			." WHERE t.fk_scrum_user_story_sprint = ".intval($this->id)
+			.' AND t.status = '.ScrumTask::STATUS_DONE
+			.' AND t.prod_calc = \'count\' ';
 
 		$obj = $this->db->getRow($sql);
 		if($obj){
 			$this->qty_done = doubleval($obj->sumTaskPlanned);
-			return $this->qty_done;
+			$qtyDone+=  $this->qty_done;
 		}
 
-		return 0;
+		// dans les cas des tâches calculé au temps passé
+		$sql = /** @lang MySQL */ "SELECT SUM(t.qty_consumed) sumTaskPlanned " // SUM(CASE WHEN t.qty_planned > t.qty_consumed THEN t.qty_consumed ELSE t.qty_planned END)
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask t "
+			." WHERE t.fk_scrum_user_story_sprint = ".intval($this->id)
+			.' AND t.prod_calc = \'onlyspent\' ';
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			$this->qty_done = doubleval($obj->sumTaskPlanned);
+			$qtyDone+=  $this->qty_done;
+		}
+
+
+		return $qtyDone;
 	}
 
 	/**

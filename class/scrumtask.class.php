@@ -552,6 +552,45 @@ class ScrumTask extends CommonObject
 	}
 
 	/**
+	 * Update object into database
+	 *
+	 * @param  User $user      	User that modifies
+	 * @param  bool $notrigger 	false=launch triggers after, true=disable triggers
+	 * @return int             	<0 if KO, >0 if OK
+	 */
+	public function updateCommon(User $user, $notrigger = false)
+	{
+		$error = 0 ;
+
+		$res = parent::updateCommon($user, $notrigger);
+
+		if($res < 0){
+			return $res;
+		};
+
+
+		// UPDATE PARENT SCRUM USER STORY FOR SPRINT
+		require_once __DIR__ . '/scrumuserstorysprint.class.php';
+		$scrumUserStorySprint = new ScrumUserStorySprint($this->db);
+		if ($scrumUserStorySprint->fetch($this->fk_scrum_user_story_sprint) > 0) {
+			if ($scrumUserStorySprint->updateTimeDone($user, $notrigger) < 0) {
+				$this->setErrorMsg($scrumUserStorySprint->errorsToString());
+				$error++;
+			}
+		} else {
+			$this->setErrorMsg('failFetchingScrumUserStorySprint to update qty done field');
+			$error++;
+		}
+
+		if ($error > 0) {
+			return -1;
+		}
+
+
+		return $res;
+	}
+
+	/**
 	 * object in database
 	 *
 	 * @param User $user       User that deletes
