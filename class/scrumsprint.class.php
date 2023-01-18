@@ -1742,9 +1742,31 @@ class ScrumSprint extends CommonObject
 		if(!class_exists('ScrumTask')){ require_once __DIR__ .'/scrumtask.class.php';}
 		if(!class_exists('ScrumSprintUser')){ require_once __DIR__ .'/scrumsprintuser.class.php';}
 
+//		La requette SQL génères des erreurs et trop d'aproximation
+//		$sql = /** @lang MySQL */
+//			"SELECT SUM(ptt.task_duration)  sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
+//			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+//			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+//			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+//			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+//			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
+//			." WHERE "
+//			." ptt.fk_user = ".$userId
+//			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
+//		;
+//
+//
+//		$item = $this->db->getRow($sql);
+
+		$item = new stdClass();
+		$item->sumTimeSpent = 0;
+		$item->sumTimePlanned = 0;
+		$item->sumTimeDone = 0;
+
+
+		// Extraction des tâches effectuées par le USER basé sur les temps saisis
 		$sql = /** @lang MySQL */
-			"SELECT SUM(ptt.task_duration)  sumTimeSpent, SUM(st.qty_planned) sumTimePlanned,   "
-			." SUM(CASE WHEN st.status = ".ScrumTask::STATUS_DONE." THEN st.qty_planned ELSE 0 END) AS sumTimeDone "
+			"SELECT DISTINCT USsprint.rowid USsprintId "
 			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
 			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
 			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
@@ -1754,8 +1776,32 @@ class ScrumSprint extends CommonObject
 			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
 		;
 
+		$res = $this->db->query($sql);
+		if ($res) {
+			if ($this->db->num_rows($res) > 0) {
+				while ($obj = $this->db->fetch_object($res)) {
+					// TRAITEMENT DE CHAQUE USER STORY PLANNIFIEE
+					$scrumTaskStatic = new ScrumTask($this->db);
+					$TScrumTasks = $scrumTaskStatic->fetchAll('', '', 0, 0, array('fk_scrum_user_story_sprint' => $obj->USsprintId));
+					if(is_array($TScrumTasks) && !empty($TScrumTasks)){
+						foreach ($TScrumTasks as $scrumTask){
+							$resultP = $scrumTask->calcUserProgress($userId);
+							if($resultP === false){
+								$this->error = 'Error calcUserProgress';
+								return false;
+							}
 
-		$item = $this->db->getRow($sql);
+							$item->sumTimeSpent+= $resultP->sumTimeSpent;
+							$item->sumTimePlanned+= $resultP->sumTimePlanned;
+							$item->sumTimeDone+= $resultP->sumTimeDone;
+
+						}
+					}
+				}
+			}
+		}
+
+
 
 		if($item === false){
 			$this->error= $this->db->error();
@@ -1763,7 +1809,7 @@ class ScrumSprint extends CommonObject
 		}
 
 		$item->fk_user = $userId;
-		$item->sumTimeSpent = $item->sumTimeSpent / 3600;
+		$item->sumTimeSpent = $item->sumTimeSpent;
 
 		$item->userQtyAvailability 	= 0;
 		$item->userAvailabilityRate = 0;

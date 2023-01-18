@@ -15,11 +15,11 @@
 
 
 CREATE TABLE llx_scrumproject_scrumuserstory(
-	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	fk_task integer,
     fk_user_po integer NOT NULL ,
-	business_value integer DEFAULT 50 NOT NULL, 
+    business_value integer DEFAULT 50 NOT NULL,
+    default_prod_calc SET('count','notcount','onlyspent') NOT NULL DEFAULT 'count',
 	qty real, 
 	ref varchar(128) NOT NULL, 
 	label varchar(255), 
@@ -31,5 +31,4 @@ CREATE TABLE llx_scrumproject_scrumuserstory(
     last_main_doc varchar(255),
     import_key varchar(14),
 	status smallint NOT NULL
-	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

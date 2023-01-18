@@ -200,6 +200,7 @@ function _actionAddScrumUserStoryPlanned($jsonResponse){
 	$userStorySprint->qty_planned = isset($data['qty_planned'])?doubleval($data['qty_planned']):0;
 	$userStorySprint->label = isset($data['label'])?$data['label']:$userStory->label;
 	$userStorySprint->business_value = isset($data['business_value'])?doubleval($data['business_value']):0;
+	$userStorySprint->default_prod_calc = $userStory->default_prod_calc;
 
 	if($userStorySprint->create($user) > 0){
 		$jsonResponse->result = 1;

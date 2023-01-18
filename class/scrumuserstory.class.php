@@ -110,7 +110,6 @@ class ScrumUserStory extends CommonObject
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
@@ -119,6 +118,7 @@ class ScrumUserStory extends CommonObject
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>5, 'notnull'=>1,'noteditable'=>'1', 'default'=>'(PROV)', 'visible'=>1, 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'validate'=>'1', 'comment'=>"Reference of object"),
 		'fk_task' => array('type'=>'integer:Task:projet/class/task.class.php:1', 'label'=>'Task', 'enabled'=>'1', 'position'=>10, 'notnull'=>-1, 'visible'=>-1,'noteditable'=>0,'index'=>1, 'validate'=>'1',),
 		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>15, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
+		'default_prod_calc' => array('type'=>'varchar(10)', 'label'=>'DefaultProductivityCalcMod', 'enabled'=>'1', 'position'=>30, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'arrayofkeyval'=>array('count'=>'ProductivityCalcModCount','onlyspent'=>'ProductivityCalcModOnlySpent','notcount'=>'ProductivityCalcModNotCount',), 'validate'=>'1', 'default' => 'count'),
 		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'showoncombobox'=>'0', 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
 		'qty' => array('type'=>'real', 'label'=>'StoryPoints', 'enabled'=>'1', 'position'=>45, 'notnull'=>0, 'visible'=>1, 'showoncombobox'=>'1', 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp', 'help'=>"Help text for quantity", 'validate'=>'1',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'cssview'=>'wordbreak', 'help'=>"Help text", 'showoncombobox'=>'2', 'validate'=>'1',),
@@ -143,7 +143,7 @@ class ScrumUserStory extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
-	// END MODULEBUILDER PROPERTIES
+	public $default_prod_calc;
 
 
 	// If this object has a subtable with lines

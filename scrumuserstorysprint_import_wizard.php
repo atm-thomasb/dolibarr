@@ -312,6 +312,7 @@ if (empty($reshook))
 								$scrumUserStorySprint->business_value = $scrumUserStory->business_value;
 								$scrumUserStorySprint->qty_planned = ($task->planned_workload / 60 / 60) / $step  * $step;
 								$scrumUserStorySprint->label = $task->label;
+								$scrumUserStorySprint->default_prod_calc = $scrumUserStory->default_prod_calc;
 //								$scrumUserStorySprint->description = $task->description; // ne pas copier sinon ça fait doublon
 
 								// check errors
