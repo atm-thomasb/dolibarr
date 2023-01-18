@@ -108,40 +108,44 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 			return call_user_func($callback, $action, $object, $user, $langs, $conf);
 		};
 
-		// Or you can execute some code here
-		switch ($action) {
-			case 'TASK_TIMESPENT_DELETE':
-				$this->updateTime($object);
-				break;
-			case 'TASK_TIMESPENT_MODIFY':
-				//requête pour remonter l'id scrumtask attribuée à la saisie des temps
-				$sql = /** @lang MySQL */
-					"SELECT fk_scrumproject_scrumtask as id"
-					. " FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time"
-					. " WHERE fk_projet_task_time = ".$object->timespent_id;
-				$obj  = $this->db->getRow($sql);
-				if ($obj !== false){
-					// on selectionne toutes les entrées à l'execption de celle traitée
-					$sql = /** @lang MySQL */
-					  " SELECT DISTINCT ssptt.rowid, SUM(ptt.task_duration) sum_duration FROM ".MAIN_DB_PREFIX."projet_task_time as ptt"
-					. " INNER JOIN ".MAIN_DB_PREFIX ."scrumproject_scrumtask_projet_task_time as ssptt ON ssptt.fk_projet_task_time = ptt.rowid"
-					. " WHERE "
-					. "  ptt.fk_task=".$object->id
-					. " AND ssptt.fk_scrumproject_scrumtask =".$obj->id
-					. " AND ssptt.fk_projet_task_time  != ".$object->timespent_id;
-
-					$obj2  = $this->db->getRow($sql);
-					if ($obj2 !== false) {
-						$cumulTime = $obj2->sum_duration;
-						$this->updateTime($object, $cumulTime, true);
-					}else{
-						dol_syslog("No time on obj2 in :  ".__FILE__. " on TASK_TIMESPENT_MODIFY trigger. last query : ".$this->db->lastquery);
-					}
-				}
-				break;
-		}
-
 		return 0;
+	}
+
+	/**
+	 * @param           $action
+	 * @param  ScrumSprint         $object
+	 * @param User      $user
+	 * @param Translate $langs
+	 * @param Conf      $conf
+	 * @return int
+	 */
+	public function taskTimespentDelete($action, $object, User $user, Translate $langs, Conf $conf) {
+		$scrumTask = $this->loadScrumTaskFromProjectTaskSpend($object->timespent_id);
+
+		// calcule du temps passé sans la saisie en cours
+		$scrumTask->calcTimeSpent('AND ptt.rowid != ' . $object->timespent_id);
+
+		return $scrumTask->updateTimeSpent($user, false, false);
+	}
+
+	/**
+	 * @param           $action
+	 * @param  ScrumSprint         $object
+	 * @param User      $user
+	 * @param Translate $langs
+	 * @param Conf      $conf
+	 * @return int
+	 */
+	public function taskTimespentModify($action, $object, User $user, Translate $langs, Conf $conf) {
+		$scrumTask = $this->loadScrumTaskFromProjectTaskSpend($object->timespent_id);
+
+		// calcule du temps passé sans la saisie en cours
+		$scrumTask->calcTimeSpent('AND ptt.rowid != '.$object->timespent_id);
+
+		// ajoute la saisie en cours
+		$scrumTask->qty_consumed+= round(intval($object->timespent_duration) / 3600 , 2);
+
+		return $scrumTask->updateTimeSpent($user, false, false);
 	}
 
 	/**
@@ -222,42 +226,25 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	}
 
 
-	/**
-	 * @param $object
-	 * @param $cumulTime
-	 * @param $isUpdate
-	 * @return void
-	 */
-	public function updateTime($object, $cumulTime = 0 , $isUpdate = false){
-		global $user;
 
+	/**
+	 * @param $timespentId
+	 * @return Scrumtask
+	 */
+	public function loadScrumTaskFromProjectTaskSpend($timespentId){
 		// scrumttask contient le total declarée et le total consommé
-		$sql  = ' SELECT spt.fk_scrumproject_scrumtask   as ss, Tablett.task_duration as qty ';
+		$sql  = ' SELECT spt.fk_scrumproject_scrumtask   as scrumtask_id, Tablett.task_duration as qty ';
 		$sql .= ' FROM ' .MAIN_DB_PREFIX .'scrumproject_scrumtask_projet_task_time as spt';
 		$sql .= ' INNER JOIN '.MAIN_DB_PREFIX.'projet_task_time as Tablett ON Tablett.rowid = spt.fk_projet_task_time ';
-		$sql .= ' WHERE spt.fk_projet_task_time ='. $object->timespent_id;
+		$sql .= ' WHERE spt.fk_projet_task_time ='. intval($timespentId);
 
 		$obj = $this->db->getRow($sql);
 		if ($obj){
-
-			// on declare un obj scrumtask
-			include_once __DIR__ .'/../../class/scrumtask.class.php';
-			$st = new ScrumTask($this->db);
-			$res = $st->fetch($obj->ss);
-			if ($res){
-				/// on retire le temps  via function  dans qty_consummed
-				if ($isUpdate){
-
-					$st->qty_consumed =  ( ($cumulTime  / 60 / 60 ) + ( $obj->qty / 60 / 60) );
-				}else{
-
-					$st->qty_consumed =  ($st->qty_consumed - ( $obj->qty / 60 / 60) ) ;
-				}
-				$st->update($user);
-			}
-		}elseif ($obj === false) {
-			dol_print_error($this->db);
+			include_once __DIR__ .'/../../lib/scrumproject.lib.php';
+			return scrumProjectGetObjectByElement('scrumproject_scrumtask', $obj->scrumtask_id,  0);
 		}
+
+		return false;
 	}
 
 }
