@@ -1134,6 +1134,23 @@ class ScrumCard extends CommonObject
 				$timePlanned= $elementObject->showOutputFieldQuick('qty_planned');
 				$timeDone	= $elementObject->showOutputFieldQuick('qty_done');
 
+				$QtyPlannedTitle = $langs->trans('QtyPlanned');
+				if($elementObject->default_prod_calc == 'count' ){
+					$QtyPlannedMoreClass = 'time-planned-count';
+					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['default_prod_calc']['arrayofkeyval'][$elementObject->prod_calc]);
+				}elseif($elementObject->default_prod_calc == 'onlyspent' ){
+					$timePlanned.= ' <i class="fa fa-toggle-on" aria-hidden="true"></i>';
+					$QtyPlannedMoreClass = 'time-planned-onlyspent';
+					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['default_prod_calc']['arrayofkeyval'][$elementObject->default_prod_calc]);
+					$QtyPlannedBefore = '<span class="fa fa-calendar-plus-o"></span>';
+				}elseif($elementObject->default_prod_calc == 'notcount' ){
+					$timePlanned.= ' <i class="fa fa-toggle-off" aria-hidden="true"></i>';
+					$QtyPlannedMoreClass = 'time-planned-notcount';
+					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['default_prod_calc']['arrayofkeyval'][$elementObject->default_prod_calc]);
+					$QtyPlannedBefore = '<span class="fa fa-calendar-o"></span>';
+				}
+
+
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
 					$object->class[] = '--time-consumed-error';
@@ -1158,6 +1175,23 @@ class ScrumCard extends CommonObject
 				$useTime = true;
 				$timeSpend =   $elementObject->showOutputFieldQuick('qty_consumed');
 				$timePlanned = $elementObject->showOutputFieldQuick('qty_planned');
+
+
+				$QtyPlannedTitle = $langs->trans('QtyPlanned');
+				if($elementObject->prod_calc == 'count' ){
+					$QtyPlannedMoreClass = 'time-planned-count';
+					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['prod_calc']['arrayofkeyval'][$elementObject->prod_calc]);
+				}elseif($elementObject->prod_calc == 'onlyspent' ){
+					$timePlanned.= ' <i class="fa fa-toggle-on" aria-hidden="true"></i>';
+					$QtyPlannedMoreClass = 'time-planned-onlyspent';
+					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['prod_calc']['arrayofkeyval'][$elementObject->prod_calc]);
+					$QtyPlannedBefore = '<span class="fa fa-calendar-plus-o"></span>';
+				}elseif($elementObject->prod_calc == 'notcount' ){
+					$timePlanned.= ' <i class="fa fa-toggle-off" aria-hidden="true"></i>';
+					$QtyPlannedMoreClass = 'time-planned-notcount';
+					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['prod_calc']['arrayofkeyval'][$elementObject->prod_calc]);
+					$QtyPlannedBefore = '<span class="fa fa-calendar-o"></span>';
+				}
 
 				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
 					$object->class[] = '--alert';
@@ -1210,10 +1244,14 @@ class ScrumCard extends CommonObject
 			$object->title.= '<span class="kanban-item__time-spend">';
 //			$object->title.= '<i class="fa fa-hourglass-o"></i> ';
 			$object->title.= '<span class="kanban-item__time-consumed" title="'.dol_escape_htmltag($langs->trans('QtyConsumed')).'"><span class="fa fa-hourglass-o"></span> '.$timeSpend.'</span>';
-			if($timeDone !== false){
+			if($timeDone !== false && !empty($timeDone)){
 				$object->title.= ' <span class="kanban-item__time-done" title="'.dol_escape_htmltag($langs->trans('QtyDone')).'"><span class="fa fa-check"></span> '.$timeDone.'</span>';
 			}
-			$object->title.= ' <span class="kanban-item__time-planned" title="'.dol_escape_htmltag($langs->trans('QtyPlanned')).'"><span class="fa fa-calendar-check-o"></span> '.$timePlanned.'</span>';
+
+			if(!isset($QtyPlannedBefore)){ $QtyPlannedBefore = '<span class="fa fa-calendar-check-o"></span>'; }
+			if(!isset($QtyPlannedTitle)){ $QtyPlannedTitle = $langs->trans('QtyPlanned'); }
+			if(!isset($QtyPlannedMoreClass)){ $QtyPlannedMoreClass = ''; }
+			$object->title.= ' <span class="kanban-item__time-planned '.$QtyPlannedMoreClass.'" title="'.dol_escape_htmltag($QtyPlannedTitle).'">'.$QtyPlannedBefore.' '.$timePlanned.'</span>';
 
 			$object->title.= '</span>';
 		}

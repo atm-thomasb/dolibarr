@@ -1390,7 +1390,7 @@ class ScrumUserStorySprint extends CommonObject
 			if ( !function_exists('convertFloatHourToHoursMins')) {
 				include_once __DIR__ . "/../lib/scrumproject.lib.php" ;
 			}
-			$out =  convertFloatHourToHoursMins($value,$langs) ;
+			$out = convertFloatHourToHoursMins($value,$langs) ;
 			if(is_null($out)){
 				$out = '';
 			}
