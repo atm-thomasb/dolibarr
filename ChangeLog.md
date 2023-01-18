@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.28
 
+- FIX : Tooltip display *18/01/2023* - 1.28.1
 - NEW/FIX : calcule temps *18/01/2023* - 1.28.0
 
 ## Version 1.27

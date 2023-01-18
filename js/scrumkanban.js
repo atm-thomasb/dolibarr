@@ -662,6 +662,8 @@ scrumKanban = {};
 				// recupérer les bonnes infos
 				o.jkanban.addBoards(response.data.boards);
 				o.lastBoardUpdateToken = response.data.md5Boards;
+
+				o.initToolTip($('#scrum-kanban').find('.classfortooltip'),1000);
 			}
 		});
 	}
@@ -714,6 +716,9 @@ scrumKanban = {};
 					$(preTargetQuery +'[data-field="qty_consumed"]').html(response.data.sprintInfos.qty_consumed);
 					$(preTargetQuery +'[data-field="qty_us_planned_done"]').html(response.data.sprintInfos.qty_us_planned_done);
 				}
+
+
+				o.initToolTip($('#scrum-kanban').find('.classfortooltip'),1000);
 				// refresh resume
 			}
 
@@ -1332,12 +1337,12 @@ scrumKanban = {};
 	 * initialisation de la tootip
 	 * @param element
 	 */
-	o.initToolTip = function (element){
+	o.initToolTip = function (element, displayDelay = 50){
 
 		if(!element.data("tooltipset")){
 			element.data("tooltipset", true);
 			element.tooltip({
-				show: { collision: "flipfit", effect:"toggle", delay:50 },
+				show: { collision: "flipfit", effect:"toggle", delay:displayDelay, duration: 0 },
 				hide: { delay: 50 },
 				tooltipClass: "mytooltip",
 				content: function () {
