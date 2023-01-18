@@ -1612,6 +1612,7 @@ class ScrumTask extends CommonObject
 		$item = new stdClass();
 		$item->sumTimeSpent = 0;
 		$item->sumTimeDone = 0;
+		$item->sumTimePlanned = 0;
 
 		$sumTimeSpent = $this->getTimeSpent(0);
 		if($sumTimeSpent === false){
@@ -1623,18 +1624,43 @@ class ScrumTask extends CommonObject
 			return false;
 		}
 
-		// un moyen simple de detecter si une autre personne à saisi du temps
-		if($this->qty_consumed != $userTimeSpent){
-			// il y a plus d'une personne qui à saisi
-			if($this->qty_consumed > $this->qty_planned){
-
-			}else{
-
-			}
-		}else{
-			//
+		if($this->prod_calc == 'notcount'){
+			return $item;
 		}
 
+		$item->sumTimeSpent = $userTimeSpent;
+
+		// un moyen simple de detecter si une autre personne à saisi du temps
+		if($sumTimeSpent > 0 && floatval($sumTimeSpent) > floatval($userTimeSpent)){
+			// Cas particulier il y a plus d'une personne qui à saisi
+			// TODO Idée : Ajouter une gestion des type de contact associé ex : dev (existe déjà) , help (le temps de prod ne lui est pas impacté au niveau productivité)
+
+			// Il faut répartir au prorata
+			$prorata = $userTimeSpent / $sumTimeSpent ;
+
+			if($this->prod_calc == 'onlyspent'){
+				$item->sumTimePlanned = min($this->qty_planned*$prorata, $userTimeSpent);
+				$item->sumTimeDone = $userTimeSpent;
+			}else{
+				$item->sumTimePlanned = $this->qty_planned*$prorata;
+				if($this->status == self::STATUS_DONE){
+					$item->sumTimeDone = $this->qty_planned*$prorata;
+				}
+			}
+		}
+		else{
+			// L'utilisateur est le seul a avoir saisis du temps
+
+			if($this->prod_calc == 'onlyspent'){
+				$item->sumTimePlanned = min($this->qty_planned, $userTimeSpent);
+				$item->sumTimeDone = $userTimeSpent;
+			}else{
+				$item->sumTimePlanned = $this->qty_planned;
+				if($this->status == self::STATUS_DONE){
+					$item->sumTimeDone = $this->qty_planned;
+				}
+			}
+		}
 
 
 		return $item;

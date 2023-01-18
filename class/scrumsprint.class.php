@@ -1776,18 +1776,25 @@ class ScrumSprint extends CommonObject
 			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
 		;
 
-		$res = $this->query($sql);
+		$res = $this->db->query($sql);
 		if ($res) {
-			if ($this->num_rows($res) > 0) {
-				while ($obj = $this->fetch_object($res)) {
+			if ($this->db->num_rows($res) > 0) {
+				while ($obj = $this->db->fetch_object($res)) {
 					// TRAITEMENT DE CHAQUE USER STORY PLANNIFIEE
 					$scrumTaskStatic = new ScrumTask($this->db);
 					$TScrumTasks = $scrumTaskStatic->fetchAll('', '', 0, 0, array('fk_scrum_user_story_sprint' => $obj->USsprintId));
 					if(is_array($TScrumTasks) && !empty($TScrumTasks)){
 						foreach ($TScrumTasks as $scrumTask){
+							$resultP = $scrumTask->calcUserProgress($userId);
+							if($resultP === false){
+								$this->error = 'Error calcUserProgress';
+								return false;
+							}
 
+							$item->sumTimeSpent+= $resultP->sumTimeSpent;
+							$item->sumTimePlanned+= $resultP->sumTimePlanned;
+							$item->sumTimeDone+= $resultP->sumTimeDone;
 
-							$scrumTask->calcUserProgress($userId);
 						}
 					}
 				}
