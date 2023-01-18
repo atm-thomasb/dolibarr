@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+- NEW/FIX : calcule temps *18/01/2023* - 1.28.0
 
 ## Version 1.27
 
