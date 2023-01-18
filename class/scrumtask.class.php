@@ -1618,11 +1618,13 @@ class ScrumTask extends CommonObject
 		if($sumTimeSpent === false){
 			return false;
 		}
+		$sumTimeSpent = floatval($sumTimeSpent);
 
 		$userTimeSpent = $this->getTimeSpent($userId);
 		if($userTimeSpent === false){
 			return false;
 		}
+		$userTimeSpent = floatval($userTimeSpent);
 
 		if($this->prod_calc == 'notcount'){
 			return $item;
@@ -1637,9 +1639,9 @@ class ScrumTask extends CommonObject
 
 			// Il faut répartir au prorata
 			$prorata = $userTimeSpent / $sumTimeSpent ;
-
+//var_dump(array($userId, $prorata, $userTimeSpent, $sumTimeSpent));
 			if($this->prod_calc == 'onlyspent'){
-				$item->sumTimePlanned = min($this->qty_planned*$prorata, $userTimeSpent);
+				$item->sumTimePlanned = min($this->qty_planned, $userTimeSpent);
 				$item->sumTimeDone = $userTimeSpent;
 			}else{
 				$item->sumTimePlanned = $this->qty_planned*$prorata;
@@ -1690,6 +1692,6 @@ class ScrumTask extends CommonObject
 			return false;
 		}
 
-		return $obj->sumTimeSpent;
+		return $obj->sumTimeSpent / 3600;
 	}
 }

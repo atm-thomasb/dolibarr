@@ -1809,7 +1809,7 @@ class ScrumSprint extends CommonObject
 		}
 
 		$item->fk_user = $userId;
-		$item->sumTimeSpent = $item->sumTimeSpent / 3600;
+		$item->sumTimeSpent = $item->sumTimeSpent;
 
 		$item->userQtyAvailability 	= 0;
 		$item->userAvailabilityRate = 0;
