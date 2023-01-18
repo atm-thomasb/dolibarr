@@ -1071,7 +1071,7 @@ class ScrumCard extends CommonObject
 			foreach ($ways as $way) {
 				$title = "";
 				if(strlen($c->description)>0){
-					$title = ' title="'.dol_escape_htmltag($c->description).'" ';
+					$title = ' title="'.dol_escape_htmltag($c->description,0,1).'" ';
 				}
 				$toprint[] = '<li '.$title.' class="select2-search-choice-dolibarr noborderoncategories classfortooltip "'.($c->color ? ' style="background: #'.$c->color.';"' : ' style="background: #bbb"').'>'.$way.'</li>';
 			}
