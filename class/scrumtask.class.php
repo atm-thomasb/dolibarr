@@ -1673,7 +1673,7 @@ class ScrumTask extends CommonObject
 	 * Calcule et retourne un résumé de la progression par Utilisateur
 	 *
 	 * @param int $userId
-	 * @return false|stdClass
+	 * @return false|float
 	 */
 	public function getTimeSpent($userId = 0 ){
 
