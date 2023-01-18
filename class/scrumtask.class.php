@@ -1339,11 +1339,12 @@ class ScrumTask extends CommonObject
 	 * Retourne la somme des temps saisis sur cette tache scrum
 	 * @return int
 	 */
-	public function calcTimeSpent(){
+	public function calcTimeSpent($moreSql = ''){
 
 		$sql = /** @lang MySQL */ "SELECT SUM(ptt.task_duration) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "
 			." JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "
-			." WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id);
+			." WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id)
+			." ".$moreSql;
 
 		$obj = $this->db->getRow($sql);
 		if($obj){
@@ -1376,13 +1377,13 @@ class ScrumTask extends CommonObject
 	 * @param bool $notrigger
 	 * @return int
 	 */
-	public function updateTimeSpent(User $user, $notrigger = false){
+	public function updateTimeSpent(User $user, $notrigger = false, $calcTimeSpent = true){
 		global $user;
 
 		$error = 0;
 		$this->db->begin();
 
-		$this->calcTimeSpent();
+		if($calcTimeSpent) { $this->calcTimeSpent();}
 
 		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
 
