@@ -336,8 +336,8 @@ ErrorTimeOnScrumUserStorySprint = Impossible de supprimer une tâche planifiée 
 ErrorTimeOnScrumTask = Impossible de supprimer une tâche ayant du temps consommé
 Confirmed = Confirmé
 
-DefaultProductivityCalcMod = Mode de calcule par défaut de la productivité
-ProductivityCalcMod = Mode de calcule de la productivité
+DefaultProductivityCalcMod = Mode de calcul par défaut de la productivité
+ProductivityCalcMod = Mode de calcul de la productivité
 ProductivityCalcModCount = Compter
 ProductivityCalcModOnlySpent = Compter le consommé seulement
 ProductivityCalcModNotCount = Ne pas prendre en compte
