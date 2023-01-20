@@ -109,6 +109,8 @@ scrumKanban = {};
 			o.config = Object.assign(o.config, config);
 		}
 
+		o.setBackgroundImage(o.config.kanbanBackgroundUrl);
+
 		o.newToken = o.config.token;
 
 		if(langs && typeof langs === 'object'){
@@ -118,7 +120,7 @@ scrumKanban = {};
 		o.initDarkMod();
 		o.initToolTip($('.classfortooltip'));
 		o.initAssignMeByPressingSpaceKey();
-
+		o.initParamPanel();
 
 		o.jkanban = new jKanban({
 			element : '#scrum-kanban',
@@ -733,6 +735,128 @@ scrumKanban = {};
 			}
 		});
 	}
+
+	/**
+	 * @param bgUrl
+	 * @returns {boolean}
+	 */
+	o.setBackgroundImage = function (bgUrl){
+		if(!o.isValidURL(bgUrl)){
+			return false;
+		}
+		document.documentElement.style.setProperty('--kanban-background-url', 'url('+bgUrl+')');
+		return true;
+	};
+
+
+	/**
+	 * init default behavior of oaram panel
+	 * @returns {boolean}
+	 */
+	o.initParamPanel = function (){
+		document.getElementById('kanban-option-btn').addEventListener('click', function(event) {
+			document.getElementById('param-panel-container').classList.toggle('--opened');
+		});
+
+		document.getElementById('panel-close').addEventListener('click', function(event) {
+			document.getElementById('param-panel-container').classList.toggle('--opened');
+		});
+
+		o.initUnsplashSearchOptionPanel();
+	};
+
+	/**
+	 * init default behavior of oaram panel
+	 * @returns {boolean}
+	 */
+	o.initUnsplashSearchOptionPanel= function (){
+
+		if(o.config.unsplashClientId == undefined || o.config.unsplashClientId.length == 0){
+			return;
+		}
+		//checkout superhi - made during their course
+		const formTag = document.querySelector("form.unsplash-search-form")
+		const inputTag = formTag.querySelector("input.unsplash-search-input")
+		const resultsTag = document.querySelector(".unsplash-section-results")
+
+
+		const apiUrl = "https://api.unsplash.com/search/photos?per_page=24&orientation=landscape&query="
+
+		const searchUnsplash = function(term) {
+			return fetch(apiUrl + term, {
+				method: "GET",
+				headers: {
+					"Authorization": "Client-ID 93AoN4km0dvNPar1Z_d-EVQR8AyOldBpGT_ScFB3uGA"
+				}
+			})
+				.then(response => response.json())
+				.then(data => {
+					if(data.errors != undefined){
+						o.setEventMessage(data.errors[0], false);
+					}
+					else{
+						//format unsplash results to suit our needs
+						return data.results.map(result => {
+							return {
+								imageThumb: result.urls.thumb,
+								imageSrc: result.urls.regular + '&w=1920',
+								width: result.width,
+								height: result.height,
+								title: (result.description || "Untitled"),
+								name: result.user.name,
+								backgroundColor: (result.color || "#cccccc") + "33"
+							}
+						})
+					}
+				})
+		}
+
+		//add results to page
+		const addResults = function (results) {
+			//remove all loading tags
+			resultsTag.innerHTML = ""
+
+			//loop over each indiv result and add to resultsTag
+			results.forEach(result => {
+				resultsTag.innerHTML = resultsTag.innerHTML + `
+					<div class="unsplash-single-result">
+						<div class="toggle-kanban-background unsplash-single-result-image" style="background-color: ${result.backgroundColor}" data-background-url="${result.imageSrc}">
+							<img  src="${result.imageThumb}">
+						</div>	
+						<span class="unsplash-single-result__title">${result.title}</span>
+						<p> by ${result.name} - ${result.width} x ${result.height} </p>
+					</div>
+				`
+			})
+		}
+
+		//when we submit the form, get the info from input
+		formTag.addEventListener("submit", function(event){
+			// stop the form from going to the usual next page
+			event.preventDefault();
+
+			//get info from input
+			const searchTerm = inputTag.value
+
+			searchUnsplash(searchTerm).then(results => {
+				addResults(results)
+			})
+		})
+
+		$(document).on('click',".toggle-kanban-background", function() {
+			let sendData = {
+				'fk_kanban': o.config.fk_kanban,
+				'field_key' : 'background_url',
+				'field_value' : $(this).attr('data-background-url')
+			};
+			o.callKanbanInterface('setKanbanValue', sendData, function(response){
+				if(response.result > 0) {
+					o.setBackgroundImage(sendData.field_value);
+				}
+			});
+		});
+
+	};
 
 	o.callKanbanInterface = function (action, sendData = {}, callBackFunction){
 		let ajaxData = {
@@ -1891,5 +2015,9 @@ scrumKanban = {};
 		}
 	}
 
+	o.isValidURL = function (string) {
+		var res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+		return (res !== null)
+	};
 
 })(scrumKanban);

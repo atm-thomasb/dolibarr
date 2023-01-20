@@ -230,14 +230,15 @@ $formSetup->newItem('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND')->setAsYesNo();
 
 
 
+$item = $formSetup->newItem('SP_KANBAN_UNSPLASH_API_KEY');
+$item->helpText = $langs->trans('SP_KANBAN_UNSPLASH_API_KEY_HELP');
 
 
 
 
 
 
-
-/**
+	/**
  * ------------------------
  * OPTIONS EXPERIMENTALES
  * ------------------------

@@ -23,7 +23,7 @@ CREATE TABLE llx_scrumproject_scrumcard(
 	fk_scrum_kanbanlist integer NOT NULL,
     fk_element int(11) DEFAULT '0',
     element_type varchar(255)  DEFAULT NULL,
-	description text, 
+	description text,
 	note_public text, 
 	note_private text, 
 	date_creation datetime NOT NULL, 

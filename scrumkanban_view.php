@@ -169,7 +169,9 @@ $confToJs = array(
 	'fk_kanban'					=> $object->id,
 	'token'						=> newToken(),
 	'maxScrumTaskStepQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 0),
-	'maxScrumTaskMaxQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0)
+	'maxScrumTaskMaxQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0),
+	'kanbanBackgroundUrl'		=> filter_var($object->background_url, FILTER_VALIDATE_URL) ? $object->background_url : '',
+	'unsplashClientId'			=> getDolGlobalString('SP_KANBAN_UNSPLASH_API_KEY', '')
 );
 
 $jsLangs = array(
@@ -261,9 +263,9 @@ $jsLangs = array(
 
 
 						// get US done in this kanban
-						print '<span class="nav-button" id="kanban-resume-btn"  >';
+						print '<button class="nav-button" id="kanban-resume-btn"  >';
 						print '<span class="fa fa-dashboard" ></span>';
-						print '</span>';
+						print '</button>';
 
 					}else{
 						print '<span id="load-scrum-sprint-error" class="error" >'.$langs->trans('LoadingScrumSprintFail').'</span>';
@@ -271,14 +273,89 @@ $jsLangs = array(
 				}
 				?>
 					<!-- TODO : déplacer le bouton en dehors de #kanban-header-scrum-sprint-resume -->
-					<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
+					<button id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></button>
 				</span>
 
 
 				<span id="light-bulb-toggle" class="nav-button"><i class="fa fa-lightbulb" ></i></span>
+				<span id="kanban-option-btn" class="nav-button"><i class="fa fa-wrench"></i></span>
 			</nav>
 		</header>
 		<div id="scrum-kanban"></div>
+	</section>
+	<section id="param-panel-container">
+		<div class="panel-header">
+			<button id="panel-close" title="<?php print $langs->trans('ClosePanel'); ?>" ><i class="fa fa-times"></i></button>
+			<span class="panel-title"><?php print $langs->trans('Parameters'); ?></span>
+		</div>
+		<div class="panel-body">
+
+		<?php
+			$unslpashClientId = getDolGlobalString('SP_KANBAN_UNSPLASH_API_KEY', '');
+			if(strlen($unslpashClientId) > 0){  ?>
+			<!-- Start UnSpash search widget-->
+			<div class="option-box">
+				<form class="unsplash-search-form">
+					<input class="unsplash-search-input" type="search" name="search" placeholder="<?php print $langs->trans('SearchBackgroundOnUnsplash'); ?>" autocomplete="off">
+				</form>
+
+				<div class="unsplash-section-results">
+					<div class="unsplash-single-result">
+						<div class="unsplash-single-result-image">
+							<!-- image goes here -->
+						</div>
+						<span class="sapunsplash-single-result__title" ><span class="loading"></span></span>
+						<p><span class="loading"></span></p>
+					</div>
+
+					<div class="unsplash-single-result">
+						<div class="unsplash-single-result-image">
+							<!-- image goes here -->
+						</div>
+						<span class="sapunsplash-single-result__title" ><span class="loading"></span></span>
+						<p><span class="loading"></span></p>
+					</div>
+
+					<div class="unsplash-single-result">
+						<div class="unsplash-single-result-image">
+							<!-- image goes here -->
+						</div>
+						<span class="sapunsplash-single-result__title" ><span class="loading"></span></span>
+						<p><span class="loading"></span></p>
+					</div>
+
+					<div class="unsplash-single-result">
+						<div class="unsplash-single-result-image">
+							<!-- image goes here -->
+						</div>
+						<span class="sapunsplash-single-result__title" ><span class="loading"></span></span>
+						<p><span class="loading"></span></p>
+					</div>
+
+					<div class="unsplash-single-result">
+						<div class="unsplash-single-result-image">
+							<!-- image goes here -->
+						</div>
+						<span class="sapunsplash-single-result__title" ><span class="loading"></span></span>
+						<p><span class="loading"></span></p>
+					</div>
+
+					<div class="unsplash-single-result">
+						<div class="unsplash-single-result-image">
+							<!-- image goes here -->
+						</div>
+						<span class="sapunsplash-single-result__title" ><span class="loading"></span></span>
+						<p><span class="loading"></span></p>
+					</div>
+
+				</div>
+			</div>
+			<!-- Start UnSpash search widget-->
+		<?php } ?>
+
+		</div>
+		<div class="panel-footer">
+		</div>
 	</section>
 	<script>
 

@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+- NEW : Unspash background search for kanban *20/01/2022* - 1.30.0
+- NEW : Kanban background selection *20/01/2022* - 1.29.0
 
 ## Version 1.28
 

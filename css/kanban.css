@@ -41,6 +41,8 @@
 			0 100%,
 			0% var(--edge-size)
 	);
+
+	--gallery-grid-min-width: 100px;
 }
 
 
@@ -659,7 +661,7 @@ nav.top-nav-bar{
 }
 
 .scrumkanban-page{
-	background-image: url("../img/backgrounds/purple-flower.jpg");
+	background-image: var(--kanban-background-url, url("../img/backgrounds/purple-flower.jpg"));/* --kanban-background-url is set by js*/
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -1184,4 +1186,157 @@ html[data-theme-color-scheme="dark"] div.ui-tooltip.mytooltip{
 html[data-theme-color-scheme="dark"] dialog.kanban-dialog .select2-container{
 	--dialog-text-color: #656565;
 	color: var(--dialog-text-color);
+}
+
+
+#param-panel-container{
+	display: none;
+}
+
+#param-panel-container.--opened{
+	--panel-padding : 30px;
+	--panel-text-color : #6c6c6c;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: min-content 1fr min-content;
+	gap: 0;
+	grid-template-areas:
+    "panel-header"
+    "panel-body"
+    "panel-footer";
+	align-content: space-between;
+	align-items: stretch;
+
+	width: min(400px, 100vw);
+	position: fixed;
+	top: 0px;
+	right: 0px;
+	height: 100%;
+	background: white;
+	z-index: 999;
+	box-shadow: 0 0 20px 0 rgba(0,0,0,0.5);
+	color: var(--panel-text-color);
+
+	animation: panel-slide-right  0.2s forwards;
+}
+
+
+@keyframes panel-slide-right {
+	0% {
+		transform: translate(100%, 0);
+	}
+	100% {
+		transform: translate(0, 0);
+	}
+}
+
+
+.panel-header {
+	grid-area: panel-header;
+	padding: var(--panel-padding);
+	border-bottom: 1px solid #e7e7e7;
+	text-align: center;
+}
+
+.panel-body {
+	grid-area: panel-body;
+	padding: var(--panel-padding);
+	overflow: auto;
+}
+.panel-footer {
+	grid-area: panel-footer;
+	padding: var(--panel-padding);
+}
+
+#panel-close{
+	position: absolute;
+	left: 21px;
+	top: 21px;
+	cursor: pointer;
+	border: none;
+	padding: 7px 7px;
+	margin: 0;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 2em;
+	line-height: 1em;
+	border-radius: var(--box-border-radius);
+	background-color: transparent;
+	color: var(--panel-text-color);
+}
+
+.panel-title{
+	font-weight: 100;
+	font-size: 1.3em;
+}
+
+/*
+* UNSPLASH PANEL
+*/
+
+/* this stupid query selection is to bypass shitty dolibarr css definition*/
+input.unsplash-search-input, body .panel-body input.unsplash-search-input:focus:not(.what-ever-not-exist-thanks-dolibarr):not(.button):not(.buttonwebsite):not(.select2-search__field):not(#top-bookmark-search-input):not(.search_component_input):not(.input-search-takepos) {
+	box-sizing: border-box;
+	width: calc(100% - 32px);
+	border: none !important;
+	background-color: #eeeeee;
+	padding: 16px 32px 16px 32px;
+	margin : 0 16px;
+	outline: none;
+	color: #4b4b4b;
+
+	border-radius : 50px !important;
+}
+
+input.unsplash-search-input::placeholder {
+	color: #6c6c6c;
+}
+
+
+.unsplash-section-results {
+	display:  grid;
+	grid-template-columns: repeat(auto-fill, minmax(var(--gallery-grid-min-width), 1fr));
+	grid-gap: 16px 16px;
+	padding: 16px;
+	font-size: 12px;
+}
+
+div.unsplash-single-result div.unsplash-single-result-image {
+	background-color: #eeeeee;
+	height: var(--gallery-grid-min-width);
+	margin: 0 0 8px 0;
+	padding: 0px;
+}
+div.unsplash-single-result div.toggle-kanban-background{
+	cursor: pointer;
+}
+
+
+div.unsplash-single-result img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	animation: fadein 1s 0.5s both;
+}
+
+div.unsplash-single-result span.loading {
+	background-color: #eeeeee;
+	height: 12px;
+	width: 50%;
+	display: inline-block;
+}
+
+div.unsplash-single-result p span.loading {
+	width: 30%;
+}
+
+div.unsplash-single-result .unsplash-single-result__title {
+	display: block;
+	white-space:nowrap;
+	font-weight: 700;
+	text-overflow: ellipsis;
+	max-height: 1.5em;
+	font-size:12px;
+	overflow:hidden;
 }
