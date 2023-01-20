@@ -154,7 +154,7 @@ class ScrumUserStorySprint extends CommonObject
 	public $last_main_doc;
 	public $import_key;
 	public $model_pdf;
-	public $default_prod_calc;
+	public $default_prod_calc = 'count';
 
 	/**
 	 * valeur dynamique non stocké en base ,  recupérée par $this->calcTimeTaskPlanned()

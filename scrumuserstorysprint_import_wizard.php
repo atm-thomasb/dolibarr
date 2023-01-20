@@ -287,6 +287,7 @@ if (empty($reshook))
 					foreach ($scrumUserStory->fields as $key => $val){
 						if (!$error && !empty($val['validate']) && is_callable(array($scrumUserStory, 'validateField'))) {
 							if (!$scrumUserStory->validateField($scrumUserStory->fields, $key, $scrumUserStory->{$key})) {
+								setEventMessage($langs->trans($scrumUserStory->fields[$key]['label']) . ' : ' .$scrumUserStory->getFieldError($key), 'errors');
 								$error++;
 							}
 						}
@@ -319,6 +320,7 @@ if (empty($reshook))
 								foreach ($scrumUserStorySprint->fields as $key => $val){
 									if (!$error && !empty($val['validate']) && is_callable(array($scrumUserStorySprint, 'validateField'))) {
 										if (!$scrumUserStorySprint->validateField($scrumUserStorySprint->fields, $key, $scrumUserStorySprint->{$key})) {
+											setEventMessage($langs->trans($scrumUserStorySprint->fields[$key]['label']) . ' : ' .$scrumUserStorySprint->getFieldError($key), 'errors');
 											$error++;
 										}
 									}
@@ -331,27 +333,9 @@ if (empty($reshook))
 										$successPlannedUs++;
 									}
 								}
-								else{
-									if(!empty($scrumUserStorySprint->validateFieldsErrors)){
-										foreach ($scrumUserStorySprint->validateFieldsErrors as $field => $errorMsg){
-											setEventMessage($langs->trans($scrumUserStorySprint->fields[$field]['label']) . ' : ' .$errorMsg, 'errors');
-										}
-									}else{
-										setEventMessage($langs->trans('ErrorValidateScrumUserStoryValues'), 'errors');
-									}
-								}
 							}
 						}else{
 							setEventMessage($langs->trans('ErrorCreateScrumUserStory'). ' : '.$scrumUserStory->errorsToString(), 'errors');
-						}
-					}
-					else{
-						if(!empty($scrumUserStory->validateFieldsErrors)){
-							foreach ($scrumUserStory->validateFieldsErrors as $field => $errorMsg){
-								setEventMessage($langs->trans($scrumUserStory->fields[$field]['label']) . ' : ' .$errorMsg, 'errors');
-							}
-						}else{
-							setEventMessage($langs->trans('ErrorValidateScrumUserStoryValues'), 'errors');
 						}
 					}
 				}

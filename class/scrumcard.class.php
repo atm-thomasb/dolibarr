@@ -1667,12 +1667,18 @@ class ScrumCard extends CommonObject
 	 * Permet de spliter la carte en 2
 	 * @param double $qty la quantité de la nouvelle carte
 	 * @param string $newCardLabel le libelle de la nouvelle carte
-	 * @return void
+	 * @return bool
 	 */
 	public function splitCard($qty, $newCardLabel, User $user){
 		$this->fetchElementObject();
 		if(is_callable(array($this->elementObject, 'splitCard'))){
-			return $this->elementObject->splitCard( $qty, $newCardLabel, $this, $user);
+			if($this->elementObject->splitCard( $qty, $newCardLabel, $this, $user)){
+				return true;
+			}else{
+				$this->error = $this->elementObject->error;
+				$this->errors = $this->elementObject->errors;
+				return false;
+			}
 		}else{
 			$this->error = 'splitCard not supported';
 			return false;

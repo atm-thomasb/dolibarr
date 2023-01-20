@@ -143,7 +143,7 @@ class ScrumUserStory extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
-	public $default_prod_calc;
+	public $default_prod_calc = 'count';
 
 
 	// If this object has a subtable with lines

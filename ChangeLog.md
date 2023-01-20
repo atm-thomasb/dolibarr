@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.28
 
+- FIX : Split scrum card position *18/01/2023* - 1.28.4
 - FIX : Project Time update/delete by trigger *18/01/2023* - 1.28.3
 - FIX : Time done update *18/01/2023* - 1.28.2
 - FIX : Tooltip display *18/01/2023* - 1.28.1
