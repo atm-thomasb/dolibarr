@@ -171,7 +171,7 @@ $confToJs = array(
 	'maxScrumTaskStepQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 0),
 	'maxScrumTaskMaxQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0),
 	'kanbanBackgroundUrl'		=> filter_var($object->background_url, FILTER_VALIDATE_URL) ? $object->background_url : '',
-	'unsplashClientId'			=> getDolGlobalString('SP_KANBAN_UNSPLASH_API_KEY', '')
+	'unsplashClientId'			=> preg_replace("/\s+/", "", getDolGlobalString('SP_KANBAN_UNSPLASH_API_KEY', ''))
 );
 
 $jsLangs = array(
