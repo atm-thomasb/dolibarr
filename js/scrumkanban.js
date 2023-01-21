@@ -786,7 +786,7 @@ scrumKanban = {};
 			return fetch(apiUrl + term, {
 				method: "GET",
 				headers: {
-					"Authorization": "Client-ID 93AoN4km0dvNPar1Z_d-EVQR8AyOldBpGT_ScFB3uGA"
+					"Authorization": "Client-ID " + o.config.unsplashClientId
 				}
 			})
 				.then(response => response.json())
