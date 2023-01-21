@@ -122,6 +122,16 @@ scrumKanban = {};
 		o.initAssignMeByPressingSpaceKey();
 		o.initParamPanel();
 
+		/* sur click sur un element de type focus, done le focus à la cible */
+		$(document).on('click',"[data-focus-target]", function() {
+			let target = $(this).attr('data-focus-target');
+			if($(target).length > 0 ){
+				setTimeout(function(){
+					$(target).focus();
+				}, 200);
+			}
+		})
+
 		o.jkanban = new jKanban({
 			element : '#scrum-kanban',
 			gutter  : '5px',
@@ -776,7 +786,7 @@ scrumKanban = {};
 		}
 		//checkout superhi - made during their course
 		const formTag = document.querySelector("form.unsplash-search-form")
-		const inputTag = formTag.querySelector("input.unsplash-search-input")
+		const inputTag = formTag.querySelector("#unsplash-search-input")
 		const resultsTag = document.querySelector(".unsplash-section-results")
 
 

@@ -345,9 +345,12 @@ ProductivityCalcModCount = Compter
 ProductivityCalcModOnlySpent = Compter le consommé seulement
 ProductivityCalcModNotCount = Ne pas prendre en compte
 
+KanbanBackgroundSetup = Réglage de l'image de fond
 KanbanBackgroundImageUrl = Url de l'image de fond du kanban
 SearchBackgroundOnUnsplash = Chercher sur unsplash...
 ClosePanel = Fermer
+KanbanInfos = Informations sur le kanban
+CreatedOn = Créé le
 
 ReadScrumKanban = Voir kanban
 WriteScrumKanban = Modifier kanban

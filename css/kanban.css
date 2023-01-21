@@ -1179,8 +1179,11 @@ html[data-theme-color-scheme="dark"] .kanban-list-label-field.live-edit:focus{
 }
 
 html[data-theme-color-scheme="dark"] div.ui-tooltip.mytooltip{
-	--tooltipfontcolor : #fff;
+	--tooltipfontcolor : #d5d5d5;
 	--tooltipbgcolor : hsla(0, 0%, 20%, 0.9);
+	color: var(--tooltipfontcolor) !important;
+	min-width: auto;
+
 }
 
 html[data-theme-color-scheme="dark"] dialog.kanban-dialog .select2-container{
@@ -1271,12 +1274,44 @@ html[data-theme-color-scheme="dark"] dialog.kanban-dialog .select2-container{
 	font-size: 1.3em;
 }
 
+details.option-box{
+	margin:  0 calc(var(--panel-padding) * -1);
+	border-top: 1px solid #ededed;
+}
+details.option-box:last-child{
+	border-bottom: 1px solid #ededed;
+}
+
+details.option-box > summary{
+	padding : 10px var(--panel-padding);
+	cursor: pointer;
+}
+
+/* THE MAGIC 🧙‍♀️ */
+details.option-box[open] > summary{
+	border-bottom: 1px solid #ededed;
+}
+
+details summary::-webkit-details-marker {
+	display:none;
+}
+
+
+.option-box-content{
+	padding : var(--panel-padding) var(--panel-padding) 60px var(--panel-padding) ;
+}
+
+.panel-infos:not(:empty){
+	margin-bottom: 30px;
+	line-height: 1.8em;
+}
+
 /*
 * UNSPLASH PANEL
 */
 
 /* this stupid query selection is to bypass shitty dolibarr css definition*/
-input.unsplash-search-input, body .panel-body input.unsplash-search-input:focus:not(.what-ever-not-exist-thanks-dolibarr):not(.button):not(.buttonwebsite):not(.select2-search__field):not(#top-bookmark-search-input):not(.search_component_input):not(.input-search-takepos) {
+input#unsplash-search-input, body .panel-body input#unsplash-search-input:focus:not(.what-ever-not-exist-thanks-dolibarr):not(.button):not(.buttonwebsite):not(.select2-search__field):not(#top-bookmark-search-input):not(.search_component_input):not(.input-search-takepos) {
 	box-sizing: border-box;
 	width: calc(100% - 32px);
 	border: none !important;
@@ -1289,7 +1324,7 @@ input.unsplash-search-input, body .panel-body input.unsplash-search-input:focus:
 	border-radius : 50px !important;
 }
 
-input.unsplash-search-input::placeholder {
+input#unsplash-search-input::placeholder {
 	color: #6c6c6c;
 }
 
