@@ -1218,7 +1218,7 @@ class ScrumKanban extends CommonObject
 		if($key == 'background_url')
 		{
 			if ($this->validateField($this->fields, $key, $fieldValue)) {
-				$out.= '<div title="'.dol_escape_htmltag($fieldValue).'" style="background: url(\''.dol_escape_htmltag($fieldValue).'\'); max-height:64px; min-height: 32px; max-width: 150px;background-repeat: no-repeat; background-size: cover; " ></div>';
+				$out.= '<div title="'.dol_escape_htmltag($fieldValue).'" style="background: url(\''.dol_escape_htmltag($fieldValue).'\'); max-height:64px; min-height: 32px; max-width: 150px;background-repeat: no-repeat; background-size: cover; background-position: center; " ></div>';
 			}else{
 				$out.= '<span class="error classfortooltip" title="'.dol_escape_htmltag($fieldValue).'" >'.$this->getFieldError($key).'</span>';
 			}
