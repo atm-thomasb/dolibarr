@@ -356,3 +356,4 @@ DeleteScrumKanban = Supprimer kanban
 RequireValidFieldToModify = Champ invalide
 RequireFieldKey = Field key required
 FieldNotFoundInObject = Champs inexistant %s
+WrongUrl = Url invalid
