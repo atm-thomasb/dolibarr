@@ -278,7 +278,7 @@ $jsLangs = array(
 
 
 				<span id="light-bulb-toggle" class="nav-button"><i class="fa fa-lightbulb" ></i></span>
-				<span id="kanban-option-btn" class="nav-button"><i class="fa fa-wrench"></i></span>
+				<span id="kanban-option-btn" class="nav-button"><i class="fa fa-bars"></i></span>
 			</nav>
 		</header>
 		<div id="scrum-kanban"></div>
@@ -286,7 +286,7 @@ $jsLangs = array(
 	<section id="param-panel-container">
 		<div class="panel-header">
 			<button id="panel-close" title="<?php print $langs->trans('ClosePanel'); ?>" ><i class="fa fa-times"></i></button>
-			<span class="panel-title"><?php print $langs->trans('Parameters'); ?></span>
+			<span class="panel-title"><?php print $langs->trans('KanbanSlidePanelTitle'); ?></span>
 		</div>
 		<div class="panel-body">
 

@@ -351,6 +351,7 @@ SearchBackgroundOnUnsplash = Chercher sur unsplash...
 ClosePanel = Fermer
 KanbanInfos = Informations sur le kanban
 CreatedOn = Créé le
+KanbanSlidePanelTitle = Infos & paramètres
 
 ReadScrumKanban = Voir kanban
 WriteScrumKanban = Modifier kanban
