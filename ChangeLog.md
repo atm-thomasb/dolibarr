@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## Version 1.32
+
 - NEW : Visual color display for project planning *23/01/2022* - 1.32.0
 - NEW : Unspash background search for kanban *20/01/2022* - 1.31.0
 - NEW : Kanban background selection *20/01/2022* - 1.30.0  
