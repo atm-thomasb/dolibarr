@@ -104,3 +104,11 @@ button.ajax-action{
 .sprint-resume-text-section{
 	margin: 20px 0;
 }
+
+
+.danger-over-planned td{
+	background: #bd7e7e80;
+}
+.success-planned td{
+	background: #b7e77780;
+}

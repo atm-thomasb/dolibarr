@@ -428,8 +428,10 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 // Output page
 // --------------------------------------------------------------------
-
-llxHeader('', $title, $help_url);
+$arrayofcss = array(
+	'scrumproject/css/scrumproject.css'
+);
+llxHeader('', $title, $help_url, '', 0, 0, '', $arrayofcss );
 
 
 
@@ -677,8 +679,16 @@ while ($i < ($limit ? min($num, $limit) : $num))
 	 * @var Project $project
 	 */
 
+	$qtyAvailable = $object->getQtyAvailable();
+	$lineClass = '';
+	if($qtyAvailable == 0){
+		$lineClass = 'success-planned';
+	}elseif($qtyAvailable < 0){
+		$lineClass = 'danger-over-planned';
+	}
+
 	// Show here line of result
-	print '<tr class="oddeven">';
+	print '<tr class="oddeven '.$lineClass.'">';
 
 	if (!empty($arrayfields['p.title']['checked'])) {
 		print '<td class="nowrap">';
