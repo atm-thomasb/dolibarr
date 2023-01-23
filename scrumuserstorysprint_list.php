@@ -738,20 +738,25 @@ foreach ($object->fields as $key => $val) {
 		}
 		print '</td>';
 	}
-}
-$key = 'societe';
-if (!empty($arrayfields[$key]['checked'])) {
-	print '<td class="liste_titre">';
-	print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
-	print '</td>';
+
+
+	if ($key == "fk_scrum_sprint") {
+		$key = 'societe';
+		if (!empty($arrayfields[$key]['checked'])) {
+			print '<td class="liste_titre ' . $key . '">';
+			print '<input type="text" class="flat maxwidth75" name="search_' . $key . '" value="' . dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '') . '">';
+			print '</td>';
+		}
+
+		$key = 'project_title';
+		if (!empty($arrayfields[$key]['checked'])) {
+			print '<td class="liste_titre">';
+			print '<input type="text" class="flat maxwidth75" name="search_' . $key . '" value="' . dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '') . '">';
+			print '</td>';
+		}
+	}
 }
 
-$key = 'project_title';
-if (!empty($arrayfields[$key]['checked'])) {
-	print '<td class="liste_titre">';
-	print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
-	print '</td>';
-}
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
 
