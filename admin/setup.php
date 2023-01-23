@@ -277,8 +277,8 @@ if ( versioncompare(explode('.', DOL_VERSION), array(15)) < 0 && $action == 'upd
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 
 if ($action == 'updateMask') {
-	$maskconst = GETPOST('maskconstBom', 'alpha');
-	$maskvalue = GETPOST('maskScrumSprint', 'alpha');
+	$maskconst = GETPOST('maskconst', 'alpha');
+	$maskvalue = GETPOST('maskvalue', 'alpha');
 
 	if ($maskconst) {
 		$res = dolibarr_set_const($db, $maskconst, $maskvalue, 'chaine', 0, '', $conf->entity);
