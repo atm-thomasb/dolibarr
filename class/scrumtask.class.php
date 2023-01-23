@@ -146,7 +146,7 @@ class ScrumTask extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
-	public $prod_calc;
+	public $prod_calc = 'count';
 
 
 	// If this object has a subtable with lines
@@ -235,7 +235,7 @@ class ScrumTask extends CommonObject
 	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
 	 * @return int             <0 if KO, Id of created object if OK
 	 */
-	public function create(User $user, $notrigger = false)
+	public function create(User $user, $notrigger = false, $params = array())
 	{
 		$resultcreate = $this->createCommon($user, $notrigger);
 
@@ -270,9 +270,20 @@ class ScrumTask extends CommonObject
 						$card->fk_element = $this->id;
 						$card->element_type = $this->element;
 						$card->fk_scrum_kanbanlist = $backLogList->id;
+						if(isset($params['ScrumCard'])  && !empty($params['ScrumCard']['fk_scrum_kanbanlist'])) {
+							if(!$card->validateField($card->fields, 'fk_scrum_kanbanlist', $params['ScrumCard']['fk_scrum_kanbanlist'])){
+								$this->error = 'Fail creating scrumcard : '.$card->getFieldError('fk_scrum_kanbanlist');
+								return -1;
+							}
+
+							$card->fk_scrum_kanbanlist = $params['ScrumCard']['fk_scrum_kanbanlist'];
+						}
 
 						//Gestion du rang
 						$rank = $card->getCardRankByElement($backLogList->id, 'scrumproject_scrumuserstorysprint', $this->fk_scrum_user_story_sprint);
+						if(isset($params['ScrumCard'])  && !empty($params['ScrumCard']['fk_rank'])) {
+							$rank = $params['ScrumCard']['fk_rank'];
+						}
 						if($rank > 0) {
 							$newRank = $rank++;
 							$card->updateAllCardRankAfterRank($newRank);
@@ -1571,9 +1582,6 @@ class ScrumTask extends CommonObject
 		if(!class_exists('ScrumTask')){
 			require_once __DIR__ . '/scrumtask.class.php';
 		}
-		if(!class_exists('ScrumCard')){
-			require_once __DIR__ . '/scrumcard.class.php';
-		}
 
 		$qty = doubleval($qty);
 
@@ -1582,15 +1590,20 @@ class ScrumTask extends CommonObject
 		// Vérification de la liaison entre ScrumCard et ScrumTask
 		if($scrumCard->element_type != $this->element || $scrumCard->fk_element != $this->id ){
 			$this->error = 'Error : scrum card not linked';
-			$this->errors[] = $this->error;
 			return false;
 		}
 
 
+		if(getDolGlobalInt('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND', 0) == 0){
+			$qty_remain_for_split = $this->qty_planned;
+		}
+		elseif($this->qty_planned - $this->qty_consumed > 0){
+			$qty_remain_for_split = $this->qty_planned - $this->qty_consumed;
+		}
+
 		// Vérification du temps restant
-		if($qty > $this->qty_planned - $this->qty_consumed ){
+		if($qty > $qty_remain_for_split ){
 			$this->error = 'Too much quantity';
-			$this->errors[] = $this->error;
 			return false;
 		}
 
@@ -1604,10 +1617,16 @@ class ScrumTask extends CommonObject
 		$newScrumTask->label = $newCardLabel;
 		if(empty($newCardLabel) || is_array($newCardLabel)){ $newScrumTask->label = $this->label;}
 
-		$resCreate = $newScrumTask->create($user);
+		$createParams = array(
+			'ScrumCard'=> array(
+				'fk_scrum_kanbanlist' => $scrumCard->fk_scrum_kanbanlist,
+				'fk_rank'=> $scrumCard->fk_rank,
+			)
+		);
+
+		$resCreate = $newScrumTask->create($user, false, $createParams);
 		if($resCreate<0){
 			$this->error = $newScrumTask->error;
-			$this->errors = array_merge($this->errors, $newScrumTask->errors);
 			return false;
 		}
 
@@ -1616,7 +1635,6 @@ class ScrumTask extends CommonObject
 		$resUpdate = $this->update($user);
 		if($resUpdate<1){
 			$this->error = 'Error updating ScrumTask : '.$this->error;
-			$this->errors = array_merge($this->errors, $this->errors);
 			return false;
 		}
 

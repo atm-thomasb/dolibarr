@@ -910,9 +910,7 @@ function _actionSplitScrumCard($jsonResponse){
 		}
 
 		if(is_array($newCardLabel)){ $newCardLabel = '';}
-
-		$res = $scrumCard->splitCard($qty, $newCardLabel, $user);
-		if($res<=0){
+		if(!$scrumCard->splitCard($qty, $newCardLabel, $user)){
 			$jsonResponse->msg =  $scrumCard->errorsToString();
 			$errors++;
 		}
