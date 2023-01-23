@@ -65,7 +65,7 @@ class modScrumProject extends DolibarrModules
 		$this->editor_url = 'www.atm-consulting.fr';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '1.28.4';
+		$this->version = '1.31.0';
 
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -379,6 +379,26 @@ class modScrumProject extends DolibarrModules
 		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete scrum cards'; // Permission label
 		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+
+		/**
+		 * DROIT POUR KANBAN
+		 */
+
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'ReadScrumKanban'; // Permission label
+		$this->rights[$r][4] = 'scrumkanban'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'WriteScrumKanban'; // Permission label
+		$this->rights[$r][4] = 'scrumkanban'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
+		$r++;
+		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
+		$this->rights[$r][1] = 'DeleteScrumKanban'; // Permission label
+		$this->rights[$r][4] = 'scrumkanban'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
 		$r++;
 

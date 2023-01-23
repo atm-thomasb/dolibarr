@@ -65,6 +65,9 @@ if (empty($user->rights->scrumproject->scrumcard->read)) {
 elseif($action === 'addKanbanList') {
 	_actionAddList($jsonResponse);
 }
+elseif($action === 'setKanbanValue') {
+	_actionSetKanbanValue($jsonResponse);
+}
 elseif ($action === 'getAllBoards') {
 	_actionGetAllBoards($jsonResponse);
 }
@@ -191,6 +194,81 @@ function _actionAddList($jsonResponse){
 	else{
 		$jsonResponse->result = 0;
 		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanbanList->errorsToString();
+		return false;
+	}
+}
+
+/**
+ * @param JsonResponse $jsonResponse
+ * @return bool|void
+ */
+function _actionSetKanbanValue($jsonResponse){
+	global $user, $langs, $db;
+
+    if (empty($user->rights->scrumproject->scrumkanban->write)) {
+        $jsonResponse->msg = $langs->trans('NotEnoughRights');
+        $jsonResponse->result = 0;
+        return false;
+    }
+
+	$data = GETPOST("data", "array");
+	$validate = new Validate($db, $langs);
+
+	if(empty($data['fk_kanban'])){
+		$jsonResponse->msg = 'Need Kanban Id';
+		return false;
+	}
+
+	$fk_kanban = $data['fk_kanban'];
+
+	if(!$validate->isNumeric($fk_kanban)){
+		$jsonResponse->msg = $validate->error;
+		return false;
+	}
+
+	if(!empty($data['field_Key'])){
+		$jsonResponse->msg = $langs->trans('RequireFieldKey');
+		return false;
+	}
+
+	$fieldKey = $data['field_key'];
+
+
+	if(!isset($data['field_value'])){
+		$jsonResponse->msg = $langs->trans('RequireFieldValue');
+		return false;
+	}
+
+	$fieldValue = $data['field_value'];
+
+	/**
+	 * @var ScrumKanban $kanban
+	 */
+	$kanban = scrumProjectGetObjectByElement('scrumproject_scrumkanban', $fk_kanban);
+	if(!$kanban){
+		$jsonResponse->msg = $langs->trans('RequireValidExistingElement');
+		return false;
+	}
+
+	if(in_array($fieldKey, array('background_url', 'label')) && !isset($kanban->fields[$fieldKey])){
+		$jsonResponse->msg = $langs->trans('RequireValidFieldToModify');
+		return false;
+	}
+
+	$kanban->{$fieldKey} = $fieldValue;
+
+	if(!$kanban->validateField($kanban->fields, $fieldKey, $fieldValue)) {
+		$jsonResponse->msg = $kanban->getFieldError($fieldKey);
+		return false;
+	}
+
+	if($kanban->update($user) > 0){
+		$jsonResponse->result = 1;
+		return true;
+	}
+	else{
+		$jsonResponse->result = 0;
+		$jsonResponse->msg = $langs->trans('CreateError') . ' : ' . $kanban->errorsToString();
 		return false;
 	}
 }

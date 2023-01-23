@@ -46,6 +46,9 @@ SP_ENABLE_KANBAN = Activer le menu kanban permettant l'usage de kanban hors spri
 SP_DEFAULT_NB_WORKING_HOURS_BY_DAY = Nombres d'heures par défaut pour une journée de travail
 SP_DEFAULT_NB_WORKING_HOURS_BY_DAY_HELP = Sera utilisé pour les calculs de certaines planifications et les alertes liées aux saisies des temps sur le sprint
 
+SP_KANBAN_UNSPLASH_API_KEY = Clé API pour la recherche d'image de fond avec Unsplash
+SP_KANBAN_UNSPLASH_API_KEY_HELP = Aller sur <a target="_blank" href="https://unsplash.com/">https://unsplash.com/</a> et récupérer la "Access Key" de votre application.
+
 SP_SETUPTITLE_KANBAN = Options du kanban
 SP_KANBAN_DISPLAY_STATUS_MODE = Mode d'affichage des statuts sur les cartes
 DoNotDisplayStatus = Ne pas afficher
@@ -341,3 +344,20 @@ ProductivityCalcMod = Mode de calcul de la productivité
 ProductivityCalcModCount = Compter
 ProductivityCalcModOnlySpent = Compter le consommé seulement
 ProductivityCalcModNotCount = Ne pas prendre en compte
+
+KanbanBackgroundSetup = Réglage de l'image de fond
+KanbanBackgroundImageUrl = Url de l'image de fond du kanban
+SearchBackgroundOnUnsplash = Chercher sur unsplash...
+ClosePanel = Fermer
+KanbanInfos = Informations sur le kanban
+CreatedOn = Créé le
+KanbanSlidePanelTitle = Infos & paramètres
+
+ReadScrumKanban = Voir kanban
+WriteScrumKanban = Modifier kanban
+DeleteScrumKanban = Supprimer kanban
+
+RequireValidFieldToModify = Champ invalide
+RequireFieldKey = Field key required
+FieldNotFoundInObject = Champs inexistant %s
+WrongUrl = Url invalid

@@ -103,7 +103,7 @@ $permissiontoadd = $user->rights->scrumproject->scrumsprint->write;
 $object = new ScrumKanban($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
-$hookmanager->initHooks(array('scrumkanbancard', 'globalcard')); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks(array('scrumkanbanview')); // Note that conf->hooks_modules contains array
 
 // Load object
 $accessForbiden = true;
@@ -169,7 +169,9 @@ $confToJs = array(
 	'fk_kanban'					=> $object->id,
 	'token'						=> newToken(),
 	'maxScrumTaskStepQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 0),
-	'maxScrumTaskMaxQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0)
+	'maxScrumTaskMaxQty'		=> getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0),
+	'kanbanBackgroundUrl'		=> filter_var($object->background_url, FILTER_VALIDATE_URL) ? $object->background_url : '',
+	'unsplashClientId'			=> preg_replace("/\s+/", "", getDolGlobalString('SP_KANBAN_UNSPLASH_API_KEY', ''))
 );
 
 $jsLangs = array(
@@ -261,9 +263,9 @@ $jsLangs = array(
 
 
 						// get US done in this kanban
-						print '<span class="nav-button" id="kanban-resume-btn"  >';
+						print '<button class="nav-button" id="kanban-resume-btn"  >';
 						print '<span class="fa fa-dashboard" ></span>';
-						print '</span>';
+						print '</button>';
 
 					}else{
 						print '<span id="load-scrum-sprint-error" class="error" >'.$langs->trans('LoadingScrumSprintFail').'</span>';
@@ -271,14 +273,92 @@ $jsLangs = array(
 				}
 				?>
 					<!-- TODO : déplacer le bouton en dehors de #kanban-header-scrum-sprint-resume -->
-					<span id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></span>
+					<button id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></button>
 				</span>
 
 
 				<span id="light-bulb-toggle" class="nav-button"><i class="fa fa-lightbulb" ></i></span>
+				<span id="kanban-option-btn" class="nav-button"><i class="fa fa-bars"></i></span>
 			</nav>
 		</header>
 		<div id="scrum-kanban"></div>
+	</section>
+	<section id="param-panel-container">
+		<div class="panel-header">
+			<button id="panel-close" title="<?php print $langs->trans('ClosePanel'); ?>" ><i class="fa fa-times"></i></button>
+			<span class="panel-title"><?php print $langs->trans('KanbanSlidePanelTitle'); ?></span>
+		</div>
+		<div class="panel-body">
+
+			<?php
+			$reshook = $hookmanager->executeHooks('kanbanParamPanelBefore', $confToJs, $object, $action); // Note that $action and $object may have been modified by some hooks
+			print $hookmanager->resPrint;
+			?>
+
+			<details class="option-box">
+				<summary class="option-box-title" data-focus-target="#unsplash-search-input"><?php print $langs->trans('KanbanInfos'); ?></summary>
+				<div class="option-box-content">
+
+					<div class="panel-infos">
+						<?php print $object->showOutputFieldQuick('ref'); ?><br/>
+						<?php print $object->showOutputFieldQuick('label'); ?><br/>
+						<?php print $langs->trans('CreatedOn') ?> : <span class="fa fa-calendar"></span> <?php print $object->showOutputFieldQuick('date_creation'); ?>
+					</div>
+
+					<div class="panel-infos">
+						<?php print $object->showOutputFieldQuick('description'); ?>
+					</div>
+
+					<div class="panel-infos">
+						<?php print $object->note_public; ?>
+					</div>
+
+					<div class="panel-infos">
+						<?php print $object->note_private; ?>
+					</div>
+				</div>
+			</details>
+
+		<?php
+			$unslpashClientId = getDolGlobalString('SP_KANBAN_UNSPLASH_API_KEY', '');
+			if(strlen($unslpashClientId) > 0){  ?>
+			<!-- Start UnSpash search widget-->
+			<details class="option-box">
+				<summary class="option-box-title" data-focus-target="#unsplash-search-input"><?php print $langs->trans('KanbanBackgroundSetup'); ?></summary>
+				<div class="option-box-content">
+					<form class="unsplash-search-form">
+						<input id="unsplash-search-input" type="search" name="search" placeholder="<?php print $langs->trans('SearchBackgroundOnUnsplash'); ?>" autocomplete="off">
+					</form>
+
+					<div class="unsplash-section-results">
+
+						<?php for($i = 0; $i< 6; $i++) { ?>
+						<div class="unsplash-single-result">
+							<div class="unsplash-single-result-image">
+								<!-- image goes here -->
+							</div>
+							<span class="sapunsplash-single-result__title" ><span class="loading"></span></span>
+							<p><span class="loading"></span></p>
+						</div>
+						<?php } ?>
+					</div>
+				</div>
+			</details>
+			<!-- Start UnSpash search widget-->
+		<?php } ?>
+
+
+		<?php
+			$reshook = $hookmanager->executeHooks('kanbanParamPanelAfter', $confToJs, $object, $action); // Note that $action and $object may have been modified by some hooks
+			print $hookmanager->resPrint;
+		?>
+		</div>
+		<div class="panel-footer">
+			<?php
+			$reshook = $hookmanager->executeHooks('kanbanParamPanelFooter', $confToJs, $object, $action); // Note that $action and $object may have been modified by some hooks
+			print $hookmanager->resPrint;
+			?>
+		</div>
 	</section>
 	<script>
 
