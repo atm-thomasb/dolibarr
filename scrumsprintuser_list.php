@@ -487,7 +487,7 @@ if($fk_sprint > 0){
 		$morehtmlref .= $sprint->showOutputField($sprint->fields['fk_team'], 'fk_team',$sprint->fk_team);
 		$morehtmlref .= '</div>';
 
-		dol_banner_tab($sprint, 'fk_sprint', $linkback, 1, 'ref', 'ref', $morehtmlref);
+		dol_banner_tab($sprint, 'fk_sprint', $linkback, 1, 'rowid', 'ref', $morehtmlref);
 
 
 		$object->fields['fk_scrum_sprint']['visible'] = 0;
