@@ -123,7 +123,7 @@ class mod_scrumsprint_advanced extends ModeleNumRefScrumSprint
 	/**
 	 * 	Return next free value
 	 *
-	 *  @param  Object		$object		Object we need next value for
+	 *  @param  ScrumSprint		$object		Object we need next value for
 	 *  @return string      			Value if KO, <0 if KO
 	 */
 	public function getNextValue($object)
@@ -140,6 +140,22 @@ class mod_scrumsprint_advanced extends ModeleNumRefScrumSprint
 			$this->error = 'NotConfigured';
 			return 0;
 		}
+
+
+		$teamRef = '';
+		if($object->fk_team>0){
+			if(!class_exists('UserGroup')){
+				require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+			}
+
+			$group = new UserGroup($object->db);
+			if($group->fetch($object->fk_team)>0){
+				$teamRef = $group->name;
+			}
+		}
+
+		$mask = str_replace("{TEAM}", $teamRef, $mask);
+
 
 		$date = $object->date;
 
