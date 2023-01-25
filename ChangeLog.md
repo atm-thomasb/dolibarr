@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.32
 
+- FIX : Missing team info in sprint ref generation *24/01/2022* - 1.32.4
 - FIX : HR banner nav *23/01/2022* - 1.32.3
 - FIX : Us planned list filters *23/01/2022* - 1.32.2
 - FIX : Setup ref numbering for objects *23/01/2022* - 1.32.1
