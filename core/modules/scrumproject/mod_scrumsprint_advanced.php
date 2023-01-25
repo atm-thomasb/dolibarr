@@ -72,6 +72,9 @@ class mod_scrumsprint_advanced extends ModeleNumRefScrumSprint
 		$texte .= '<table class="nobordernopadding" width="100%">';
 
 		$tooltip = $langs->trans("GenericMaskCodes", $langs->transnoentities("ScrumSprint"), $langs->transnoentities("ScrumSprint"));
+		$tooltip .= '<strong>{GROUPID}</strong> '.$langs->transnoentities("RefNumbUserGroupId");
+		$tooltip .= '<strong>{GROUPSHORT}</strong> '.$langs->transnoentities("RefNumbUserGroupShortLabel").'<br/>';
+		$tooltip .= '<strong>{GROUPEXTRACT}</strong> '.$langs->transnoentities("RefNumbUserGroupExtractLabel").'<br/>';
 		$tooltip .= $langs->trans("GenericMaskCodes2");
 		$tooltip .= $langs->trans("GenericMaskCodes3");
 		$tooltip .= $langs->trans("GenericMaskCodes4a", $langs->transnoentities("ScrumSprint"), $langs->transnoentities("ScrumSprint"));
@@ -123,7 +126,7 @@ class mod_scrumsprint_advanced extends ModeleNumRefScrumSprint
 	/**
 	 * 	Return next free value
 	 *
-	 *  @param  Object		$object		Object we need next value for
+	 *  @param  ScrumSprint		$object		Object we need next value for
 	 *  @return string      			Value if KO, <0 if KO
 	 */
 	public function getNextValue($object)
@@ -140,6 +143,29 @@ class mod_scrumsprint_advanced extends ModeleNumRefScrumSprint
 			$this->error = 'NotConfigured';
 			return 0;
 		}
+
+
+		$teamRef = $teamShort = $teamMatch = '';
+		if($object->fk_team>0){
+			if(!class_exists('UserGroup')){
+				require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+			}
+
+			$group = new UserGroup($object->db);
+			if($group->fetch($object->fk_team)>0){
+				$teamRef = $group->id;
+				$teamShort = substr($group->name, 0, 2);
+				$teamMatchExtract = preg_match('/\[(.*)\]/', $group->name, $teamMatches);
+				if($teamMatchExtract !== false && is_array($teamMatches) && count($teamMatches) > 1 && isset($teamMatches[1])){
+					$teamMatch = substr($teamMatches[1], 0, 10);
+				}
+			}
+		}
+
+		$mask = str_replace("{GROUPID}", $teamRef, $mask);
+		$mask = str_replace("{GROUPSHORT}", $teamShort, $mask);
+		$mask = str_replace("{GROUPEXTRACT}", $teamMatch, $mask);
+
 
 		$date = $object->date;
 

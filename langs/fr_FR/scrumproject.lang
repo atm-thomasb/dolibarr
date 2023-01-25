@@ -345,6 +345,10 @@ ProductivityCalcModCount = Compter
 ProductivityCalcModOnlySpent = Compter le consommé seulement
 ProductivityCalcModNotCount = Ne pas prendre en compte
 
+RefNumbUserGroupId = Id du groupe utilisateur
+RefNumbUserGroupShortLabel = 2 premier chars du groupe utilisateur
+RefNumbUserGroupExtractLabel = Extraction des 10 premiers caractères entre [crochets] dans le libellé du groupe utilisateur
+
 KanbanBackgroundSetup = Réglage de l'image de fond
 KanbanBackgroundImageUrl = Url de l'image de fond du kanban
 SearchBackgroundOnUnsplash = Chercher sur unsplash...
