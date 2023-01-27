@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Version 1.32
 
+- FIX : Add alert when missing mandatory setup conf for kanban  *27/01/2022* - 1.32.5
 - FIX : Missing team info in sprint ref generation *24/01/2022* - 1.32.4
 - FIX : HR banner nav *23/01/2022* - 1.32.3
 - FIX : Us planned list filters *23/01/2022* - 1.32.2

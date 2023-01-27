@@ -3,3 +3,5 @@ NewCard = Nouvelle carte
 KanbanBackLogList = Backlog
 KanbanDoneList = Done
 UserStoryPlannedDone = Quantité livrable (Somme des users stories réalisées)
+
+MissingSetupStepConfiguration = Étape de configuration du module manquante
