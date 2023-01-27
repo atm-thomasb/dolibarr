@@ -120,12 +120,15 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	 * @return int
 	 */
 	public function taskTimespentDelete($action, $object, User $user, Translate $langs, Conf $conf) {
+
 		$scrumTask = $this->loadScrumTaskFromProjectTaskSpend($object->timespent_id);
+		if($scrumTask){
+			// calcule du temps passé sans la saisie en cours
+			$scrumTask->calcTimeSpent('AND ptt.rowid != ' . $object->timespent_id);
+			return $scrumTask->updateTimeSpent($user, false, false);
+		}
 
-		// calcule du temps passé sans la saisie en cours
-		$scrumTask->calcTimeSpent('AND ptt.rowid != ' . $object->timespent_id);
-
-		return $scrumTask->updateTimeSpent($user, false, false);
+		return 0;
 	}
 
 	/**
