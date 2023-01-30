@@ -1191,7 +1191,7 @@ class ScrumSprint extends CommonObject
 
 			$countObj = $this->db->getRow("SELECT SUM(qty_velocity) qty_velocity FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($this->id));
 			if($countObj){
-				if($countObj->qty_velocity != $value){
+				if(round(floatval($countObj->qty_velocity),2) != round(floatval($this->qty_velocity),2)){
 					$tooltip = '<strong>' . $langs->trans('SumOfDeveloperAvailabilityIsDifferent') . '</strong></br>';
 					$tooltip.= $langs->trans('SumOfDeveloperAvailability') . ' : ' .price($countObj->qty_velocity).'</br>';
 					$tooltip.= $langs->trans('QtyVelocity') . ' : ' .price($value);

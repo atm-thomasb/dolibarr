@@ -1375,3 +1375,10 @@ div.unsplash-single-result .unsplash-single-result__title {
 	font-size:12px;
 	overflow:hidden;
 }
+
+@media only screen and (max-width: 1000px)  {
+	#kanban-header-scrum-sprint-resume{
+		display: none;
+	}
+}
+

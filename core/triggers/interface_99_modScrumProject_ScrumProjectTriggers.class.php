@@ -120,12 +120,15 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	 * @return int
 	 */
 	public function taskTimespentDelete($action, $object, User $user, Translate $langs, Conf $conf) {
+
 		$scrumTask = $this->loadScrumTaskFromProjectTaskSpend($object->timespent_id);
+		if($scrumTask){
+			// calcule du temps passé sans la saisie en cours
+			$scrumTask->calcTimeSpent('AND ptt.rowid != ' . $object->timespent_id);
+			return $scrumTask->updateTimeSpent($user, false, false);
+		}
 
-		// calcule du temps passé sans la saisie en cours
-		$scrumTask->calcTimeSpent('AND ptt.rowid != ' . $object->timespent_id);
-
-		return $scrumTask->updateTimeSpent($user, false, false);
+		return 0;
 	}
 
 	/**
@@ -137,15 +140,19 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	 * @return int
 	 */
 	public function taskTimespentModify($action, $object, User $user, Translate $langs, Conf $conf) {
+
 		$scrumTask = $this->loadScrumTaskFromProjectTaskSpend($object->timespent_id);
+		if($scrumTask){
+			// calcule du temps passé sans la saisie en cours
+			$scrumTask->calcTimeSpent('AND ptt.rowid != '.$object->timespent_id);
 
-		// calcule du temps passé sans la saisie en cours
-		$scrumTask->calcTimeSpent('AND ptt.rowid != '.$object->timespent_id);
+			// ajoute la saisie en cours
+			$scrumTask->qty_consumed+= round(intval($object->timespent_duration) / 3600 , 2);
 
-		// ajoute la saisie en cours
-		$scrumTask->qty_consumed+= round(intval($object->timespent_duration) / 3600 , 2);
+			return $scrumTask->updateTimeSpent($user, false, false);
+		}
 
-		return $scrumTask->updateTimeSpent($user, false, false);
+		return 0;
 	}
 
 	/**

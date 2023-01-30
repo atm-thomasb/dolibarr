@@ -282,42 +282,47 @@ scrumKanban = {};
 
 
 		// Gestion du scroll auto
-		o.jkanban.drake.on("shadow", function(el, container, source) {
-			let isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
-			if(isSmoothScrollSupported) {
+		if(window[o.jkanban.drake] instanceof Function){
+			o.jkanban.drake.on("shadow", function(el, container, source) {
+				let isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style;
+				if(isSmoothScrollSupported) {
 
-				let edgeOffsetContainer = container.offsetWidth;
-				let edgeOffsetYItem = el.offsetHeight;
+					let edgeOffsetContainer = container.offsetWidth;
+					let edgeOffsetYItem = el.offsetHeight;
 
 
-				if(el.nextSibling != undefined &&  window.innerHeight - edgeOffsetYItem * 2 < o.lastMouseY ){
-					el.nextSibling.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
-				}else if(el.previousSibling != undefined && o.lastMouseY < edgeOffsetYItem * 3){
-					el.previousSibling.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+					if(el.nextSibling != undefined &&  window.innerHeight - edgeOffsetYItem * 2 < o.lastMouseY ){
+						el.nextSibling.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+					}else if(el.previousSibling != undefined && o.lastMouseY < edgeOffsetYItem * 3){
+						el.previousSibling.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+					}
+
+					// Déplacement X entre les listes
+					if(container.nextSibling != undefined && window.innerWidth - edgeOffsetContainer < o.lastMouseX  && o.mouseDirrectionX > 0) {
+						container.nextSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+					}else if(container.previousSibling != undefined && o.lastMouseX < edgeOffsetContainer  && o.mouseDirrectionX < 0 ) {
+						container.previousSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+					}
 				}
+			});
+		}
 
-				// Déplacement X entre les listes
-				if(container.nextSibling != undefined && window.innerWidth - edgeOffsetContainer < o.lastMouseX  && o.mouseDirrectionX > 0) {
-					container.nextSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
-				}else if(container.previousSibling != undefined && o.lastMouseX < edgeOffsetContainer  && o.mouseDirrectionX < 0 ) {
-					container.previousSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+
+
+		if(window[o.jkanban.drakeBoard] instanceof Function) {
+			o.jkanban.drakeBoard.on("shadow", function (el, container, source) {
+				let isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style
+				if (isSmoothScrollSupported) {
+					let edgeOffsetContainer = el.offsetWidth;
+
+					if (el.nextSibling != undefined && window.innerWidth - edgeOffsetContainer < o.lastMouseX) {
+						el.nextSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
+					} else if (el.previousSibling != undefined && o.lastMouseX < edgeOffsetContainer) {
+						el.previousSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
+					}
 				}
-			}
-		});
-
-
-		o.jkanban.drakeBoard.on("shadow", function(el, container, source) {
-			let isSmoothScrollSupported = 'scrollBehavior' in document.documentElement.style
-			if(isSmoothScrollSupported) {
-				let edgeOffsetContainer = el.offsetWidth;
-
-				if(el.nextSibling != undefined && window.innerWidth - edgeOffsetContainer < o.lastMouseX ) {
-					el.nextSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
-				}else if(el.previousSibling != undefined && o.lastMouseX < edgeOffsetContainer ) {
-					el.previousSibling.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
-				}
-			}
-		});
+			});
+		}
 
 		// Get all board
 		o.getAllBoards();

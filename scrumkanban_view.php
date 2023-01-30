@@ -179,6 +179,19 @@ $jsLangs = array(
 	'NewCard' => $langs->trans('NewCard')
 );
 
+
+// Display error message when conf is missing
+$confsToCheck = array(
+	'SP_MAX_SCRUM_TASK_STEP_QTY', 'SP_MAX_SCRUM_TASK_MAX_QTY', 'SP_DEFAULT_NB_WORKING_HOURS_BY_DAY'
+);
+
+foreach ($confsToCheck as $confToCheck){
+	$val = getDolGlobalString($confToCheck, 0);
+	if(empty($val)){
+		setEventMessage($langs->trans('MissingSetupStepConfiguration').' : '.$langs->trans($confToCheck), 'errors');
+	}
+}
+
 ?>
 <body id="mainbody" class="scrumkanban-page">
 	<section id="kanban" >
@@ -272,10 +285,9 @@ $jsLangs = array(
 					}
 				}
 				?>
-					<!-- TODO : déplacer le bouton en dehors de #kanban-header-scrum-sprint-resume -->
-					<button id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></button>
 				</span>
 
+				<button id="addkanbancol" class="nav-button"><i class="fa fa-plus-circle" ></i> <?php print $langs->trans('NewList'); ?></button>
 
 				<span id="light-bulb-toggle" class="nav-button"><i class="fa fa-lightbulb" ></i></span>
 				<span id="kanban-option-btn" class="nav-button"><i class="fa fa-bars"></i></span>
@@ -386,4 +398,5 @@ $jsLangs = array(
 </body>
 
 <?php
+llxFooter();
 $db->close();
