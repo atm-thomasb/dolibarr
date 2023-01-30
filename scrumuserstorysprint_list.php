@@ -503,7 +503,7 @@ if($fk_us > 0){
 		$scrumUserStory = new ScrumUserStory($db);
 		if($scrumUserStory->fetch($fk_us)>0){
 			$head = scrumuserstoryPrepareHead($scrumUserStory);
-			print dol_get_fiche_head($head, 'scrumuserstorysprint', $langs->trans("Workstation"), -1, $scrumUserStory->picto);
+			print dol_get_fiche_head($head, 'scrumuserstorysprint', $langs->trans("ScrumUserStorySprint"), -1, $scrumUserStory->picto);
 		}
 
 }
