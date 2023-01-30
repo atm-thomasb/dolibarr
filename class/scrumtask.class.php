@@ -854,7 +854,6 @@ class ScrumTask extends CommonObject
 
 		$res = parent::setStatusCommon($user, $status, $notrigger, $triggercode);
 		if($res>0){
-q
 			// UPDATE PARENT SCRUM USER STORY FOR SPRINT
 			require_once __DIR__ . '/scrumuserstorysprint.class.php';
 
