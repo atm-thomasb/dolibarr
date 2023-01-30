@@ -515,6 +515,10 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
+if(!empty($fk_scrum_user_story_sprint)){
+	print '<input type="hidden" name="fk_scrum_user_story_sprint" value="'.intval($fk_scrum_user_story_sprint).'">';
+}
+
 
 $newScrumTaskUrl = dol_buildpath('/scrumproject/scrumtask_card.php', 1).'?action=create';
 $backtopageAdd = $_SERVER['PHP_SELF'];
