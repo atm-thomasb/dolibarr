@@ -83,6 +83,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
 // load scrumproject libraries
 require_once __DIR__.'/class/scrumuserstorysprint.class.php';
 require_once __DIR__.'/lib/scrumproject.lib.php';
+require_once __DIR__.'/lib/scrumproject_scrumuserstory.lib.php';
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -500,8 +501,11 @@ llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 
 if($fk_us > 0){
 		$scrumUserStory = new ScrumUserStory($db);
-		$head = scrumuserstoryPrepareHead($scrumUserStory);
-		print dol_get_fiche_head($head, 'card', $langs->trans("Workstation"), -1, $scrumUserStory->picto);
+		if($scrumUserStory->fetch($fk_us)>0){
+			$head = scrumuserstoryPrepareHead($scrumUserStory);
+			print dol_get_fiche_head($head, 'scrumuserstorysprint', $langs->trans("Workstation"), -1, $scrumUserStory->picto);
+		}
+
 }
 elseif($project) {
 	$head = project_prepare_head($project);
@@ -541,7 +545,7 @@ if($project){
 }
 
 if($fk_us > 0){
-	$param .= '&fk_project='.intval($fk_us).' ';
+	$param .= '&fk_us='.intval($fk_us).' ';
 }
 
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
@@ -652,6 +656,9 @@ print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 if($fk_project>0){
 	print '<input type="hidden" name="fk_project" value="'.$fk_project.'">';
+}
+if($fk_us > 0){
+	print '<input type="hidden" name="fk_us" value="'.intval($fk_us).'">';
 }
 
 $listBtn = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
