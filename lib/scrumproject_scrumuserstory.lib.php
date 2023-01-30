@@ -76,6 +76,11 @@ function scrumuserstoryPrepareHead($object)
 	$head[$h][2] = 'agenda';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/scrumproject/scrumuserstorysprint_list.php", 1).'?fk_us='.$object->id;
+	$head[$h][1] = $langs->trans("ScrumUserStorySprint");
+	$head[$h][2] = 'scrumuserstorysprint';
+	$h++;
+
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
 	//$this->tabs = array(

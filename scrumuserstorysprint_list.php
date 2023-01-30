@@ -102,6 +102,7 @@ $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always ''
 
 $id = GETPOST('id', 'int');
 
+$fk_us = GETPOST('fk_us', 'int');
 $fk_project = GETPOST('fk_project', 'int');
 $project = scrumProjectGetObjectByElement('project', $fk_project);
 
@@ -362,6 +363,11 @@ if($fk_project > 0){
 	$sql .= ' AND pt.fk_projet = '.intval($fk_project).' ';
 }
 
+if($fk_us > 0){
+	$sql .= ' AND us.rowid = '.intval($fk_us).' ';
+}
+
+
 foreach ($search as $key => $val) {
 
 	if($key == 'project_title' && $search[$key] != ''){
@@ -492,8 +498,12 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 // --------------------------------------------------------------------
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 
-
-if($project) {
+if($fk_us > 0){
+		$scrumUserStory = new ScrumUserStory($db);
+		$head = scrumuserstoryPrepareHead($scrumUserStory);
+		print dol_get_fiche_head($head, 'card', $langs->trans("Workstation"), -1, $scrumUserStory->picto);
+}
+elseif($project) {
 	$head = project_prepare_head($project);
 	print dol_get_fiche_head($head, 'projectTasksPlanning', $langs->trans("Project"), -1, ($project->public ? 'projectpub' : 'project'));
 
@@ -528,6 +538,10 @@ $arrayofselected = is_array($toselect) ? $toselect : array();
 $param = '';
 if($project){
 	$param = '&fk_project='.$project->id;
+}
+
+if($fk_us > 0){
+	$param .= '&fk_project='.intval($fk_us).' ';
 }
 
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
