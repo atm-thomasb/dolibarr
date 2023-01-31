@@ -854,20 +854,18 @@ class ScrumTask extends CommonObject
 
 		$res = parent::setStatusCommon($user, $status, $notrigger, $triggercode);
 		if($res>0){
-			if($this->status = ScrumTask::STATUS_DONE){
-				// UPDATE PARENT SCRUM USER STORY FOR SPRINT
-				require_once __DIR__ . '/scrumuserstorysprint.class.php';
+			// UPDATE PARENT SCRUM USER STORY FOR SPRINT
+			require_once __DIR__ . '/scrumuserstorysprint.class.php';
 
-				$scrumUserStorySprint = new ScrumUserStorySprint($this->db);
-				if($scrumUserStorySprint->fetch($this->fk_scrum_user_story_sprint)>0){
-					if($scrumUserStorySprint->updateTimeDone($user, $notrigger)<0){
-						$this->setErrorMsg($scrumUserStorySprint->errorsToString());
-						$error++;
-					}
-				}else{
-					$this->setErrorMsg('failFetchingScrumUserStorySprint to update qty done field');
+			$scrumUserStorySprint = new ScrumUserStorySprint($this->db);
+			if($scrumUserStorySprint->fetch($this->fk_scrum_user_story_sprint)>0){
+				if($scrumUserStorySprint->updateTimeDone($user, $notrigger)<0){
+					$this->setErrorMsg($scrumUserStorySprint->errorsToString());
 					$error++;
 				}
+			}else{
+				$this->setErrorMsg('failFetchingScrumUserStorySprint to update qty done field');
+				$error++;
 			}
 		}
 

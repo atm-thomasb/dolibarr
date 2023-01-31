@@ -76,6 +76,24 @@ function scrumuserstoryPrepareHead($object)
 	$head[$h][2] = 'agenda';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/scrumproject/scrumuserstorysprint_list.php", 1).'?fk_us='.$object->id;
+	$head[$h][1] = $langs->trans("ScrumUserStorySprint");
+	$nbPlanned = $object->getCountUserStoryPlanned();
+	if ($nbPlanned > 0) {
+		$head[$h][1] .= '<span class="badge marginleftonlyshort">'.$nbPlanned.'</span>';
+	}
+	$head[$h][2] = 'scrumuserstorysprint';
+	$h++;
+
+	$head[$h][0] = dol_buildpath("/scrumproject/scrumtask_list.php", 1).'?fk_us='.$object->id;
+	$head[$h][1] = $langs->trans("ScrumTasks");
+	$nbPlanned = $object->getCountTasks();
+	if ($nbPlanned > 0) {
+		$head[$h][1] .= '<span class="badge marginleftonlyshort">'.$nbPlanned.'</span>';
+	}
+	$head[$h][2] = 'scrumtask';
+	$h++;
+
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
 	//$this->tabs = array(

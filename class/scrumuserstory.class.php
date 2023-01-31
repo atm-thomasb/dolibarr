@@ -1061,6 +1061,38 @@ class ScrumUserStory extends CommonObject
 
 
 	/**
+	 * Compte le nombre de user story plannifiées
+	 * @return int
+	 */
+	public function getCountUserStoryPlanned(){
+
+		$sql = 'SELECT COUNT(rowid) nb_planned FROM '.$this->db->prefix().'scrumproject_scrumuserstorysprint WHERE fk_scrum_user_story = '.$this->id;
+		$result = $this->db->getRow($sql);
+		if($result == false){
+			$this->setErrorMsg($this->db->error());
+		}
+
+		return intval($result->nb_planned);
+	}
+
+
+	/**
+	 * Compte le nombre de tâches liées
+	 * @return int
+	 */
+	public function getCountTasks(){
+
+		$sqlIn = 'SELECT ussp.rowid  FROM '.$this->db->prefix().'scrumproject_scrumuserstorysprint ussp WHERE ussp.fk_scrum_user_story = '.$this->id;
+		$sql = 'SELECT COUNT(t.rowid) nb FROM '.$this->db->prefix().'scrumproject_scrumtask t WHERE t.fk_scrum_user_story_sprint IN('.$sqlIn.')';
+		$result = $this->db->getRow($sql);
+		if($result == false){
+			$this->setErrorMsg($this->db->error());
+		}
+
+		return intval($result->nb);
+	}
+
+	/**
 	 * @param   string  $label      empty = auto (progress), string = replace output
 	 * @param   string  $tooltip    empty = auto , string = replace output
 	 * @return  string
@@ -1291,6 +1323,9 @@ class ScrumUserStory extends CommonObject
 
 		return $returnData;
 	}
+
+
+
 }
 
 

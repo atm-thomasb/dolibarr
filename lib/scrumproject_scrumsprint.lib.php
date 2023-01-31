@@ -80,15 +80,20 @@ function scrumsprintPrepareHead($object)
 	$h++;
 
 	// FIX
-	$sql = " SELECT SUM(qty_velocity) qty_velocity FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($object->id);
-	$countObj = $db->getRow($sql);
-	if($countObj){
-		$out = '<span class="badge marginleftonlyshort">'. number_format((float)$countObj->qty_velocity , 0, '.', '') .' / ' . number_format((float)$object->qty_velocity , 0, '.', '') .'</span>';
-		$countObj->qty_velocity = is_null($countObj->qty_velocity) ? 0.0 : $countObj->qty_velocity;
-		if ( (float) $object->qty_velocity !== (float) $countObj->qty_velocity){
-			$out .= ' &nbsp;<span class="margin-l-3 fa fa-warning"></span>';
+	$sqlV = " SELECT COUNT(rowid) nb FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($object->id).' AND status = 1 ';
+	$sqlT = " SELECT COUNT(rowid) nb FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($object->id);
+	$countObjT = $db->getRow($sqlT);
+	if($countObjT && $countObjT->nb > 0){
+		$out = '<span class="badge marginleftonlyshort">';
+
+		$countObjV = $db->getRow($sqlV);
+		if($countObjV){
+			$out.= $countObjV->nb.'/';
 		}
-		$out .= '</span>';
+
+		$out.= $countObjT->nb;
+
+		$out.= '</span>';
 	}
 	$head[$h][0] = dol_buildpath("/scrumproject/scrumsprintuser_list.php", 1).'?fk_sprint='.$object->id;
 	$head[$h][1] = $langs->trans("ScrumSprintUsersShort") . $out;

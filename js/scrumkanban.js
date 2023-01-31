@@ -12,6 +12,7 @@ scrumKanban = {};
 	};
 
 	o.debugMode = false;
+	o.debugModeDisableAutoRefresh = false;
 
 	console.log("To activate kanban debug mode set : scrumKanban.setDebugMod(true); ");
 
@@ -694,6 +695,17 @@ scrumKanban = {};
 			if(o.debugMode) {
 				console.log("refresh skip flag holdRefreshFlag is " + o.holdRefreshFlag );
 			}
+
+			if(autoRefresh){
+				setTimeout(function(){
+					if(!o.debugModeDisableAutoRefresh) {
+						o.refreshAllBoards(true);
+					}else if(o.debugMode){
+						console.log("disable auto refresh mode on : auto-refresh disable");
+					}
+				}, 5000);
+			}
+
 			return;
 		}
 
@@ -741,10 +753,10 @@ scrumKanban = {};
 
 			if(autoRefresh){
 				setTimeout(function(){
-					if(!o.debugMode) {
+					if(!o.debugModeDisableAutoRefresh) {
 						o.refreshAllBoards(true);
-					}else{
-						console.log("debug mode on : auto-refresh disable");
+					}else if(o.debugMode){
+						console.log("disable auto refresh mode on : auto-refresh disable");
 					}
 				}, 5000);
 			}
@@ -2003,13 +2015,17 @@ scrumKanban = {};
 			"background-color: #95cf04 ; color: #ffffff ; font-weight: bold ; padding: 4px ;"
 		);
 
-			console.log( "Show this help : %cscrumKanban.help();","font-weight: bold ;");
+		console.log( "Show this help : %cscrumKanban.help();","font-weight: bold ;");
 
-			console.group("Activate kanban debug mode : %cscrumKanban.setDebugMod(true);","font-weight: bold ;");
+		console.group("Activate kanban debug mode : %cscrumKanban.setDebugMod(true);","font-weight: bold ;");
 
-				console.log( "If Debug mod is On : add log and Kanban auto-refresh will be disable ");
+		console.log( "If Debug mod is On : add log");
 
-			console.groupEnd();
+
+		console.log( "To disable kanban auto refresh : %cscrumKanban.setKanbanAutoRefreshStatus(false);","font-weight: bold ;");
+		console.log( "To enable kanban auto refresh : %cscrumKanban.setKanbanAutoRefreshStatus(true);","font-weight: bold ;");
+
+		console.groupEnd();
 
 
 		console.groupEnd();
@@ -2027,6 +2043,18 @@ scrumKanban = {};
 		}else{
 			o.debugMode = false;
 			console.log('Disable kanban debug mode');
+		}
+	}
+	/**
+	 * Set debugMod
+	 */
+	o.setKanbanAutoRefreshStatus = function (value = true){
+		if(!value){
+			o.debugModeDisableAutoRefresh  = true;
+			if(o.debugMode){ console.log("Disable kanban auto refresh"); }
+		}else{
+			o.debugModeDisableAutoRefresh = false;
+			if(o.debugMode){ console.log("Enable kanban auto refresh"); }
 		}
 	}
 

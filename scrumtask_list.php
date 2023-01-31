@@ -100,6 +100,7 @@ $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always ''
 
 $id = GETPOST('id', 'int');
 $fk_scrum_user_story_sprint = GETPOST('fk_scrum_user_story_sprint', 'int');
+$fk_us = GETPOST('fk_us', 'int');
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -290,6 +291,11 @@ if ($object->ismultientitymanaged == 1) {
 if (!empty($fk_scrum_user_story_sprint)){
 	$sql .= ' AND fk_scrum_user_story_sprint = '.$fk_scrum_user_story_sprint;
 }
+if (!empty($fk_us)){
+	$sqlIn = 'SELECT ussp.rowid  FROM '.$db->prefix().'scrumproject_scrumuserstorysprint ussp WHERE ussp.fk_scrum_user_story = '.intval($fk_us);
+	$sql .= ' AND t.fk_scrum_user_story_sprint IN('.$sqlIn.') ';
+
+}
 
 foreach ($search as $key => $val) {
 	if (array_key_exists($key, $object->fields)) {
@@ -409,8 +415,18 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 
+if($fk_us > 0) {
 
-if($fk_scrum_user_story_sprint > 0) {
+	require_once __DIR__.'/class/scrumuserstory.class.php';
+	require_once __DIR__.'/lib/scrumproject_scrumuserstory.lib.php';
+
+	$scrumUserStory = new ScrumUserStory($db);
+	if($scrumUserStory->fetch($fk_us)>0){
+		$head = scrumuserstoryPrepareHead($scrumUserStory);
+		print dol_get_fiche_head($head, 'scrumtask', $langs->trans("ScrumUserStorySprintTask"), -1, $scrumUserStory->picto);
+	}
+}
+elseif($fk_scrum_user_story_sprint > 0) {
 	dol_include_once('/scrumproject/class/scrumuserstorysprint.class.php');
 	$scrumUserStorySprint = new ScrumUserStorySprint($db);
 
@@ -480,6 +496,9 @@ if ($optioncss != '') {
 if(!empty($fk_scrum_user_story_sprint)){
 	$param .= '&fk_scrum_user_story_sprint='.urlencode($fk_scrum_user_story_sprint);
 }
+if(!empty($fk_us)){
+	$param .= '&fk_us='.urlencode($fk_us);
+}
 
 // Add $param from extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_param.tpl.php';
@@ -515,6 +534,13 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
+if(!empty($fk_scrum_user_story_sprint)){
+	print '<input type="hidden" name="fk_scrum_user_story_sprint" value="'.intval($fk_scrum_user_story_sprint).'">';
+}
+if(!empty($fk_us)){
+	print '<input type="hidden" name="fk_us" value="'.intval($fk_us).'">';
+}
+
 
 $newScrumTaskUrl = dol_buildpath('/scrumproject/scrumtask_card.php', 1).'?action=create';
 $backtopageAdd = $_SERVER['PHP_SELF'];
@@ -525,6 +551,11 @@ if($fk_scrum_user_story_sprint>0){
 $newScrumTaskUrl.= '&backtopage='.urlencode($backtopageAdd);
 
 $newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $newScrumTaskUrl, '', $permissiontoadd);
+
+if($fk_us>0){
+	$newcardbutton = '';
+}
+
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 

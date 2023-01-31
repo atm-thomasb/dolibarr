@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+- FIX : RH badge count type  *30/01/2022* - 1.33.3
+- FIX : Filter for User story planned task list  *30/01/2022* - 1.33.2
+- NEW : Tab for user story task showing planned on print *30/01/2022* - 1.33.1
 
 ## Version 1.32
 

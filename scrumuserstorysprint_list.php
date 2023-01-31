@@ -83,6 +83,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
 // load scrumproject libraries
 require_once __DIR__.'/class/scrumuserstorysprint.class.php';
 require_once __DIR__.'/lib/scrumproject.lib.php';
+require_once __DIR__.'/lib/scrumproject_scrumuserstory.lib.php';
 
 // for other modules
 //dol_include_once('/othermodule/class/otherobject.class.php');
@@ -102,6 +103,7 @@ $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always ''
 
 $id = GETPOST('id', 'int');
 
+$fk_us = GETPOST('fk_us', 'int');
 $fk_project = GETPOST('fk_project', 'int');
 $project = scrumProjectGetObjectByElement('project', $fk_project);
 
@@ -362,6 +364,11 @@ if($fk_project > 0){
 	$sql .= ' AND pt.fk_projet = '.intval($fk_project).' ';
 }
 
+if($fk_us > 0){
+	$sql .= ' AND us.rowid = '.intval($fk_us).' ';
+}
+
+
 foreach ($search as $key => $val) {
 
 	if($key == 'project_title' && $search[$key] != ''){
@@ -492,8 +499,15 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 // --------------------------------------------------------------------
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 
+if($fk_us > 0){
+		$scrumUserStory = new ScrumUserStory($db);
+		if($scrumUserStory->fetch($fk_us)>0){
+			$head = scrumuserstoryPrepareHead($scrumUserStory);
+			print dol_get_fiche_head($head, 'scrumuserstorysprint', $langs->trans("ScrumUserStorySprint"), -1, $scrumUserStory->picto);
+		}
 
-if($project) {
+}
+elseif($project) {
 	$head = project_prepare_head($project);
 	print dol_get_fiche_head($head, 'projectTasksPlanning', $langs->trans("Project"), -1, ($project->public ? 'projectpub' : 'project'));
 
@@ -528,6 +542,10 @@ $arrayofselected = is_array($toselect) ? $toselect : array();
 $param = '';
 if($project){
 	$param = '&fk_project='.$project->id;
+}
+
+if($fk_us > 0){
+	$param .= '&fk_us='.intval($fk_us).' ';
 }
 
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
@@ -638,6 +656,9 @@ print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 if($fk_project>0){
 	print '<input type="hidden" name="fk_project" value="'.$fk_project.'">';
+}
+if($fk_us > 0){
+	print '<input type="hidden" name="fk_us" value="'.intval($fk_us).'">';
 }
 
 $listBtn = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
