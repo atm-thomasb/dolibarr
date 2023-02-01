@@ -365,3 +365,4 @@ RequireValidFieldToModify = Champ invalide
 RequireFieldKey = Field key required
 FieldNotFoundInObject = Champs inexistant %s
 WrongUrl = Url invalid
+ErrorScrumUserStoryTasksOverPlanned = Attention : La somme des planifications de tâches dépasse la planification de cette user story soit %s / %s.
