@@ -6,6 +6,7 @@
 	--box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 	--default-space-size: 10px;
 	--default-block-background-color : rgba(234,234,234,1);
+	--kanban-item-background-color : #ffffff;
 	--default-strong-color : #223058;
 	--user-image-size : 32px;
 
@@ -408,6 +409,7 @@ html[data-theme-color-scheme="dark"] button:hover{
 
 .scrumkanban-page  .kanban-item {
 	margin-bottom: var(--default-space-size);
+	background: var(--kanban-item-background-color);
 }
 
 .scrumkanban-page  .kanban-item.gu-mirror {
@@ -839,16 +841,19 @@ nav.top-nav-bar{
 }
 
 .kanban-item__header{
+	position: relative;
 	z-index: 1;
 	min-height: 10px;
 }
 
 .kanban-item__footer{
+	position: relative;
 	z-index: 1;
 	min-height: 10px;
 }
 
 .kanban-item__body{
+	position: relative;
 	z-index: 1;
 	font-size: 14px;
 	min-height: 30px;
@@ -893,7 +898,25 @@ nav.top-nav-bar{
 /*	opacity: 0.1;*/
 /*}*/
 
-.kanban-item.--alert .kanban-item__time-consumed{
+.kanban-item__error_icon{
+	display: block;
+	position: absolute;
+	right: 3px;
+	top :3px;
+
+	font-size: 12px;
+	line-height: 14px;
+	width: 14px;
+	height: 14px;
+
+}.kanban-item__error_icon::before{
+	font-family: var(--font-awesome-familly);
+	font-weight: var(--font-awesome-weight);
+	content: "\f071"; /* fa fa-warning */
+}
+
+.kanban-item.--time-consumed-error .kanban-item__time-consumed,
+.kanban-item.--task-time-planned-error .kanban-item__time-planned{
 	display: inline-block;
 	border-radius: 0.25rem;
 	vertical-align: baseline;
@@ -903,6 +926,35 @@ nav.top-nav-bar{
 	background-color: #9f1b05;
 	font-size: 11px;
 	padding: 0.25em 0.35em;
+}
+
+
+.kanban-item.--alert{
+	position: relative;
+	--kanban-item-background-color : #ffcdcd;
+	--kanban-item-alert-icon-color : #a300003b;
+	z-index: auto;
+	isolation: isolate;
+}
+
+.kanban-item.--alert::before {
+	display: block;
+	position: absolute;
+	font-family: var(--font-awesome-familly);
+	font-weight: var(--font-awesome-weight);
+	content: "\f071"; /* fa fa-warning */
+	font-size: 75px;
+	color: var(--kanban-item-alert-icon-color);
+	z-index: 0;
+	overflow: hidden;
+	bottom : 0;
+	right: 0;
+	max-height: calc(100% - 7px);
+}
+
+html[data-theme-color-scheme="dark"] .scrumkanban-page .kanban-item.--alert {
+	--kanban-item-background-color : #52003a;
+	--kanban-item-alert-icon-color : #6a2f59
 }
 
 
@@ -1110,7 +1162,7 @@ nav.top-nav-bar{
 html[data-theme-color-scheme="dark"]{
 	--general-text-color : #c0c0c0;
 	--default-block-background-color: rgba(57, 67, 84, 0.8);
-	--kanban-item-backgroud-color : #485366;
+	--kanban-item-background-color : #485366;
 	--kanban-item-color:  #485366;
 	--default-strong-color: #dedede;
 
@@ -1137,7 +1189,7 @@ html[data-theme-color-scheme="dark"] a:link, html[data-theme-color-scheme="dark"
 }
 
 html[data-theme-color-scheme="dark"] .scrumkanban-page .kanban-item{
-	background-color: var(--kanban-item-backgroud-color);
+	background-color: var(--kanban-item-background-color);
 }
 
 html[data-theme-color-scheme="dark"] .scrumkanban-page :where(.kanban-item__user,.sprint-resume-user-img__pic) {

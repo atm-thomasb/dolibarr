@@ -1092,12 +1092,25 @@ class ScrumUserStorySprint extends CommonObject
 
 	/**
 	 * @param $scrumCard ScrumCard
-	 * @param $object stdClass
+	 * @param $cardDataObj stdClass
 	 * @return void
 	 */
-	public function getScrumKanBanItemObjectFormatted($scrumCard,$object){
+	public function getScrumKanBanItemObjectFormatted($scrumCard, $cardDataObj){
+		global $langs;
 
-		$object->socid = $this->getSocIdAssociated();
+		$cardDataObj->socid = $this->getSocIdAssociated();
+
+		if($this->calcTimeTaskPlanned() > $this->qty_planned){
+			$cardDataObj->class[] = '--task-time-planned-error';
+			$cardDataObj->class[] = '--alert'; // default error class
+			$cardDataObj->errorMsgs[] = $langs->trans('ErrorScrumUserStoryTasksOverPlanned', $this->calcTimeTaskPlanned(), $this->qty_planned);
+		}
+
+		if(doubleval($this->qty_consumed) > doubleval($this->qty_planned) && $this->qty_planned > 0){
+			$cardDataObj->class[] = '--alert';
+			$cardDataObj->class[] = '--time-consumed-error';
+		}
+
 		return null;
 	}
 
@@ -1503,6 +1516,13 @@ class ScrumUserStorySprint extends CommonObject
 		$obj = $this->db->getRow($sql);
 		if($obj){
 			$qtyDone+=  doubleval($obj->sumTaskPlanned);
+		}
+
+		// Si ce cas ressort c'est clairement une erreur de découpe
+		// pour ne pas **casser** les plannifications et les stats du sprint il n'est pas
+		// possible d'OverProduire
+		if($qtyDone > $this->qty_planned){
+			$qtyDone = $this->qty_planned;
 		}
 
 		$this->qty_done = $qtyDone;

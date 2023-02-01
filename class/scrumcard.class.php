@@ -1101,6 +1101,7 @@ class ScrumCard extends CommonObject
 		$object->scrumCardUrl = dol_buildpath('/scrumproject/scrumcard_card.php',1).'?id='.$this->id;
 		$object->objectId = $this->id;
 		$object->title = '';
+		$object->errorMsgs = array();
 		$useTime = false;
 		$timeSpend = $timePlanned ='--';
 		$timeDone = false;
@@ -1152,7 +1153,7 @@ class ScrumCard extends CommonObject
 				$QtyPlannedTitle = $langs->trans('QtyPlanned');
 				if($elementObject->default_prod_calc == 'count' ){
 					$QtyPlannedMoreClass = 'time-planned-count';
-					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['default_prod_calc']['arrayofkeyval'][$elementObject->prod_calc]);
+					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['default_prod_calc']['arrayofkeyval'][$elementObject->default_prod_calc]);
 				}elseif($elementObject->default_prod_calc == 'onlyspent' ){
 					$timePlanned.= ' <i class="fa fa-toggle-on" aria-hidden="true"></i>';
 					$QtyPlannedMoreClass = 'time-planned-onlyspent';
@@ -1163,12 +1164,6 @@ class ScrumCard extends CommonObject
 					$QtyPlannedMoreClass = 'time-planned-notcount';
 					$QtyPlannedTitle.= ' - '.$langs->trans($elementObject->fields['default_prod_calc']['arrayofkeyval'][$elementObject->default_prod_calc]);
 					$QtyPlannedBefore = '<span class="fa fa-calendar-o"></span>';
-				}
-
-
-				if(doubleval($elementObject->qty_consumed) > doubleval($elementObject->qty_planned) && $elementObject->qty_planned > 0){
-					$object->class[] = '--alert';
-					$object->class[] = '--time-consumed-error';
 				}
 
 				$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $elementObject->fk_scrum_user_story);
@@ -1235,6 +1230,10 @@ class ScrumCard extends CommonObject
 			}
 		}
 
+
+		if(!empty($object->errorMsgs)){
+			$object->title.= '<span class="kanban-item__error_icon classfortooltip" title="'.dol_escape_htmltag(implode('<br/>', $object->errorMsgs)).'"></span>';
+		}
 
 		$object->title.= '<div class="kanban-item__header">';
 		$object->title.= '<span class="kanban-item__tags">'.$object->tags.'</span>';
