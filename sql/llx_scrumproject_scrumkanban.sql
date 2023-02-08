@@ -24,7 +24,7 @@ CREATE TABLE llx_scrumproject_scrumkanban(
 	fk_soc integer, 
 	fk_project integer, 
 	description text,
-    background_url text;
+	background_url text,
 	note_public text, 
 	note_private text, 
 	date_creation datetime NOT NULL, 
