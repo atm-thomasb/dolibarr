@@ -852,7 +852,6 @@ class ScrumTask extends CommonObject
 			.' 										 AND l.fk_rank < '.intval($kanbanList->fk_rank)
 			.' 							 )'
 			.' AND c.element_type = \''.$this->db->escape($advKanbanCard->element_type).'\' '
-			.' AND c.fk_element = '.intval($advKanbanCard->fk_element)
 			.' AND st.fk_scrum_user_story_sprint = '.intval($this->fk_scrum_user_story_sprint)
 			.' AND c.rowid != '.intval($advKanbanCard->id)
 		;
