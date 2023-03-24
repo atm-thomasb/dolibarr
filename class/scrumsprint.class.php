@@ -1816,6 +1816,10 @@ class ScrumSprint extends CommonObject
 			$excludedUsersIds = $this->getPlannedUsersIdList();
 		}
 
+		if(empty($excludedUsersIds)){
+			return false;
+		}
+
 		// récupération des utilisateurs avec des temps saisis mais qui normalement ne font pas parties du sprint
 		$sql = /** @lang MySQL */
 			"SELECT ptt.fk_user  "
