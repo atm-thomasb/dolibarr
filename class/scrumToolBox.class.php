@@ -19,7 +19,7 @@
 
 /**
  * Une boite aà outils de lib dans une class pour eviter les colisions de nommage
- * Class for ScrumCard
+ * Class for AdvKanbanCard
  */
 class ScrumToolBox
 {

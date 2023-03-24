@@ -15,12 +15,12 @@
 
 
 CREATE TABLE llx_scrumproject_scrumsprint(
-	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
 	entity integer DEFAULT 1 NOT NULL, 
-	fk_team integer NOT NULL, 
-	label varchar(255), 
+	fk_team integer NOT NULL,
+    fk_advkanban integer,
+    label varchar(255),
 	date_start date NOT NULL, 
 	date_end date NOT NULL, 
 	description text, 
@@ -36,5 +36,4 @@ CREATE TABLE llx_scrumproject_scrumsprint(
 	fk_user_modif integer, 
 	import_key varchar(14), 
 	status smallint NOT NULL
-	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

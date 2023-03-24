@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## Version 2.0
+
+- NEW : Dependency to AdvancedKanban module  *20/03/2023* - 2.0.0  
+  Need to execute migration script in bash ```scrumproject/scripts/migrate-advanced-kanban.php```  
+  before activating AdvancedKanban module 
 
 ## Version 1.33
 

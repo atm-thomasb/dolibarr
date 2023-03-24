@@ -103,7 +103,7 @@ function scrumsprintPrepareHead($object)
 
 	$kanban = $object->getKanbanId();
 	if ($kanban > 0) {
-		$head[$h][0] = dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $kanban;
+		$head[$h][0] = dol_buildpath('/advancedkanban/advkanban_view.php', 1) . '?id=' . $kanban;
 		$head[$h][1] = $langs->trans('Kanban');
 		$head[$h][2] = 'kanban';
 		$h++;
@@ -114,7 +114,7 @@ function scrumsprintPrepareHead($object)
 	$records =  $scrumUserStorySprint->fetchAll('','',0,0,array('fk_scrum_sprint' => $object->id));
 	$out = '<span class="badge marginleftonlyshort">'. number_format((float)count($records) , 0, '.', '') .'</span>' ;
 	// list Tâche planifées
-	$head[$h][0] = dol_buildpath("scrumproject/scrumuserstorysprint_list.php?mainmenu=project&leftmenu=scrumuserstorysprint", 1).'&search_fk_scrum_sprint='.$object->id;
+	$head[$h][0] = dol_buildpath("scrumproject/scrumuserstorysprint_list.php?mainmenu=project&leftmenu=scrumuserstorysprint", 1).'&contextpage=tabscrumcarduserstorysprintlist&fk_scrum_sprint='.$object->id;
 	$head[$h][1] = $langs->trans("ScrumUserStorySprintShort") . $out;
 	$head[$h][2] = 'scrumuserstorysprint';
 	$h++;

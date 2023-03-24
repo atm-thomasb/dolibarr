@@ -77,7 +77,7 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
-require_once __DIR__ . '/class/scrumcard.class.php';
+dol_include_once('/advancedkanban/class/advkanbancard.class.php');
 require_once __DIR__ . '/class/scrumtask.class.php';
 require_once __DIR__ . '/class/scrumuserstory.class.php';
 require_once __DIR__ . '/class/scrumuserstorysprint.class.php';
@@ -315,12 +315,12 @@ if ($id > 0 || !empty($ref)) {
 		$note = isset($_POST['timespent_note']) ? $_POST['timespent_note'] : $object->label;
 
 
-		$scrumCardStatic = new ScrumCard($db);
-		$TScrumCard = $scrumCardStatic->fetchAll( '','', 0, 0, array('fk_element' => $object->id, 'customsql' => 'element_type IN ("'.$db->escape($object->element).'")'));
-		if(is_array($TScrumCard)){
+		$advKanbanCardStatic = new AdvKanbanCard($db);
+		$TAdvKanbanCard = $advKanbanCardStatic->fetchAll( '','', 0, 0, array('fk_element' => $object->id, 'customsql' => 'element_type IN ("'.$db->escape($object->element).'")'));
+		if(is_array($TAdvKanbanCard)){
 			$TConcat = array();
-			foreach ($TScrumCard as $scrumCard){
-				$tCats = $scrumCard->getCategoriesCommon('scrumcard');
+			foreach ($TAdvKanbanCard as $advKanbanCard){
+				$tCats = $advKanbanCard->getCategoriesCommon('advkanbancard');
 				if(is_array($tCats)){
 					foreach ($tCats as $catID){
 						if(isset($TConcat[$catID])){ continue; }

@@ -1,5 +1,6 @@
 <?php
 
+namespace ScrumProject;
 class JsonResponse{
 
 	/**
@@ -41,7 +42,7 @@ class JsonResponse{
 	 * @return string JSON
 	 */
 	public function getJsonResponse(){
-		$jsonResponse = new stdClass();
+		$jsonResponse = new \stdClass();
 		$jsonResponse->result = $this->result;
 		$jsonResponse->msg = $this->msg;
 		$jsonResponse->newToken = $this->newToken;

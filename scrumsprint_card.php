@@ -63,7 +63,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 dol_include_once('/scrumproject/class/scrumsprint.class.php');
 dol_include_once('/scrumproject/lib/scrumproject_scrumsprint.lib.php');
-dol_include_once('/scrumproject/class/scrumkanban.class.php');
+dol_include_once('/advancedkanban/class/advkanban.class.php');
+
 
 // Load translation files required by the page
 $langs->loadLangs(array("scrumproject@scrumproject", "other"));
@@ -155,21 +156,26 @@ if (empty($reshook))
 	}
 	if ($action == 'confirm_create_kanban'){
 
-		$newkanban = New ScrumKanban($db);
-		$newkanban->fk_scrum_sprint = $object->id;
-		$newkanban->status = ScrumKanban::STATUS_DRAFT;
+		$newkanban = New AdvKanban($db);
+		$newkanban->status = AdvKanban::STATUS_DRAFT;
 		$newkanban->label = $object->label;
 		$res = $newkanban->create($user);
 
 		if($res>0){
+
+			$object->fk_advkanban = $newkanban->id;
+			if($object->update($user)<0){
+				setEventMessage('ErrorAssignKanbanToSprint', 'error');
+			}
+
 			//Create KanbanList on Clone
 			if ($fk_kanban > 0){
 
-				$kanbanList = New ScrumKanbanList($db);
+				$kanbanList = New AdvKanbanList($db);
 
-				//Récupération des ScrumKanbanList
-				$TkanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $fk_kanban));
-				$TnewKanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_scrum_kanban' => $newkanban->id));
+				//Récupération des AdvKanbanList
+				$TkanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_advkanban' => $fk_kanban));
+				$TnewKanbanList = $kanbanList->fetchAll('','',0,0,array('t.fk_advkanban' => $newkanban->id));
 
 				//Delete list done & keep backlog
 				if (!empty($TnewKanbanList)){
@@ -194,7 +200,7 @@ if (empty($reshook))
 							continue;
 						}
 
-						$resultDel = $newKanbanList->delete($user);
+						$resultDel = $newKanbanList->delete($user, false, true);
 						if ($resultDel < 0) {
 							setEventMessages($newKanbanList->error, $newKanbanList->errors, 'errors');
 						}
@@ -210,7 +216,7 @@ if (empty($reshook))
 						}
 
 						$newKanbanList->id = 0;
-						$newKanbanList->fk_scrum_kanban = $newkanban->id;
+						$newKanbanList->fk_advkanban = $newkanban->id;
 
 						$resultCreate = $newKanbanList->create($user);
 						if ($resultCreate < 0) {
@@ -218,10 +224,26 @@ if (empty($reshook))
 						}
 					}
 				}
+
+				if($object->autoCreateMissingListForKanban($user)<0){
+					if(empty($object->error) && empty($object->errors)){
+						setEventMessages($langs->trans('ErrorAutoCreateMissingListForKanban'), array(), 'errors');
+					} else {
+						setEventMessages($object->error, $object->errors, 'errors');
+					}
+				}
+
+				if($object->createAdvKanbanCardsInAdvKanban($user)<0){
+					if(empty($object->error) && empty($object->errors)){
+						setEventMessages($langs->trans('ErrorCreateAdvKanbanCardsInAdvKanban'), array(), 'errors');
+					} else {
+						setEventMessages($object->error, $object->errors, 'errors');
+					}
+				}
 			}
 			//Redirect to kanban
 			if ($newkanban->id > 0){
-				header('Location: ' . dol_buildpath('/scrumproject/scrumkanban_view.php', 1) . '?id=' . $newkanban->id);
+				header('Location: ' . dol_buildpath('/advancedkanban/advkanban_view.php', 1) . '?id=' . $newkanban->id);
 				exit;
 			}
 
@@ -376,7 +398,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	// Create Kanban Confirmation
 	if ($action == 'createkanban') {
 
-		$kanbanObject = New ScrumKanban($db);
+		$kanbanObject = New AdvKanban($db);
 		$Tkanban = $kanbanObject->fetchAll();
 		$TkanbanLabel = array();
 		if (!empty($Tkanban)){
@@ -391,7 +413,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$formquestion = array(
 			array('type' => 'other', 'name' => 'fk_kanban', 'label' => $langs->trans('SelectKanbanClone'), 'value' => $SelectKanban),
 		);
-		$formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('CreateNewScrumKanban'), $langs->trans('ConfirmCreateAsk', $object->ref), 'confirm_create_kanban', $formquestion, 'yes', 1);
+		$formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('CreateNewAdvKanban'), $langs->trans('ConfirmCreateAsk', $object->ref), 'confirm_create_kanban', $formquestion, 'yes', 1);
 	}
 
 	// Confirmation to delete
@@ -476,11 +498,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	$jsData->langs = new stdClass();
 	$jsData->langs->kanban = $langs->trans("kanban");
 
-	$scrumKanbanStatic = new ScrumKanban($db);
-	$TScrumKanbans = $scrumKanbanStatic->fetchAll( '', '',0,  0, array('fk_scrum_sprint' => $object->id));
-	if(is_array($TScrumKanbans) && !empty($TScrumKanbans)){
+	$scrumKanbanStatic = new AdvKanban($db);
+	$TAdvKanbans = $scrumKanbanStatic->fetchAll( '', '',0,  0, array('fk_scrum_sprint' => $object->id));
+	if(is_array($TAdvKanbans) && !empty($TAdvKanbans)){
 
-		foreach ($TScrumKanbans as $scrumKanban){
+		foreach ($TAdvKanbans as $scrumKanban){
 			$jsData->kanbansGetNomUrls[]=$scrumKanban->getNomUrl(1);
 		}
 
@@ -513,13 +535,13 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// Create Kanban
 			$kanban = $object->getKanbanId();
-			if ($kanban < 0) {
-				print dolGetButtonAction($langs->trans('CreateNewScrumKanban'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=createkanban&object=scrumsprint', '', $permissiontoadd);
+			if (empty($kanban)) {
+				print dolGetButtonAction($langs->trans('CreateNewAdvKanban'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=createkanban&object=scrumsprint&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// Send
 			if (empty($user->socid)) {
-				print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init#formmailbeforetitle');
+				print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init#formmailbeforetitle&token='.newToken());
 			}
 
 			// Modify
@@ -532,34 +554,34 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// When valid
 			if ($object->status == $object::STATUS_VALIDATED) {
-				print dolGetButtonAction($langs->trans('SetToDraft'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes', '', $permissiontoadd);
-				print dolGetButtonAction($langs->trans('SetToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes', '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetToDraft'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes&token='.newToken(), '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// When pending
 			if($object->status == $object::STATUS_PENDING) {
-				print dolGetButtonAction($langs->trans('SetBackToValid'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_reopen&confirm=yes', '', $permissiontoadd);
-				print dolGetButtonAction($langs->trans('SetToDone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdone&confirm=yes', '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetBackToValid'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_reopen&confirm=yes&token='.newToken(), '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetToDone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setdone&confirm=yes&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// When done
 			if($object->status == $object::STATUS_DONE) {
-				print dolGetButtonAction($langs->trans('SetBackToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes', '', $permissiontoadd);
+				print dolGetButtonAction($langs->trans('SetBackToPending'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_setpending&confirm=yes&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// Clone
-			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&socid='.$object->socid.'&action=clone&object=scrumsprint', '', $permissiontoadd);
+			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&socid='.$object->socid.'&action=clone&object=scrumsprint&token='.newToken(), '', $permissiontoadd);
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
-			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete', '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
+			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete&token='.newToken(), '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
 
 			print '<div style="clear:both; margin-top: 5px;"></div>';
 
-			if ($object->status != $object::STATUS_DRAFT) {
-				print dolGetButtonAction($langs->trans('RefreshVelocity'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=refreshVelocity');
+			if ($object->status == $object::STATUS_DRAFT) {
+				print dolGetButtonAction($langs->trans('RefreshVelocity'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=refreshVelocity&token='.newToken());
 			}
 
-			print dolGetButtonAction($langs->trans('RefreshTimes'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=refreshQuantities');
+			print dolGetButtonAction($langs->trans('RefreshTimes'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=refreshQuantities&token='.newToken());
 
 
 		}

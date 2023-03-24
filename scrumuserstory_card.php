@@ -234,7 +234,7 @@ if ($action == 'create') {
 	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ScrumUserStory")), '', $object->picto);
 
 	if(GETPOST('fk_task', 'int') == 0){
-		$object->fields['fk_task']['type'] = 'integer:Task:projet/class/task.class.php:1:progress<100';
+		$object->fields['fk_task']['type'] = 'integer:Task:projet/class/task.class.php:1:(progress:<:100)';
 	}
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';

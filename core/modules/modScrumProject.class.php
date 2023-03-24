@@ -65,7 +65,7 @@ class modScrumProject extends DolibarrModules
 		$this->editor_url = 'www.atm-consulting.fr';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '1.33.4';
+		$this->version = '2.0.0';
 
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -107,11 +107,13 @@ class modScrumProject extends DolibarrModules
 			// Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
 			'hooks' => array(
 				   'data' => array(
-				       'projecttaskcard',
-				       'category',
-					   'scrumtaskcard',
-					   'emailtemplates'
-				   ),
+						'projecttaskcard',
+						'category',
+						'advkanbanview',
+						'scrumtaskcard',
+						'emailtemplates',
+						'advkanbandao'
+					),
 			),
 			// Set this to 1 if features of module are opened to external users
 			'moduleforexternal' => 0,
@@ -128,7 +130,7 @@ class modScrumProject extends DolibarrModules
 		// A condition to hide module
 		$this->hidden = false;
 		// List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
-		$this->depends = array('always1'=>'modProjet');
+		$this->depends = array('always1'=>'modAdvancedKanban');
 		$this->requiredby = array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith = array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 		$this->langfiles = array("scrumproject@scrumproject");
@@ -189,27 +191,7 @@ class modScrumProject extends DolibarrModules
 		// 'user'             to add a tab in user view
 
 		// Dictionaries
-		$this->dictionaries=array(
-			'langs'=>'scrumproject@scrumproject',
-			// List of tables we want to see into dictonnary editor
-			'tabname'=>array(MAIN_DB_PREFIX."c_scrum_stage"),
-			// Label of tables
-			'tablib'=>array("ScrumCardStage"),
-			// Request to select fields
-			'tabsql'=>array('SELECT f.rowid, f.code, f.position, f.label, f.picto, f.active FROM '.MAIN_DB_PREFIX.'c_scrum_stage as f'),
-			// Sort order
-			'tabsqlsort'=>array("position ASC"),
-			// List of fields (result of select to show dictionary)
-			'tabfield'=>array("code,label,picto,position"),
-			// List of fields (list of fields to edit a record)
-			'tabfieldvalue'=>array("code,label,picto,position"),
-			// List of fields (list of fields for insert)
-			'tabfieldinsert'=>array("code,label,picto,position"),
-			// Name of columns with primary key (try to always name it 'rowid')
-			'tabrowid'=>array("rowid"),
-			// Condition to show each dictionary
-			'tabcond'=>array($conf->scrumproject->enabled)
-		);
+		$this->dictionaries=array();
 
 
 		// Boxes/Widgets
@@ -361,46 +343,6 @@ class modScrumProject extends DolibarrModules
 
 
 
-		/**
-		 * DROIT POUR SCRUM CARDS
-		 */
-
-
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read scrum cards'; // Permission label
-		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/Update scrum cards'; // Permission label
-		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete scrum cards'; // Permission label
-		$this->rights[$r][4] = 'scrumcard'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
-
-		/**
-		 * DROIT POUR KANBAN
-		 */
-
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'ReadScrumKanban'; // Permission label
-		$this->rights[$r][4] = 'scrumkanban'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'WriteScrumKanban'; // Permission label
-		$this->rights[$r][4] = 'scrumkanban'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
-		$this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
-		$this->rights[$r][1] = 'DeleteScrumKanban'; // Permission label
-		$this->rights[$r][4] = 'scrumkanban'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->scrumproject->level1->level2)
-		$r++;
 
 		// Main menu entries to add
 		$this->menu = array();
@@ -918,17 +860,17 @@ class modScrumProject extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=project',
 			// This is a Left menu entry
 			'type'=>'left',
-			'titre'=>'ScrumKanban',
+			'titre'=>'AdvKanban',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumkanban',
-			'url'=>'/scrumproject/scrumkanban_list.php?mainmenu=project&leftmenu=scrumkanban',
+			'url'=>'/advancedkanban/advkanban_list.php?mainmenu=project&leftmenu=scrumkanban',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
 			'enabled'=>'$conf->scrumproject->enabled && !empty($conf->global->SP_ENABLE_KANBAN)',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'perms'=>'$user->rights->advancedkanban->advkanban->read',
 			'prefix' => '<span class="fa fa-align-right icon-kanban em092 pictofixedwidth scrum-project-left-menu-picto" style="color: #00384e;"></span>',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
@@ -939,17 +881,17 @@ class modScrumProject extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumkanban',
 			// This is a Left menu entry
 			'type'=>'left',
-			'titre'=>'NewScrumKanban',
+			'titre'=>'NewAdvKanban',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumkanbannew',
-			'url'=>'/scrumproject/scrumkanban_card.php?action=create',
+			'url'=>'/advancedkanban/advkanban_card.php?action=create',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
 			'enabled'=>'$conf->scrumproject->enabled && !empty($conf->global->SP_ENABLE_KANBAN)',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->write',
+			'perms'=>'$user->rights->advancedkanban->advkanban->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0
@@ -963,14 +905,14 @@ class modScrumProject extends DolibarrModules
 			'titre'=>'List',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumkanbanlist',
-			'url'=>'/scrumproject/scrumkanban_list.php?mainmenu=project&leftmenu=scrumkanban',
+			'url'=>'/advancedkanban/advkanban_list.php?mainmenu=project&leftmenu=scrumkanban',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && !empty($conf->global->SP_ENABLE_KANBAN)',
+			'enabled'=>'$conf->advancedkanban->enabled && !empty($conf->global->SP_ENABLE_KANBAN)',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'perms'=>'$user->rights->advancedkanban->advkanban->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0,
@@ -980,17 +922,17 @@ class modScrumProject extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumkanbanlist',
 			// This is a Left menu entry
 			'type'=>'left',
-			'titre'=>'StatusScrumKanbanDraft',
+			'titre'=>'StatusAdvKanbanDraft',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumkanbanlist0',
-			'url'=>'/scrumproject/scrumkanban_list.php?mainmenu=project&leftmenu=scrumkanban&search_status=0',
+			'url'=>'/advancedkanban/advkanban_list.php?mainmenu=project&leftmenu=scrumkanban&search_status=0',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumkanban\'  && !empty($conf->global->SP_ENABLE_KANBAN)',
+			'enabled'=>'$conf->advancedkanban->enabled && $leftmenu==\'scrumkanban\'  && !empty($conf->global->SP_ENABLE_KANBAN)',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'perms'=>'$user->rights->advancedkanban->advkanban->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0,
@@ -1000,17 +942,17 @@ class modScrumProject extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumkanbanlist',
 			// This is a Left menu entry
 			'type'=>'left',
-			'titre'=>'StatusScrumKanbanReady',
+			'titre'=>'StatusAdvKanbanReady',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumkanbanlist1',
-			'url'=>'/scrumproject/scrumkanban_list.php?mainmenu=project&leftmenu=scrumkanban&search_status=1',
+			'url'=>'/advancedkanban/advkanban_list.php?mainmenu=project&leftmenu=scrumkanban&search_status=1',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumkanban\'  && !empty($conf->global->SP_ENABLE_KANBAN)',
+			'enabled'=>'$conf->advancedkanban->enabled && $leftmenu==\'scrumkanban\'  && !empty($conf->global->SP_ENABLE_KANBAN)',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'perms'=>'$user->rights->advancedkanban->advkanban->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0,
@@ -1020,17 +962,17 @@ class modScrumProject extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=project,fk_leftmenu=scrumkanbanlist',
 			// This is a Left menu entry
 			'type'=>'left',
-			'titre'=>'StatusScrumKanbanDone',
+			'titre'=>'StatusAdvKanbanDone',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumkanbanlist2',
-			'url'=>'/scrumproject/scrumkanban_list.php?mainmenu=project&leftmenu=scrumkanban&search_status=2',
+			'url'=>'/advancedkanban/advkanban_list.php?mainmenu=project&leftmenu=scrumkanban&search_status=2',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use '$conf->scrumproject->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'$conf->scrumproject->enabled && $leftmenu==\'scrumkanban\' && !empty($conf->global->SP_ENABLE_KANBAN)',
+			'enabled'=>'$conf->advancedkanban->enabled && $leftmenu==\'scrumkanban\' && !empty($conf->global->SP_ENABLE_KANBAN)',
 			// Use 'perms'=>'$user->rights->scrumproject->level1->level2' if you want your menu with a permission rules
-			'perms'=>'$user->rights->scrumproject->scrumuserstorysprint->read',
+			'perms'=>'$user->rights->advancedkanban->advkanban->read',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0,

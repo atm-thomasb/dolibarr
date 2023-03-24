@@ -74,7 +74,7 @@ $modulepart = GETPOST('modulepart', 'aZ09');	// Used by actions_setmoduleoptions
 $value = GETPOST('value', 'alpha');
 $label = GETPOST('label', 'alpha');
 $scandir = GETPOST('scan_dir', 'alpha');
-$type = 'myobject';
+$type = 'scrumproject';
 
 
 
@@ -193,21 +193,8 @@ $item->fieldAttr = array(
 );
 $item->helpText = $langs->trans('SP_DEFAULT_NB_WORKING_HOURS_BY_DAY_HELP');
 
-$item = $formSetup->newItem('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE');
 
-$sql = "SELECT code, libelle FROM  ".MAIN_DB_PREFIX."c_type_contact WHERE active=1 AND element='scrumproject_scrumcard' AND source='internal'";
-$contactsType = $db->getRows($sql);
-$TSelect = array();
-if($contactsType){
-	foreach ($contactsType as $contactType){
-		$TSelect[$contactType->code] = $langs->trans($contactType->libelle);
-		if($conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE == $contactType->code){
-			$item->fieldOutputOverride = $TSelect[$contactType->code];
-		}
-	}
-}
-$item->fieldInputOverride = $form->selectArray('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE', $TSelect, $conf->global->SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE);
-
+//$item = $formSetup->newItem('SCRUMPROJECT_DEFAULT_KANBAN_CONTACT_CODE');
 
 
 $formSetup->newItem('SP_SETUPTITLE_KANBAN')->setAsTitle();
@@ -216,22 +203,9 @@ $formSetup->newItem('SP_SETUPTITLE_KANBAN')->setAsTitle();
 $formSetup->newItem('SP_ENABLE_KANBAN')->setAsYesNo();
 
 
-
-$item = $formSetup->newItem('SP_KANBAN_DISPLAY_STATUS_MODE');
-$TField = array(
-	'' => $langs->trans('DoNotDisplayStatus'),
-	'dot' => $langs->trans('DisplayAsDotBadge'),
-	'badge' => $langs->trans('DisplayAsBadge'),
-);
-$item->setAsSelect($TField);
-
 // Ne pas permettre le split de tâche si le temps est consommé
 $formSetup->newItem('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND')->setAsYesNo();
 
-
-
-$item = $formSetup->newItem('SP_KANBAN_UNSPLASH_API_KEY');
-$item->helpText = $langs->trans('SP_KANBAN_UNSPLASH_API_KEY_HELP');
 
 
 
@@ -421,8 +395,6 @@ $myTmpObjects = array();
 $myTmpObjects['ScrumSprint'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
 $myTmpObjects['ScrumUserStory'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
 //$myTmpObjects['ScrumUserTask'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
-$myTmpObjects['ScrumKanban'] = array('includerefgeneration'=>1, 'includedocgeneration'=>0);
-$myTmpObjects['ScrumCard'] = array('includerefgeneration'=>0, 'includedocgeneration'=>0);
 
 
 foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {

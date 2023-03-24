@@ -89,9 +89,6 @@ function _actionLiveUpdate(&$jsonResponse){
 		),
 		'scrumproject_scrumsprintuser' => array(
 			'allowedFields' => array('qty_availability', 'availability_rate', 'qty_velocity')
-		),
-		'scrumproject_scrumkanbanlist' => array(
-			'allowedFields' => array('label')
 		)
 	);
 
@@ -99,7 +96,6 @@ function _actionLiveUpdate(&$jsonResponse){
 	$TWriteRight = array(
 		'scrumproject_scrumuserstorysprint' => $user->rights->scrumproject->scrumuserstorysprint->write,
 		'scrumproject_scrumsprintuser' => $user->rights->scrumproject->scrumsprintuser->write,
-		'scrumproject_scrumkanbanlist' => $user->rights->scrumproject->scrumsprintuser->write,
 	);
 
 

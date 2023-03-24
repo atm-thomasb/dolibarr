@@ -33,16 +33,16 @@ ScrumProjectSetup = Configuration du module Projet Scrum
 Settings = Réglages
 ScrumProjectSetupPage = Page de configuration du module Projet Scrum
 ScrumSprintExtraFields = Attributs supplémentaires sprints
-ScrumKanbanExtraFields = Attributs supplémentaires Kanban
+AdvKanbanExtraFields = Attributs supplémentaires Kanban
 ScrumUserStoryExtraFields = Attributs supplémentaires User story
 ScrumUserStorySprintExtraFields = Attributs supplémentaires User story planifiés
-ScrumCardExtraFields = Attributs supplémentaires cartes
+AdvKanbanCardExtraFields = Attributs supplémentaires cartes
 NumberingModules = Modèles de numérotation pour %s
-ScrumCardStage = Projet Scrum - Étapes des cartes
+AdvKanbanCardStage = Projet Scrum - Étapes des cartes
 
 SP_MAX_SCRUM_TASK_STEP_QTY = Granularité des quantités pour les tâches scrum et les User stories
 SP_MAX_SCRUM_TASK_MAX_QTY = Quantités maximal pouvant être affecter à une tâche scrum
-SP_ENABLE_KANBAN = Activer le menu kanban permettant l'usage de kanban hors sprint
+SP_ENABLE_KANBAN = Activer une copie du menu kanban dans projet (en plus de outils)
 SP_DEFAULT_NB_WORKING_HOURS_BY_DAY = Nombres d'heures par défaut pour une journée de travail
 SP_DEFAULT_NB_WORKING_HOURS_BY_DAY_HELP = Sera utilisé pour les calculs de certaines planifications et les alertes liées aux saisies des temps sur le sprint
 
@@ -73,11 +73,11 @@ ScrumUserStory = User story
 NewScrumUserStory = Nouvelle User story
 ScrumUserStorySprint = User story plannifiés
 NewScrumUserStorySprint = Nouvelle plannification
-NewScrumKanban = Nouveau Kanban
-CreateNewScrumKanban = Créer nouveau Kanban
+NewAdvKanban = Nouveau Kanban
+CreateNewAdvKanban = Créer nouveau Kanban
 SelectKanbanClone = Copier la structure du Kanban :
 ConfirmCreateAsk=Voulez-vous vraiment créer un kanban pour <b> %s </b> ?
-DisplayScrumKanban = Afficher Kanban
+DisplayAdvKanban = Afficher Kanban
 
 LeftMenuDeveloperAvailability = Dispo RH
 
@@ -127,7 +127,7 @@ ScrumProjectUserVelocityRate = Ratio de vélocité
 ScrumProjectUserRole = Rôle scrum
 ScrumProjectUserRolePO = Product Owner
 ScrumProjectUserRoleDEV = Developer
-ScrumKanbanNotDefine = Aucun Kanban pour le Sprint "%s"
+AdvKanbanNotDefine = Aucun Kanban pour le Sprint "%s"
 ProductivityReal = Productivité réelle
 ProductivityRealHelp = Productivité calculée sur la base des temps saisies
 ProductivityGoal = Objectif
@@ -180,7 +180,7 @@ ProjectPlanningReportMenu = Planning projets
 ListOfSprintProjectPlanning = Planning projets/prints
 ScrumUserStorySprintShort=Liste des US planifiées
 #####################################################
-# ScrumCard
+# AdvKanbanCard
 #
 Points = Points
 Stage = Étape
@@ -192,14 +192,14 @@ SetBackToReady = Retour en prête
 #
 # Liste
 #
-ScrumCard = Carte scrum
-ScrumCards = cartes scrum
-ScrumCardTab = Cartes
-NewScrumCard = Nouvelle carte
-StatusScrumCardDraft = Brouillon
-StatusScrumCardReady = A faire
-StatusScrumCardDone = Terminée
-GoToScrumCards = Voir les cartes
+AdvKanbanCard = Carte scrum
+AdvKanbanCards = cartes scrum
+AdvKanbanCardTab = Cartes
+NewAdvKanbanCard = Nouvelle carte
+StatusAdvKanbanCardDraft = Brouillon
+StatusAdvKanbanCardReady = A faire
+StatusAdvKanbanCardDone = Terminée
+GoToAdvKanbanCards = Voir les cartes
 
 
 
@@ -289,20 +289,20 @@ XUserStoryCreated = %s user stories créée(s)
 XUserStorySprintCreated = %s user stories plannifiée(s)
 
 
-# ScrumKanban
-ScrumKanban = Kanban
-ScrumKanbans = Kanbans
-StatusScrumKanbanDraft = Brouillon
-StatusScrumKanbanReady = Prêt
-StatusScrumKanbanDone = Terminée
-ScrumCardLinkedTo=Lié à
-ScrumCardLinkedToHelp=Element Dolibarr auquel cette carte est liée
+# AdvKanban
+AdvKanban = Kanban
+AdvKanbans = Kanbans
+StatusAdvKanbanDraft = Brouillon
+StatusAdvKanbanReady = Prêt
+StatusAdvKanbanDone = Terminée
+AdvKanbanCardLinkedTo=Lié à
+AdvKanbanCardLinkedToHelp=Element Dolibarr auquel cette carte est liée
 
 
 TypeContact_scrumproject_scrumsprint_internal_PO = Product Owner
 TypeContact_scrumproject_scrumsprint_internal_DEV = Développeur
-TypeContact_scrumproject_scrumcard_internal_PO = Product Owner
-TypeContact_scrumproject_scrumcard_internal_DEV = Développeur
+TypeContact_advancedkanban_advkanbancard_internal_PO = Product Owner
+TypeContact_advancedkanban_advkanbancard_internal_DEV = Développeur
 TypeContact_scrumproject_scrumtask_internal_PO = Product Owner
 TypeContact_scrumproject_scrumtask_internal_DEV = Développeur
 TypeContact_scrumproject_scrumuserstorysprint_internal_PO = Product Owner
@@ -333,8 +333,8 @@ MoreTimeSpendsThanAvailability = Temps saisi %s supérieur au temps disponible %
 
 SP_FormatQtyHourShort = %02dh%02d
 CantDeleteTaskWhenTimeAlreadySpent = Il n'est pas possible de supprimer car du temps saisi est associé.
-ErrorOnFetchingAllScrumCardsAffectedToTask = Une erreur c'est produite lors de la récupération de la liste des cartes kanban associées à la tâche scrum
-ErrorOnFetchingAllScrumCardsAffectedToElement = Une erreur c'est produite lors de la récupération de la liste des cartes kanban associées à l'objet
+ErrorOnFetchingAllAdvKanbanCardsAffectedToTask = Une erreur c'est produite lors de la récupération de la liste des cartes kanban associées à la tâche scrum
+ErrorOnFetchingAllAdvKanbanCardsAffectedToElement = Une erreur c'est produite lors de la récupération de la liste des cartes kanban associées à l'objet
 ErrorTimeOnScrumUserStorySprint = Impossible de supprimer une tâche planifiée ayant une quantité consommée
 ErrorTimeOnScrumTask = Impossible de supprimer une tâche ayant du temps consommé
 Confirmed = Confirmé
@@ -357,9 +357,9 @@ KanbanInfos = Informations sur le kanban
 CreatedOn = Créé le
 KanbanSlidePanelTitle = Infos & paramètres
 
-ReadScrumKanban = Voir kanban
-WriteScrumKanban = Modifier kanban
-DeleteScrumKanban = Supprimer kanban
+ReadAdvKanban = Voir kanban
+WriteAdvKanban = Modifier kanban
+DeleteAdvKanban = Supprimer kanban
 
 RequireValidFieldToModify = Champ invalide
 RequireFieldKey = Field key required

@@ -100,13 +100,13 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		// You can isolate code for each action in a separate method: this method should be named like the trigger in camelCase.
 		// For example : COMPANY_CREATE => public function companyCreate($action, $object, User $user, Translate $langs, Conf $conf)
 		$methodName = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', strtolower($action)))));
-		$callback = array($this, $methodName);
-		if (is_callable($callback)) {
-			dol_syslog(
-				"Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id
-			);
-			return call_user_func($callback, $action, $object, $user, $langs, $conf);
-		};
+		if (is_callable( array($this, $action))) {
+			dol_syslog( "Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id );
+			return call_user_func(array($this, $action), $action, $object, $user, $langs, $conf);
+		}elseif (is_callable( array($this, $methodName))) {
+			dol_syslog( "Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id );
+			return call_user_func(array($this, $methodName), $action, $object, $user, $langs, $conf);
+		}
 
 		return 0;
 	}
@@ -178,19 +178,19 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		return 0;
 	}
 
-	public function scrumCardCreate($action, $object, User $user, Translate $langs, Conf $conf) {
+	public function advKanbanCardCreate($action, $object, User $user, Translate $langs, Conf $conf) {
 		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
 	}
 
-	public function scrumCardModify($action, $object, User $user, Translate $langs, Conf $conf) {
+	public function advKanbanCardModify($action, $object, User $user, Translate $langs, Conf $conf) {
 		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
 	}
 
-	public function scrumCardDone($action, $object, User $user, Translate $langs, Conf $conf) {
+	public function advKanbanCardDone($action, $object, User $user, Translate $langs, Conf $conf) {
 		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
 	}
 
-	public function scrumCardReopen($action, $object, User $user, Translate $langs, Conf $conf) {
+	public function advKanbanCardReopen($action, $object, User $user, Translate $langs, Conf $conf) {
 		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
 	}
 
@@ -230,6 +230,42 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 			}
 		}
 
+	}
+
+	/**
+	 * TRIGGER : ADVANCEDKANBAN_GET_COMPATIBLE_ELEMENT_LIST
+	 * @param           $action
+	 * @param AdvKanbanCard $object
+	 * @param User      $user
+	 * @param Translate $langs
+	 * @param Conf      $conf
+	 * @return void
+	 */
+	public function advancedkanbanGetCompatibleElementList($action, $object, User $user, Translate $langs, Conf $conf) {
+
+		if ($object->element_type == 'scrumproject_scrumtask'){
+			$object->fields['fk_element']['visible'] = '5'; // Non mofifiable
+		}
+
+		// OVERRRIDE COMPATIBLE LIST we can't change
+		$object->compatibleElementList['scrumproject_scrumtask'] = array(
+			'selectable' => false,
+			'label' => $langs->trans('ScrumTask'),
+			'class' => 'ScrumTask',
+			'classfile' => 'scrumproject/class/scrumtask.class.php',
+		);
+
+		if ($object->element_type == 'scrumproject_scrumuserstorysprint'){
+			$object->fields['fk_element']['visible'] = '5'; // Non mofifiable
+		}
+
+		// OVERRRIDE COMPATIBLE LIST we can't change
+		$object->compatibleElementList['scrumproject_scrumuserstorysprint'] = array(
+			'selectable' => false,
+			'label' => $langs->trans('ScrumUserStorySprint'),
+			'class' => 'ScrumUserStorySprint',
+			'classfile' => 'scrumproject/class/ScrumUserStorySprint.class.php',
+		);
 	}
 
 

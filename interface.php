@@ -50,14 +50,14 @@ global $langs, $db, $hookmanager, $user, $mysoc;
 $hookmanager->initHooks('scrumuserstorysprintplanwizardinterface');
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("scrumproject@scrumproject","scrumkanban@scrumproject", "other", 'main'));
+$langs->loadLangs(array("scrumproject@scrumproject","advancedkanban@advancedkanban", "other", 'main'));
 
 $action = GETPOST('action');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
 
-$jsonResponse = new JsonResponse();
+$jsonResponse = new ScrumProject\JsonResponse();
 
 
 if ($action === 'get-sprint-autocompletion') {

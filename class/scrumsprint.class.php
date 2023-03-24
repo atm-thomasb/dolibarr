@@ -99,7 +99,6 @@ class ScrumSprint extends CommonObject
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
@@ -108,6 +107,7 @@ class ScrumSprint extends CommonObject
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'comment'=>"Reference of object"),
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'fk_team' => array('type'=>'integer:UserGroup:user/class/usergroup.class.php', 'label'=>'SprintTeam', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'usergroup.rowid',),
+		'fk_advkanban' => array('type'=>'integer:AdvKanban:advancedkanban/class/advkanban.class.php', 'label'=>'Kanban', 'enabled'=>'$conf->advancedkanban->enabled', 'position'=>20, 'notnull'=>0, 'visible'=>5, 'foreignkey'=>'advancedkanban_advkanban.rowid',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'SprintLabel', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
 		'date_start' => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>35, 'notnull'=>1, 'visible'=>1,'showoncombobox'=>'1',),
 		'date_end' => array('type'=>'date', 'label'=>'DateEnd', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>1,'showoncombobox'=>'1',),
@@ -129,6 +129,7 @@ class ScrumSprint extends CommonObject
 	public $ref;
 	public $entity;
 	public $fk_team;
+	public $fk_advkanban;
 	public $label;
 	public $date_start;
 	public $date_end;
@@ -145,7 +146,6 @@ class ScrumSprint extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
-	// END MODULEBUILDER PROPERTIES
 
 
 	// If this object has a subtable with lines
@@ -401,6 +401,27 @@ class ScrumSprint extends CommonObject
 	}
 
 	/**
+	 * Load object in memory from the database
+	 *
+	 * @param int    $fk_advkanban   Id kanban
+	 * @return ScrumSprint | false
+	 */
+	public static function getScrumSprintFromKanban($fk_advkanban)
+	{
+		global $db;
+		$sprint = new self($db);
+		$result = $sprint->fetchCommon('', '', ' AND fk_advkanban = '.intval($fk_advkanban));
+		if ($result > 0){
+			if(!empty($sprint->table_element_line)) {
+				$sprint->fetchLines();
+			}
+			return $sprint;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Load object lines in memory from the database
 	 *
 	 * @return int         <0 if KO, 0 if not found, >0 if OK
@@ -531,7 +552,144 @@ class ScrumSprint extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		global $langs;
+
+		if($this->autoCreateMissingListForKanban($user, $notrigger) < 0){
+			return -1;
+		}
+
 		return $this->updateCommon($user, $notrigger);
+	}
+
+	/**
+	 * Create missing list for kanban
+	 *
+	 * @param  User $user      User that modifies
+	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
+	 * @return int             <0 if KO, >0 if OK
+	 */
+	public function autoCreateMissingListForKanban(User $user, $notrigger = false){
+		global $langs;
+
+		// Add DONE list if not exists
+		if($this->fk_advkanban > 0 ){
+
+			dol_include_once('/advancedkanban/class/advkanbanlist.class.php');
+
+			$staticAdvKanbanList = new AdvKanbanList($this->db);
+			$obj = $this->db->getRow("SELECT COUNT(rowid) nb, MAX(fk_rank) maxRank FROM ".$this->db->prefix().$staticAdvKanbanList->table_element." WHERE fk_advkanban = ".intval($this->fk_advkanban)." AND ref_code = 'done' ");
+			if($obj && $obj->nb == 0){
+				// create done list
+				$doneList = new AdvKanbanList($this->db);
+				$doneList->fk_advkanban = $this->fk_advkanban;
+				$doneList->label = $langs->transnoentities('KanbanDoneList');
+				$doneList->ref_code = 'done';
+				$doneList->fk_rank = intval($obj->maxRank) + 1;
+				$res = $doneList->create($user, $notrigger);
+				if($res<0){
+					$this->errors[] = $doneList->errorsToString();
+					return  -1;
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * Create missing list for kanban
+	 *
+	 * @param  User $user      User that modifies
+	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
+	 * @return int             <0 if KO, >0 if OK
+	 */
+	public function createAdvKanbanCardsInAdvKanban(User $user, $notrigger = false){
+		$errors = 0;
+		if($this->fk_advkanban > 0 ){
+
+			if(!class_exists('ScrumUserStorySprint')){ require_once __DIR__ . '/scrumuserstorysprint.class.php'; }
+			if(!class_exists('ScrumUserStory')){ require_once __DIR__ . '/scrumuserstory.class.php'; }
+			if(!class_exists('ScrumTask')){ require_once __DIR__ . '/scrumtask.class.php'; }
+
+
+
+			$backLogList = new AdvKanbanList($this->db);
+			$resFetch = $backLogList->fetchFromKanbanAndListRefCode($this->fk_advkanban, 'backlog');
+			if($resFetch<0){
+				// creation des listes manquantes
+				if($this->autoCreateMissingListForKanban($user, $notrigger)>0){
+					$this->error = $backLogList->errorsToString();
+					return -1;
+				}
+
+				$resFetch = $backLogList->fetchFromKanbanAndListRefCode($this->fk_advkanban, 'backlog');
+				if($resFetch<0) {
+					$this->error = $backLogList->errorsToString();
+					return -1;
+				}
+			}
+
+			if(empty($resFetch)){
+				$this->error = '';
+				return -1;
+			}
+
+			// Add users stories to sprint
+			$staticScrumUserStorySprint = new ScrumUserStorySprint($this->db);
+
+			/**
+			 * @var ScrumUserStorySprint[] $TUsersStorySprint
+			 */
+			$TUsersStorySprint = $staticScrumUserStorySprint->fetchAll( 'ASC', 'business_value',0,  0, array('fk_scrum_sprint' => $this->fk_scrum_sprint));
+			if(!empty($TUsersStorySprint) && is_array($TUsersStorySprint)){
+				foreach ($TUsersStorySprint as $usSprint){
+					/**
+					 * @var ScrumUserStory $us
+					 */
+					$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $usSprint->fk_scrum_user_story);
+					if($us){
+						$card = new ScrumCard($this->db);
+						$card->label = $us->label;
+						$card->fk_element = $usSprint->id;
+						$card->element_type = $usSprint->element;
+						$card->fk_scrum_kanbanlist = $backLogList->id;
+						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems() +1 ;
+						$res = $card->create($user, $notrigger);
+						if($res>0){
+							// Ajout des tâches
+							$staticTask = new ScrumTask($this->db);
+							$TScrumTask = $staticTask->fetchAll('', '', 0, 0, array('fk_scrum_user_story_sprint' => $usSprint->id));
+							if(!empty($TScrumTask) && is_array($TScrumTask)){
+								foreach ($TScrumTask as $scrumTask){
+									$card = new ScrumCard($this->db);
+									$card->label = $scrumTask->label;
+									$card->fk_element = $scrumTask->id;
+									$card->element_type = $scrumTask->element;
+									$card->fk_scrum_kanbanlist = $backLogList->id;
+									$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems() +1;
+									$res = $card->create($user, $notrigger);
+									if($res<=0){
+										$this->errors[] = $card->errorsToString();
+										$errors++;
+									}
+								}
+							}
+						}else{
+							$this->errors[] = $card->errorsToString();
+							$errors++;
+						}
+					}else{
+						$this->errors[] = 'US not found';
+						$errors++;
+					}
+				}
+			}elseif($TUsersStorySprint < 0){
+				$this->errors[] = $staticScrumUserStorySprint->errorsToString();
+				$errors++;
+			}
+		}
+
+		if($errors){ return -1; }
+		return 1;
 	}
 
 	/**
@@ -1310,19 +1468,12 @@ class ScrumSprint extends CommonObject
 	 */
 	public function getKanbanId()
 	{
-		global $db;
-
-		$sql = 'SELECT rowid FROM ' . MAIN_DB_PREFIX . 'scrumproject_scrumkanban';
-		$sql .= ' WHERE fk_scrum_sprint = ' . $this->id;
-		$res = $db->query($sql);
-
-		if (!$res) {
-			$errors[] = $db->error();
-			setEventMessages('', $errors, 'errors');
-			return -1;
+		if($this->fk_advkanban > 0){
+			return $this->fk_advkanban;
 		}
-		if ($obj = $db->fetch_object($res)) return $obj->rowid;
-		return -2;
+		else{
+			return 0;
+		}
 	}
 
 	/**
@@ -1723,6 +1874,33 @@ class ScrumSprint extends CommonObject
 		}
 
 		return $TUsersIds;
+	}
+
+
+	/**
+	 *
+	 * @return int
+	 */
+	public function calcUsPlannedInList($ref_code = 'done'){
+
+		if(empty($this->fk_advkanban) ){
+			return 0;
+		}
+
+		// TODO : changer les calculs et les baser sur le status des US et non les colonnes du kanban si les statuts des us refont leurs apparition
+
+		$sql = /** @lang MySQL */ "SELECT SUM(usp.qty_planned) sumPlanned "
+			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint usp "
+			." JOIN ".MAIN_DB_PREFIX."advancedkanban_advkanbancard c ON (c.fk_element = usp.rowid AND c.element_type = 'scrumproject_scrumuserstorysprint' )"
+			." WHERE  usp.fk_scrum_sprint = ".intval($this->id)
+			." AND  c.fk_advkanbanlist IN (SELECT l.rowid FROM ".MAIN_DB_PREFIX."advancedkanban_advkanbanlist l WHERE l.ref_code = '".$this->db->escape($ref_code)."')  ";
+
+		$obj = $this->db->getRow($sql);
+		if($obj){
+			return doubleval($obj->sumPlanned);
+		}
+
+		return false;
 	}
 
 	/**

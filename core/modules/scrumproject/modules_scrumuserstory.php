@@ -64,7 +64,7 @@ abstract class ModelePDFScrumUserStory extends CommonDocGenerator
 
 
 /**
- *  Parent class to manage numbering of ScrumCard
+ *  Parent class to manage numbering of AdvKanbanCard
  */
 abstract class ModeleNumRefScrumUserStory
 {

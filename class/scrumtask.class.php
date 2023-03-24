@@ -242,65 +242,72 @@ class ScrumTask extends CommonObject
 		//$resultvalidate = $this->validate($user, $notrigger);
 
 		// Kanban
-		if(!class_exists('ScrumKanban')){ require_once __DIR__ .'/scrumkanban.class.php'; }
-		if(!class_exists('ScrumKanbanList')){ require_once __DIR__ .'/scrumkanbanlist.class.php'; }
-		if(!class_exists('ScrumCard')){ require_once __DIR__ .'/scrumcard.class.php'; }
+		if(!class_exists('AdvKanban')){ dol_include_once('/advancedkanban/class/advkanban.class.php'); }
+		if(!class_exists('AdvKanbanList')){ dol_include_once('/advancedkanban/class/advkanbanlis.class.php'); }
+		if(!class_exists('AdvKanbanCard')){ dol_include_once('/advancedkanban/class/advkanbancard.class.php'); }
 		if(!class_exists('ScrumUserStorySprint')){ require_once __DIR__ .'/scrumuserstorysprint.class.php'; }
+		if(!class_exists('scrumSprint')){ require_once __DIR__ .'/crumsprint.class.php'; }
 
 		$scrumUserStorySprint = new ScrumUserStorySprint($this->db);
 		$res = $scrumUserStorySprint->fetch($this->fk_scrum_user_story_sprint);
 		if($res > 0) {
-			$staticScrumKanban = new ScrumKanban($this->db);
-			$TScrumKanban = $staticScrumKanban->fetchAll('','', 1, 0, array('fk_scrum_sprint' => $scrumUserStorySprint->fk_scrum_sprint));
-			if(is_array($TScrumKanban) && !empty($TScrumKanban)){
-				foreach ($TScrumKanban as $scrumkanban){
-					$staticScrumKanbanList = new ScrumKanbanList($scrumUserStorySprint->db);
-                    if(isset($this->context['fk_scrum_kanbanlist'])){
-                        $TScrumKanbanList = [$staticScrumKanbanList];
-                        $customsql = 'fk_scrum_kanban = '.intval($scrumkanban->id).' AND  rowid = '.intval($this->context['fk_scrum_kanbanlist']);
-                    } else {
-                        $customsql = 'fk_scrum_kanban = '.intval($scrumkanban->id).' AND  ref_code = \'backlog\'';
-                    }
-					$TScrumKanbanList = $staticScrumKanbanList->fetchAll('','', 1, 0, array('customsql' => $customsql));
-					if(!empty($TScrumKanbanList) && is_array($TScrumKanbanList)){
-						$backLogList = reset($TScrumKanbanList);
 
-						$card = new ScrumCard($scrumUserStorySprint->db);
-						$card->label = $this->label;
-						$card->fk_element = $this->id;
-						$card->element_type = $this->element;
-						$card->fk_scrum_kanbanlist = $backLogList->id;
-						if(isset($params['ScrumCard'])  && !empty($params['ScrumCard']['fk_scrum_kanbanlist'])) {
-							if(!$card->validateField($card->fields, 'fk_scrum_kanbanlist', $params['ScrumCard']['fk_scrum_kanbanlist'])){
-								$this->error = 'Fail creating scrumcard : '.$card->getFieldError('fk_scrum_kanbanlist');
-								return -1;
-							}
+			$scrumSprint = new ScrumSprint($this->db);
+			if($scrumSprint->fetch($scrumUserStorySprint->fk_scrum_sprint) < 0){
+				$this->error = 'Fail fetch sprint';
+				return -1;
+			}
 
-							$card->fk_scrum_kanbanlist = $params['ScrumCard']['fk_scrum_kanbanlist'];
+			$staticAdvKanban = new AdvKanban($this->db);
+			$kanban = $staticAdvKanban->fetch($scrumSprint->fk_advkanban);
+			if($kanban<0) {
+				$this->error = 'Fail fetch kanban';
+				return -1;
+			}
+
+			if($kanban>0) {
+				$staticAdvKanbanList = new AdvKanbanList($scrumUserStorySprint->db);
+				if(isset($params['AdvKanbanCard']['fk_advkanbanlist'])){
+					$customsql = ' rowid = '.intval($params['AdvKanbanCard']['fk_advkanbanlist']);
+				} else {
+					$customsql = 'fk_advkanban = '.intval($scrumSprint->fk_advkanban).' AND  ref_code = \'backlog\'';
+				}
+				$TAdvKanbanList = $staticAdvKanbanList->fetchAll('','', 1, 0, array('customsql' => $customsql));
+				if(!empty($TAdvKanbanList) && is_array($TAdvKanbanList)){
+					$backLogList = reset($TAdvKanbanList);
+
+					$card = new AdvKanbanCard($scrumUserStorySprint->db);
+					$card->label = $this->label;
+					$card->fk_element = $this->id;
+					$card->element_type = $this->element;
+					$card->fk_advkanbanlist = $backLogList->id;
+					if(isset($params['AdvKanbanCard'])  && !empty($params['AdvKanbanCard']['fk_advkanbanlist'])) {
+						if(!$card->validateField($card->fields, 'fk_advkanbanlist', $params['AdvKanbanCard']['fk_advkanbanlist'])){
+							$this->error = 'Fail creating AdvKanbanCard : '.$card->getFieldError('fk_advkanbanlist');
+							return -1;
 						}
 
-						//Gestion du rang
-						$rank = $card->getCardRankByElement($backLogList->id, 'scrumproject_scrumuserstorysprint', $this->fk_scrum_user_story_sprint);
-						if(isset($params['ScrumCard'])  && !empty($params['ScrumCard']['fk_rank'])) {
-							$rank = $params['ScrumCard']['fk_rank'];
-						}
-						if($rank > 0) {
-							$newRank = $rank++;
-							$card->updateAllCardRankAfterRank($newRank);
-							$card->fk_rank = $newRank;
-						}
-						else $card->fk_rank = $backLogList->getMaxRankOfKanBanListItems()+1;
+						$card->fk_advkanbanlist = $params['AdvKanbanCard']['fk_advkanbanlist'];
+					}
 
-						$res = $card->create($user, $notrigger);
-						if($res<=0) {
-							$this->errors[] = $card->errorsToString();
-							$resultcreate = $res;
-						}
+					//Gestion du rang
+					$rank = $card->getCardRankByElement($backLogList->id, 'scrumproject_scrumuserstorysprint', $this->fk_scrum_user_story_sprint);
+					if(isset($params['AdvKanbanCard'])  && !empty($params['AdvKanbanCard']['fk_rank'])) {
+						$rank = $params['AdvKanbanCard']['fk_rank'];
+					}
+					if($rank > 0) {
+						$newRank = $rank++;
+						$card->fk_rank = $newRank;
+						$card->shiftAllCardRankAfterRank();
+					}
+					else $card->fk_rank = $backLogList->getMaxRankOfKanBanListItems()+1;
+
+					$res = $card->create($user, $notrigger);
+					if($res<=0) {
+						$this->errors[] = $card->errorsToString();
+						$resultcreate = $res;
 					}
 				}
-			}
-			else{
-				// TODO gérer le cas des erreurs : passer ce code dans les triggers ?
 			}
 		}
 
@@ -613,16 +620,17 @@ class ScrumTask extends CommonObject
 		global $langs;
 
 		/**
-		 * TODO : Lors de la mise à jours de cette methode vérifier aussi onScrumCardDelete au cas ou
+		 * TODO : Lors de la mise à jours de cette methode vérifier aussi onAdvKanbanCardDelete au cas ou
 		 */
 		if(!$this->canBeDeleted()){
 			return -1;
 		}
-		if(!class_exists('ScrumCard')){ require_once __DIR__ . '/scrumcard.class.php'; }
-		$staticsScrumCard = new ScrumCard($this->db);
-		if($staticsScrumCard->deleteAllFromElement($user, $this->element, $this->id, $notrigger)<0){
-			$this->error = $staticsScrumCard->error;
-			$this->errors[] = array_merge($this->errors,  $staticsScrumCard->errors);
+
+		if(!class_exists('AdvKanbanCard')){ dol_include_once('/advancedkanban/class/advkanbancard.class.php'); }
+		$staticsAdvKanbanCard = new AdvKanbanCard($this->db);
+		if($staticsAdvKanbanCard->deleteAllFromElement($user, $this->element, $this->id, $notrigger)<0){
+			$this->error = $staticsAdvKanbanCard->error;
+			$this->errors[] = array_merge($this->errors,  $staticsAdvKanbanCard->errors);
 			return -1;
 		}
 
@@ -631,14 +639,14 @@ class ScrumTask extends CommonObject
 
 
 	/**
-	 * On scrumCard delete this scrumTask if affected
+	 * On advKanbanCard delete this scrumTask if affected
 	 *
-	 * @param ScrumCard $scrumCard the scrum card how run this kanban trigger
+	 * @param AdvKanbanCard $advKanbanCard the scrum card how run this kanban trigger
 	 * @param User      $user      User that deletes
 	 * @param bool      $notrigger false=launch triggers after, true=disable triggers
 	 * @return int             <0 if KO, >0 if OK
 	 */
-	public function onScrumCardDelete(ScrumCard $scrumCard, User $user, $notrigger = false)
+	public function onAdvKanbanCardDelete(AdvKanbanCard $advKanbanCard, User $user, $notrigger = false)
 	{
 		global $langs;
 		if(!$this->canBeDeleted()){
@@ -812,30 +820,83 @@ class ScrumTask extends CommonObject
 	 * Update object into database
 	 *
 	 * @param User $user User that modifies
-	 * @param ScrumCard $scrumCard
-	 * @param ScrumKanbanList $kanbanList
+	 * @param AdvKanbanCard $advKanbanCard
+	 * @param AdvKanbanList $kanbanList
 	 * @param bool $noTrigger false=launch triggers after, true=disable triggers
 	 * @param bool $noUpdate false=launch update after, true=disable update
 	 * @return int             <if KO, >0 if OK
 	 */
-	public function dropInKanbanList(User $user, ScrumCard $scrumCard, ScrumKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
+	public function dropInKanbanList(User $user, AdvKanbanCard $advKanbanCard, AdvKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
 	{
 
 		if($this->status != ScrumTask::STATUS_CANCELED){
-			$scrumCard->status = ScrumTask::STATUS_VALIDATED;
+			$advKanbanCard->status = ScrumTask::STATUS_VALIDATED;
 			if($kanbanList->ref_code == 'backlog'){
-				$scrumCard->status = ScrumTask::STATUS_DRAFT;
+				$advKanbanCard->status = ScrumTask::STATUS_DRAFT;
 			}
 			elseif($kanbanList->ref_code == 'done'){
-				$scrumCard->status = ScrumTask::STATUS_DONE;
+				$advKanbanCard->status = ScrumTask::STATUS_DONE;
 			}
+		}
+
+
+		// Déplacement des US avec la tâche si la tâche est la dernière
+		$sqlCount = /** @lang MySQL */
+			'  SELECT COUNT(c.rowid) nbFound '
+			.' FROM '.$this->db->prefix().$advKanbanCard->table_element . ' c '
+			.' JOIN '.$this->db->prefix().$this->table_element . ' st ON( st.rowid = c.fk_element) '
+			.' WHERE c.fk_advkanbanlist IN ('
+			.' 								SELECT l.rowid '
+			.' 								FROM '.$this->db->prefix().$kanbanList->table_element . ' l '
+			.' 								WHERE l.fk_advkanban = '.intval($kanbanList->fk_advkanban)
+			.' 										 AND l.fk_rank < '.intval($kanbanList->fk_rank)
+			.' 							 )'
+			.' AND c.element_type = \''.$this->db->escape($advKanbanCard->element_type).'\' '
+			.' AND c.fk_element = '.intval($advKanbanCard->fk_element)
+			.' AND st.fk_scrum_user_story_sprint = '.intval($this->fk_scrum_user_story_sprint)
+			.' AND c.rowid != '.intval($advKanbanCard->id)
+		;
+
+		$obj = $this->db->getRow($sqlCount);
+		if($obj && intval($obj->nbFound) == 0){
+
+			// recherche de l'us dans le kanban
+			$sqlCount = /** @lang MySQL */
+				'  SELECT c.rowid cardId '
+				.' FROM '.$this->db->prefix().$advKanbanCard->table_element . ' c '
+				.' JOIN '.$this->db->prefix().'scrumproject_scrumuserstorysprint sus ON( sus.rowid = c.fk_element) '
+				.' WHERE c.fk_advkanbanlist IN ('
+				.' 								SELECT l.rowid '
+				.' 								FROM '.$this->db->prefix().$kanbanList->table_element . ' l '
+				.' 								WHERE l.fk_advkanban = '.intval($kanbanList->fk_advkanban)
+				.' 										 AND l.fk_rank < '.intval($kanbanList->fk_rank)
+				.' 							 )'
+				.' AND c.element_type = \'scrumproject_scrumuserstorysprint\' '
+				.' AND c.fk_element = '.intval($this->fk_scrum_user_story_sprint)
+				.' AND sus.rowid = '.intval($this->fk_scrum_user_story_sprint)
+			;
+
+			$obj = $this->db->getRow($sqlCount);
+			if($obj && $obj->cardId > 0){
+
+				$usKanbanCard = new AdvKanbanCard($this->db);
+				$usKanbanCard->fetch($obj->cardId);
+				$usKanbanCard->fk_rank = $advKanbanCard->fk_rank;
+				$usKanbanCard->dropInKanbanList($user, $kanbanList);
+				if(!$usKanbanCard->shiftAllCardRankAfterRank()){
+					$this->error = $usKanbanCard->error;
+					$this->errors = $this->errors;
+					return -1;
+				}
+			}
+
 		}
 
 		if($noUpdate){
 			return 0;
 		}
 
-		return $this->setStatusCommon($user, $scrumCard->status, $noTrigger, 'SCRUMTASK_DROPINKABANLIST');
+		return $this->setStatusCommon($user, $advKanbanCard->status, $noTrigger, 'SCRUMTASK_DROPINKABANLIST');
 	}
 
 	/**
@@ -1502,7 +1563,7 @@ class ScrumTask extends CommonObject
 		$object = new stdClass();
 		$object->objectId = $this->id;
 		$object->ref= $this->ref;
-		$object->type = 'scrum-user-story-task';// le type dans le kanban tel que getScrumKanBanItemObjectFormatted le fait
+		$object->type = 'scrum-user-story-task';// le type dans le kanban tel que getAdvKanBanItemObjectFormatted le fait
 		$object->label = $this->label;
 		$object->element = $this->element;
 		$object->socid = 0;
@@ -1528,13 +1589,58 @@ class ScrumTask extends CommonObject
 	}
 
 	/**
-	 * @param $scrumCard ScrumCard
-	 * @param $object stdClass
+	 * used as callback function for advanced kanban module in advkanbancard.class.php
+	 * @param $advKanbanCard AdvKanbanCard
+	 * @param $cardDataObj stdClass
+	 * @param $tpl stdClass
 	 * @return void
 	 */
-	public function getScrumKanBanItemObjectFormatted($scrumCard,$object){
-		$object->socid = $this->getSocIdAssociated();
-		$object->cardTimeUrl = dol_buildpath('/scrumproject/scrumtask_time_list.php',1).'?id='.$this->id;
+	public function getItemObjectFormattedForAdvKanBan($advKanbanCard, &$cardDataObj, &$tpl){
+		global $langs;
+
+		$langs->load('scrumproject@scrumproject');
+
+		$tpl->useTime = true;
+		$tpl->useAutoStatusBadge = false;
+		$tpl->linkedElementTitle = '';
+		$tpl->timeSpend =   $this->showOutputFieldQuick('qty_consumed');
+		$tpl->timePlanned = $this->showOutputFieldQuick('qty_planned');
+
+
+		$tpl->QtyPlannedTitle = $langs->trans('QtyPlanned');
+		if($this->prod_calc == 'count' ){
+			$tpl->QtyPlannedMoreClass = 'time-planned-count';
+			$tpl->QtyPlannedTitle.= ' - '.$langs->trans($this->fields['prod_calc']['arrayofkeyval'][$this->prod_calc]);
+		}elseif($this->prod_calc == 'onlyspent' ){
+			$tpl->timePlanned.= ' <i class="fa fa-toggle-on" aria-hidden="true"></i>';
+			$tpl->QtyPlannedMoreClass = 'time-planned-onlyspent';
+			$tpl->QtyPlannedTitle.= ' - '.$langs->trans($this->fields['prod_calc']['arrayofkeyval'][$this->prod_calc]);
+			$tpl->QtyPlannedBefore = '<span class="fa fa-calendar-plus-o"></span>';
+		}elseif($this->prod_calc == 'notcount' ){
+			$tpl->timePlanned.= ' <i class="fa fa-toggle-off" aria-hidden="true"></i>';
+			$tpl->QtyPlannedMoreClass = 'time-planned-notcount';
+			$tpl->QtyPlannedTitle.= ' - '.$langs->trans($this->fields['prod_calc']['arrayofkeyval'][$this->prod_calc]);
+			$tpl->QtyPlannedBefore = '<span class="fa fa-calendar-o"></span>';
+		}
+
+		if(doubleval($this->qty_consumed) > doubleval($this->qty_planned) && $this->qty_planned > 0){
+			$cardDataObj->class[] = '--alert';
+			$cardDataObj->class[] = '--time-consumed-error';
+		}
+
+
+		$cardDataObj->label = $this->showOutputFieldQuick('label');
+
+		$cardDataObj->cardUrl = dol_buildpath('/scrumproject/scrumtask_card.php',1).'?id='.$this->id;
+		$cardDataObj->type = 'scrum-user-story-task';
+		$cardDataObj->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
+
+		$cardDataObj->socid = $this->getSocIdAssociated();
+		$cardDataObj->cardTimeUrl = dol_buildpath('/scrumproject/scrumtask_time_list.php',1).'?id='.$this->id;
+
+		$tpl->status = '<span class="highlight-scrum-task prevent-card-click" ></span>';
+
+
 		return null;
 	}
 
@@ -1572,10 +1678,10 @@ class ScrumTask extends CommonObject
 	 * Permet de spliter la carte en 2
 	 * @param double $qty la quantité de la nouvelle carte
 	 * @param string $newCardLabel le libelle de la nouvelle carte
-	 * @param ScrumCard $scrumCard
+	 * @param AdvKanbanCard $advKanbanCard
 	 * @return bool
 	 */
-	public function splitCard($qty, $newCardLabel, ScrumCard $scrumCard, User $user ){
+	public function splitCard($qty, $newCardLabel, AdvKanbanCard $advKanbanCard, User $user ){
 
 		if(!class_exists('ScrumTask')){
 			require_once __DIR__ . '/scrumtask.class.php';
@@ -1585,8 +1691,8 @@ class ScrumTask extends CommonObject
 
 		$this->calcTimeSpent();
 
-		// Vérification de la liaison entre ScrumCard et ScrumTask
-		if($scrumCard->element_type != $this->element || $scrumCard->fk_element != $this->id ){
+		// Vérification de la liaison entre AdvKanbanCard et ScrumTask
+		if($advKanbanCard->element_type != $this->element || $advKanbanCard->fk_element != $this->id ){
 			$this->error = 'Error : scrum card not linked';
 			return false;
 		}
@@ -1616,9 +1722,9 @@ class ScrumTask extends CommonObject
 		if(empty($newCardLabel) || is_array($newCardLabel)){ $newScrumTask->label = $this->label;}
 
 		$createParams = array(
-			'ScrumCard'=> array(
-				'fk_scrum_kanbanlist' => $scrumCard->fk_scrum_kanbanlist,
-				'fk_rank'=> $scrumCard->fk_rank,
+			'AdvKanbanCard'=> array(
+				'fk_advkanbanlist' => $advKanbanCard->fk_advkanbanlist,
+				'fk_rank'=> $advKanbanCard->fk_rank,
 			)
 		);
 
@@ -1638,19 +1744,19 @@ class ScrumTask extends CommonObject
 
 // Bloc deja effectué par  $newScrumTask->create
 //		// AJOUT DE LA CARD LIÉE
-//		$newScrumCard = new ScrumCard($this->db);
+//		$newAdvKanbanCard = new AdvKanbanCard($this->db);
 //		if(empty($newCardLabel)){
-//			$newScrumCard->label = $this->label;
+//			$newAdvKanbanCard->label = $this->label;
 //		}
-//		$newScrumCard->label = $newScrumTask->label;
-//		$newScrumCard->fk_element = $newScrumTask->id;
-//		$newScrumCard->element_type = $newScrumTask->element;
-//		$newScrumCard->fk_scrum_kanbanlist = $scrumCard->fk_scrum_kanbanlist;
-//		$newScrumCard->fk_rank = $scrumCard->fk_rank;
-//		$res = $newScrumCard->create($user);
+//		$newAdvKanbanCard->label = $newScrumTask->label;
+//		$newAdvKanbanCard->fk_element = $newScrumTask->id;
+//		$newAdvKanbanCard->element_type = $newScrumTask->element;
+//		$newAdvKanbanCard->fk_advkanbanlist = $advKanbanCard->fk_advkanbanlist;
+//		$newAdvKanbanCard->fk_rank = $advKanbanCard->fk_rank;
+//		$res = $newAdvKanbanCard->create($user);
 //		if($res<=0){
-//			$this->error = 'Error creating ScrumCard : '.$newScrumCard->error;
-//			$this->errors = array_merge($this->errors, $newScrumCard->errors);
+//			$this->error = 'Error creating AdvKanbanCard : '.$newAdvKanbanCard->error;
+//			$this->errors = array_merge($this->errors, $newAdvKanbanCard->errors);
 //			return false;
 //		}
 
