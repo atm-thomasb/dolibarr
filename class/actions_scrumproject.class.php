@@ -124,13 +124,18 @@ class ActionsScrumProject
 	 */
 	public function addHtmlHeader($parameters, &$object, &$action, $hookmanager)
 	{
+		global $db;
 		$TContext = explode(':', $parameters['context']);
 
 		if (in_array('advkanbanview', $TContext))
 		{
-			print '<!-- ScrumProject hooks -->'."\n";
-			print '<script src="'.dol_buildpath('scrumproject/js/scrumkanban.js', 1).'"></script>'."\n";
-			print '<link rel="stylesheet" type="text/css" href="'.dol_buildpath('scrumproject/css/kanban.css', 1).'" />'."\n";
+			include_once __DIR__ .'/scrumsprint.class.php';
+			$scrumSprint = ScrumSprint::getScrumSprintFromKanban(GETPOST('id', 'int'));
+			if($scrumSprint) {
+				print '<!-- ScrumProject hooks -->' . "\n";
+				print '<script src="' . dol_buildpath('scrumproject/js/scrumkanban.js', 1) . '"></script>' . "\n";
+				print '<link rel="stylesheet" type="text/css" href="' . dol_buildpath('scrumproject/css/kanban.css', 1) . '" />' . "\n";
+			}
 		}
 
 		return 0;

@@ -46,7 +46,7 @@ window.addEventListener('AdvKanban_refreshAllBoards', function (e){
 	};
 
 	o.callScrumProjectKanbanInterface('getSprintInfo', sendData, function(response){
-		if (response.data.sprintInfos){
+		if (response.data && response.data.sprintInfos){
 			let preTargetQuery = '#kanban-header-scrum-sprint-resume .kanban-header__item__value[data-element="scrumproject_scrumsprint"]';
 
 			$(preTargetQuery +'[data-field="date_start"]').html(response.data.sprintInfos.date_start);
