@@ -27,6 +27,36 @@ window.addEventListener('AdvKanban_init', function (e){
 	}
 
 
+	const toggleScrumUserStoryAndTaskHighLight = function($el, usId){
+		const tagetUserStory = '.kanban-item[data-type="scrum-user-story"][data-targetelementid="'+usId+'"]';
+		const tagetUserStoryTask = '.kanban-item[data-type="scrum-user-story-task"][data-fk_scrum_user_story_sprint="'+usId+'"]';
+
+		if($el.attr('data-highlight') == '1'){
+			o.removeHighlight(tagetUserStory);
+			o.removeHighlight(tagetUserStoryTask);
+			return;
+		}
+
+		$(tagetUserStory + ' .highlight-scrum-task').attr('data-highlight', '1');
+		$(tagetUserStoryTask + ' .highlight-scrum-task').attr('data-highlight', '1');
+
+		o.setHighlight(tagetUserStory, '.kanban-item');
+		o.setHighlight(tagetUserStoryTask);
+	}
+
+	$(document).on('click','.kanban-item[data-type="scrum-user-story"] .highlight-scrum-task', function(e) {
+		e.stopPropagation();
+		const usId = $(this).closest('.kanban-item').attr('data-targetelementid');
+		toggleScrumUserStoryAndTaskHighLight($(this), usId);
+	});
+
+	$(document).on('click','.kanban-item[data-type="scrum-user-story-task"] .highlight-scrum-task', function(e) {
+		e.stopPropagation();
+		const usId = $(this).closest('.kanban-item').attr('data-fk_scrum_user_story_sprint');
+		toggleScrumUserStoryAndTaskHighLight($(this), usId);
+	});
+
+
 	// Open dialog for kanban resume
 	$(document).on('click','#kanban-resume-btn', function() {
 		o.sprintResumeDialog();
