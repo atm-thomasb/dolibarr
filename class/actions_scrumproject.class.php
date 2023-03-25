@@ -194,10 +194,19 @@ class ActionsScrumProject
 				$fieldK = 'label';
 				$this->resprints.= '<span class="kanban-header__item"  >';
 				$this->resprints.= '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
-				$this->resprints.= $scrumSprint->getNomUrl(1). ' '.$scrumSprint->showOutputFieldQuick($fieldK);
+				$this->resprints.= $scrumSprint->getNomUrl(1); //. ' '.$scrumSprint->showOutputFieldQuick($fieldK);
 				$this->resprints.= '</span>';
 				$this->resprints.= '</span>';
 
+
+				$fieldK = 'fk_team';
+				$this->resprints.= '<span class="kanban-header__item"  >';
+				$this->resprints.= '<span class="kanban-header__item__value" data-element="'.$scrumSprint->element.'" data-field="'.$fieldK.'" >';
+				$this->resprints.= $scrumSprint->showOutputFieldQuick($fieldK);
+				$this->resprints.= '</span>';
+				$this->resprints.= '</span>';
+
+				/*
 				$this->resprints.= '<span class="kanban-header__item" >';
 				$this->resprints.= '<span class="fa fa-calendar-alt" ></span>';
 				$fieldK = 'date_start';
@@ -213,7 +222,7 @@ class ActionsScrumProject
 				$this->resprints.= '</span>';
 
 				$this->resprints.= '</span>';
-
+				*/
 
 
 				$fieldK = 'qty_velocity';
@@ -271,6 +280,50 @@ class ActionsScrumProject
 		return 0;
 	}
 
+	/**
+	 * kanbanParamPanelBefore Method Hook Call
+	 *
+	 * @param array $parameters parameters
+	 * @param Object $advKanban Object to use hooks on
+	 * @param string $action Action code on calling page ('create', 'edit', 'view', 'add', 'update', 'delete'...)
+	 * @param object $hookmanager class instance
+	 * @return void
+	 */
+	public function kanbanParamPanelBefore($parameters, $advKanban, &$action, $hookmanager){
+		global $langs;
+
+		$TContext = explode(':', $parameters['context']);
+		if (in_array('advkanbanview', $TContext)) {
+			require_once __DIR__ . '/../class/scrumsprint.class.php';
+			$scrumSprint = ScrumSprint::getScrumSprintFromKanban($advKanban->id);
+
+			$this->resprints = '';
+			if ($scrumSprint) {
+
+				$langs->load('scrumproject@scrumproject');
+
+				$this->resprints.= '<details class="option-box">';
+				$this->resprints.= '	<summary class="option-box-title" >'.$langs->trans('SprintInfos').'</summary>';
+				$this->resprints.= '		<div class="option-box-content">';
+
+				$this->resprints.= '			<div class="panel-infos">';
+
+				$fieldK = 'label';
+				$this->resprints.= $scrumSprint->getNomUrl(1).' : '.$scrumSprint->showOutputFieldQuick($fieldK).'<br/>';
+				$fieldK = 'fk_team';
+				$this->resprints.= $langs->trans($scrumSprint->fields[$fieldK]['label']).' : '.$scrumSprint->showOutputFieldQuick($fieldK).'<br/>';
+
+				$this->resprints.= '<span class="fa fa-calendar-alt" ></span>';
+				$this->resprints.= $scrumSprint->showOutputFieldQuick('date_start').' - '.$scrumSprint->showOutputFieldQuick('date_start').'<br/>';
+
+				$this->resprints.= '			</div>';
+
+
+				$this->resprints.= '		</div>';
+				$this->resprints.= '</details>';
+			}
+		}
+	}
 
 	/**
 	 * kanbanParamNavBar Method Hook Call

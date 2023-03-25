@@ -68,7 +68,7 @@ RequireValidSplitData = Les données de découpe sont invalides
 ScrumTaskStatusToDo = A faire
 ScrumTaskStatusDone = Terminé
 
-
+SprintInfos = Informations sur le sprint
 ScrumUserStory = User story
 NewScrumUserStory = Nouvelle User story
 ScrumUserStorySprint = User story plannifiés

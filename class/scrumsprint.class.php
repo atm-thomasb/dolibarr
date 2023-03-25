@@ -910,7 +910,23 @@ class ScrumSprint extends CommonObject
 			$label .= ' '.$this->getLibStatut(5);
 		}
 		$label .= '<br>';
+		$label .= '<b>'.$this->label.'</b> ';
+
+		$label .= '<br>';
 		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
+
+
+
+		$label .= '<br>';
+		$label .= '<span class="fa fa-calendar-alt" ></span> ';
+		$fieldK = 'date_start';
+		$label .= $this->showOutputFieldQuick($fieldK);
+		$label .= ' - ';
+		$fieldK = 'date_end';
+		$label .= $this->showOutputFieldQuick($fieldK);
+
+
+
 
 		$url = dol_buildpath('/scrumproject/scrumsprint_card.php', 1).'?id='.$this->id;
 
