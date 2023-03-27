@@ -93,6 +93,40 @@ window.addEventListener('AdvKanban_refreshAllBoards', function (e){
 	});
 });
 
+/**
+ * On activate filters
+ */
+window.addEventListener('AdvKanban_activeCardsFilters', function (e) {
+
+
+	let scrumTask = $('.highlight-element[data-type="scrum-user-story"]');
+	if(scrumTask.length > 0){
+		scrumTask.each(function(){
+			// TODO faire le decompte des heures
+		});
+	}
+
+	let textScrumResume = $('#nb-scrum-task-found');
+	if(textScrumResume.length > 0){
+		textScrumResume.text(scrumTask.length);
+	}
+
+
+
+
+	let scrumUs = $('.highlight-element[data-type="scrum-user-story-task"]');
+	if(scrumUs.length > 0){
+		scrumUs.each(function(){
+			// TODO faire le decompte des heures
+		});
+	}
+
+	let textScrumUsResume = $('#nb-scrum-user-story-found');
+	if(textScrumUsResume.length > 0){
+		textScrumUsResume.text(scrumUs.length);
+	}
+});
+
 window.addEventListener('AdvKanban_addDropDownItemContextMenu', function (e){
 	let o = e.detail.advKanban;
 	let dataType = e.detail.dataType;
