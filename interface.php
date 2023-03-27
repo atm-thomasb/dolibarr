@@ -95,7 +95,7 @@ $db->close();    // Close $db database opened handler
  * @return array|string  Returns a sequential array of objects with 2 props: "id" (ID of the contract) and "text" (concatenated client / leaser refs)
  *                       If the SQL query fails, return the SQL itself.
  */
-function _getAutocompletionForSprint(JsonResponse $jsonResponse, string $search, int $minDateEnd = 0, $notSprint = array()): bool {
+function _getAutocompletionForSprint($jsonResponse, string $search, int $minDateEnd = 0, $notSprint = array()): bool {
 	/** @var DoliDB $db */
 	global $db, $conf, $langs;
 
