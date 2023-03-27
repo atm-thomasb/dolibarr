@@ -616,7 +616,7 @@ class ScrumSprint extends CommonObject
 			$resFetch = $backLogList->fetchFromKanbanAndListRefCode($this->fk_advkanban, 'backlog');
 			if($resFetch<0){
 				// creation des listes manquantes
-				if($this->autoCreateMissingListForKanban($user, $notrigger)>0){
+				if($this->autoCreateMissingListForKanban($user, $notrigger)<0){
 					$this->error = $backLogList->errorsToString();
 					return -1;
 				}
@@ -639,7 +639,7 @@ class ScrumSprint extends CommonObject
 			/**
 			 * @var ScrumUserStorySprint[] $TUsersStorySprint
 			 */
-			$TUsersStorySprint = $staticScrumUserStorySprint->fetchAll( 'ASC', 'business_value',0,  0, array('fk_scrum_sprint' => $this->fk_scrum_sprint));
+			$TUsersStorySprint = $staticScrumUserStorySprint->fetchAll( 'ASC', 'business_value',0,  0, array('fk_scrum_sprint' => $this->id));
 			if(!empty($TUsersStorySprint) && is_array($TUsersStorySprint)){
 				foreach ($TUsersStorySprint as $usSprint){
 					/**
