@@ -114,7 +114,7 @@ class ScrumSprintUser extends CommonObject
 
 		// fk_user_role : c'est le role en temps que contact, la valeur par défaut est à récupérer sur les extrafields de l'utilisateur todo : ajouter l'extrafield du user role par défaut
 		'fk_user_role' => array('type'=>'integer:', 'label'=>'ScrumUserRoleForTask', 'enabled'=>'1', 'position'=>52, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'c_type_contact.rowid', 'validate'=>'1',),
-		'fk_user' => array('type'=>'integer:User:user/class/user.class.php:1:employee=1', 'label'=>'User', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'user.rowid',),
+		'fk_user' => array('type'=>'integer:User:user/class/user.class.php:1:(employee:=:1)', 'label'=>'User', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'user.rowid',),
 		'qty_availability' => array('type'=>'real', 'label'=>'QtyAvailability', 'help' => 'QtyAvailabilityHelp', 'enabled'=>'1', 'position'=>80, 'notnull'=>1, 'visible'=>1, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'availability_rate' => array('type'=>'real', 'label'=>'AvailabilityRate', 'help' => 'AvailabilityRateHelp', 'enabled'=>'1', 'position'=>90, 'notnull'=>1, 'visible'=>1, 'default'=>'1', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
 		'qty_velocity' => array('type'=>'real', 'label'=>'QtyVelocity', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>5, 'default'=>'0', 'isameasure'=>'1', 'css'=>'maxwidth75imp',),
