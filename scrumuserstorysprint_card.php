@@ -249,7 +249,7 @@ if ($action == 'create') {
 	}
 
 	if(GETPOST('fk_scrum_sprint', 'int') == 0){
-		$object->fields['fk_scrum_sprint']['type'] = 'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1:(status:IN:' . ScrumSprint::STATUS_DRAFT . ', ' . ScrumSprint::STATUS_VALIDATED . ', ' . ScrumSprint::STATUS_PENDING . ')';
+		$object->fields['fk_scrum_sprint']['type'] = 'integer:ScrumSprint:scrumproject/class/scrumsprint.class.php:1:((status:=:' . ScrumSprint::STATUS_DRAFT . ') OR (status:=:' . ScrumSprint::STATUS_VALIDATED . ') OR (status:=:' . ScrumSprint::STATUS_PENDING . '))';
 	}
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
