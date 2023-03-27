@@ -1627,6 +1627,7 @@ class ScrumTask extends CommonObject
 			$cardDataObj->class[] = '--time-consumed-error';
 		}
 
+		$cardDataObj->qty_planned = $this->qty_planned;
 
 		$cardDataObj->label = $this->showOutputFieldQuick('label');
 

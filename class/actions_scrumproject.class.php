@@ -428,8 +428,8 @@ class ActionsScrumProject
 			$scrumSprint = ScrumSprint::getScrumSprintFromKanban($advKanban->id);
 
 			if ($scrumSprint) {
-				$this->resprints .= '<div class="result-resume-item">'.$langs->trans('CardScrumTaskFound').' : <span id="nb-scrum-task-found"></span></div>';
 				$this->resprints .= '<div class="result-resume-item">'.$langs->trans('CardScrumUserStoryFound').' : <span id="nb-scrum-user-story-found"></span></div>';
+				$this->resprints .= '<div class="result-resume-item">'.$langs->trans('CardScrumTaskFound').' : <span id="nb-scrum-task-found"></span></div>';
 			}
 		}
 	}

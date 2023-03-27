@@ -1121,7 +1121,7 @@ class ScrumUserStorySprint extends CommonObject
 			$cardDataObj->class[] = '--time-consumed-error';
 		}
 
-
+		$cardDataObj->qty_planned = $this->qty_planned;
 
 		$tpl->useTime = true;
 		$tpl->useAutoStatusBadge  = false;

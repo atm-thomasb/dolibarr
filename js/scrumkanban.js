@@ -98,32 +98,45 @@ window.addEventListener('AdvKanban_refreshAllBoards', function (e){
  */
 window.addEventListener('AdvKanban_activeCardsFilters', function (e) {
 
+	const zeroPad = (num, places) => String(num).padStart(places, '0')
 
+	const time_convert = function(num)
+	{
+		var hours = Math.floor(num / 60);
+		var minutes = num % 60;
+		return hours + ":" + zeroPad(minutes,2);
+	}
+
+	let scrumTask_qty_planned = 0;
 	let scrumTask = $('.highlight-element[data-type="scrum-user-story"]');
 	if(scrumTask.length > 0){
 		scrumTask.each(function(){
-			// TODO faire le decompte des heures
+			if($(this).attr('data-qty_planned') !== undefined){
+				scrumTask_qty_planned+= parseFloat($(this).attr('data-qty_planned'));
+			}
 		});
 	}
 
 	let textScrumResume = $('#nb-scrum-task-found');
 	if(textScrumResume.length > 0){
-		textScrumResume.text(scrumTask.length);
+		textScrumResume.text(scrumTask.length + ' / ' + time_convert(scrumTask_qty_planned*60));
 	}
 
 
 
-
+	let scrumUS_qty_planned = 0;
 	let scrumUs = $('.highlight-element[data-type="scrum-user-story-task"]');
 	if(scrumUs.length > 0){
 		scrumUs.each(function(){
-			// TODO faire le decompte des heures
+			if($(this).attr('data-qty_planned') !== undefined){
+				scrumUS_qty_planned+= parseFloat($(this).attr('data-qty_planned'));
+			}
 		});
 	}
 
 	let textScrumUsResume = $('#nb-scrum-user-story-found');
 	if(textScrumUsResume.length > 0){
-		textScrumUsResume.text(scrumUs.length);
+		textScrumUsResume.text(scrumUs.length + ' / ' + time_convert(scrumUS_qty_planned*60));
 	}
 });
 
