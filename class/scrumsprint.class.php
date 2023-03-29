@@ -636,6 +636,8 @@ class ScrumSprint extends CommonObject
 			// Add users stories to sprint
 			$staticScrumUserStorySprint = new ScrumUserStorySprint($this->db);
 
+			if(!class_exists('AdvKanbanCard')){ dol_include_once('advancedkanban/class/advkanbancard.class.php'); }
+
 			/**
 			 * @var ScrumUserStorySprint[] $TUsersStorySprint
 			 */
@@ -647,7 +649,7 @@ class ScrumSprint extends CommonObject
 					 */
 					$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $usSprint->fk_scrum_user_story);
 					if($us){
-						$card = new ScrumCard($this->db);
+						$card = new AdvKanbanCard($this->db);
 						$card->label = $us->label;
 						$card->fk_element = $usSprint->id;
 						$card->element_type = $usSprint->element;
@@ -660,7 +662,7 @@ class ScrumSprint extends CommonObject
 							$TScrumTask = $staticTask->fetchAll('', '', 0, 0, array('fk_scrum_user_story_sprint' => $usSprint->id));
 							if(!empty($TScrumTask) && is_array($TScrumTask)){
 								foreach ($TScrumTask as $scrumTask){
-									$card = new ScrumCard($this->db);
+									$card = new AdvKanbanCard($this->db);
 									$card->label = $scrumTask->label;
 									$card->fk_element = $scrumTask->id;
 									$card->element_type = $scrumTask->element;
