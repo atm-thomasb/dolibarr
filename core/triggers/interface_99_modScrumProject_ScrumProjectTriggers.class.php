@@ -178,6 +178,16 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		return 0;
 	}
 
+	public function advKanbanDelete($action, $object, User $user, Translate $langs, Conf $conf) {
+		include_once __DIR__ . '/../../class/scrumsprint.class.php';
+
+		$sprint = ScrumSprint::getScrumSprintFromKanban($object->id);
+		if($sprint){
+			$sprint->fk_advkanban = null;
+			$sprint->update($user);
+		}
+	}
+
 	public function advKanbanCardCreate($action, $object, User $user, Translate $langs, Conf $conf) {
 		$this->_updateSprintQuantities($action, $object, $user, $langs, $conf);
 	}
