@@ -184,7 +184,10 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		$sprint = ScrumSprint::getScrumSprintFromKanban($object->id);
 		if($sprint){
 			$sprint->fk_advkanban = null;
-			$sprint->update($user);
+			if($sprint->update($user)<0){
+				$this->errors[] = 'Fail update linked sprint';
+				return -1;
+			}
 		}
 	}
 
