@@ -653,7 +653,7 @@ class ScrumSprint extends CommonObject
 						$card->label = $us->label;
 						$card->fk_element = $usSprint->id;
 						$card->element_type = $usSprint->element;
-						$card->fk_scrum_kanbanlist = $backLogList->id;
+						$card->fk_advkanbanlist = $backLogList->id;
 						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems() +1 ;
 						$res = $card->create($user, $notrigger);
 						if($res>0){
@@ -666,7 +666,7 @@ class ScrumSprint extends CommonObject
 									$card->label = $scrumTask->label;
 									$card->fk_element = $scrumTask->id;
 									$card->element_type = $scrumTask->element;
-									$card->fk_scrum_kanbanlist = $backLogList->id;
+									$card->fk_advkanbanlist = $backLogList->id;
 									$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems() +1;
 									$res = $card->create($user, $notrigger);
 									if($res<=0){
