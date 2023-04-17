@@ -156,8 +156,8 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	}
 
 	/**
-	 * @param           $action
-	 * @param  ScrumSprint         $object
+	 * @param $action
+	 * @param ScrumSprint $object
 	 * @param User      $user
 	 * @param Translate $langs
 	 * @param Conf      $conf
