@@ -156,8 +156,8 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	}
 
 	/**
-	 * @param           $action
-	 * @param  ScrumSprint         $object
+	 * @param $action
+	 * @param ScrumSprint $object
 	 * @param User      $user
 	 * @param Translate $langs
 	 * @param Conf      $conf
@@ -176,6 +176,19 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 		}
 
 		return 0;
+	}
+
+	public function advKanbanDelete($action, $object, User $user, Translate $langs, Conf $conf) {
+		include_once __DIR__ . '/../../class/scrumsprint.class.php';
+
+		$sprint = ScrumSprint::getScrumSprintFromKanban($object->id);
+		if($sprint){
+			$sprint->fk_advkanban = null;
+			if($sprint->update($user)<0){
+				$this->errors[] = 'Fail update linked sprint';
+				return -1;
+			}
+		}
 	}
 
 	public function advKanbanCardCreate($action, $object, User $user, Translate $langs, Conf $conf) {

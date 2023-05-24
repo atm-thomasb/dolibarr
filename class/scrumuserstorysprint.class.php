@@ -1108,6 +1108,8 @@ class ScrumUserStorySprint extends CommonObject
 	public function getItemObjectFormattedForAdvKanBan($advKanbanCard, &$cardDataObj, $tpl){
 		global $langs;
 
+		$langs->load('scrumproject@scrumproject');
+
 		$cardDataObj->socid = $this->getSocIdAssociated();
 
 		if($this->calcTimeTaskPlanned() > $this->qty_planned){

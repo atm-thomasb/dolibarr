@@ -616,7 +616,7 @@ class ScrumSprint extends CommonObject
 			$resFetch = $backLogList->fetchFromKanbanAndListRefCode($this->fk_advkanban, 'backlog');
 			if($resFetch<0){
 				// creation des listes manquantes
-				if($this->autoCreateMissingListForKanban($user, $notrigger)>0){
+				if($this->autoCreateMissingListForKanban($user, $notrigger)<0){
 					$this->error = $backLogList->errorsToString();
 					return -1;
 				}
@@ -636,10 +636,12 @@ class ScrumSprint extends CommonObject
 			// Add users stories to sprint
 			$staticScrumUserStorySprint = new ScrumUserStorySprint($this->db);
 
+			if(!class_exists('AdvKanbanCard')){ dol_include_once('advancedkanban/class/advkanbancard.class.php'); }
+
 			/**
 			 * @var ScrumUserStorySprint[] $TUsersStorySprint
 			 */
-			$TUsersStorySprint = $staticScrumUserStorySprint->fetchAll( 'ASC', 'business_value',0,  0, array('fk_scrum_sprint' => $this->fk_scrum_sprint));
+			$TUsersStorySprint = $staticScrumUserStorySprint->fetchAll( 'ASC', 'business_value',0,  0, array('fk_scrum_sprint' => $this->id));
 			if(!empty($TUsersStorySprint) && is_array($TUsersStorySprint)){
 				foreach ($TUsersStorySprint as $usSprint){
 					/**
@@ -647,11 +649,11 @@ class ScrumSprint extends CommonObject
 					 */
 					$us = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $usSprint->fk_scrum_user_story);
 					if($us){
-						$card = new ScrumCard($this->db);
+						$card = new AdvKanbanCard($this->db);
 						$card->label = $us->label;
 						$card->fk_element = $usSprint->id;
 						$card->element_type = $usSprint->element;
-						$card->fk_scrum_kanbanlist = $backLogList->id;
+						$card->fk_advkanbanlist = $backLogList->id;
 						$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems() +1 ;
 						$res = $card->create($user, $notrigger);
 						if($res>0){
@@ -660,11 +662,11 @@ class ScrumSprint extends CommonObject
 							$TScrumTask = $staticTask->fetchAll('', '', 0, 0, array('fk_scrum_user_story_sprint' => $usSprint->id));
 							if(!empty($TScrumTask) && is_array($TScrumTask)){
 								foreach ($TScrumTask as $scrumTask){
-									$card = new ScrumCard($this->db);
+									$card = new AdvKanbanCard($this->db);
 									$card->label = $scrumTask->label;
 									$card->fk_element = $scrumTask->id;
 									$card->element_type = $scrumTask->element;
-									$card->fk_scrum_kanbanlist = $backLogList->id;
+									$card->fk_advkanbanlist = $backLogList->id;
 									$card->fk_rank = $backLogList->getMaxRankOfKanBanListItems() +1;
 									$res = $card->create($user, $notrigger);
 									if($res<=0){
