@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
+## Version 2.1
+
+- NEW : Duplicate tag from user story sprint *25/05/2023* - 2.1.0
+- 
 ## Version 2.0
 
 - FIX : Load lang missing *24/05/2023* - 2.0.1

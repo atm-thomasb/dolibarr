@@ -307,6 +307,8 @@ class ScrumTask extends CommonObject
 						$this->errors[] = $card->errorsToString();
 						$resultcreate = $res;
 					}
+
+					$this->duplicateTag($this->fk_scrum_user_story_sprint, $card,  $backLogList->id);
 				}
 			}
 		}
@@ -315,6 +317,28 @@ class ScrumTask extends CommonObject
 
 
 		return $resultcreate;
+	}
+
+
+	/**
+	 * Permet de dupliquer les tags en reprenant ceux de l'us associée
+	 *
+	 * @param int $fk_user_story_sprint
+	 * @return void
+	 */
+	public function duplicateTag(int $fk_user_story_sprint, AdvKanbanCard &$card, int $fk_kanbanlist) {
+		//On récupère l'id de carte liée à l'us
+		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$card->table_element.' WHERE element_type="scrumproject_scrumuserstorysprint" AND fk_advkanbanlist='.$fk_kanbanlist.' AND fk_element='.$fk_user_story_sprint;
+		$resql = $this->db->query($sql);
+		if($resql) {
+			$obj = $this->db->fetch_object($resql);
+
+			require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+
+			$cat = new Categorie($this->db);
+			$categories = $cat->containing($obj->rowid, 'advkanbancard', 'id');
+			if(! empty($categories)) $card->setCategories($categories);
+		}
 	}
 
 	/**
