@@ -307,8 +307,7 @@ class ScrumTask extends CommonObject
 						$this->errors[] = $card->errorsToString();
 						$resultcreate = $res;
 					}
-
-					$this->duplicateTag($this->fk_scrum_user_story_sprint, $card,  $backLogList->id);
+					else $this->duplicateTag($this->fk_scrum_user_story_sprint, $card,  $backLogList->id);
 				}
 			}
 		}
@@ -324,6 +323,8 @@ class ScrumTask extends CommonObject
 	 * Permet de dupliquer les tags en reprenant ceux de l'us associée
 	 *
 	 * @param int $fk_user_story_sprint
+	 * @param AdvKanbanCard $card
+	 * @param int $fk_kanbanlist
 	 * @return void
 	 */
 	public function duplicateTag(int $fk_user_story_sprint, AdvKanbanCard &$card, int $fk_kanbanlist) {
