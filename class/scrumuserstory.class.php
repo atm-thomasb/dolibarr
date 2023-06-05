@@ -642,6 +642,21 @@ class ScrumUserStory extends CommonObject
 	 */
 	public function setDone($user, $notrigger = 0)
 	{
+		if(!class_exists('Task')){
+			include_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+		}
+
+		// Mise à jour de la tâche projet
+		if($this->fk_task > 0){
+			$projectTask = new Task($this->db);
+			if($projectTask->fetch($this->fk_task) > 0 && $projectTask->progress != 100){
+				$projectTask->progress = 100;
+				$projectTask->update($user, $notrigger);
+			}
+		}
+
+
+
 		return $this->setStatusCommon($user, self::STATUS_DONE, $notrigger, 'SCRUMUSERSTORY_DONE');
 	}
 
