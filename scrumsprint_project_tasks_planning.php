@@ -377,25 +377,31 @@ foreach ($search as $key => $val)
 	if ($key == 'status' && $search[$key] == -1) continue;
 	if ($key == 'status' && !empty($search['status'])) {
 		$newarrayofstatus = array();
-		if(is_array($search['status'])){
+		if (is_array($search['status'])) {
 			foreach ($search['status'] as $key2 => $val2) {
 				if (in_array($val2, array('openall', 'closeall'))) {
+					if ($val2 == 'openall') {
+						$newarrayofstatus[] = ScrumSprint::STATUS_PENDING;
+						$newarrayofstatus[] = ScrumSprint::STATUS_VALIDATED;
+					}
+					if ($val2 == 'closeall') {
+						$newarrayofstatus[] = ScrumSprint::STATUS_DONE;
+						$newarrayofstatus[] = ScrumSprint::STATUS_DRAFT;
+					}
 					continue;
 				}
 				$newarrayofstatus[] = $val2;
 			}
-		}
-		else{
-			if ($search['status'] == 'openall' || in_array('openall', $search['status'])) {
+		} else {
+			if ($search['status'] == 'openall') {
 				$newarrayofstatus[] = ScrumSprint::STATUS_PENDING;
 				$newarrayofstatus[] = ScrumSprint::STATUS_VALIDATED;
 			}
-			if ($search['status'] == 'closeall' || in_array('closeall', $search['status'])) {
+			if ($search['status'] == 'closeall') {
 				$newarrayofstatus[] = ScrumSprint::STATUS_DONE;
 				$newarrayofstatus[] = ScrumSprint::STATUS_DRAFT;
 			}
 		}
-
 
 		if (count($newarrayofstatus)) {
 			$sql .= natural_search('t.'.$key, join(',', $newarrayofstatus), 2);

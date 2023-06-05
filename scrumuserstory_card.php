@@ -189,6 +189,10 @@ if (empty($reshook)) {
 		$object->setProject(GETPOST('projectid', 'int'));
 	}
 
+	if($action == 'confirm_setdone' && $confirm == 'yes') {
+		$object->setDone($user);
+	}
+
 	// Actions to send emails
 	$triggersendname = 'SCRUMPROJECT_SCRUMUSERSTORY_SENTBYMAIL';
 	$autocopy = 'MAIN_MAIL_AUTOCOPY_SCRUMUSERSTORY_TO';
@@ -564,6 +568,13 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				}
 			}
 			*/
+			if ($object->status == $object::STATUS_PLANNED || $object->status == $object::STATUS_VALIDATED) {
+				print dolGetButtonAction($langs->trans('SetToDone'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=confirm_setdone&confirm=yes&token=' . newToken(), '', $permissiontoadd);
+			}
+			if ($object->status == $object::STATUS_DONE) {
+				print dolGetButtonAction($langs->trans('Rouvrir'), '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=confirm_reopen&confirm=yes&token=' . newToken(), '', $permissiontoadd);
+			}
+
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete&token='.newToken(), '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));

@@ -67,7 +67,7 @@ function completeSubstitutionFromScrumUserStorySprint(&$substitutionarray, $lang
 			$substitutionarray['__US_LABEL__'] = $userStory->showOutputFieldQuick('label');
 			$substitutionarray['__US_DESCRIPTION__'] = $userStory->showOutputFieldQuick('description');
 
-			// lorsqu'une US plannifié na pas de label c'est qu'elle utilise celui défini sur l'US
+			// lorsqu'une US planifié na pas de label c'est qu'elle utilise celui défini sur l'US
 			if(empty($substitutionarray['__USPLANNED_LABEL__']) && !empty($substitutionarray['__US_LABEL__'])){
 				$substitutionarray['__USPLANNED_LABEL__'] = $substitutionarray['__US_LABEL__'];
 			}

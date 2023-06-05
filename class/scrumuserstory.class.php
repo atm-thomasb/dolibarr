@@ -128,7 +128,7 @@ class ScrumUserStory extends CommonObject
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>510, 'notnull'=>1, 'visible'=>-2, 'foreignkey'=>'user.rowid',),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2,),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
-		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>5, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', 1=>'Valid&eacute;', 2 => 'Plannifié', 9=>'Annul&eacute;'), 'validate'=>'1', 'default' => 0),
+		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>5, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', 1=>'Valid&eacute;', 2 => 'Planifié', 3 => 'Terminé', 9=>'Annul&eacute;'), 'validate'=>'1', 'default' => 0),
 	);
 	public $rowid;
 	public $fk_task;
@@ -694,7 +694,8 @@ class ScrumUserStory extends CommonObject
 	}
 
 	/**
-	 *	Set back to validated status
+	 *	Set back to validated status: if the US was previously planned, it goes back to the planned status, else it goes
+	 * back to validated status.
 	 *
 	 *	@param	User	$user			Object user that modify
 	 *  @param	int		$notrigger		1=Does not execute triggers, 0=Execute triggers
@@ -703,16 +704,13 @@ class ScrumUserStory extends CommonObject
 	public function reopen($user, $notrigger = 0)
 	{
 		// Protection
-		if ($this->status != self::STATUS_CANCELED) {
+		if ($this->status != self::STATUS_CANCELED && $this->status != self::STATUS_DONE) {
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
+		if ($this->getCountUserStoryPlanned()) {
+			return $this->setPlanned($user);
+		}
 
 		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SCRUMUSERSTORY_REOPEN');
 	}
@@ -1038,7 +1036,7 @@ class ScrumUserStory extends CommonObject
 
 
 	/**
-	 * recupère les sommes de temps consommé, produit et plannifié sur l'ensemble des sprints
+	 * recupère les sommes de temps consommé, produit et planifié sur l'ensemble des sprints
 	 * @return ScrumUserStoryTotalTimeFromSprints {nb_print, total_qty_consumed, total_qty_planned, total_qty_done}
 	 */
 	public function getTotalTimeFromSprints($useCache = true){
@@ -1061,7 +1059,7 @@ class ScrumUserStory extends CommonObject
 
 
 	/**
-	 * Compte le nombre de user story plannifiées
+	 * Compte le nombre de user story planifiées
 	 * @return int
 	 */
 	public function getCountUserStoryPlanned(){

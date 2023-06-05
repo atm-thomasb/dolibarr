@@ -71,7 +71,7 @@ ScrumTaskStatusDone = Terminé
 SprintInfos = Informations sur le sprint
 ScrumUserStory = User story
 NewScrumUserStory = Nouvelle User story
-ScrumUserStorySprint = User story plannifiés
+ScrumUserStorySprint = User story planifiés
 NewScrumUserStorySprint = Nouvelle plannification
 NewAdvKanban = Nouveau Kanban
 CreateNewAdvKanban = Créer nouveau Kanban
@@ -246,6 +246,7 @@ DeleteScrumsprint = Supprimer les sprints
 
 TotalTimePlanned = Temps temps planifié
 Planned = Planifié
+Reopen = Rouvrir
 TotalDone = Total produit
 OnXSprints = Sur %s sprint(s)
 onXSprints = sur %s sprint(s)
@@ -285,8 +286,9 @@ ViewByTaskPlanned = Passer en vue tâches planifiées
 TaskConvertionToUserStoryWizard = Importer les tâches dans la gestion scrum
 ConfirmMassTaskImportIntoScrumManagementQuestion = Êtes-vous sûr de vouloir importer en gestion scrum ces %s tâche(s) sélectionnée(s) ?
 ConfirmMassTaskImportIntoScrumManagement = Importer les tâches ?
+ConfirmMassUSSetDone = Êtes-vous sûr de vouloir passer les US sélectionnées au statut Réalisé ?
 XUserStoryCreated = %s user stories créée(s)
-XUserStorySprintCreated = %s user stories plannifiée(s)
+XUserStorySprintCreated = %s user stories planifiée(s)
 
 
 # AdvKanban

@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- NEW : User stories can be set to "Done" (button on the card or mass action on the list); when an US is done, it no
+  longer shows on the list when the filter "openall" is set - *02/06/2023* - 2.2.0
 
 ## Version 2.1
 

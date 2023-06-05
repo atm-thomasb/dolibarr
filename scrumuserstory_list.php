@@ -209,6 +209,20 @@ if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massa
 }
 
 if($massaction == 'usePlanWizard'){ $action = 'usePlanWizard'; }
+if( $action == 'setdone'){
+	// action de masse "terminer"
+	if ($confirm === 'yes' && !empty($toselect) && $permissiontoadd) {
+		$TUSFetchError = [];
+		foreach ($toselect as $userStoryId) {
+			$userStory = new ScrumUserStory($db);
+			if ($userStory->fetch($userStoryId) <= 0) {
+				$TUSFetchError = array_merge($TUSFetchError, $userStory->errors);
+				continue;
+			}
+			$userStory->setDone($user);
+		}
+	}
+}
 
 $parameters = array();
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
@@ -468,7 +482,10 @@ $arrayofmassactions = array(
 if ($permissiontodelete) {
 	$arrayofmassactions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"').$langs->trans("Delete");
 }
-if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete'))) {
+if ($permissiontoadd) {
+	$arrayofmassactions['presetdone'] = $langs->trans('SetToDone');
+}
+if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete', 'presetdone'))) {
 	$arrayofmassactions = array();
 }
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
@@ -505,6 +522,10 @@ $modelmail = "scrumuserstory";
 $objecttmp = new ScrumUserStory($db);
 $trackid = 'xxxx'.$object->id;
 include DOL_DOCUMENT_ROOT.'/core/tpl/massactions_pre.tpl.php';
+
+if ($massaction == 'presetdone') {
+	print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('Confirm'), $langs->trans('ConfirmMassUSSetDone', count($toselect)), 'setdone', null, 'yes', 0, 200, 500, 1);
+}
 
 if ($search_all) {
 	foreach ($fieldstosearchall as $key => $val) {
