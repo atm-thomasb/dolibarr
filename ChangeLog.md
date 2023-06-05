@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## Version 2.3
+
 - NEW : Change status of user story to done update project task progress to 100% - *05/06/2023* - 2.3.0
 - NEW : User stories can be set to "Done" (button on the card or mass action on the list); when an US is done, it no
   longer shows on the list when the filter "openall" is set - *02/06/2023* - 2.2.0
