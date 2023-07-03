@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- FIX : php warning  - *01/07/2023* - 2.4.1
+- NEW : Hidden conf SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH - *01/07/2023* - 2.4.0  
+  Will remove ref for combo search in wizard  
+
 ## Version 2.3
 
 - NEW : Change status of user story to done update project task progress to 100% - *05/06/2023* - 2.3.0
@@ -12,7 +16,7 @@ All notable changes to this project will be documented in this file.
 ## Version 2.1
 
 - NEW : Duplicate tag from user story sprint *25/05/2023* - 2.1.0
-- 
+
 ## Version 2.0
 
 - FIX : Load lang missing *24/05/2023* - 2.0.1
