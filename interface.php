@@ -125,8 +125,13 @@ function _getAutocompletionForSprint($jsonResponse, string $search, int $minDate
 		$sql.= ' AND s.date_end >= "'. $db->idate($minDateEnd).'" ';
 	}
 
+	$searchCol = array('s.label');
+	if(empty($conf->global->SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH)){
+		$searchCol[] = 's.ref';
+	}
+
 	if(!empty($search)){
-		$sql.= natural_search(['s.label', 's.ref'], $search);
+		$sql.= natural_search($searchCol, $search);
 	}
 
 
@@ -150,7 +155,11 @@ function _getAutocompletionForSprint($jsonResponse, string $search, int $minDate
 
 		$item = new stdClass();
 		$item->id = $sprint->id;
-		$item->text = $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start, "%d/%m/%Y").' '.$langs->trans('to').' '.dol_print_date($sprint->date_end, "%d/%m/%Y");
+		$item->text = '';
+		if(empty($conf->global->SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH)){
+			$item->text.= $sprint->ref . ' ';
+		}
+		$item->text.= $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start, "%d/%m/%Y").' '.$langs->trans('to').' '.dol_print_date($sprint->date_end, "%d/%m/%Y");
 
 		$item->sprintQtyAvailable = $sprint->getQtyAvailable();
 		$item->html_sprintQtyAvailable = $sprint->getQtyAvailableBadge();

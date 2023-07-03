@@ -332,7 +332,7 @@ class ActionsScrumProject
 	 * @param AdvKanbanList $advKanbanList Object to use hooks on
 	 * @param string $action Action code on calling page ('create', 'edit', 'view', 'add', 'update', 'delete'...)
 	 * @param object $hookmanager class instance
-	 * @return void
+	 * @return int
 	 */
 	public function getKanBanListObjectFormatted($parameters, $advKanbanList, &$action, $hookmanager)
 	{
@@ -406,7 +406,10 @@ class ActionsScrumProject
 
 
 			$formattedObject->title.= '</div>';
+
 		}
+
+		return 0;
 	}
 
 
