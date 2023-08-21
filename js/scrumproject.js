@@ -5,7 +5,7 @@ jQuery(function ($) {
 		if($(this).data('target') != undefined){
 
 			let lineId = $(this).data('target');
-			let childrenLines = $('.toggle-line-display[data-parent=' + lineId + ']');
+			let childrenLines = $('.toggle-line-display[data-parent=' + lineId + ']:not([data-force-hide=1])');
 			let classToAdd = '--open';
 			if($(this).hasClass(classToAdd)){
 				childrenLines.removeClass(classToAdd);

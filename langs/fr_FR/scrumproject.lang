@@ -370,3 +370,6 @@ WrongUrl = Url invalid
 ErrorScrumUserStoryTasksOverPlanned = Attention : La somme des planifications de tâches dépasse la planification de cette user story soit %s / %s.
 CardScrumTaskFound = Tâche(s) scrum
 CardScrumUserStoryFound = User stories scrum
+
+toggleHideClosedSprint = Cacher / Afficher les sprints terminés
+toggleHideClosedSprintHelp = Cacher / Afficher les sprints terminés
