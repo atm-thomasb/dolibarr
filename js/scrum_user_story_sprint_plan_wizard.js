@@ -16,6 +16,28 @@ jQuery(function ($) {
 		}
 	});
 
+	$('#toggle-view-closed-sprint').on('click', function (){
+		let classToAdd = '--open';
+		let childrenLines = $('.toggle-line-display[data-sprint-closed=1]');
+		let clasIconOpen = 'fa-eye';
+		let clasIconClose = 'fa-eye-slash';
+
+	// :not([data-force-hide=1])
+		if($(this).attr('data-toggle') == 'show'){
+			$(this).attr('data-toggle', 'hide');
+			childrenLines.removeClass(classToAdd);
+			childrenLines.attr('data-force-hide', '1');
+			$(this).find('.fa').removeClass(clasIconOpen).addClass(clasIconClose);
+		}
+		else{
+			$(this).attr('data-toggle', 'show');
+			childrenLines.addClass(classToAdd);
+			childrenLines.attr('data-force-hide', '0');
+			$(this).find('.fa').removeClass(clasIconClose).addClass(clasIconOpen);
+		}
+	});
+
+
 
 	let sprintSelect = $('#form-scrum-user-story-plan-wizard [name="fk_scrumsprint"]');
 	sprintSelect.select2({

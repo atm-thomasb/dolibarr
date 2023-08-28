@@ -219,7 +219,7 @@ print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="list">';
 print '<input type="hidden" name="interface-url" value="'.dol_buildpath('scrumproject/interface.php',1).'">';
 
-$listBtn = '';
+$listBtn = dolGetButtonTitle($langs->trans('toggleHideClosedSprint'), $langs->trans('toggleHideClosedSprintHelp'), 'fa fa-eye-slash', '', 'toggle-view-closed-sprint', 1, array('attr' => array('data-toggle' => 'show')));
 
 print_barre_liste($title, -1, $_SERVER["PHP_SELF"], '', $sortfield, $sortorder, '', 0, '', $object->picto, 0, $listBtn);
 
@@ -390,7 +390,8 @@ foreach ($TQueryResults as $obj)
 			}
 
 			// Show here line of result
-			print '<tr class="oddeven toggle-line-display --open" data-parent="'. $userStory->id.'" id="scrum-user-story-sprint-'.$scrumUserStorySprint->id.'"  >';
+			$sprintIsOpen = in_array(intval($scrumSprint->status), array(ScrumSprint::STATUS_DRAFT, ScrumSprint::STATUS_PENDING, ScrumSprint::STATUS_VALIDATED));
+			print '<tr class="oddeven toggle-line-display --open" data-sprint-closed="'.($sprintIsOpen?'0':'1').'" data-parent="'. $userStory->id.'" id="scrum-user-story-sprint-'.$scrumUserStorySprint->id.'"  >';
 
 
 			print '<td class="nowrap">';
