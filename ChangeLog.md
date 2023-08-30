@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## Version 2.5
+
 - NEW : Button to toggle display planned user story on closed sprints - *01/07/2023* - 2.5.0
 - FIX : php warning  - *01/07/2023* - 2.4.1
 - NEW : Hidden conf SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH - *01/07/2023* - 2.4.0  
