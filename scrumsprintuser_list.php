@@ -155,6 +155,7 @@ foreach ($object->fields as $key => $val) {
 	}
 }
 
+// TODO : factorisez Dolibarr pour avor des fonctions ou methods à appeler au lieu de copier les bouts de code
 foreach ($staticScrumSprint->fields as $key => $val) {
 
 	if(!in_array($key, $fieldsFromSprint)){
