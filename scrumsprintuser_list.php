@@ -123,6 +123,10 @@ $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('scrumsprintuserlist')); // Note that conf->hooks_modules contains array
 
+
+$staticScrumSprint = new ScrumSprint($db);
+$fieldsFromSprint = array('date_start', 'date_end');
+
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 //$extrafields->fetch_name_optionals_label($object->table_element_line);
@@ -151,6 +155,24 @@ foreach ($object->fields as $key => $val) {
 	}
 }
 
+foreach ($staticScrumSprint->fields as $key => $val) {
+
+	if(!in_array($key, $fieldsFromSprint)){
+		continue;
+	}
+
+	if (GETPOST('search_'.$key, 'alpha') !== '') {
+		$search[$key] = GETPOST('search_'.$key, 'alpha');
+	}
+	if (preg_match('/^(date|timestamp|datetime)/', $val['type'])) {
+		$search[$key.'_dtstart'] = dol_mktime(0, 0, 0, GETPOST('search_'.$key.'_dtstartmonth', 'int'), GETPOST('search_'.$key.'_dtstartday', 'int'), GETPOST('search_'.$key.'_dtstartyear', 'int'));
+		$search[$key.'_dtend'] = dol_mktime(23, 59, 59, GETPOST('search_'.$key.'_dtendmonth', 'int'), GETPOST('search_'.$key.'_dtendday', 'int'), GETPOST('search_'.$key.'_dtendyear', 'int'));
+	}
+}
+
+
+
+
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
 foreach ($object->fields as $key => $val) {
@@ -166,6 +188,25 @@ foreach ($object->fields as $key => $val) {
 	if (!empty($val['visible'])) {
 		$visible = (int) dol_eval($val['visible'], 1);
 		$arrayfields['t.'.$key] = array(
+			'label'=>$val['label'],
+			'checked'=>(($visible < 0) ? 0 : 1),
+			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
+			'position'=>$val['position'],
+			'help'=> isset($val['help']) ? $val['help'] : ''
+		);
+	}
+}
+
+
+foreach ($staticScrumSprint->fields as $key => $val) {
+	if(! in_array($key, $fieldsFromSprint)) {
+		continue;
+	}
+
+	// If $val['visible']==0, then we never show the field
+	if (!empty($val['visible'])) {
+		$visible = (int) dol_eval($val['visible'], 1);
+		$arrayfields['ssp.'.$key] = array(
 			'label'=>$val['label'],
 			'checked'=>(($visible < 0) ? 0 : 1),
 			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
@@ -267,6 +308,7 @@ $morecss = array();
 // --------------------------------------------------------------------
 $sql = 'SELECT ';
 $sql .= $object->getFieldList('t');
+$sql .= ' ,'.$staticScrumSprint->getFieldList('ssp');
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
@@ -282,6 +324,9 @@ $sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
 if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 }
+
+$sql .= " LEFT JOIN ".$db->prefix()."scrumproject_scrumsprint as ssp on (t.fk_scrum_sprint = ssp.rowid)";
+
 // Add table from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object); // Note that $action and $object may have been modified by hook
@@ -293,7 +338,7 @@ if ($object->ismultientitymanaged == 1) {
 }
 
 if($fk_sprint>0){
-	$sql .= " AND fk_scrum_sprint = ".intval($fk_sprint);
+	$sql .= " AND t.fk_scrum_sprint = ".intval($fk_sprint);
 }
 
 
@@ -580,6 +625,11 @@ print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwit
 // Fields title search
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
+
+/**
+ * DATA OBJECT SCRUM SPRINT USER
+ *  // TODO Factoriser Dolibarr pour pouvoir factoriser ici
+ */
 foreach ($object->fields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
@@ -614,6 +664,47 @@ foreach ($object->fields as $key => $val) {
 		print '</td>';
 	}
 }
+
+
+/**
+ * DATA OBJECT SCRUM SPRINT
+ * // TODO Factoriser Dolibarr pour pouvoir factoriser ici
+ */
+foreach ($staticScrumSprint->fields as $key => $val) {
+	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+	if ($key == 'status') {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+	} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'right';
+	}
+	if (!empty($arrayfields['ssp.'.$key]['checked'])) {
+		print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
+		if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+			print $form->selectarray('search_'.$key, $val['arrayofkeyval'], (isset($search[$key]) ? $search[$key] : ''), $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth100', 1);
+		} elseif ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0)) {
+			print $staticScrumSprint->showInputField($val, $key, (isset($search[$key]) ? $search[$key] : ''), '', '', 'search_', 'maxwidth125', 1);
+		} elseif (preg_match('/^(date|timestamp|datetime)/', $val['type'])) {
+			print '<div class="nowrap">';
+			print $form->selectDate($search[$key.'_dtstart'] ? $search[$key.'_dtstart'] : '', "search_".$key."_dtstart", 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From'));
+			print '</div>';
+			print '<div class="nowrap">';
+			print $form->selectDate($search[$key.'_dtend'] ? $search[$key.'_dtend'] : '', "search_".$key."_dtend", 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('to'));
+			print '</div>';
+		} elseif ($key == 'lang') {
+			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
+			$formadmin = new FormAdmin($db);
+			print $formadmin->select_language($search[$key], 'search_lang', 0, null, 1, 0, 0, 'minwidth150 maxwidth200', 2);
+		} else {
+			print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+		}
+		print '</td>';
+	}
+}
+
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
 
@@ -645,6 +736,22 @@ foreach ($object->fields as $key => $val) {
 	}
 	if (!empty($arrayfields['t.'.$key]['checked'])) {
 		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+	}
+}
+
+foreach ($staticScrumSprint->fields as $key => $val) {
+	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+	if ($key == 'status') {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+	} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'right';
+	}
+	if (!empty($arrayfields['ssp.'.$key]['checked'])) {
+		print getTitleFieldOfList($arrayfields['ssp.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 'ssp.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 	}
 }
 // Extra fields
@@ -682,6 +789,10 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
+	$staticScrumSprint = new ScrumSprint($db); // to be certain $staticScrumSprint is clean
+	if($object->fk_scrum_sprint > 0){
+		$staticScrumSprint->fetch($object->fk_scrum_sprint);
+	}
 
 	// Show here line of result
 	print '<tr  class="oddeven" data-lineid="' . $obj->rowid . '" id="scrumsprintuser-'. $obj->rowid .'">';
@@ -738,6 +849,55 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 			}
 		}
 	}
+
+	foreach ($staticScrumSprint->fields as $key => $val) {
+		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		} elseif ($key == 'status') {
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		}
+
+		if (in_array($val['type'], array('timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+		} elseif ($key == 'ref') {
+			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+		}
+
+		if (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('rowid', 'status')) && empty($val['arrayofkeyval'])) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'right';
+		}
+		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
+
+		if (!empty($arrayfields['ssp.'.$key]['checked'])) {
+
+			print '<td  '.($cssforfield ? ' class="col-'.$key.' '.$cssforfield.'"' : '').'>';
+			if ($key == 'status') {
+				print $staticScrumSprint->getLibStatut(5);
+			} elseif ($key == 'rowid') {
+				print $staticScrumSprint->showOutputField($val, $key, $staticScrumSprint->id, '');
+			} else {
+				print $staticScrumSprint->showOutputField($val, $key, $staticScrumSprint->$key, '');
+			}
+			print '</td>';
+			if (!$i) {
+				$totalarray['nbfield']++;
+			}
+			if (!empty($val['isameasure']) && $val['isameasure'] == 1) {
+				if (!$i) {
+					$totalarray['pos'][$totalarray['nbfield']] = 'ssp.'.$key;
+				}
+				if (!isset($totalarray['val'])) {
+					$totalarray['val'] = array();
+				}
+				if (!isset($totalarray['val']['ssp.'.$key])) {
+					$totalarray['val']['ssp.'.$key] = 0;
+				}
+				$totalarray['val']['ssp.'.$key] += $staticScrumSprint->$key;
+			}
+		}
+	}
+
 	// Extra fields
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
 	// Fields from hook
