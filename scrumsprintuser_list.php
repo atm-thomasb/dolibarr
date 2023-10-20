@@ -851,6 +851,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 		}
 	}
 
+// TODO Factoriser Dolibarr pour pouvoir factoriser ici
 	foreach ($staticScrumSprint->fields as $key => $val) {
 		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
