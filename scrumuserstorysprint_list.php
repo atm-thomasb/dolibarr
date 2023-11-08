@@ -840,7 +840,7 @@ foreach ($object->fields as $key => $val) {
 	}
 	if ($key == "fk_scrum_sprint"){
 		if (!empty($arrayfields['societe']['checked'])) {
-			print getTitleFieldOfList($arrayfields['societe']['label'], 0, $_SERVER['PHP_SELF'], 'societe', '', $param, '', $sortfield, $sortorder)."\n";
+			print getTitleFieldOfList($arrayfields['societe']['label'], 0, $_SERVER['PHP_SELF'], 's.nom', '', $param, '', $sortfield, $sortorder)."\n";
 		}
 
 		if (!empty($arrayfields['project_title']['checked'])) {
