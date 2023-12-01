@@ -428,13 +428,12 @@ class FormMail extends Form
 			$keytoavoidconflict = empty($this->trackid) ? '' : '-'.$this->trackid; // this->trackid must be defined
 
 			if (GETPOST('mode', 'alpha') == 'init' || (GETPOST('modelselected') && GETPOST('modelmailselected', 'alpha') && GETPOST('modelmailselected', 'alpha') != '-1')) {
-				if (!empty($arraydefaultmessage->joinfiles) && !empty($this->param['fileinit']) && is_array($this->param['fileinit'])) {
+                if (!empty($arraydefaultmessage->joinfiles) && !empty($this->param['fileinit']) && is_array($this->param['fileinit'])) {
 					foreach ($this->param['fileinit'] as $file) {
 						$this->add_attached_files($file, basename($file), dol_mimetype($file));
 					}
 				}
 			}
-
 			if (!empty($_SESSION["listofpaths".$keytoavoidconflict])) {
 				$listofpaths = explode(';', $_SESSION["listofpaths".$keytoavoidconflict]);
 			}
@@ -1312,7 +1311,7 @@ class FormMail extends Form
 		$sql = "SELECT rowid, module, label, type_template, topic, joinfiles, content, content_lines, lang, email_from, email_to, email_tocc, email_tobcc";
 		$sql .= " FROM ".$dbs->prefix().'c_email_templates';
 		$sql .= " WHERE (type_template = '".$dbs->escape($type_template)."' OR type_template = 'all')";
-		$sql .= " AND entity IN (".$conf->global->FINANCEMENT_ENTITY_CONF_GLOBALE.', '.getEntity('c_email_templates').")";
+		$sql .= " AND entity IN (". (!empty($conf->global->FINANCEMENT_ENTITY_CONF_GLOBALE) ? $conf->global->FINANCEMENT_ENTITY_CONF_GLOBALE.', ' : '').getEntity('c_email_templates').")";
 		$sql .= " AND (private = 0 OR fk_user = ".((int) $user->id).")"; // Get all public or private owned
 		if ($active >= 0) {
 			$sql .= " AND active = ".((int) $active);
@@ -1470,7 +1469,7 @@ class FormMail extends Form
 		$sql = "SELECT rowid, module, label, topic, content, content_lines, lang, fk_user, private, position";
 		$sql .= " FROM ".$this->db->prefix().'c_email_templates';
 		$sql .= " WHERE type_template IN ('".$this->db->escape($type_template)."', 'all')";
-		$sql .= " AND entity IN (".$conf->global->FINANCEMENT_ENTITY_CONF_GLOBALE.', '.getEntity('c_email_templates').")";
+		$sql .= " AND entity IN (".(!empty($conf->global->FINANCEMENT_ENTITY_CONF_GLOBALE) ? $conf->global->FINANCEMENT_ENTITY_CONF_GLOBALE.', ' : '').getEntity('c_email_templates').")";
 		$sql .= " AND (private = 0 OR fk_user = ".((int) $user->id).")"; // See all public templates or templates I own.
 		if ($active >= 0) {
 			$sql .= " AND active = ".((int) $active);
