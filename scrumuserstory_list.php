@@ -176,9 +176,9 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
-$permissiontoread = $user->rights->scrumproject->scrumuserstory->read;
-$permissiontoadd = $user->rights->scrumproject->scrumuserstory->write;
-$permissiontodelete = $user->rights->scrumproject->scrumuserstory->delete;
+$permissiontoread = $user->hasRight('scrumproject','scrumuserstory','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumuserstory','write');
+$permissiontodelete = $user->hasRight('scrumproject','scrumuserstory','delete');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) {
@@ -375,7 +375,7 @@ $sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPri
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
+if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST')) {
 	/* This old and fast method to get and count full list returns all record so use a high amount of memory.
 	$resql = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($resql);
@@ -413,7 +413,7 @@ $num = $db->num_rows($resql);
 
 
 // Direct jump if only one record found
-if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page) {
+if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page) {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
 	header("Location: ".dol_buildpath('/scrumproject/scrumuserstory_card.php', 1).'?id='.$id);

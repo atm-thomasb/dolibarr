@@ -94,8 +94,8 @@ function _actionLiveUpdate(&$jsonResponse){
 
 	// TODO use fields object rights
 	$TWriteRight = array(
-		'scrumproject_scrumuserstorysprint' => $user->rights->scrumproject->scrumuserstorysprint->write,
-		'scrumproject_scrumsprintuser' => $user->rights->scrumproject->scrumsprintuser->write,
+		'scrumproject_scrumuserstorysprint' => $user->hasRight('scrumproject','scrumuserstorysprint','write'),
+		'scrumproject_scrumsprintuser' => $user->hasRight('scrumproject','scrumsprintuser','write'),
 	);
 
 

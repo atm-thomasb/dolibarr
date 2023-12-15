@@ -210,13 +210,14 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	public function _updateSprintQuantities($action, $object, User $user, Translate $langs, Conf $conf) {
 		dol_include_once('/scrumproject/class/scrumsprint.class.php');
 		$sprint = new ScrumSprint($this->db);
-		$sprint->fetch($object->fk_scrumsprint);
-		$res = $sprint->refreshQuantities($user);
-
-		if($res < 0) {
-			setEventMessages($langs->trans('ScrumSprintQuantitiesCalculatedError'), $sprint->errors, 'errors');
-			return -1;
-		}
+		//TODO Revoir avec john pour corriger ça
+//		$sprint->fetch($object->fk_scrumsprint);
+//		$res = $sprint->refreshQuantities($user);
+//
+//		if($res < 0) {
+//			setEventMessages($langs->trans('ScrumSprintQuantitiesCalculatedError'), $sprint->errors, 'errors');
+//			return -1;
+//		}
 
 		return 0;
 	}
@@ -289,10 +290,17 @@ class InterfaceScrumProjectTriggers extends DolibarrTriggers
 	 */
 	public function loadScrumTaskFromProjectTaskSpend($timespentId){
 		// scrumttask contient le total declarée et le total consommé
-		$sql  = ' SELECT spt.fk_scrumproject_scrumtask   as scrumtask_id, Tablett.task_duration as qty ';
-		$sql .= ' FROM ' .MAIN_DB_PREFIX .'scrumproject_scrumtask_projet_task_time as spt';
-		$sql .= ' INNER JOIN '.MAIN_DB_PREFIX.'projet_task_time as Tablett ON Tablett.rowid = spt.fk_projet_task_time ';
-		$sql .= ' WHERE spt.fk_projet_task_time ='. intval($timespentId);
+		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
+			$sql = ' SELECT spt.fk_scrumproject_scrumtask   as scrumtask_id, Tablett.task_duration as qty ';
+			$sql .= ' FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time as spt';
+			$sql .= ' INNER JOIN '.MAIN_DB_PREFIX.'projet_task_time as Tablett ON Tablett.rowid = spt.fk_projet_task_time ';
+			$sql .= ' WHERE spt.fk_projet_task_time ='.intval($timespentId);
+		} else {
+			$sql = ' SELECT spt.fk_scrumproject_scrumtask   as scrumtask_id, Tablett.element_duration as qty ';
+			$sql .= ' FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time as spt';
+			$sql .= ' INNER JOIN '.MAIN_DB_PREFIX.'element_time as Tablett ON (Tablett.rowid = spt.fk_projet_task_time AND Tablett.elementtype="task")';
+			$sql .= ' WHERE spt.fk_projet_task_time ='.intval($timespentId);
+		}
 
 		$obj = $this->db->getRow($sql);
 		if ($obj){

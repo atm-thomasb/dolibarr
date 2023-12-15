@@ -194,7 +194,6 @@ print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="mass_create">';
 if($backtopage) print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
-if($backtopageforcancel) print '<input type="hidden" name="backtopageforcancel" value="'.$backtopageforcancel.'">';
 
 print '<table>';
 

@@ -124,7 +124,7 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->scrumproject->multidir_output[$object->entity ? $object->entity : $conf->entity]."/scrumuserstorysprint/".get_exdir(0, 0, 0, 1, $object);
 }
 
-$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
+$permissiontoadd = $user->hasRight('scrumproject','scrumuserstorysprint','write'); // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();

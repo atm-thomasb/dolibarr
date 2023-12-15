@@ -101,8 +101,8 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->scrumproject->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity]."/".$object->id;
 }
 
-$permissionnote = $user->rights->scrumproject->scrumuserstory->write; // Used by the include of actions_setnotes.inc.php
-$permissiontoadd = $user->rights->scrumproject->scrumuserstory->write; // Used by the include of actions_addupdatedelete.inc.php
+$permissionnote = $user->hasRight('scrumproject','scrumuserstory','write'); // Used by the include of actions_setnotes.inc.php
+$permissiontoadd = $user->hasRight('scrumproject','scrumuserstory','write'); // Used by the include of actions_addupdatedelete.inc.php
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();

@@ -883,7 +883,7 @@ class ScrumUserStorySprint extends CommonObject
 
 		$linkclose = '';
 		if (empty($notooltip)) {
-			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+			if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
 				$tooltip = $langs->trans("ShowScrumUserStorySprint");
 				$linkclose .= ' alt="'.dol_escape_htmltag($tooltip, 1).'"';
 			}
@@ -911,7 +911,7 @@ class ScrumUserStorySprint extends CommonObject
 					$pospoint = strpos($filearray[0]['name'], '.');
 
 					$pathtophoto = $class.'/'.$this->ref.'/thumbs/'.substr($filename, 0, $pospoint).'_mini'.substr($filename, $pospoint);
-					if (empty($conf->global->{strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'})) {
+					if (empty(getDolGlobalString(strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'))) {
 						$linkHtml .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
 					} else {
 						$linkHtml .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
@@ -1005,7 +1005,8 @@ class ScrumUserStorySprint extends CommonObject
 		if ($status == self::STATUS_CANCELED) {
 			$statusType = 'status6';
 		}
-
+		if(empty($this->labelStatus[$status])) $this->labelStatus[$status] = '';
+		if(empty($this->labelStatusShort[$status])) $this->labelStatusShort[$status] = '';
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
 	}
 
@@ -1030,13 +1031,15 @@ class ScrumUserStorySprint extends CommonObject
 				if (!empty($obj->fk_user_author)) {
 					$cuser = new User($this->db);
 					$cuser->fetch($obj->fk_user_author);
-					$this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation')) $this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation_id')) $this->user_creation_id = $cuser;
 				}
 
 				if (!empty($obj->fk_user_valid)) {
 					$vuser = new User($this->db);
 					$vuser->fetch($obj->fk_user_valid);
-					$this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation')) $this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation_id')) $this->user_validation_id = $vuser;
 				}
 
 				if (!empty($obj->fk_user_cloture)) {
@@ -1079,8 +1082,7 @@ class ScrumUserStorySprint extends CommonObject
 		$object->socid = $this->getSocIdAssociated();
 
 
-		$object->fk_scrum_user_story_sprint = $this->fk_scrum_user_story_sprint;
-		$object->fk_scrum_user_story_sprint= $this->fk_scrum_user_story_sprint;
+		if(!empty($this->fk_scrum_user_story_sprint)) $object->fk_scrum_user_story_sprint= $this->fk_scrum_user_story_sprint;
 		$object->qty_planned = doubleval($this->qty_planned);
 		$object->qty_consumed = doubleval($this->qty_consumed);
 		$object->qty_done = doubleval($this->qty_done);
@@ -1354,15 +1356,15 @@ class ScrumUserStorySprint extends CommonObject
 		global $langs, $conf;
 		$langs->load("scrumproject@scrumproject");
 
-		if (empty($conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON)) {
+		if (!getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON')) {
 			$conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON = 'mod_scrumuserstorysprint_standard';
 		}
 
-		if (!empty($conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON)) {
+		if (getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON')) {
 			$mybool = false;
 
-			$file = $conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON.".php";
-			$classname = $conf->global->SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON;
+			$file = getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON') . ".php";
+			$classname = getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORYSPRINT_ADDON');
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);

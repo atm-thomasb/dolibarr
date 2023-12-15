@@ -92,8 +92,8 @@ $hookmanager->initHooks(array('scrumsprintlistprojecttaskplanning')); // Note th
 
 
 
-$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-$permissiontodelete = $user->rights->scrumproject->scrumuserstorysprint->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissiontoadd = $user->hasRight('scrumproject','scrumuserstorysprint','write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->hasRight('scrumproject','scrumuserstorysprint','delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
 
 
 $scrumFieldsToKeep = array(
@@ -126,7 +126,7 @@ if ($fk_project > 0) {
 $listFields = array();
 scrumProjectAddObjectFieldDefinition($listFields, $object->fields, $scrumFieldsToKeep);
 
-
+$object->fields = $listFields;
 //
 //// Fetch optionals attributes and labels
 //$extrafields->fetch_name_optionals_label($object->table_element);
@@ -160,7 +160,7 @@ if(empty($search['status'])){
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
 foreach ($listFields as $key => $val) {
-	if ($val['searchall']) $fieldstosearchall['t.'.$key] = $val['label'];
+	if (!empty($val['searchall'])) $fieldstosearchall['t.'.$key] = $val['label'];
 }
 
 // Definition of array of fields for columns
@@ -177,21 +177,21 @@ $arrayfields = array(
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
-		'help'=>$val['us_qty_planned_help']
+		'help'=>!empty($val['us_qty_planned_help']) ? $val['us_qty_planned_help'] : ''
 	),
 	'us_qty_consumed' => array(
 		'label'=>'us_qty_consumed',
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
-		'help'=>$val['us_qty_consumed_help']
+		'help'=>!empty($val['us_qty_consumed_help']) ? $val['us_qty_consumed_help'] : ''
 	),
 	'us_qty_done' => array(
 		'label'=>'us_qty_done',
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
-		'help'=>$val['us_qty_done_help']
+		'help'=>!empty($val['us_qty_done_help'])? $val['us_qty_done_help'] : ''
 	)
 );
 
@@ -205,7 +205,7 @@ foreach ($listFields as $key => $val) {
 			'checked'=>(($visible < 0) ? 0 : 1),
 			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
 			'position'=>$val['position'],
-			'help'=>$val['help']
+			'help'=>!empty($val['help']) ? $val['help'] : ''
 		);
 	}
 }
@@ -216,9 +216,9 @@ foreach ($listFields as $key => $val) {
 $listFields = dol_sort_array($listFields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
-$permissiontoread = $user->rights->scrumproject->scrumsprint->read;
-$permissiontoadd = $user->rights->scrumproject->scrumsprint->write;
-$permissiontodelete = $user->rights->scrumproject->scrumsprint->delete;
+$permissiontoread = $user->hasRight('scrumproject','scrumsprint','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumsprint','write');
+$permissiontodelete = $user->hasRight('scrumproject','scrumsprint','delete');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
@@ -348,7 +348,7 @@ $sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
 $sql = preg_replace('/,\s*$/', '', $sql);
 
 $sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t"; // llx_scrumproject_scrumuserstory
-if (is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
+if (!empty($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 
 $sql .= " JOIN ".MAIN_DB_PREFIX."projet_task as pt ON (t.fk_task = pt.rowid )";
 $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint as sUSsprint ON (t.rowid = sUSsprint.fk_scrum_user_story )";
@@ -459,7 +459,7 @@ $sql .= $db->order($sortfield, $sortorder);
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
+if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST')) {
 	$resql = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($resql);
 	if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
@@ -483,7 +483,7 @@ if (is_numeric($nbtotalofrecords) && ($limit > $nbtotalofrecords || empty($limit
 }
 
 // Direct jump if only one record found
-if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page)
+if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page)
 {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
@@ -517,13 +517,13 @@ $morehtmlref = '<div class="refidno">';
 $morehtmlref .= dol_escape_htmltag($project->title);
 // Thirdparty
 $morehtmlref .= '<br>'.$langs->trans('ThirdParty').' : ';
-if (!empty($project->thirdparty->id) && $object->thirdparty->id > 0) {
+if (!empty($project->thirdparty) && !empty($project->thirdparty->id) && $project->thirdparty->id > 0) {
 	$morehtmlref .= $project->thirdparty->getNomUrl(1, 'project');
 }
 $morehtmlref .= '</div>';
 
 // Define a complementary filter for search of next/prev ref.
-if (empty($user->rights->projet->all->lire)) {
+if (!$user->hasRight('projet', 'all', 'lire')) {
 	$objectsListId = $project->getProjectsAuthorizedForUser($user, 0, 0);
 	$project->next_prev_filter = " rowid IN (".$db->sanitize(count($objectsListId) ? join(',', array_keys($objectsListId)) : '0').")";
 }
@@ -659,7 +659,7 @@ print '<tr class="liste_titre">';
 
 if (!empty($arrayfields['pt.label']['checked'])) {
 	print '<td class="liste_titre">';
-	print '<input name="search_task_label" value="'.dol_escape_htmltag($search['task_label']).'" >';
+	print '<input name="search_task_label" value="'.dol_escape_htmltag(!empty($search['task_label']) ? $search['task_label'] : '').'" >';
 	print '</td>';
 }
 
@@ -681,6 +681,7 @@ if (!empty($arrayfields['us_qty_done']['checked'])) {
 
 foreach ($listFields as $key => $val)
 {
+	if(empty($search[$key])) $search[$key] = '';
 	$cssforfield = (empty($val['css']) ? '' : $val['css']);
 	if ($key == 'status') $cssforfield .= ($cssforfield ? ' ' : '').'center';
 	elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) $cssforfield .= ($cssforfield ? ' ' : '').'center';
@@ -777,7 +778,7 @@ print '</tr>'."\n";
 
 // Detect if we need a fetch on each output line
 $needToFetchEachLine = 0;
-if (is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0)
+if (!empty($extrafields->attributes[$object->table_element]['computed']) && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0)
 {
 	foreach ($extrafields->attributes[$object->table_element]['computed'] as $key => $val)
 	{
@@ -789,7 +790,7 @@ if (is_array($extrafields->attributes[$object->table_element]['computed']) && co
 // Loop on record
 // --------------------------------------------------------------------
 $i = 0;
-$totalarray = array();
+$totalarray = array('nbfield' => 0);
 while ($i < ($limit ? min($num, $limit) : $num))
 {
 	$obj = $db->fetch_object($resql);

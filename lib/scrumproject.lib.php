@@ -324,7 +324,7 @@ function scrumProjectGetObjectFromCache($objetClassName, $fk_object, $maxCacheBy
 			return false;
 		}
 
-		if(is_array($TScrumProjectGetObjectFromCache[$objetClassName]) && count($TScrumProjectGetObjectFromCache[$objetClassName]) >= $maxCacheByType){
+		if(!empty($TScrumProjectGetObjectFromCache[$objetClassName]) && is_array($TScrumProjectGetObjectFromCache[$objetClassName]) && count($TScrumProjectGetObjectFromCache[$objetClassName]) >= $maxCacheByType){
 			// les clés sont importantes je veux être sûr de les préserver c'est pourquoi je n'utilise plus array_shift
 			foreach ($TScrumProjectGetObjectFromCache[$objetClassName] as $TCacheKey => $TCacheVal){
 				unset($TScrumProjectGetObjectFromCache[$objetClassName][$TCacheKey]);
@@ -413,7 +413,7 @@ function scrumProjectAddObjectFieldDefinition(&$globalFields, $fields, $fieldsTo
 function scrumProjectConvertQuantityToProjectGranularity($value){
 	global $langs;
 	$value = doubleval($value);
-	$quotient = !empty($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY)? intval($conf->global->DOC2PROJECT_NB_HOURS_PER_DAY): 7; // TODO ajouter soit une conf globale (une de plus ) ou utiliser celle de DOC2PROJECT_NB_HOURS_PER_DAY
+	$quotient = getDolGlobalInt('DOC2PROJECT_NB_HOURS_PER_DAY', 7); // TODO ajouter soit une conf globale (une de plus ) ou utiliser celle de DOC2PROJECT_NB_HOURS_PER_DAY
 	$outV = price($value / $quotient);
 
 	$toolTip = $value.' '.$langs->trans('Hours').' / '.$quotient.' '.$langs->trans('HoursByDay').' = <strong>'.$outV.$langs->trans('shortLetterForDaysMan').'</strong>';

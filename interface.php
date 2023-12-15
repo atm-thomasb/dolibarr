@@ -126,7 +126,7 @@ function _getAutocompletionForSprint($jsonResponse, string $search, int $minDate
 	}
 
 	$searchCol = array('s.label');
-	if(empty($conf->global->SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH)){
+	if(!getDolGlobalString('SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH')){
 		$searchCol[] = 's.ref';
 	}
 
@@ -156,7 +156,7 @@ function _getAutocompletionForSprint($jsonResponse, string $search, int $minDate
 		$item = new stdClass();
 		$item->id = $sprint->id;
 		$item->text = '';
-		if(empty($conf->global->SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH)){
+		if(!getDolGlobalString('SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH')){
 			$item->text.= $sprint->ref . ' ';
 		}
 		$item->text.= $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start, "%d/%m/%Y").' '.$langs->trans('to').' '.dol_print_date($sprint->date_end, "%d/%m/%Y");
@@ -265,7 +265,7 @@ function _actionRemoveUserStorySprint($jsonResponse){
 		return false;
 	}
 
-	if(empty($user->rights->scrumproject->scrumuserstorysprint->delete)){
+	if(!$user->hasRight('scrumproject', 'scrumuserstorysprint', 'delete')){
 		$jsonResponse->msg = 'Not enough rights';
 		return false;
 	}

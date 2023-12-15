@@ -97,7 +97,7 @@ if (GETPOST('actioncode', 'array')) {
 		$actioncode = '0';
 	}
 } else {
-	$actioncode = GETPOST("actioncode", "alpha", 3) ? GETPOST("actioncode", "alpha", 3) : (GETPOST("actioncode") == '0' ? '0' : (empty($conf->global->AGENDA_DEFAULT_FILTER_TYPE_FOR_OBJECT) ? '' : $conf->global->AGENDA_DEFAULT_FILTER_TYPE_FOR_OBJECT));
+	$actioncode = GETPOST("actioncode", "alpha", 3) ? GETPOST("actioncode", "alpha", 3) : (GETPOST("actioncode") == '0' ? '0' : (getDolGlobalString('AGENDA_DEFAULT_FILTER_TYPE_FOR_OBJECT', '' )));
 }
 $search_agenda_label = GETPOST('search_agenda_label');
 
@@ -132,7 +132,7 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->scrumproject->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity]."/".$object->id;
 }
 
-$permissiontoadd = $user->rights->scrumproject->scrumtask->write; // Used by the include of actions_addupdatedelete.inc.php
+$permissiontoadd = $user->hasRight('scrumproject','scrumtask','write'); // Used by the include of actions_addupdatedelete.inc.php
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();
@@ -255,7 +255,7 @@ if ($object->id > 0) {
 	$out = '&origin='.urlencode($object->element.'@'.$object->module).'&originid='.urlencode($object->id);
 	$urlbacktopage = $_SERVER['PHP_SELF'].'?id='.$object->id;
 	$out .= '&backtopage='.urlencode($urlbacktopage);
-	$permok = $user->rights->agenda->myactions->create;
+	$permok = $user->hasRight('agenda','myactions','create');
 	if ((!empty($objthirdparty->id) || !empty($objcon->id)) && $permok) {
 		//$out.='<a href="'.DOL_URL_ROOT.'/comm/action/card.php?action=create';
 		if (get_class($objthirdparty) == 'Societe') {
@@ -271,7 +271,7 @@ if ($object->id > 0) {
 	print '<div class="tabsAction">';
 
 	if (!empty($conf->agenda->enabled)) {
-		if (!empty($user->rights->agenda->myactions->create) || !empty($user->rights->agenda->allactions->create)) {
+		if ($user->hasRight('agenda', 'myactions', 'create') || $user->hasRight('agenda', 'allactions', 'create')) {
 			print '<a class="butAction" href="'.DOL_URL_ROOT.'/comm/action/card.php?action=create'.$out.'">'.$langs->trans("AddAction").'</a>';
 		} else {
 			print '<a class="butActionRefused classfortooltip" href="#">'.$langs->trans("AddAction").'</a>';
@@ -280,8 +280,8 @@ if ($object->id > 0) {
 
 	print '</div>';
 
-	if (!empty($conf->agenda->enabled) && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
-		$param = '&id='.$object->id.'&socid='.$socid;
+	if (!empty($conf->agenda->enabled) && ($user->hasRight('agenda', 'myactions', 'read') || $user->hasRight('agenda', 'allactions', 'read'))) {
+		$param = '&id='.$object->id;
 		if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
 			$param .= '&contextpage='.urlencode($contextpage);
 		}
