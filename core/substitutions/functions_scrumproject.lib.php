@@ -11,6 +11,10 @@
  */
 function scrumproject_completesubstitutionarray(&$substitutionarray, $langs, $object) {
 
+	if(!is_object($object) || property_exists($object, 'element')){
+		return null;
+	}
+
 	if($object->element == 'scrumproject_scrumuserstorysprint' ) {
 		/** @var ScrumUserStorySprint $object  */
 		completeSubstitutionFromScrumUserStorySprint($substitutionarray, $langs, $object);
