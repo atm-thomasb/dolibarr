@@ -231,13 +231,14 @@ if (empty($reshook))
 						setEventMessages($object->error, $object->errors, 'errors');
 					}
 				}
+			}
 
-				if($object->createAdvKanbanCardsInAdvKanban($user)<0){
-					if(empty($object->error) && empty($object->errors)){
-						setEventMessages($langs->trans('ErrorCreateAdvKanbanCardsInAdvKanban'), array(), 'errors');
-					} else {
-						setEventMessages($object->error, $object->errors, 'errors');
-					}
+			if($object->createAdvKanbanCardsInAdvKanban($user) < 0) {
+				if(empty($object->error) && empty($object->errors)) {
+					setEventMessages($langs->trans('ErrorCreateAdvKanbanCardsInAdvKanban'), array(), 'errors');
+				}
+				else {
+					setEventMessages($object->error, $object->errors, 'errors');
 				}
 			}
 			//Redirect to kanban

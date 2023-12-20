@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- FIX :  Creation of empty kanban doesnt convert us into kanban card- *14/12/2023* - 2.7.1
 - FIX :  COMPAT v19 - *14/12/2023* - 2.7.0
 - FIX : Remove kanban menu for tag - *16/11/2023* - 2.6.0
 
