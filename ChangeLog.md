@@ -3,8 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- FIX :  Creation of empty kanban doesnt convert us into kanban card- *14/12/2023* - 2.7.1
-- FIX :  COMPAT v19 - *14/12/2023* - 2.7.0
+- FIX : Email double click send multiple email - *10/01/2024* - 2.7.2
+- FIX : Creation of empty kanban doesn't convert us into kanban card- *14/12/2023* - 2.7.1
+- FIX : COMPAT v19 - *14/12/2023* - 2.7.0
 - FIX : Remove kanban menu for tag - *16/11/2023* - 2.6.0
 
 ## Version 2.5

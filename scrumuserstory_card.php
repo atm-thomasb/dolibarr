@@ -215,7 +215,9 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("ScrumUserStory");
 $help_url = '';
-llxHeader('', $title, $help_url);
+$arrayofjs = array(dol_buildpath('scrumproject/js/scrumproject_cards_only.js', 1));
+$arrayofcss = array(dol_buildpath('scrumproject/css/scrumproject.css', 1));
+llxHeader('', $title, $help_url, '', 0 , 0, $arrayofjs, $arrayofcss);
 
 // Example : Adding jquery code
 // print '<script type="text/javascript">
