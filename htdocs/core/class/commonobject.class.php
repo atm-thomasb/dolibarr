@@ -734,7 +734,7 @@ abstract class CommonObject
 
 		$ret .= dolGetFirstLastname($firstname, $lastname, $nameorder);
 
-		return dol_trunc($ret, $maxlen);
+		return dol_string_nohtmltag(dol_trunc($ret, $maxlen));
 	}
 
 	/**
@@ -1290,22 +1290,34 @@ abstract class CommonObject
 		// phpcs:enable
 		global $user;
 
+		$error = 0;
 
 		$this->db->begin();
 
-		$sql = "DELETE FROM ".$this->db->prefix()."element_contact";
-		$sql .= " WHERE rowid = ".((int) $rowid);
-
-		dol_syslog(get_class($this)."::delete_contact", LOG_DEBUG);
-		if ($this->db->query($sql)) {
-			if (!$notrigger) {
-				$result = $this->call_trigger(strtoupper($this->element).'_DELETE_CONTACT', $user);
-				if ($result < 0) {
-					$this->db->rollback();
-					return -1;
-				}
+		if (!$error && empty($notrigger)) {
+			// Call trigger
+			$this->context['contact_id'] = ((int) $rowid);
+			$result = $this->call_trigger(strtoupper($this->element).'_DELETE_CONTACT', $user);
+			if ($result < 0) {
+				$error++;
 			}
+			// End call triggers
+		}
 
+		if (!$error) {
+			dol_syslog(get_class($this)."::delete_contact", LOG_DEBUG);
+
+			$sql = "DELETE FROM ".MAIN_DB_PREFIX."element_contact";
+			$sql .= " WHERE rowid = ".((int) $rowid);
+
+			$result = $this->db->query($sql);
+			if (!$result) {
+				$error++;
+				$this->errors[] = $this->db->lasterror();
+			}
+		}
+
+		if (!$error) {
 			$this->db->commit();
 			return 1;
 		} else {
@@ -2147,7 +2159,7 @@ abstract class CommonObject
 		}
 
 		// For backward compatibility
-		if ($this->table_element == 'facture_rec' && $fieldid == 'title') {
+		if (in_array($this->table_element, array('facture_rec', 'facture_fourn_rec')) && $fieldid == 'title') {
 			$fieldid = 'titre';
 		}
 
@@ -5535,7 +5547,7 @@ abstract class CommonObject
 				if (in_array(get_class($this), array('Adherent'))) {
 					$resultwritefile = $obj->write_file($this, $outputlangs, $srctemplatepath, 'member', 1, 'tmp_cards', $moreparams);
 				} else {
-					 $resultwritefile = $obj->write_file($this, $outputlangs, $srctemplatepath, $hidedetails, $hidedesc, $hideref, $moreparams);
+					$resultwritefile = $obj->write_file($this, $outputlangs, $srctemplatepath, $hidedetails, $hidedesc, $hideref, $moreparams);
 				}
 				// After call of write_file $obj->result['fullpath'] is set with generated file. It will be used to update the ECM database index.
 
@@ -9074,7 +9086,7 @@ abstract class CommonObject
 
 		foreach ($this->fields as $field => $info) {
 			if ($this->isDate($info)) {
-				if (is_null($obj->{$field}) || $obj->{$field} === '' || $obj->{$field} === '0000-00-00 00:00:00' || $obj->{$field} === '1000-01-01 00:00:00') {
+				if (!isset($obj->{$field}) || is_null($obj->{$field}) || $obj->{$field} === '' || $obj->{$field} === '0000-00-00 00:00:00' || $obj->{$field} === '1000-01-01 00:00:00') {
 					$this->{$field} = '';
 				} else {
 					$this->{$field} = $db->jdate($obj->{$field});
@@ -9090,7 +9102,7 @@ abstract class CommonObject
 							$this->{$field} = (double) $obj->{$field};
 						}
 					} else {
-						if (!is_null($obj->{$field}) || (isset($info['notnull']) && $info['notnull'] == 1)) {
+						if (isset($obj->{$field}) && (!is_null($obj->{$field}) || (isset($info['notnull']) && $info['notnull'] == 1))) {
 							$this->{$field} = (int) $obj->{$field};
 						} else {
 							$this->{$field} = null;
@@ -9105,7 +9117,7 @@ abstract class CommonObject
 						$this->{$field} = (double) $obj->{$field};
 					}
 				} else {
-					if (!is_null($obj->{$field}) || (isset($info['notnull']) && $info['notnull'] == 1)) {
+					if (isset($obj->{$field}) && (!is_null($obj->{$field}) || (isset($info['notnull']) && $info['notnull'] == 1))) {
 						$this->{$field} = (double) $obj->{$field};
 					} else {
 						$this->{$field} = null;
@@ -9305,7 +9317,12 @@ abstract class CommonObject
 					$line = (object) $line;
 				}
 
-				$result = $line->create($user, 1);
+				$result = 0;
+				if (method_exists($line, 'insert')) {
+					$result = $line->insert($user, 1);
+				} elseif (method_exists($line, 'create')) {
+					$result = $line->create($user, 1);
+				}
 				if ($result < 0) {
 					$this->error = $line->error;
 					$this->db->rollback();

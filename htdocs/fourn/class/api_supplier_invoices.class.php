@@ -122,7 +122,7 @@ class SupplierInvoices extends DolibarrApi
 		if (!DolibarrApiAccess::$user->rights->societe->client->voir || $search_sale > 0) {
 			$sql .= ", sc.fk_soc, sc.fk_user";
 		}
-		$sql .= " FROM ".MAIN_DB_PREFIX."facture_fourn as t";
+		$sql .= " FROM ".MAIN_DB_PREFIX."facture_fourn AS t LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn_extrafields AS ef ON (ef.fk_object = t.rowid)"; // Modification VMR Global Solutions to include extrafields as search parameters in the API GET call, so we will be able to filter on extrafields
 
 		// We need this table joined to the select in order to filter by sale
 		if (!DolibarrApiAccess::$user->rights->societe->client->voir || $search_sale > 0) {
@@ -379,13 +379,13 @@ class SupplierInvoices extends DolibarrApi
 			throw new RestException(400, 'Invoice ID is mandatory');
 		}
 
-		if (!DolibarrApi::_checkAccessToResource('fournisseur', $this->invoice->id, 'facture_fourn', 'facture')) {
-			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
-		}
-
 		$result = $this->invoice->fetch($id);
 		if (!$result) {
 			throw new RestException(404, 'Invoice not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('fournisseur', $this->invoice->id, 'facture_fourn', 'facture')) {
+			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
 		}
 
 		$result = $this->invoice->getListOfPayments();
@@ -428,6 +428,11 @@ class SupplierInvoices extends DolibarrApi
 			throw new RestException(400, 'Invoice ID is mandatory');
 		}
 
+		$result = $this->invoice->fetch($id);
+		if (!$result) {
+			throw new RestException(404, 'Invoice not found');
+		}
+
 		if (!DolibarrApi::_checkAccessToResource('fournisseur', $this->invoice->id, 'facture_fourn', 'facture')) {
 			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
 		}
@@ -440,12 +445,6 @@ class SupplierInvoices extends DolibarrApi
 
 		if (empty($payment_mode_id)) {
 			throw new RestException(400, 'Payment mode ID is mandatory');
-		}
-
-
-		$result = $this->invoice->fetch($id);
-		if (!$result) {
-			throw new RestException(404, 'Invoice not found');
 		}
 
 		// Calculate amount to pay
