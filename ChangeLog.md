@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ## Release 2.5
 
+- FIX : comma error in sql request for scrumuserstorysprint_list.php  - *29/02/2024* - 2.5.3
 - FIX : Sort by tiers list user story planifiée  - *07/10/2023* - 2.5.2
 - FIX : Hot fix due to Dolibarr patch on object field filter...  - *04/09/2023* - 2.5.1
 - NEW : Button to toggle display planned user story on closed sprints - *01/07/2023* - 2.5.0
