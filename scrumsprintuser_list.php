@@ -125,7 +125,7 @@ $hookmanager->initHooks(array('scrumsprintuserlist')); // Note that conf->hooks_
 
 
 $staticScrumSprint = new ScrumSprint($db);
-$fieldsFromSprint = array('date_start', 'date_end');
+$fieldsFromSprint = array('fk_team', 'date_start', 'date_end');
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -170,7 +170,6 @@ foreach ($staticScrumSprint->fields as $key => $val) {
 		$search[$key.'_dtend'] = dol_mktime(23, 59, 59, GETPOST('search_'.$key.'_dtendmonth', 'int'), GETPOST('search_'.$key.'_dtendday', 'int'), GETPOST('search_'.$key.'_dtendyear', 'int'));
 	}
 }
-
 
 
 
@@ -305,45 +304,94 @@ $morejs = array();
 $morecss = array();
 
 
+$sqlBuild = [
+	'SELECT' => '',
+	'FROM' => '',
+	'WHERE' => '',
+	'ORDER' => '',
+	'GROUP' => '',
+	'HAVING' => '',
+	'LIMIT' => ''
+];
+
+
 // Build and execute select
 // --------------------------------------------------------------------
-$sql = 'SELECT ';
-$sql .= $object->getFieldList('t');
-$sql .= ' ,'.$staticScrumSprint->getFieldList('ssp');
+$sqlBuild['SELECT'].= 'SELECT ';
+$sqlBuild['SELECT'].= $object->getFieldList('t');
+$sqlBuild['SELECT'].= ' ,'._getFieldListPrefix($staticScrumSprint, 'ssp');
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
-		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? ", ef.".$key." as options_".$key : '');
+		$sqlBuild['SELECT'].= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? ", ef.".$key." as options_".$key : '');
 	}
 }
 // Add fields from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
-$sql = preg_replace('/,\s*$/', '', $sql);
-$sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
+$sqlBuild['SELECT'].= preg_replace('/^,/', '', $hookmanager->resPrint);
+$sqlBuild['SELECT']= preg_replace('/,\s*$/', '', $sqlBuild['SELECT']);
+$sqlBuild['FROM'].= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
 if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
-	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
+	$sqlBuild['FROM'].= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 }
 
-$sql .= " LEFT JOIN ".$db->prefix()."scrumproject_scrumsprint as ssp on (t.fk_scrum_sprint = ssp.rowid)";
+$sqlBuild['FROM'].= " LEFT JOIN ".$db->prefix()."scrumproject_scrumsprint as ssp on (t.fk_scrum_sprint = ssp.rowid)";
 
 // Add table from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= $hookmanager->resPrint;
+$sqlBuild['FROM'].= $hookmanager->resPrint;
 if ($object->ismultientitymanaged == 1) {
-	$sql .= " WHERE t.entity IN (".getEntity($object->element).")";
+	$sqlBuild['WHERE']= " WHERE t.entity IN (".getEntity($object->element).")";
 } else {
-	$sql .= " WHERE 1 = 1";
+	$sqlBuild['WHERE']= " WHERE 1 = 1";
 }
 
 if($fk_sprint>0){
-	$sql .= " AND t.fk_scrum_sprint = ".intval($fk_sprint);
+	$sqlBuild['WHERE'].= " AND t.fk_scrum_sprint = ".intval($fk_sprint);
 }
 
 
 foreach ($search as $key => $val) {
+
+	if ( in_array($key, array_merge($fieldsFromSprint , ['date_start_dtstart', 'date_start_dtend','date_end_dtstart', 'date_end_dtend']))) {
+		$sqlKeyP = 'ssp'.$key;
+		$sqlKeyP = 'ssp'.$key;
+
+
+		if (array_key_exists($key, $staticScrumSprint->fields)) {
+			if ($key == 'status' && $search[$key] == -1) {
+				continue;
+			}
+			$mode_search = (($staticScrumSprint->isInt($staticScrumSprint->fields[$key]) || $staticScrumSprint->isFloat($staticScrumSprint->fields[$key])) ? 1 : 0);
+			if ((strpos($staticScrumSprint->fields[$key]['type'], 'integer:') === 0) || (strpos($staticScrumSprint->fields[$key]['type'], 'sellist:') === 0) || !empty($staticScrumSprint->fields[$key]['arrayofkeyval'])) {
+				if ($search[$key] == '-1' || ($search[$key] === '0' && (empty($staticScrumSprint->fields[$key]['arrayofkeyval']) || !array_key_exists('0', $staticScrumSprint->fields[$key]['arrayofkeyval'])))) {
+					$search[$key] = '';
+				}
+				$mode_search = 2;
+			}
+			if ($search[$key] != '') {
+				$sqlBuild['WHERE'] .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
+			}
+		} else {
+			if (preg_match('/(_dtstart|_dtend)$/', $key) && $search[$key] != '') {
+				$columnName = preg_replace('/(_dtstart|_dtend)$/', '', $key);
+				if (preg_match('/^(date|timestamp|datetime)/', $staticScrumSprint->fields[$columnName]['type'])) {
+					if (preg_match('/_dtstart$/', $key)) {
+						$sqlBuild['WHERE'] .= " AND ssp.".$columnName." >= '".$db->idate($search[$key])."'";
+					}
+					if (preg_match('/_dtend$/', $key)) {
+						$sqlBuild['WHERE'] .= " AND ssp." . $columnName . " <= '" . $db->idate($search[$key]) . "'";
+					}
+				}
+			}
+
+		}
+	}
+
+
+
 	if (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
 			continue;
@@ -356,24 +404,24 @@ foreach ($search as $key => $val) {
 			$mode_search = 2;
 		}
 		if ($search[$key] != '') {
-			$sql .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
+			$sqlBuild['WHERE'] .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
 		}
 	} else {
 		if (preg_match('/(_dtstart|_dtend)$/', $key) && $search[$key] != '') {
 			$columnName = preg_replace('/(_dtstart|_dtend)$/', '', $key);
 			if (preg_match('/^(date|timestamp|datetime)/', $object->fields[$columnName]['type'])) {
 				if (preg_match('/_dtstart$/', $key)) {
-					$sql .= " AND t.".$columnName." >= '".$db->idate($search[$key])."'";
+					$sqlBuild['WHERE'] .= " AND t.".$columnName." >= '".$db->idate($search[$key])."'";
 				}
 				if (preg_match('/_dtend$/', $key)) {
-					$sql .= " AND t." . $columnName . " <= '" . $db->idate($search[$key]) . "'";
+					$sqlBuild['WHERE'] .= " AND t." . $columnName . " <= '" . $db->idate($search[$key]) . "'";
 				}
 			}
 		}
 	}
 }
 if ($search_all) {
-	$sql .= natural_search(array_keys($fieldstosearchall), $search_all);
+	$sqlBuild['WHERE'] .= natural_search(array_keys($fieldstosearchall), $search_all);
 }
 //$sql.= dolSqlDateFilter("t.field", $search_xxxday, $search_xxxmonth, $search_xxxyear);
 // Add where from extra fields
@@ -381,62 +429,62 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
 // Add where from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListWhere', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= $hookmanager->resPrint;
+$sqlBuild['WHERE'] .= $hookmanager->resPrint;
 
 /* If a group by is required
-$sql .= " GROUP BY ";
+$sqlBuild['GROUP'] .= " GROUP BY ";
 foreach($object->fields as $key => $val) {
-	$sql .= "t.".$key.", ";
+	$sqlBuild['GROUP'] .= "t.".$key.", ";
 }
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
-		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.', ' : '');
+		$sqlBuild['GROUP'] .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.', ' : '');
 	}
 }
 // Add where from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListGroupBy', $parameters, $object);    // Note that $action and $object may have been modified by hook
-$sql .= $hookmanager->resPrint;
-$sql = preg_replace('/,\s*$/', '', $sql);
+$sqlBuild['GROUP'] .= $hookmanager->resPrint;
+$sqlBuild['GROUP'] = preg_replace('/,\s*$/', '', $sqlBuild['GROUP']);
 */
 
 // Add HAVING from hooks
 /*
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListHaving', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPrint;
+$sqlBuild['HAVING'] .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPrint;
 */
 
 // Count total nb of records
 $nbtotalofrecords = '';
 if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST')) {
-	/* This old and fast method to get and count full list returns all record so use a high amount of memory.
-	$resql = $db->query($sql);
-	$nbtotalofrecords = $db->num_rows($resql);
-	*/
-	/* The slow method does not consume memory on mysql (not tested on pgsql) */
-	/*$resql = $db->query($sql, 0, 'auto', 1);
-	while ($db->fetch_object($resql)) {
-		$nbtotalofrecords++;
-	}*/
-	/* The fast and low memory method to get and count full list converts the sql into a sql count */
-	$sqlforcount = preg_replace('/^SELECT[a-z0-9\._\s\(\),]+FROM/i', 'SELECT COUNT(*) as nbtotalofrecords FROM', $sql);
+
+	$sqlCountBuild = $sqlBuild;
+	$sqlCountBuild['SELECT'] = 'SELECT COUNT(*) as nbtotalofrecords';
+	$sqlforcount = _buildSqlQuery($sqlCountBuild);
+
+
+
 	$resql = $db->query($sqlforcount);
-	$objforcount = $db->fetch_object($resql);
-	$nbtotalofrecords = $objforcount->nbtotalofrecords;
-	if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
-		$page = 0;
-		$offset = 0;
+	if($resql){
+		$objforcount = $db->fetch_object($resql);
+		$nbtotalofrecords = intval($objforcount->nbtotalofrecords);
+		if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
+			$page = 0;
+			$offset = 0;
+		}
+		$db->free($resql);
 	}
-	$db->free($resql);
 }
 
 // Complete request and execute it with limit
-$sql .= $db->order($sortfield, $sortorder);
+$sqlBuild['ORDER'] = $db->order($sortfield, $sortorder);
 if ($limit) {
-	$sql .= $db->plimit($limit + 1, $offset);
+	$sqlBuild['LIMIT'] = $db->plimit($limit + 1, $offset);
 }
+
+$sql = _buildSqlQuery($sqlBuild);
 
 $resql = $db->query($sql);
 if (!$resql) {
@@ -821,13 +869,18 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 
 			$liveEdit = '';
-			if($object->statut == $object::STATUS_DRAFT && in_array($key, array('qty_availability', 'availability_rate'))){
+			if($object->statut == $object::STATUS_DRAFT
+					&& $staticScrumSprint->date_end >= time()
+					&& in_array($key, array('qty_availability', 'availability_rate'))){
 				$liveEdit = scrumProjectGenLiveUpdateAttributes($object->element, $object->id, $key, 'scrumSprintUserGenLiveUpdateAttributes_qty_velocity');
 			}
 
 			print '<td '.$liveEdit.' '.($cssforfield ? ' class="col-'.$key.' '.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
+			} elseif ($key == 'fk_scrum_sprint') {
+				print $object->showOutputField($val, $key, $object->$key, '');
+				print '<br/><small>'.$staticScrumSprint->showOutputFieldQuick('label').'</small>';
 			} elseif ($key == 'rowid') {
 				print $object->showOutputField($val, $key, $object->id, '');
 			} else {
@@ -975,3 +1028,39 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 // End of page
 llxFooter();
 $db->close();
+
+/**
+ * Function to concat keys of fields in a sql SELECT
+ *
+ * @param  CommonObject      $object
+ * @param string $alias String of alias of table for fields. For example 't'. It is recommended to use '' and set alias into fields defintion.
+ * @return  string                list of alias fields
+ */
+function _getFieldListPrefix($object, $alias)
+{
+	$keys = array_keys($object->fields);
+	$keys_with_alias = array();
+	foreach ($keys as $fieldName) {
+		$keys_with_alias[] = $alias . '.' . $fieldName.' as '. $alias . '_'.$fieldName;
+	}
+	return implode(',', $keys_with_alias);
+}
+
+
+/**
+ * Build SQL query from array
+ * @param array $sqlBuild
+ *                       [
+ *                       'SELECT' => '',
+ *                       'FROM' => '',
+ *                       'WHERE' => '',
+ *                       'ORDER' => '',
+ *                       'GROUP' => '',
+ *                       'HAVING' => ''
+ *                       'LIMIT' => ''
+ *                       ]
+ * @return string
+ */
+function _buildSqlQuery($sqlBuild){
+	return $sqlBuild['SELECT'].' '.$sqlBuild['FROM'].' '.$sqlBuild['WHERE'].' '.$sqlBuild['ORDER'].' '.$sqlBuild['GROUP'].' '.$sqlBuild['HAVING'].' '.$sqlBuild['LIMIT'];
+}
