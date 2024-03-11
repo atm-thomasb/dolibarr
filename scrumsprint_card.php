@@ -79,7 +79,6 @@ $contextpage = GETPOST('contextpage', 'aZ') ?GETPOST('contextpage', 'aZ') : 'scr
 $backtopage = GETPOST('backtopage', 'alpha');
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 $fk_kanban = GETPOST('fk_kanban','int');
-//$lineid   = GETPOST('lineid', 'int');
 
 // Initialize technical objects
 $object = new ScrumSprint($db);
@@ -106,11 +105,11 @@ if (empty($action) && empty($id) && empty($ref)) $action = 'view';
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
 
 
-$permissiontoread = $user->rights->scrumproject->scrumsprint->read;
-$permissiontoadd = $user->rights->scrumproject->scrumsprint->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-$permissiontodelete = $user->rights->scrumproject->scrumsprint->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-$permissionnote = $user->rights->scrumproject->scrumsprint->write; // Used by the include of actions_setnotes.inc.php
-$permissiondellink = $user->rights->scrumproject->scrumsprint->write; // Used by the include of actions_dellink.inc.php
+$permissiontoread = $user->hasRight('scrumproject','scrumsprint','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumsprint','write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->hasRight('scrumproject','scrumsprint','delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissionnote = $user->hasRight('scrumproject','scrumsprint','write'); // Used by the include of actions_setnotes.inc.php
+$permissiondellink = $user->hasRight('scrumproject','scrumsprint','write'); // Used by the include of actions_dellink.inc.php
 $upload_dir = $conf->scrumproject->multidir_output[isset($object->entity) ? $object->entity : 1];
 
 // Security check - Protection if external user
@@ -232,13 +231,14 @@ if (empty($reshook))
 						setEventMessages($object->error, $object->errors, 'errors');
 					}
 				}
+			}
 
-				if($object->createAdvKanbanCardsInAdvKanban($user)<0){
-					if(empty($object->error) && empty($object->errors)){
-						setEventMessages($langs->trans('ErrorCreateAdvKanbanCardsInAdvKanban'), array(), 'errors');
-					} else {
-						setEventMessages($object->error, $object->errors, 'errors');
-					}
+			if($object->createAdvKanbanCardsInAdvKanban($user) < 0) {
+				if(empty($object->error) && empty($object->errors)) {
+					setEventMessages($langs->trans('ErrorCreateAdvKanbanCardsInAdvKanban'), array(), 'errors');
+				}
+				else {
+					setEventMessages($object->error, $object->errors, 'errors');
 				}
 			}
 			//Redirect to kanban
@@ -312,7 +312,9 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("ScrumSprint");
 $help_url = '';
-llxHeader('', $title, $help_url);
+$arrayofjs = array(dol_buildpath('scrumproject/js/scrumproject_cards_only.js', 1));
+$arrayofcss = array(dol_buildpath('scrumproject/css/scrumproject.css', 1));
+llxHeader('', $title, $help_url, '', 0 , 0, $arrayofjs, $arrayofcss);
 
 
 // Part to create
@@ -420,10 +422,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	if ($action == 'delete') {
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteScrumSprint'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
 	}
-	// Confirmation to delete line
-	if ($action == 'deleteline') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('DeleteLine'), $langs->trans('ConfirmDeleteLine'), 'confirm_deleteline', '', 0, 1);
-	}
 	// Clone confirmation
 	if ($action == 'clone') {
 		// Create an array for form
@@ -449,7 +447,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 
 	// Call Hook formConfirm
-	$parameters = array('formConfirm' => $formconfirm, 'lineid' => $lineid);
+	$parameters = array('formConfirm' => $formconfirm);
 	$reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 	if (empty($reshook)) $formconfirm .= $hookmanager->resPrint;
 	elseif ($reshook > 0) $formconfirm = $hookmanager->resPrint;
@@ -570,7 +568,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 
 			// Clone
-			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&socid='.$object->socid.'&action=clone&object=scrumsprint&token='.newToken(), '', $permissiontoadd);
+			print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=clone&object=scrumsprint&token='.newToken(), '', $permissiontoadd);
 
 			// Delete (need delete permission, or if draft, just need create/modify permission)
 			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete&token='.newToken(), '', $permissiontodelete || ($object->status == $object::STATUS_DRAFT && $permissiontoadd));
@@ -607,8 +605,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$relativepath = $objref.'/'.$objref.'.pdf';
 			$filedir = $conf->scrumproject->dir_output.'/'.$object->element.'/'.$objref;
 			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
-			$genallowed = $user->rights->scrumproject->scrumsprint->read; // If you can read, you can build the PDF to read content
-			$delallowed = $user->rights->scrumproject->scrumsprint->write; // If you can create/edit, you can remove a file on card
+			$genallowed = $user->hasRight('scrumproject','scrumsprint','read'); // If you can read, you can build the PDF to read content
+			$delallowed = $user->hasRight('scrumproject','scrumsprint','write'); // If you can create/edit, you can remove a file on card
 			print $formfile->showdocuments('scrumproject:ScrumSprint', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
 

@@ -104,7 +104,7 @@ $scrumFieldsToKeep = array(
 // Vu qu'il y a plusieurs table et object en jointures il faut
 $listFields = array();
 scrumProjectAddObjectFieldDefinition($listFields, $object->fields, $scrumFieldsToKeep);
-
+$object->fields = $listFields;
 
 //
 //// Fetch optionals attributes and labels
@@ -136,7 +136,7 @@ if(empty($search['status'])){
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
 foreach ($listFields as $key => $val) {
-	if ($val['searchall']) $fieldstosearchall['t.'.$key] = $val['label'];
+	if (!empty($val['searchall'])) $fieldstosearchall['t.'.$key] = $val['label'];
 }
 
 // Definition of array of fields for columns
@@ -153,21 +153,21 @@ $arrayfields = array(
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
-		'help'=>$val['us_qty_planned_help']
+		'help'=>$val['us_qty_planned_help'] ?? ''
 	),
 	'us_qty_consumed' => array(
 		'label'=>'us_qty_consumed',
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
-		'help'=>$val['us_qty_consumed_help']
+		'help'=>$val['us_qty_consumed_help'] ?? ''
 	),
 	'us_qty_done' => array(
 		'label'=>'us_qty_done',
 		'checked'=>1,
 		'enabled'=>1,
 		'position'=>1,
-		'help'=>$val['us_qty_done_help']
+		'help'=>$val['us_qty_done_help'] ?? ''
 	)
 );
 
@@ -181,7 +181,7 @@ foreach ($listFields as $key => $val) {
 			'checked'=>(($visible < 0) ? 0 : 1),
 			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
 			'position'=>$val['position'],
-			'help'=>$val['help']
+			'help'=>$val['help'] ?? ''
 		);
 	}
 }
@@ -192,9 +192,9 @@ foreach ($listFields as $key => $val) {
 $listFields = dol_sort_array($listFields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
-$permissiontoread = $user->rights->scrumproject->scrumsprint->read;
-$permissiontoadd = $user->rights->scrumproject->scrumsprint->write;
-$permissiontodelete = $user->rights->scrumproject->scrumsprint->delete;
+$permissiontoread = $user->hasRight('scrumproject','scrumsprint','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumsprint','write');
+$permissiontodelete = $user->hasRight('scrumproject','scrumsprint','delete');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
@@ -292,7 +292,7 @@ $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $obje
 $sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
 $sql = preg_replace('/,\s*$/', '', $sql);
 $sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
-if (is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
+if (!empty($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 
 $sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint as sUSsprint ON (t.rowid = sUSsprint.fk_scrum_sprint )";
 $sql .= " RIGHT JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstory as sUS ON (sUSsprint.fk_scrum_user_story = sUS.rowid )";
@@ -393,7 +393,7 @@ $sql .= $db->order($sortfield, $sortorder);
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
+if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST')) {
 	$resql = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($resql);
 	if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
@@ -417,7 +417,7 @@ if (is_numeric($nbtotalofrecords) && ($limit > $nbtotalofrecords || empty($limit
 }
 
 // Direct jump if only one record found
-if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page)
+if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page)
 {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
@@ -535,7 +535,7 @@ print '<tr class="liste_titre">';
 
 if (!empty($arrayfields['p.title']['checked'])) {
 	print '<td class="liste_titre">';
-	print '<input name="search_project_title" value="'.dol_escape_htmltag($search['search_project_title']).'" >';
+	print '<input name="search_project_title" value="'.dol_escape_htmltag($search['search_project_title'] ?? '').'" >';
 	print '</td>';
 }
 
@@ -580,8 +580,8 @@ foreach ($listFields as $key => $val)
 			print Form::multiselectarray('search_status', $arrayofstatus, $selectedarray, 0, 0, 'minwidth100imp maxwidth150', 1, 0, '', '', '');
 		}elseif (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) print $form->selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth100', 1);
 		elseif (strpos($val['type'], 'integer:') === 0) {
-			print $object->showInputField($val, $key, $search[$key], '', '', 'search_', 'maxwidth125', 1);
-		} elseif (!preg_match('/^(date|timestamp)/', $val['type'])) print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag($search[$key]).'">';
+			print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', 'maxwidth125', 1);
+		} elseif (!preg_match('/^(date|timestamp)/', $val['type'])) print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag($search[$key] ?? '').'">';
 
 
 		print '</td>';
@@ -665,7 +665,7 @@ if (is_array($extrafields->attributes[$object->table_element]['computed']) && co
 // Loop on record
 // --------------------------------------------------------------------
 $i = 0;
-$totalarray = array();
+$totalarray = array('nbfield' => 0);
 while ($i < ($limit ? min($num, $limit) : $num))
 {
 	$obj = $db->fetch_object($resql);
@@ -748,6 +748,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 			if (!$i) $totalarray['nbfield']++;
 			if (!empty($val['isameasure']))
 			{
+				if(empty($totalarray['val']['t.'.$key])) $totalarray['val']['t.'.$key] = 0;
 				if (!$i) $totalarray['pos'][$totalarray['nbfield']] = 't.'.$key;
 				$totalarray['val']['t.'.$key] += $object->$key;
 			}

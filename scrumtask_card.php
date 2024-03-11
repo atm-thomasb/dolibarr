@@ -122,11 +122,11 @@ if (empty($action) && empty($id) && empty($ref)) {
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
 
 
-$permissiontoread = $user->rights->scrumproject->scrumtask->read;
-$permissiontoadd = $user->rights->scrumproject->scrumtask->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-$permissiontodelete = $user->rights->scrumproject->scrumtask->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-$permissionnote = $user->rights->scrumproject->scrumtask->write; // Used by the include of actions_setnotes.inc.php
-$permissiondellink = $user->rights->scrumproject->scrumtask->write; // Used by the include of actions_dellink.inc.php
+$permissiontoread = $user->hasRight('scrumproject','scrumtask','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumtask','write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->hasRight('scrumproject','scrumtask','delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissionnote = $user->hasRight('scrumproject','scrumtask','write'); // Used by the include of actions_setnotes.inc.php
+$permissiondellink = $user->hasRight('scrumproject','scrumtask','write'); // Used by the include of actions_dellink.inc.php
 $upload_dir = $conf->scrumproject->multidir_output[isset($object->entity) ? $object->entity : 1].'/scrumtask';
 
 // Security check (enable the most restrictive one)
@@ -209,7 +209,9 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("ScrumTask");
 $help_url = '';
-llxHeader('', $title, $help_url);
+$arrayofjs = array(dol_buildpath('scrumproject/js/scrumproject_cards_only.js', 1));
+$arrayofcss = array(dol_buildpath('scrumproject/css/scrumproject.css', 1));
+llxHeader('', $title, $help_url, '', 0 , 0, $arrayofjs, $arrayofcss);
 
 // Example : Adding jquery code
 // print '<script type="text/javascript">
@@ -497,8 +499,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$relativepath = $objref.'/'.$objref.'.pdf';
 			$filedir = $conf->scrumproject->dir_output.'/'.$object->element.'/'.$objref;
 			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
-			$genallowed = $user->rights->scrumproject->scrumtask->read; // If you can read, you can build the PDF to read content
-			$delallowed = $user->rights->scrumproject->scrumtask->write; // If you can create/edit, you can remove a file on card
+			$genallowed = $user->hasRight('scrumproject','scrumtask','read'); // If you can read, you can build the PDF to read content
+			$delallowed = $user->hasRight('scrumproject','scrumtask','write'); // If you can create/edit, you can remove a file on card
 			print $formfile->showdocuments('scrumproject:ScrumTask', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
 

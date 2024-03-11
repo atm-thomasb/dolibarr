@@ -41,7 +41,7 @@ function scrumsprintPrepareHead($object)
 	$head[$h][2] = 'card';
 	$h++;
 
-	if (empty($conf->global->MAIN_DISABLE_CONTACTS_TAB))
+	if (!getDolGlobalString('MAIN_DISABLE_CONTACTS_TAB'))
 	{
 		$nbContact = count($object->liste_contact(-1, 'internal')) + count($object->liste_contact(-1, 'external'));
 		$head[$h][0] = dol_buildpath("/scrumproject/scrumsprint_contact.php", 1).'?id='.$object->id;
@@ -58,7 +58,7 @@ function scrumsprintPrepareHead($object)
 		if (!empty($object->note_public)) $nbNote++;
 		$head[$h][0] = dol_buildpath('/scrumproject/scrumsprint_note.php', 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans('Notes');
-		if ($nbNote > 0) $head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">'.$nbNote.'</span>' : '');
+		if ($nbNote > 0) $head[$h][1] .= (!getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER') ? '<span class="badge marginleftonlyshort">'.$nbNote.'</span>' : '');
 		$head[$h][2] = 'note';
 		$h++;
 	}
@@ -83,6 +83,7 @@ function scrumsprintPrepareHead($object)
 	$sqlV = " SELECT COUNT(rowid) nb FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($object->id).' AND status = 1 ';
 	$sqlT = " SELECT COUNT(rowid) nb FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($object->id);
 	$countObjT = $db->getRow($sqlT);
+	$out = '';
 	if($countObjT && $countObjT->nb > 0){
 		$out = '<span class="badge marginleftonlyshort">';
 

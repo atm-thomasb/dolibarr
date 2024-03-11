@@ -5,39 +5,48 @@ All notable changes to this project will be documented in this file.
 
 - NEW : Columns date start and end of sprint in sprint user list - *18/10/2023* - 2.6.0
 
-## Version 2.5
+## Release 2.7
 
+- FIX : Email double click send multiple email - *10/01/2024* - 2.7.2
+- FIX : Creation of empty kanban doesn't convert us into kanban card- *14/12/2023* - 2.7.1
+- FIX : COMPAT v19 - *14/12/2023* - 2.7.0
+- FIX : Remove kanban menu for tag - *16/11/2023* - 2.6.0
+
+## Release 2.5
+
+- FIX : comma error in sql request for scrumuserstorysprint_list.php  - *29/02/2024* - 2.5.3
+- FIX : Sort by tiers list user story planifiée  - *07/10/2023* - 2.5.2
 - FIX : Hot fix due to Dolibarr patch on object field filter...  - *04/09/2023* - 2.5.1
 - NEW : Button to toggle display planned user story on closed sprints - *01/07/2023* - 2.5.0
 - FIX : php warning  - *01/07/2023* - 2.4.1
 - NEW : Hidden conf SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH - *01/07/2023* - 2.4.0  
   Will remove ref for combo search in wizard  
 
-## Version 2.3
+## Release 2.3
 - FIX : error 500 on list definition   *04/06/2023* - 2.3.1 
 - NEW : Change status of user story to done update project task progress to 100% - *05/06/2023* - 2.3.0
 - NEW : User stories can be set to "Done" (button on the card or mass action on the list); when an US is done, it no
   longer shows on the list when the filter "openall" is set - *02/06/2023* - 2.2.0
 
-## Version 2.1
+## Release 2.1
 
 - NEW : Duplicate tag from user story sprint *25/05/2023* - 2.1.0
 
-## Version 2.0
+## Release 2.0
 
 - FIX : Load lang missing *24/05/2023* - 2.0.1
 - NEW : Dependency to AdvancedKanban module  *20/03/2023* - 2.0.0  
   Need to execute migration script in bash ```scrumproject/scripts/migrate-advanced-kanban.php```  
   before activating AdvancedKanban module 
 
-## Version 1.33
+## Release 1.33
 
 - FIX : Missing error display when scrum user story have over planned tasks  *01/02/2022* - 1.33.4
 - FIX : RH badge count type  *30/01/2022* - 1.33.3
 - FIX : Filter for User story planned task list  *30/01/2022* - 1.33.2
 - NEW : Tab for user story task showing planned on print *30/01/2022* - 1.33.1
 
-## Version 1.32
+## Release 1.32
 
 - FIX : Fatal error on delete project time task  *27/01/2022* - 1.32.6
 - FIX : Add alert when missing mandatory setup conf for kanban  *27/01/2022* - 1.32.5
@@ -51,7 +60,7 @@ All notable changes to this project will be documented in this file.
   Note : add new Rights for kanban too
 - NEW : Kanban slide panel *21/01/2022* - 1.29.0
 
-## Version 1.28
+## Release 1.28
 
 - FIX : Split scrum card position *18/01/2023* - 1.28.4
 - FIX : Project Time update/delete by trigger *18/01/2023* - 1.28.3
@@ -59,14 +68,14 @@ All notable changes to this project will be documented in this file.
 - FIX : Tooltip display *18/01/2023* - 1.28.1
 - NEW/FIX : calcule temps *18/01/2023* - 1.28.0
 
-## Version 1.27
+## Release 1.27
 
 - NEW : remove clone function *04/01/2022* - 1.27.0
 - NEW : Ajout extrafield sur catégorie pour faire apparaitre le tag catégorie *04/01/2022* - 1.26.0  
   -> lors du préremplissage des notes de saisie de temps sur les tâches   
 - NEW : Préremplissage des notes de saisie de temps sur les tâches *04/01/2022* - 1.25.0
 
-## Version 1.24
+## Release 1.24
 
 - FIX : Submenu open behavior *16/01/2023* - 1.24.10
 - FIX : RH status langs *16/01/2023* - 1.24.9
@@ -81,7 +90,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Display company on card *02/01/2023* - 1.24.0
 - NEW : Delete cascade from kanban *20/12/2022* - 1.23.0
 
-## Version 1.22
+## Release 1.22
 
 - FIX : Us sprint label display *02/01/2023* - 1.22.3
 - FIX : Can't validate a scrumsprintuser card beacause ref column doesn't exist for table scrumproject_scrumsprintuser *23/12/2022* - 1.22.2
@@ -90,7 +99,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Add model email possibility *30/11/2022* - 1.21.0
 - NEW : Kanban, add addTime on menu list Task *30/11/2022* - 1.20.0
 
-## Version 1.19
+## Release 1.19
 
 - FIX : Hours qty conversion to time display  *24/11/2022* - 1.19.1
 - NEW : Add total on kanban sprint dashboard  *24/11/2022* - 1.19.0
@@ -105,7 +114,7 @@ All notable changes to this project will be documented in this file.
   Change qty_availablity -> qty_availability  
   Change availablity_rate -> availability_rate 
 
-## Version 1.14
+## Release 1.14
 
 - FIX : Suppréssion du bouton afficher kanban et ajout getnomurl du scrumkanban sous date de fin - *25/11/2022* - 1.14.10
 - FIX : Pagination ScrumSprint page *25/11/2022* - 1.14.9
@@ -131,7 +140,7 @@ All notable changes to this project will be documented in this file.
 - FIX : Caché le status de la tache sur une carte vide *12/09/2022* - 1.7.1
 - NEW : Kanban drop card status *12/10/2022* - 1.7.0
 
-## Version 1.6
+## Release 1.6
 
  - FIX : - Transformer les heures afficher au format numérique en format heure sur us card - *03/11/2022)* - 1.6.4  
  - FIX :  - *27/10/2022)* - 1.6.3 
@@ -155,18 +164,18 @@ All notable changes to this project will be documented in this file.
 - NEW : Ajout de massaction de planification pour les US et les US planif *29/08/2022* - 1.4.0
 - NEW : Add Tab Kanban to Sprint card page *17/08/2022* - 1.3.0
 
-## Version 1.2
+## Release 1.2
 
 - FIX : update view planif US *02/09/2022* -1.2.4
 - FIX : Update menu *17/08/2022* - 1.2.3
 - FIX : Object element name *05/08/2022* - 1.2.1
 - NEW : Planning interface for user stories *05/08/2022* - 1.2.0
 
-## Version 1.1
+## Release 1.1
 
 - NEW : Split dialog for kanban card of type User story or Scrum task *28/07/2022* - 1.1.0
 
-## Version 1.0 [2020-12-25]
+## Release 1.0 [2020-12-25]
 
 - FIX : Suppression des champs qté réalisée et quantité prévue à la création d'un sprint *21/07/2022* - 1.0.9
 - FIX : Update visuel de la liste US planifiée *21/07/2022* - 1.0.8

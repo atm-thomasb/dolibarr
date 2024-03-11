@@ -218,9 +218,9 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
-$permissiontoread = $user->rights->scrumproject->scrumuserstorysprint->read;
-$permissiontoadd = $user->rights->scrumproject->scrumuserstorysprint->write;
-$permissiontodelete = $user->rights->scrumproject->scrumuserstorysprint->delete;
+$permissiontoread = $user->hasRight('scrumproject','scrumuserstorysprint','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumuserstorysprint','write');
+$permissiontodelete = $user->hasRight('scrumproject','scrumuserstorysprint','delete');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) {
@@ -330,12 +330,12 @@ foreach ($object->fields as $key => $val) {
 	$sql .= 't.'.$key.', ';
 }
 
-$sql .= ' pt.fk_projet fk_project , p.title project_title, p.ref project_ref, p.fk_soc, ';
+$sql .= ' pt.fk_projet fk_project , p.title project_title, p.ref project_ref, p.fk_soc ';
 
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
-		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? ", ef.".$key." as options_".$key : '');
+		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key." as options_".$key.", " : '');
 	}
 }
 // Add fields from hooks
@@ -465,7 +465,7 @@ $sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPri
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
+if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST')) {
 	$page = 0;
 	$offset = 0;
 
@@ -497,7 +497,7 @@ $num = $db->num_rows($resql);
 
 
 // Direct jump if only one record found
-if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page) {
+if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page) {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
 	header("Location: ".dol_buildpath('/scrumproject/scrumuserstorysprint_card.php', 1).'?id='.$id);
@@ -545,7 +545,7 @@ elseif($project) {
 	$morehtmlref .= '</div>';
 
 // Define a complementary filter for search of next/prev ref.
-	if (empty($user->rights->projet->all->lire)) {
+	if (!$user->hasRight('projet', 'all', 'lire')) {
 		$objectsListId = $project->getProjectsAuthorizedForUser($user, 0, 0);
 		$project->next_prev_filter = " rowid IN (" . $db->sanitize(count($objectsListId) ? join(',', array_keys($objectsListId)) : '0') . ")";
 	}
@@ -567,7 +567,7 @@ if($fk_us > 0){
 }
 
 if($fk_scrum_sprint> 0){
-	$param .= '&fk_scrum_sprint='.intval($fk_scrum_sprint).' ';
+	$param .= '&fk_scrum_sprint='.intval($fk_scrum_sprint);
 }
 
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
@@ -840,7 +840,7 @@ foreach ($object->fields as $key => $val) {
 	}
 	if ($key == "fk_scrum_sprint"){
 		if (!empty($arrayfields['societe']['checked'])) {
-			print getTitleFieldOfList($arrayfields['societe']['label'], 0, $_SERVER['PHP_SELF'], 'societe', '', $param, '', $sortfield, $sortorder)."\n";
+			print getTitleFieldOfList($arrayfields['societe']['label'], 0, $_SERVER['PHP_SELF'], 's.nom', '', $param, '', $sortfield, $sortorder)."\n";
 		}
 
 		if (!empty($arrayfields['project_title']['checked'])) {
@@ -855,7 +855,7 @@ $parameters = array('arrayfields'=>$arrayfields, 'param'=>$param, 'sortfield'=>$
 $reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters, $object); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
 // Action column
-print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
+print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', $param, '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
 print '</tr>'."\n";
 
 

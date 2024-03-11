@@ -196,7 +196,7 @@ class ScrumTask extends CommonObject
 
 		$this->db = $db;
 
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
+		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
 		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
@@ -1078,7 +1078,7 @@ class ScrumTask extends CommonObject
 
 		$linkclose = '';
 		if (empty($notooltip)) {
-			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+			if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
 				$label = $langs->trans("ShowScrumTask");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
@@ -1118,7 +1118,7 @@ class ScrumTask extends CommonObject
 					$pospoint = strpos($filearray[0]['name'], '.');
 
 					$pathtophoto = $class.'/'.$this->ref.'/thumbs/'.substr($filename, 0, $pospoint).'_mini'.substr($filename, $pospoint);
-					if (empty($conf->global->{strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'})) {
+					if (empty(getDolGlobalString(strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'))) {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
 					} else {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
@@ -1227,13 +1227,15 @@ class ScrumTask extends CommonObject
 				if (!empty($obj->fk_user_author)) {
 					$cuser = new User($this->db);
 					$cuser->fetch($obj->fk_user_author);
-					$this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation')) $this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation_id')) $this->user_creation_id = $cuser;
 				}
 
 				if (!empty($obj->fk_user_valid)) {
 					$vuser = new User($this->db);
 					$vuser->fetch($obj->fk_user_valid);
-					$this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation')) $this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation_id')) $this->user_validation_id = $vuser;
 				}
 
 				if (!empty($obj->fk_user_cloture)) {
@@ -1244,7 +1246,6 @@ class ScrumTask extends CommonObject
 
 				$this->date_creation     = $this->db->jdate($obj->datec);
 				$this->date_modification = $this->db->jdate($obj->datem);
-				$this->date_validation   = $this->db->jdate($obj->datev);
 			}
 
 			$this->db->free($result);
@@ -1300,15 +1301,15 @@ class ScrumTask extends CommonObject
 		global $langs, $conf;
 		$langs->load("scrumproject@scrumproject");
 
-		if (empty($conf->global->SCRUMPROJECT_SCRUMTASK_ADDON)) {
+		if (!getDolGlobalString('SCRUMPROJECT_SCRUMTASK_ADDON')) {
 			$conf->global->SCRUMPROJECT_SCRUMTASK_ADDON = 'mod_scrumtask_standard';
 		}
 
-		if (!empty($conf->global->SCRUMPROJECT_SCRUMTASK_ADDON)) {
+		if (getDolGlobalString('SCRUMPROJECT_SCRUMTASK_ADDON')) {
 			$mybool = false;
 
-			$file = $conf->global->SCRUMPROJECT_SCRUMTASK_ADDON.".php";
-			$classname = $conf->global->SCRUMPROJECT_SCRUMTASK_ADDON;
+			$file = getDolGlobalString('SCRUMPROJECT_SCRUMTASK_ADDON') . ".php";
+			$classname = getDolGlobalString('SCRUMPROJECT_SCRUMTASK_ADDON');
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
@@ -1435,10 +1436,20 @@ class ScrumTask extends CommonObject
 	 */
 	public function calcTimeSpent($moreSql = ''){
 
-		$sql = /** @lang MySQL */ "SELECT SUM(ptt.task_duration) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "
-			." JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "
-			." WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id)
-			." ".$moreSql;
+		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
+			$sql = /** @lang MySQL */
+				"SELECT SUM(ptt.task_duration) sumTimeSpent 
+				FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "." 
+				JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "." 
+				WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id)." ".$moreSql;
+		}
+		else {
+			$sql = /** @lang MySQL */
+				'SELECT SUM(ptt.element_duration) sumTimeSpent 
+				FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time pttl '.' 
+				JOIN '.MAIN_DB_PREFIX.'element_time ptt ON (ptt.rowid = pttl.fk_projet_task_time AND ptt.elementtype="task") '.' 
+				WHERE pttl.fk_scrumproject_scrumtask = '.intval($this->id).' '.$moreSql;
+		}
 
 		$obj = $this->db->getRow($sql);
 		if($obj){
@@ -1476,7 +1487,6 @@ class ScrumTask extends CommonObject
 
 		$error = 0;
 		$this->db->begin();
-
 		if($calcTimeSpent) { $this->calcTimeSpent();}
 
 		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
@@ -1864,14 +1874,20 @@ class ScrumTask extends CommonObject
 	 */
 	public function getTimeSpent($userId = 0 ){
 
-		$sql = /** @lang MySQL */
-			"SELECT SUM(ptt.task_duration) sumTimeSpent  "
-			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
-			." WHERE  "
-			." st_ptt.fk_scrumproject_scrumtask = ".intval($this->id)
-			. ($userId>0 ? " AND ptt.fk_user = ".$userId : '')
-		;
+		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
+			$sql = /** @lang MySQL */
+				"SELECT SUM(ptt.task_duration) sumTimeSpent  "
+				." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+				." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+				." WHERE  "." st_ptt.fk_scrumproject_scrumtask = ".intval($this->id).($userId > 0 ? " AND ptt.fk_user = ".$userId : '');
+		}
+		else {
+			$sql = /** @lang MySQL */
+				'SELECT SUM(ptt.element_duration) sumTimeSpent  '
+				.' FROM '.MAIN_DB_PREFIX.'element_time ptt '
+				.' JOIN '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid AND ptt.elementtype = "task") '
+				.' WHERE  '.' st_ptt.fk_scrumproject_scrumtask = '.intval($this->id).($userId > 0 ? ' AND ptt.fk_user = '.$userId : '');
+		}
 
 		$obj = $this->db->getRow($sql);
 		if($obj === false){

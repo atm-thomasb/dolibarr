@@ -82,7 +82,7 @@ class mod_scrumsprint_advanced extends ModeleNumRefScrumSprint
 
 		// Parametrage du prefix
 		$texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
-		$texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat" size="24" name="maskvalue" value="'.$conf->global->SCRUMPROJECT_SCRUMSPRINT_ADVANCED_MASK.'">', $tooltip, 1, 1).'</td>';
+		$texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat" size="24" name="maskvalue" value="' . getDolGlobalString('SCRUMPROJECT_SCRUMSPRINT_ADVANCED_MASK').'">', $tooltip, 1, 1).'</td>';
 
 		$texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button" value="'.$langs->trans("Modify").'" name="Button"></td>';
 
@@ -136,7 +136,7 @@ class mod_scrumsprint_advanced extends ModeleNumRefScrumSprint
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
 		// We get cursor rule
-		$mask = $conf->global->SCRUMPROJECT_SCRUMSPRINT_ADVANCED_MASK;
+		$mask = getDolGlobalString('SCRUMPROJECT_SCRUMSPRINT_ADVANCED_MASK');
 
 		if (!$mask)
 		{

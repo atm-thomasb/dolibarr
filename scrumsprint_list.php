@@ -121,7 +121,7 @@ foreach ($object->fields as $key => $val)
 $fieldstosearchall = array();
 foreach ($object->fields as $key => $val)
 {
-	if ($val['searchall']) $fieldstosearchall['t.'.$key] = $val['label'];
+	if (!empty($val['searchall'])) $fieldstosearchall['t.'.$key] = $val['label'];
 }
 
 // Definition of array of fields for columns
@@ -135,7 +135,7 @@ foreach ($object->fields as $key => $val) {
 			'checked'=>(($visible < 0) ? 0 : 1),
 			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
 			'position'=>$val['position'],
-			'help'=>$val['help']
+			'help'=>!empty($val['help'])?$val['help']:''
 		);
 	}
 }
@@ -145,9 +145,9 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
-$permissiontoread = $user->rights->scrumproject->scrumsprint->read;
-$permissiontoadd = $user->rights->scrumproject->scrumsprint->write;
-$permissiontodelete = $user->rights->scrumproject->scrumsprint->delete;
+$permissiontoread = $user->hasRight('scrumproject','scrumsprint','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumsprint','write');
+$permissiontodelete = $user->hasRight('scrumproject','scrumsprint','delete');
 
 // Security check
 if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
@@ -278,7 +278,7 @@ $sql .= $db->order($sortfield, $sortorder);
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
+if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST')) {
 	$resql = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($resql);
 	if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
@@ -302,7 +302,7 @@ if (is_numeric($nbtotalofrecords) && ($limit > $nbtotalofrecords || empty($limit
 }
 
 // Direct jump if only one record found
-if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page)
+if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page)
 {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
@@ -409,6 +409,7 @@ foreach ($object->fields as $key => $val)
 	elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID') $cssforfield .= ($cssforfield ? ' ' : '').'right';
 	if (!empty($arrayfields['t.'.$key]['checked']))
 	{
+		if(empty($search[$key])) $search[$key] = '';
 		print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
 		if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) print $form->selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth100', 1);
 		elseif (strpos($val['type'], 'integer:') === 0) {
@@ -472,7 +473,7 @@ if (is_array($extrafields->attributes[$object->table_element]['computed']) && co
 // Loop on record
 // --------------------------------------------------------------------
 $i = 0;
-$totalarray = array();
+$totalarray = array('nbfield' => 0);
 while ($i < ($limit ? min($num, $limit) : $num))
 {
 	$obj = $db->fetch_object($resql);
@@ -504,6 +505,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 			if (!$i) $totalarray['nbfield']++;
 			if (!empty($val['isameasure']))
 			{
+				if(empty($totalarray['val']['t.'.$key])) $totalarray['val']['t.'.$key] = 0;
 				if (!$i) $totalarray['pos'][$totalarray['nbfield']] = 't.'.$key;
 				$totalarray['val']['t.'.$key] += $object->$key;
 			}

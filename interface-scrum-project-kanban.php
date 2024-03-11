@@ -59,7 +59,7 @@ if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
 $jsonResponse = new ScrumProject\JsonResponse();
 
 // TODO : ajouter des droits et une vérification plus rigoureuse actuellement il n'y a pas de droit sur le kanban il faut peut-être en ajouter
-if (empty($user->rights->scrumproject->scrumsprint->read)) {
+if (!$user->hasRight('scrumproject', 'scrumsprint', 'read')) {
     $jsonResponse->msg = $langs->trans('NotEnoughRights');
     $jsonResponse->result = 0;
 }
@@ -89,7 +89,7 @@ function _actionGetSprintInfos($jsonResponse){
 
 	$data = GETPOST("data", "array");
 
-	if (empty($user->rights->scrumproject->scrumsprint->read)) {
+	if (!$user->hasRight('scrumproject', 'scrumsprint', 'read')) {
 		$jsonResponse->msg = $langs->trans('NotEnoughRights');
 		$jsonResponse->result = 0;
 		return false;
@@ -132,7 +132,7 @@ function _actionGetSprintInfos($jsonResponse){
 function _actionGetSprintResumeData($jsonResponse){
 	global $user, $langs, $db;
 
-	if (empty($user->rights->scrumproject->scrumsprint->read)) {
+	if (!$user->hasRight('scrumproject', 'scrumsprint', 'read')) {
 		$jsonResponse->msg = $langs->trans('NotEnoughRights');
 		$jsonResponse->result = 0;
 		return false;

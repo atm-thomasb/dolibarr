@@ -195,7 +195,7 @@ class ScrumSprint extends CommonObject
 
 		$this->db = $db;
 
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) $this->fields['rowid']['visible'] = 0;
+		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid'])) $this->fields['rowid']['visible'] = 0;
 		//if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) $this->fields['entity']['enabled'] = 0;
 
 		// Example to show how to set values of fields definition dynamically
@@ -943,7 +943,7 @@ class ScrumSprint extends CommonObject
 		$linkclose = '';
 		if (empty($notooltip))
 		{
-			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER))
+			if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER'))
 			{
 				$label = $langs->trans("ShowScrumSprint");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
@@ -972,7 +972,7 @@ class ScrumSprint extends CommonObject
 					$pospoint = strpos($filearray[0]['name'], '.');
 
 					$pathtophoto = $class.'/'.$this->ref.'/thumbs/'.substr($filename, 0, $pospoint).'_mini'.substr($filename, $pospoint);
-					if (empty($conf->global->{strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'})) {
+					if (empty(getDolGlobalString(strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'))) {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
 					} else {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
@@ -1063,21 +1063,23 @@ class ScrumSprint extends CommonObject
 			{
 				$obj = $this->db->fetch_object($result);
 				$this->id = $obj->rowid;
-				if ($obj->fk_user_author)
+				if (!empty($obj->fk_user_author))
 				{
 					$cuser = new User($this->db);
 					$cuser->fetch($obj->fk_user_author);
-					$this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation')) $this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation_id')) $this->user_creation_id = $cuser;
 				}
 
-				if ($obj->fk_user_valid)
+				if (!empty($obj->fk_user_valid))
 				{
 					$vuser = new User($this->db);
 					$vuser->fetch($obj->fk_user_valid);
-					$this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation')) $this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation_id')) $this->user_validation_id = $vuser;
 				}
 
-				if ($obj->fk_user_cloture)
+				if (!empty($obj->fk_user_cloture))
 				{
 					$cluser = new User($this->db);
 					$cluser->fetch($obj->fk_user_cloture);
@@ -1086,7 +1088,6 @@ class ScrumSprint extends CommonObject
 
 				$this->date_creation     = $this->db->jdate($obj->datec);
 				$this->date_modification = $this->db->jdate($obj->datem);
-				$this->date_validation   = $this->db->jdate($obj->datev);
 			}
 
 			$this->db->free($result);
@@ -1139,16 +1140,16 @@ class ScrumSprint extends CommonObject
 		global $langs, $conf;
 		$langs->load("scrumproject@scrumproject");
 
-		if (empty($conf->global->SCRUMPROJECT_SCRUMSPRINT_ADDON)) {
+		if (!getDolGlobalString('SCRUMPROJECT_SCRUMSPRINT_ADDON')) {
 			$conf->global->SCRUMPROJECT_SCRUMSPRINT_ADDON = 'mod_scrumsprint_standard';
 		}
 
-		if (!empty($conf->global->SCRUMPROJECT_SCRUMSPRINT_ADDON))
+		if (getDolGlobalString('SCRUMPROJECT_SCRUMSPRINT_ADDON'))
 		{
 			$mybool = false;
 
-			$file = $conf->global->SCRUMPROJECT_SCRUMSPRINT_ADDON.".php";
-			$classname = $conf->global->SCRUMPROJECT_SCRUMSPRINT_ADDON;
+			$file = getDolGlobalString('SCRUMPROJECT_SCRUMSPRINT_ADDON') . ".php";
+			$classname = getDolGlobalString('SCRUMPROJECT_SCRUMSPRINT_ADDON');
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
@@ -1839,16 +1840,24 @@ class ScrumSprint extends CommonObject
 		}
 
 		// récupération des utilisateurs avec des temps saisis mais qui normalement ne font pas parties du sprint
-		$sql = /** @lang MySQL */
-			"SELECT ptt.fk_user  "
-			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
-			." WHERE "
-			." ptt.fk_user NOT IN (".implode(',', $excludedUsersIds).')'
-			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
-		;
+		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
+			$sql = /** @lang MySQL */
+				"SELECT ptt.fk_user  "." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
+				." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+				." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+				." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
+				." WHERE "." ptt.fk_user NOT IN (".implode(',', $excludedUsersIds).')'
+				." AND USsprint.fk_scrum_sprint = ".intval($this->id);
+		}
+		else {
+			$sql = /** @lang MySQL */
+			'SELECT ptt.fk_user  '.' FROM '.MAIN_DB_PREFIX.'element_time ptt '
+			.' JOIN '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid AND ptt.elementtype = "task") '
+			.' JOIN '.MAIN_DB_PREFIX.'scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) '
+			.' JOIN '.MAIN_DB_PREFIX.'scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) '
+			.' WHERE '.' ptt.fk_user NOT IN ('.implode(',', $excludedUsersIds).')'
+			.' AND USsprint.fk_scrum_sprint = '.intval($this->id);
+		}
 
 		$sqlObjList = $this->db->getRows($sql);
 
@@ -1965,16 +1974,24 @@ class ScrumSprint extends CommonObject
 
 
 		// Extraction des tâches effectuées par le USER basé sur les temps saisis
-		$sql = /** @lang MySQL */
-			"SELECT DISTINCT USsprint.rowid USsprintId "
-			." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
-			." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
-			." WHERE "
-			." ptt.fk_user = ".$userId
-			." AND USsprint.fk_scrum_sprint = ".intval($this->id)
-		;
+		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
+			$sql = /** @lang MySQL */
+				"SELECT DISTINCT USsprint.rowid USsprintId ".
+				" FROM ".MAIN_DB_PREFIX."projet_task_time ptt ".
+				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) ".
+				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) ".
+				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) ".
+				" WHERE "." ptt.fk_user = ".$userId." AND USsprint.fk_scrum_sprint = ".intval($this->id);
+		}
+		else {
+				$sql = /** @lang MySQL */
+				"SELECT DISTINCT USsprint.rowid USsprintId ".
+				" FROM ".MAIN_DB_PREFIX."element_time ptt ".
+				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid AND ptt.elementtype = 'task') ".
+				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) ".
+				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) ".
+				" WHERE "." ptt.fk_user = ".$userId." AND USsprint.fk_scrum_sprint = ".intval($this->id);
+		}
 
 		$res = $this->db->query($sql);
 		if ($res) {

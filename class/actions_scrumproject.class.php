@@ -26,7 +26,9 @@
 /**
  * Class ActionsScrumProject
  */
-class ActionsScrumProject
+require_once __DIR__.'/../backport/v19/core/class/commonhookactions.class.php';
+
+class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 {
 	/**
 	 * @var DoliDB Database handler.
@@ -187,7 +189,7 @@ class ActionsScrumProject
 		{
 			require_once __DIR__ . '/../class/scrumsprint.class.php';
 			$scrumSprint = ScrumSprint::getScrumSprintFromKanban($advKanban->id);
-
+            if(empty($this->resprint)) $this->resprints = '';
 			$this->resprints.= '<span id="kanban-header-scrum-sprint-resume">';
 			if ($scrumSprint){
 
@@ -429,7 +431,7 @@ class ActionsScrumProject
 		if (in_array('advkanbanview', $TContext)) {
 			require_once __DIR__ . '/../class/scrumsprint.class.php';
 			$scrumSprint = ScrumSprint::getScrumSprintFromKanban($advKanban->id);
-
+            if(empty($this->resprints)) $this->resprints = '';
 			if ($scrumSprint) {
 				$this->resprints .= '<div class="result-resume-item">'.$langs->trans('CardScrumUserStoryFound').' : <span id="nb-scrum-user-story-found"></span></div>';
 				$this->resprints .= '<div class="result-resume-item">'.$langs->trans('CardScrumTaskFound').' : <span id="nb-scrum-task-found"></span></div>';

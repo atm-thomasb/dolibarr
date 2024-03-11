@@ -92,9 +92,9 @@ $hookmanager->initHooks(array('scrumsprintlistplanwizard')); // Note that conf->
 
 
 
-$permissiontoread = $user->rights->scrumproject->scrumuserstory->read;
-$permissiontoadd = $user->rights->scrumproject->scrumuserstory->write;
-$permissiontodelete = $user->rights->scrumproject->scrumuserstory->delete;
+$permissiontoread = $user->hasRight('scrumproject','scrumuserstory','read');
+$permissiontoadd = $user->hasRight('scrumproject','scrumuserstory','write');
+$permissiontodelete = $user->hasRight('scrumproject','scrumuserstory','delete');
 
 $scrumFieldsToKeep = array(
 	'rowid'			=> array(),

@@ -80,7 +80,6 @@ $sortfield = GETPOST("sortfield", 'alpha');
 $sortorder = GETPOST("sortorder", 'alpha');
 $page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
 if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
-$offset = $liste_limit * $page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 if (!$sortorder) $sortorder = "ASC";
@@ -105,7 +104,7 @@ if ($id > 0 || !empty($ref)) $upload_dir = $conf->scrumproject->multidir_output[
 //if ($user->socid > 0) $socid = $user->socid;
 //$result = restrictedArea($user, 'scrumproject', $object->id);
 
-$permissiontoadd = $user->rights->scrumproject->scrumsprint->write; // Used by the include of actions_addupdatedelete.inc.php
+$permissiontoadd = $user->hasRight('scrumproject','scrumsprint','write'); // Used by the include of actions_addupdatedelete.inc.php
 
 
 

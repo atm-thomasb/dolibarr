@@ -67,7 +67,7 @@ include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be includ
 //if ($user->socid > 0) $socid = $user->socid;
 //$result = restrictedArea($user, 'scrumproject', $object->id);
 
-$permission = $user->rights->scrumproject->scrumsprint->write;
+$permission = $user->hasRight('scrumproject','scrumsprint','write');
 
 
 /*

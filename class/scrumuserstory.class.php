@@ -193,7 +193,7 @@ class ScrumUserStory extends CommonObject
 
 		$this->db = $db;
 
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
+		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
 		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
@@ -780,7 +780,7 @@ class ScrumUserStory extends CommonObject
 
 		$linkclose = '';
 		if (empty($notooltip)) {
-			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+			if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
 				$label = $langs->trans("ShowScrumUserStory");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
@@ -820,7 +820,7 @@ class ScrumUserStory extends CommonObject
 					$pospoint = strpos($filearray[0]['name'], '.');
 
 					$pathtophoto = $class.'/'.$this->ref.'/thumbs/'.substr($filename, 0, $pospoint).'_mini'.substr($filename, $pospoint);
-					if (empty($conf->global->{strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'})) {
+					if (empty(getDolGlobalString(strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'))) {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
 					} else {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
@@ -931,13 +931,15 @@ class ScrumUserStory extends CommonObject
 				if (!empty($obj->fk_user_author)) {
 					$cuser = new User($this->db);
 					$cuser->fetch($obj->fk_user_author);
-					$this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation')) $this->user_creation = $cuser;
+					if(property_exists($this, 'user_creation_id')) $this->user_creation_id = $cuser;
 				}
 
 				if (!empty($obj->fk_user_valid)) {
 					$vuser = new User($this->db);
 					$vuser->fetch($obj->fk_user_valid);
-					$this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation')) $this->user_validation = $vuser;
+					if(property_exists($this, 'user_validation_id')) $this->user_validation_id = $vuser;
 				}
 
 				if (!empty($obj->fk_user_cloture)) {
@@ -1004,15 +1006,15 @@ class ScrumUserStory extends CommonObject
 		global $langs, $conf;
 		$langs->load("scrumproject@scrumproject");
 
-		if (empty($conf->global->SCRUMPROJECT_SCRUMUSERSTORY_ADDON)) {
+		if (!getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORY_ADDON')) {
 			$conf->global->SCRUMPROJECT_SCRUMUSERSTORY_ADDON = 'mod_scrumuserstory_standard';
 		}
 
-		if (!empty($conf->global->SCRUMPROJECT_SCRUMUSERSTORY_ADDON)) {
+		if (getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORY_ADDON')) {
 			$mybool = false;
 
-			$file = $conf->global->SCRUMPROJECT_SCRUMUSERSTORY_ADDON.".php";
-			$classname = $conf->global->SCRUMPROJECT_SCRUMUSERSTORY_ADDON;
+			$file = getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORY_ADDON') . ".php";
+			$classname = getDolGlobalString('SCRUMPROJECT_SCRUMUSERSTORY_ADDON');
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
