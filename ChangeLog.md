@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+- NEW : Columns date start and end of sprint in sprint user list - *18/10/2023* - 2.8.0
 
 ## Release 2.7
 
