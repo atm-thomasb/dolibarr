@@ -100,6 +100,7 @@ $toselect   = GETPOST('toselect', 'array'); // Array of ids of elements selected
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'scrumsprintuserlist'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
+$filterNow = GETPOST('filternow', 'int'); // Option for the css output (always '' except when 'print')
 
 $id = GETPOST('id', 'int');
 $fk_sprint = GETPOST('fk_sprint', 'int');
@@ -169,8 +170,6 @@ foreach ($staticScrumSprint->fields as $key => $val) {
 		$search[$key.'_dtend'] = dol_mktime(23, 59, 59, GETPOST('search_'.$key.'_dtendmonth', 'int'), GETPOST('search_'.$key.'_dtendday', 'int'), GETPOST('search_'.$key.'_dtendyear', 'int'));
 	}
 }
-
-
 
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
@@ -419,6 +418,14 @@ foreach ($search as $key => $val) {
 		}
 	}
 }
+
+
+if($filterNow){
+	$sqlBuild['WHERE'] .= ' AND ssp.date_end >= NOW() ';
+	$search['date_end_dtstart'] = time();
+}
+
+
 if ($search_all) {
 	$sqlBuild['WHERE'] .= natural_search(array_keys($fieldstosearchall), $search_all);
 }

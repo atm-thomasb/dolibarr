@@ -522,7 +522,7 @@ class modScrumProject extends DolibarrModules
 			'titre'=>'LeftMenuDeveloperAvailability',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumsprintrhlist',
-			'url'=>'/scrumproject/scrumsprintuser_list.php?mainmenu=project&leftmenu=scrumsprint',
+			'url'=>'/scrumproject/scrumsprintuser_list.php?mainmenu=project&leftmenu=scrumsprint&filternow=1',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
