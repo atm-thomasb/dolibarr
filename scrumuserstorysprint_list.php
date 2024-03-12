@@ -330,7 +330,7 @@ foreach ($object->fields as $key => $val) {
 	$sql .= 't.'.$key.', ';
 }
 
-$sql .= ' pt.fk_projet fk_project , p.title project_title, p.ref project_ref, p.fk_soc ';
+$sql .= ' pt.fk_projet fk_project , p.title project_title, p.ref project_ref, p.fk_soc, ';
 
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {

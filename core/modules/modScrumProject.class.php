@@ -65,6 +65,7 @@ class modScrumProject extends DolibarrModules
 		$this->editor_url = 'www.atm-consulting.fr';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
+
 		$this->version = '2.8.0';
 
 		// Url to the file with your last numberversion of this module
@@ -522,7 +523,7 @@ class modScrumProject extends DolibarrModules
 			'titre'=>'LeftMenuDeveloperAvailability',
 			'mainmenu'=>'project',
 			'leftmenu'=>'scrumsprintrhlist',
-			'url'=>'/scrumproject/scrumsprintuser_list.php?mainmenu=project&leftmenu=scrumsprint',
+			'url'=>'/scrumproject/scrumsprintuser_list.php?mainmenu=project&leftmenu=scrumsprint&filternow=1',
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
