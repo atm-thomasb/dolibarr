@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 
 
 
+## Release 2.8
+
+- NEW : Columns date start and end of sprint in sprint user list - *18/10/2023* - 2.8.0
+
 ## Release 2.7
 
 - FIX : comma error in sql request for scrumuserstorysprint_list.php  - *12/03/2024* - 2.7.3

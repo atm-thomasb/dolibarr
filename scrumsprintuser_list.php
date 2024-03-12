@@ -100,6 +100,7 @@ $toselect   = GETPOST('toselect', 'array'); // Array of ids of elements selected
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'scrumsprintuserlist'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha'); // Go back to a dedicated page
 $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
+$filterNow = GETPOST('filternow', 'int'); // Option for the css output (always '' except when 'print')
 
 $id = GETPOST('id', 'int');
 $fk_sprint = GETPOST('fk_sprint', 'int');
@@ -123,6 +124,10 @@ $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->scrumproject->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('scrumsprintuserlist')); // Note that conf->hooks_modules contains array
 
+
+$staticScrumSprint = new ScrumSprint($db);
+$fieldsFromSprint = array('fk_team', 'date_start', 'date_end');
+
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 //$extrafields->fetch_name_optionals_label($object->table_element_line);
@@ -131,8 +136,7 @@ $search_array_options = $extrafields->getOptionalsFromPost($object->table_elemen
 
 // Default sort order (if not yet defined by previous GETPOST)
 if (!$sortfield) {
-	reset($object->fields);					// Reset is required to avoid key() to return null.
-	$sortfield = "t.".key($object->fields); // Set here default search field. By default 1st field in definition.
+	$sortfield = "ssp.date_start"; // Set here default search field. By default 1st field in definition.
 }
 if (!$sortorder) {
 	$sortorder = "ASC";
@@ -142,6 +146,22 @@ if (!$sortorder) {
 $search_all = GETPOST('search_all', 'alphanohtml');
 $search = array();
 foreach ($object->fields as $key => $val) {
+	if (GETPOST('search_'.$key, 'alpha') !== '') {
+		$search[$key] = GETPOST('search_'.$key, 'alpha');
+	}
+	if (preg_match('/^(date|timestamp|datetime)/', $val['type'])) {
+		$search[$key.'_dtstart'] = dol_mktime(0, 0, 0, GETPOST('search_'.$key.'_dtstartmonth', 'int'), GETPOST('search_'.$key.'_dtstartday', 'int'), GETPOST('search_'.$key.'_dtstartyear', 'int'));
+		$search[$key.'_dtend'] = dol_mktime(23, 59, 59, GETPOST('search_'.$key.'_dtendmonth', 'int'), GETPOST('search_'.$key.'_dtendday', 'int'), GETPOST('search_'.$key.'_dtendyear', 'int'));
+	}
+}
+
+// TODO : factorisez Dolibarr pour avor des fonctions ou methods à appeler au lieu de copier les bouts de code
+foreach ($staticScrumSprint->fields as $key => $val) {
+
+	if(!in_array($key, $fieldsFromSprint)){
+		continue;
+	}
+
 	if (GETPOST('search_'.$key, 'alpha') !== '') {
 		$search[$key] = GETPOST('search_'.$key, 'alpha');
 	}
@@ -166,6 +186,25 @@ foreach ($object->fields as $key => $val) {
 	if (!empty($val['visible'])) {
 		$visible = (int) dol_eval($val['visible'], 1);
 		$arrayfields['t.'.$key] = array(
+			'label'=>$val['label'],
+			'checked'=>(($visible < 0) ? 0 : 1),
+			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
+			'position'=>$val['position'],
+			'help'=> isset($val['help']) ? $val['help'] : ''
+		);
+	}
+}
+
+
+foreach ($staticScrumSprint->fields as $key => $val) {
+	if(! in_array($key, $fieldsFromSprint)) {
+		continue;
+	}
+
+	// If $val['visible']==0, then we never show the field
+	if (!empty($val['visible'])) {
+		$visible = (int) dol_eval($val['visible'], 1);
+		$arrayfields['ssp.'.$key] = array(
 			'label'=>$val['label'],
 			'checked'=>(($visible < 0) ? 0 : 1),
 			'enabled'=>($visible != 3 && dol_eval($val['enabled'], 1)),
@@ -263,41 +302,94 @@ $morejs = array();
 $morecss = array();
 
 
+$sqlBuild = [
+	'SELECT' => '',
+	'FROM' => '',
+	'WHERE' => '',
+	'ORDER' => '',
+	'GROUP' => '',
+	'HAVING' => '',
+	'LIMIT' => ''
+];
+
+
 // Build and execute select
 // --------------------------------------------------------------------
-$sql = 'SELECT ';
-$sql .= $object->getFieldList('t');
+$sqlBuild['SELECT'].= 'SELECT ';
+$sqlBuild['SELECT'].= $object->getFieldList('t');
+$sqlBuild['SELECT'].= ' ,'._getFieldListPrefix($staticScrumSprint, 'ssp');
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
-		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? ", ef.".$key." as options_".$key : '');
+		$sqlBuild['SELECT'].= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? ", ef.".$key." as options_".$key : '');
 	}
 }
 // Add fields from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
-$sql = preg_replace('/,\s*$/', '', $sql);
-$sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
+$sqlBuild['SELECT'].= preg_replace('/^,/', '', $hookmanager->resPrint);
+$sqlBuild['SELECT']= preg_replace('/,\s*$/', '', $sqlBuild['SELECT']);
+$sqlBuild['FROM'].= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
 if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
-	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
+	$sqlBuild['FROM'].= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (t.rowid = ef.fk_object)";
 }
+
+$sqlBuild['FROM'].= " LEFT JOIN ".$db->prefix()."scrumproject_scrumsprint as ssp on (t.fk_scrum_sprint = ssp.rowid)";
+
 // Add table from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= $hookmanager->resPrint;
+$sqlBuild['FROM'].= $hookmanager->resPrint;
 if ($object->ismultientitymanaged == 1) {
-	$sql .= " WHERE t.entity IN (".getEntity($object->element).")";
+	$sqlBuild['WHERE']= " WHERE t.entity IN (".getEntity($object->element).")";
 } else {
-	$sql .= " WHERE 1 = 1";
+	$sqlBuild['WHERE']= " WHERE 1 = 1";
 }
 
 if($fk_sprint>0){
-	$sql .= " AND fk_scrum_sprint = ".intval($fk_sprint);
+	$sqlBuild['WHERE'].= " AND t.fk_scrum_sprint = ".intval($fk_sprint);
 }
 
 
 foreach ($search as $key => $val) {
+
+	if ( in_array($key, array_merge($fieldsFromSprint , ['date_start_dtstart', 'date_start_dtend','date_end_dtstart', 'date_end_dtend']))) {
+		$sqlKeyP = 'ssp'.$key;
+		$sqlKeyP = 'ssp'.$key;
+
+
+		if (array_key_exists($key, $staticScrumSprint->fields)) {
+			if ($key == 'status' && $search[$key] == -1) {
+				continue;
+			}
+			$mode_search = (($staticScrumSprint->isInt($staticScrumSprint->fields[$key]) || $staticScrumSprint->isFloat($staticScrumSprint->fields[$key])) ? 1 : 0);
+			if ((strpos($staticScrumSprint->fields[$key]['type'], 'integer:') === 0) || (strpos($staticScrumSprint->fields[$key]['type'], 'sellist:') === 0) || !empty($staticScrumSprint->fields[$key]['arrayofkeyval'])) {
+				if ($search[$key] == '-1' || ($search[$key] === '0' && (empty($staticScrumSprint->fields[$key]['arrayofkeyval']) || !array_key_exists('0', $staticScrumSprint->fields[$key]['arrayofkeyval'])))) {
+					$search[$key] = '';
+				}
+				$mode_search = 2;
+			}
+			if ($search[$key] != '') {
+				$sqlBuild['WHERE'] .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
+			}
+		} else {
+			if (preg_match('/(_dtstart|_dtend)$/', $key) && $search[$key] != '') {
+				$columnName = preg_replace('/(_dtstart|_dtend)$/', '', $key);
+				if (preg_match('/^(date|timestamp|datetime)/', $staticScrumSprint->fields[$columnName]['type'])) {
+					if (preg_match('/_dtstart$/', $key)) {
+						$sqlBuild['WHERE'] .= " AND ssp.".$columnName." >= '".$db->idate($search[$key])."'";
+					}
+					if (preg_match('/_dtend$/', $key)) {
+						$sqlBuild['WHERE'] .= " AND ssp." . $columnName . " <= '" . $db->idate($search[$key]) . "'";
+					}
+				}
+			}
+
+		}
+	}
+
+
+
 	if (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
 			continue;
@@ -310,24 +402,32 @@ foreach ($search as $key => $val) {
 			$mode_search = 2;
 		}
 		if ($search[$key] != '') {
-			$sql .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
+			$sqlBuild['WHERE'] .= natural_search($key, $search[$key], (($key == 'status') ? 2 : $mode_search));
 		}
 	} else {
 		if (preg_match('/(_dtstart|_dtend)$/', $key) && $search[$key] != '') {
 			$columnName = preg_replace('/(_dtstart|_dtend)$/', '', $key);
 			if (preg_match('/^(date|timestamp|datetime)/', $object->fields[$columnName]['type'])) {
 				if (preg_match('/_dtstart$/', $key)) {
-					$sql .= " AND t.".$columnName." >= '".$db->idate($search[$key])."'";
+					$sqlBuild['WHERE'] .= " AND t.".$columnName." >= '".$db->idate($search[$key])."'";
 				}
 				if (preg_match('/_dtend$/', $key)) {
-					$sql .= " AND t." . $columnName . " <= '" . $db->idate($search[$key]) . "'";
+					$sqlBuild['WHERE'] .= " AND t." . $columnName . " <= '" . $db->idate($search[$key]) . "'";
 				}
 			}
 		}
 	}
 }
+
+
+if($filterNow){
+	$sqlBuild['WHERE'] .= ' AND ssp.date_end >= NOW() ';
+	$search['date_end_dtstart'] = time();
+}
+
+
 if ($search_all) {
-	$sql .= natural_search(array_keys($fieldstosearchall), $search_all);
+	$sqlBuild['WHERE'] .= natural_search(array_keys($fieldstosearchall), $search_all);
 }
 //$sql.= dolSqlDateFilter("t.field", $search_xxxday, $search_xxxmonth, $search_xxxyear);
 // Add where from extra fields
@@ -335,62 +435,62 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
 // Add where from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListWhere', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= $hookmanager->resPrint;
+$sqlBuild['WHERE'] .= $hookmanager->resPrint;
 
 /* If a group by is required
-$sql .= " GROUP BY ";
+$sqlBuild['GROUP'] .= " GROUP BY ";
 foreach($object->fields as $key => $val) {
-	$sql .= "t.".$key.", ";
+	$sqlBuild['GROUP'] .= "t.".$key.", ";
 }
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
-		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.', ' : '');
+		$sqlBuild['GROUP'] .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.', ' : '');
 	}
 }
 // Add where from hooks
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListGroupBy', $parameters, $object);    // Note that $action and $object may have been modified by hook
-$sql .= $hookmanager->resPrint;
-$sql = preg_replace('/,\s*$/', '', $sql);
+$sqlBuild['GROUP'] .= $hookmanager->resPrint;
+$sqlBuild['GROUP'] = preg_replace('/,\s*$/', '', $sqlBuild['GROUP']);
 */
 
 // Add HAVING from hooks
 /*
 $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListHaving', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPrint;
+$sqlBuild['HAVING'] .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPrint;
 */
 
 // Count total nb of records
 $nbtotalofrecords = '';
 if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST')) {
-	/* This old and fast method to get and count full list returns all record so use a high amount of memory.
-	$resql = $db->query($sql);
-	$nbtotalofrecords = $db->num_rows($resql);
-	*/
-	/* The slow method does not consume memory on mysql (not tested on pgsql) */
-	/*$resql = $db->query($sql, 0, 'auto', 1);
-	while ($db->fetch_object($resql)) {
-		$nbtotalofrecords++;
-	}*/
-	/* The fast and low memory method to get and count full list converts the sql into a sql count */
-	$sqlforcount = preg_replace('/^SELECT[a-z0-9\._\s\(\),]+FROM/i', 'SELECT COUNT(*) as nbtotalofrecords FROM', $sql);
+
+	$sqlCountBuild = $sqlBuild;
+	$sqlCountBuild['SELECT'] = 'SELECT COUNT(*) as nbtotalofrecords';
+	$sqlforcount = _buildSqlQuery($sqlCountBuild);
+
+
+
 	$resql = $db->query($sqlforcount);
-	$objforcount = $db->fetch_object($resql);
-	$nbtotalofrecords = $objforcount->nbtotalofrecords;
-	if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
-		$page = 0;
-		$offset = 0;
+	if($resql){
+		$objforcount = $db->fetch_object($resql);
+		$nbtotalofrecords = intval($objforcount->nbtotalofrecords);
+		if (($page * $limit) > $nbtotalofrecords) {	// if total of record found is smaller than page * limit, goto and load page 0
+			$page = 0;
+			$offset = 0;
+		}
+		$db->free($resql);
 	}
-	$db->free($resql);
 }
 
 // Complete request and execute it with limit
-$sql .= $db->order($sortfield, $sortorder);
+$sqlBuild['ORDER'] = $db->order($sortfield, $sortorder);
 if ($limit) {
-	$sql .= $db->plimit($limit + 1, $offset);
+	$sqlBuild['LIMIT'] = $db->plimit($limit + 1, $offset);
 }
+
+$sql = _buildSqlQuery($sqlBuild);
 
 $resql = $db->query($sql);
 if (!$resql) {
@@ -580,6 +680,11 @@ print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwit
 // Fields title search
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
+
+/**
+ * DATA OBJECT SCRUM SPRINT USER
+ *  // TODO Factoriser Dolibarr pour pouvoir factoriser ici
+ */
 foreach ($object->fields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
@@ -614,6 +719,47 @@ foreach ($object->fields as $key => $val) {
 		print '</td>';
 	}
 }
+
+
+/**
+ * DATA OBJECT SCRUM SPRINT
+ * // TODO Factoriser Dolibarr pour pouvoir factoriser ici
+ */
+foreach ($staticScrumSprint->fields as $key => $val) {
+	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+	if ($key == 'status') {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+	} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'right';
+	}
+	if (!empty($arrayfields['ssp.'.$key]['checked'])) {
+		print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
+		if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+			print $form->selectarray('search_'.$key, $val['arrayofkeyval'], (isset($search[$key]) ? $search[$key] : ''), $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth100', 1);
+		} elseif ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0)) {
+			print $staticScrumSprint->showInputField($val, $key, (isset($search[$key]) ? $search[$key] : ''), '', '', 'search_', 'maxwidth125', 1);
+		} elseif (preg_match('/^(date|timestamp|datetime)/', $val['type'])) {
+			print '<div class="nowrap">';
+			print $form->selectDate($search[$key.'_dtstart'] ? $search[$key.'_dtstart'] : '', "search_".$key."_dtstart", 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From'));
+			print '</div>';
+			print '<div class="nowrap">';
+			print $form->selectDate($search[$key.'_dtend'] ? $search[$key.'_dtend'] : '', "search_".$key."_dtend", 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('to'));
+			print '</div>';
+		} elseif ($key == 'lang') {
+			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
+			$formadmin = new FormAdmin($db);
+			print $formadmin->select_language($search[$key], 'search_lang', 0, null, 1, 0, 0, 'minwidth150 maxwidth200', 2);
+		} else {
+			print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+		}
+		print '</td>';
+	}
+}
+
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
 
@@ -645,6 +791,23 @@ foreach ($object->fields as $key => $val) {
 	}
 	if (!empty($arrayfields['t.'.$key]['checked'])) {
 		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+	}
+}
+
+ // TODO Factoriser Dolibarr pour pouvoir factoriser ici
+foreach ($staticScrumSprint->fields as $key => $val) {
+	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+	if ($key == 'status') {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'center';
+	} elseif (in_array($val['type'], array('timestamp'))) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+	} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+		$cssforfield .= ($cssforfield ? ' ' : '').'right';
+	}
+	if (!empty($arrayfields['ssp.'.$key]['checked'])) {
+		print getTitleFieldOfList($arrayfields['ssp.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 'ssp.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 	}
 }
 // Extra fields
@@ -682,6 +845,10 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
+	$staticScrumSprint = new ScrumSprint($db); // to be certain $staticScrumSprint is clean
+	if($object->fk_scrum_sprint > 0){
+		$staticScrumSprint->fetch($object->fk_scrum_sprint);
+	}
 
 	// Show here line of result
 	print '<tr  class="oddeven" data-lineid="' . $obj->rowid . '" id="scrumsprintuser-'. $obj->rowid .'">';
@@ -708,13 +875,18 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 
 
 			$liveEdit = '';
-			if($object->statut == $object::STATUS_DRAFT && in_array($key, array('qty_availability', 'availability_rate'))){
+			if($object->statut == $object::STATUS_DRAFT
+					&& $staticScrumSprint->date_end >= time()
+					&& in_array($key, array('qty_availability', 'availability_rate'))){
 				$liveEdit = scrumProjectGenLiveUpdateAttributes($object->element, $object->id, $key, 'scrumSprintUserGenLiveUpdateAttributes_qty_velocity');
 			}
 
 			print '<td '.$liveEdit.' '.($cssforfield ? ' class="col-'.$key.' '.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
+			} elseif ($key == 'fk_scrum_sprint') {
+				print $object->showOutputField($val, $key, $object->$key, '');
+				print '<br/><small>'.$staticScrumSprint->showOutputFieldQuick('label').'</small>';
 			} elseif ($key == 'rowid') {
 				print $object->showOutputField($val, $key, $object->id, '');
 			} else {
@@ -738,6 +910,56 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 			}
 		}
 	}
+
+// TODO Factoriser Dolibarr pour pouvoir factoriser ici
+	foreach ($staticScrumSprint->fields as $key => $val) {
+		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		} elseif ($key == 'status') {
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		}
+
+		if (in_array($val['type'], array('timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+		} elseif ($key == 'ref') {
+			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+		}
+
+		if (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('rowid', 'status')) && empty($val['arrayofkeyval'])) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'right';
+		}
+		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
+
+		if (!empty($arrayfields['ssp.'.$key]['checked'])) {
+
+			print '<td  '.($cssforfield ? ' class="col-'.$key.' '.$cssforfield.'"' : '').'>';
+			if ($key == 'status') {
+				print $staticScrumSprint->getLibStatut(5);
+			} elseif ($key == 'rowid') {
+				print $staticScrumSprint->showOutputField($val, $key, $staticScrumSprint->id, '');
+			} else {
+				print $staticScrumSprint->showOutputField($val, $key, $staticScrumSprint->$key, '');
+			}
+			print '</td>';
+			if (!$i) {
+				$totalarray['nbfield']++;
+			}
+			if (!empty($val['isameasure']) && $val['isameasure'] == 1) {
+				if (!$i) {
+					$totalarray['pos'][$totalarray['nbfield']] = 'ssp.'.$key;
+				}
+				if (!isset($totalarray['val'])) {
+					$totalarray['val'] = array();
+				}
+				if (!isset($totalarray['val']['ssp.'.$key])) {
+					$totalarray['val']['ssp.'.$key] = 0;
+				}
+				$totalarray['val']['ssp.'.$key] += $staticScrumSprint->$key;
+			}
+		}
+	}
+
 	// Extra fields
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
 	// Fields from hook
@@ -812,3 +1034,39 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 // End of page
 llxFooter();
 $db->close();
+
+/**
+ * Function to concat keys of fields in a sql SELECT
+ *
+ * @param  CommonObject      $object
+ * @param string $alias String of alias of table for fields. For example 't'. It is recommended to use '' and set alias into fields defintion.
+ * @return  string                list of alias fields
+ */
+function _getFieldListPrefix($object, $alias)
+{
+	$keys = array_keys($object->fields);
+	$keys_with_alias = array();
+	foreach ($keys as $fieldName) {
+		$keys_with_alias[] = $alias . '.' . $fieldName.' as '. $alias . '_'.$fieldName;
+	}
+	return implode(',', $keys_with_alias);
+}
+
+
+/**
+ * Build SQL query from array
+ * @param array $sqlBuild
+ *                       [
+ *                       'SELECT' => '',
+ *                       'FROM' => '',
+ *                       'WHERE' => '',
+ *                       'ORDER' => '',
+ *                       'GROUP' => '',
+ *                       'HAVING' => ''
+ *                       'LIMIT' => ''
+ *                       ]
+ * @return string
+ */
+function _buildSqlQuery($sqlBuild){
+	return $sqlBuild['SELECT'].' '.$sqlBuild['FROM'].' '.$sqlBuild['WHERE'].' '.$sqlBuild['ORDER'].' '.$sqlBuild['GROUP'].' '.$sqlBuild['HAVING'].' '.$sqlBuild['LIMIT'];
+}
