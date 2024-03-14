@@ -11,23 +11,29 @@
  */
 function scrumproject_completesubstitutionarray(&$substitutionarray, $langs, $object) {
 
-	if(!is_object($object) || property_exists($object, 'element')){
-		return null;
-	}
 
-	if($object->element == 'scrumproject_scrumuserstorysprint' ) {
-		/** @var ScrumUserStorySprint $object  */
-		completeSubstitutionFromScrumUserStorySprint($substitutionarray, $langs, $object);
-	}
+	//fix ticket DA024647 (léna) : dans la fonction setSubstitFromObject() on passe dans la fonction getCommonSubstitutionArray() qui donne l'objet puis dans la fonction complete_substitutions_array() qui ne donne pas l'objet
+	//Comme cette verif retourne null quand l'objet est vide, ça bloque le reste.
+	//Je ne sais pas si c'est voulu en standard de ne pas passer l'objet mais le fix le plus rapide est de continuer à faire la verif de l'objet ici sans, cependant, retourne null
+	//	if(!is_object($object) || property_exists($object, 'element')){
+	//		return null;
+	//	}
 
-	if($object->element == 'scrumproject_scrumtask' ) {
-		if(!function_exists('scrumProjectGetObjectByElement')){
-			require_once __DIR__ . '/../../lib/scrumproject.lib.php';
+	if(is_object($object) && property_exists($object, 'element')) {
+		if ($object->element == 'scrumproject_scrumuserstorysprint') {
+			/** @var ScrumUserStorySprint $object */
+			completeSubstitutionFromScrumUserStorySprint($substitutionarray, $langs, $object);
 		}
 
-		/** @var ScrumTask $object  */
-		$userStorySprint = scrumProjectGetObjectByElement('scrumproject_scrumuserstorysprint', $object->fk_scrum_user_story_sprint);
-		completeSubstitutionFromScrumUserStorySprint($substitutionarray, $langs, $userStorySprint);
+		if ($object->element == 'scrumproject_scrumtask') {
+			if (! function_exists('scrumProjectGetObjectByElement')) {
+				require_once __DIR__ . '/../../lib/scrumproject.lib.php';
+			}
+
+			/** @var ScrumTask $object */
+			$userStorySprint = scrumProjectGetObjectByElement('scrumproject_scrumuserstorysprint', $object->fk_scrum_user_story_sprint);
+			completeSubstitutionFromScrumUserStorySprint($substitutionarray, $langs, $userStorySprint);
+		}
 	}
 }
 
