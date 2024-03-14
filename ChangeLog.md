@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Release 2.7
 
+- FIX : bug substitution key for mail model in scrumproject_completesubstitutionarray() - *14/01/2024* - 2.7.3
 - FIX : Email double click send multiple email - *10/01/2024* - 2.7.2
 - FIX : Creation of empty kanban doesn't convert us into kanban card- *14/12/2023* - 2.7.1
 - FIX : COMPAT v19 - *14/12/2023* - 2.7.0
