@@ -7,7 +7,8 @@ All notable changes to this project will be documented in this file.
 
 ## Release 2.7
 
-- FIX : bug substitution key for mail model in scrumproject_completesubstitutionarray() - *14/01/2024* - 2.7.3
+- FIX : bug substitution key for mail model in scrumproject_completesubstitutionarray() - *14/01/2024* - 2.7.4
+- FIX : comma error in sql request for scrumuserstorysprint_list.php  - *12/03/2024* - 2.7.3
 - FIX : Email double click send multiple email - *10/01/2024* - 2.7.2
 - FIX : Creation of empty kanban doesn't convert us into kanban card- *14/12/2023* - 2.7.1
 - FIX : COMPAT v19 - *14/12/2023* - 2.7.0
@@ -15,6 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ## Release 2.5
 
+- FIX : comma error in sql request for scrumuserstorysprint_list.php  - *29/02/2024* - 2.5.3
 - FIX : Sort by tiers list user story planifiée  - *07/10/2023* - 2.5.2
 - FIX : Hot fix due to Dolibarr patch on object field filter...  - *04/09/2023* - 2.5.1
 - NEW : Button to toggle display planned user story on closed sprints - *01/07/2023* - 2.5.0

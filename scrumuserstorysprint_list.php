@@ -330,12 +330,12 @@ foreach ($object->fields as $key => $val) {
 	$sql .= 't.'.$key.', ';
 }
 
-$sql .= ' pt.fk_projet fk_project , p.title project_title, p.ref project_ref, p.fk_soc ';
+$sql .= ' pt.fk_projet fk_project , p.title project_title, p.ref project_ref, p.fk_soc, ';
 
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
-		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? ", ef.".$key." as options_".$key : '');
+		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key." as options_".$key.", " : '');
 	}
 }
 // Add fields from hooks
