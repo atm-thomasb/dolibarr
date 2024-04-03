@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## Release 2.8
-
+- FIX : font-awesome icon missing - *03/04/2024* - 2.8.1  
 - NEW : Columns date start and end of sprint in sprint user list - *18/10/2023* - 2.8.0
 
 ## Release 2.7
