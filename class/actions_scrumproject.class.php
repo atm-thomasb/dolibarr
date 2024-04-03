@@ -272,7 +272,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 
 				// get US done in this kanban
 				$this->resprints.= '<button class="nav-button" id="kanban-resume-btn"  >';
-				$this->resprints.= '<span class="fa fa-dashboard" ></span>';
+				$this->resprints.= '<span class="fas fa-tachometer-alt" ></span>';
 				$this->resprints.= '</button>';
 			}
 
