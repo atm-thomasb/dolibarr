@@ -66,7 +66,7 @@ class modScrumProject extends DolibarrModules
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
 
-		$this->version = '2.8.1';
+		$this->version = '2.8.2';
 
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -119,7 +119,8 @@ class modScrumProject extends DolibarrModules
 			// Set this to 1 if features of module are opened to external users
 			'moduleforexternal' => 0,
 			'contactelement' => array(
-				'scrumsprint' => "ScrumSprint"
+				'scrumsprint' => "ScrumSprint",
+				'scrumproject_scrumcard' => "scrumprojectScrumcard"
 			)
 		);
 		// Data directories to create when module is enabled.
