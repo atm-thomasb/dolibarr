@@ -120,7 +120,10 @@ class modScrumProject extends DolibarrModules
 			'moduleforexternal' => 0,
 			'contactelement' => array(
 				'scrumsprint' => "ScrumSprint",
-				'scrumproject_scrumcard' => "scrumprojectScrumcard"
+				'scrumproject_scrumcard' => "scrumprojectScrumcard",
+				'scrumproject_scrumtask' => "scrumprojectScrumtask",
+				'scrumproject_scrumuserstory' => "scrumprojectScrumuserstory",
+				'scrumproject_scrumuserstorysprint' => "scrumprojectScrumuserstorysprint",
 			)
 		);
 		// Data directories to create when module is enabled.

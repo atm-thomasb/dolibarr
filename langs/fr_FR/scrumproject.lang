@@ -100,9 +100,12 @@ MyWidget = Mon widget
 MyWidgetDescription = Description de mon widget
 
 #####################################################
-# ScrumCard
+# Scrum type contact
 #
 scrumprojectScrumcard = Scrum Card
+scrumprojectScrumtask= Scrum task
+scrumprojectScrumuserstory=Scrum user story
+scrumprojectScrumuserstorysprint=Scrum user story sprint
 
 # ScrumSprint
 #
