@@ -16,6 +16,9 @@
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042151,'scrumproject_scrumsprint','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042152,'scrumproject_scrumsprint','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
 
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042153,'scrumproject_scrumcard','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042154,'scrumproject_scrumcard','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
+
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042155,'scrumproject_scrumtask','internal','PO','ScrumProjectUserRolePO','1','scrumproject');
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (1042156,'scrumproject_scrumtask','internal','DEV','ScrumProjectUserRoleDEV','1','scrumproject');
 

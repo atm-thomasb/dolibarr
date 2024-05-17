@@ -51,3 +51,10 @@ MyPageName = My page name
 #
 MyWidget = My widget
 MyWidgetDescription = My widget description
+
+# Scrum type contact
+#
+scrumprojectScrumcard = Scrum Card
+scrumprojectScrumtask= Scrum task
+scrumprojectScrumuserstory=Scrum user story
+scrumprojectScrumuserstorysprint=Scrum user story sprint
