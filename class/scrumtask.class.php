@@ -854,7 +854,8 @@ class ScrumTask extends CommonObject
 	public function dropInKanbanList(User $user, AdvKanbanCard $advKanbanCard, AdvKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
 	{
 
-		if($this->status != ScrumTask::STATUS_CANCELED){
+        global $db;
+        if($this->status != ScrumTask::STATUS_CANCELED){
 			$advKanbanCard->status = ScrumTask::STATUS_VALIDATED;
 			if($kanbanList->ref_code == 'backlog'){
 				$advKanbanCard->status = ScrumTask::STATUS_DRAFT;
@@ -881,6 +882,7 @@ class ScrumTask extends CommonObject
 			.' AND c.rowid != '.intval($advKanbanCard->id)
 		;
 
+
 		$obj = $this->db->getRow($sqlCount);
 		if($obj && intval($obj->nbFound) == 0){
 
@@ -903,8 +905,24 @@ class ScrumTask extends CommonObject
 			$obj = $this->db->getRow($sqlCount);
 			if($obj && $obj->cardId > 0){
 
+                global $conf, $langs;
+
 				$usKanbanCard = new AdvKanbanCard($this->db);
 				$usKanbanCard->fetch($obj->cardId);
+                $sql = "SELECT * FROM llx_projet_task WHERE rowid IN (";
+                $sql .="SELECT fk_task FROM llx_scrumproject_scrumuserstory WHERE rowid IN (";
+                $sql .="SELECT fk_scrum_user_story FROM `llx_scrumproject_scrumuserstorysprint` WHERE rowid IN (";
+                $sql .="SELECT fk_scrum_user_story_sprint FROM `llx_scrumproject_scrumtask` WHERE rowid IN (";
+                $sql .="SELECT fk_element FROM `llx_advancedkanban_advkanbancard` WHERE rowid =". $advKanbanCard->id."))));";
+                $resql=$db->query($sql);
+                if ($resql) {
+                    if ($db->num_rows($resql) > 0) {
+                        $card = $db->fetch_object($resql);
+                        $sql = "UPDATE ";
+                        $sql .=$db->prefix()."llx_projet_task SET progress = ". 100;
+                        $sql .= "WHERE rowid = ".$card->id;
+                    }
+                }
 				$usKanbanCard->fk_rank = $advKanbanCard->fk_rank;
 				$usKanbanCard->dropInKanbanList($user, $kanbanList);
 				if(!$usKanbanCard->shiftAllCardRankAfterRank()){
