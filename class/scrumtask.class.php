@@ -904,28 +904,27 @@ class ScrumTask extends CommonObject
 
 			$obj = $this->db->getRow($sqlCount);
 			if($obj && $obj->cardId > 0){
-
-                global $conf, $langs;
-
 				$usKanbanCard = new AdvKanbanCard($this->db);
 				$usKanbanCard->fetch($obj->cardId);
-                $sql = "SELECT * FROM llx_projet_task WHERE rowid IN (";
-                $sql .="SELECT fk_task FROM llx_scrumproject_scrumuserstory WHERE rowid IN (";
-                $sql .="SELECT fk_scrum_user_story FROM `llx_scrumproject_scrumuserstorysprint` WHERE rowid IN (";
-                $sql .="SELECT fk_scrum_user_story_sprint FROM `llx_scrumproject_scrumtask` WHERE rowid IN (";
-                $sql .="SELECT fk_element FROM `llx_advancedkanban_advkanbancard` WHERE rowid =". $advKanbanCard->id."))));";
-                $resql=$db->query($sql);
-                if ($resql) {
-                    if ($db->num_rows($resql) > 0) {
-                        $card = $db->fetch_object($resql);
-                        $sql = "UPDATE ";
-                        $sql .=$db->prefix()."llx_projet_task SET progress = ". 100;
-                        $sql .= "WHERE rowid = ".$card->id;
-                    }
-                }
 				$usKanbanCard->fk_rank = $advKanbanCard->fk_rank;
 				$usKanbanCard->dropInKanbanList($user, $kanbanList);
-				if(!$usKanbanCard->shiftAllCardRankAfterRank()){
+				if($usKanbanCard->shiftAllCardRankAfterRank()){
+					$sql = "SELECT * FROM llx_projet_task WHERE rowid IN (";
+					$sql .="SELECT fk_task FROM llx_scrumproject_scrumuserstory WHERE rowid IN (";
+					$sql .="SELECT fk_scrum_user_story FROM `llx_scrumproject_scrumuserstorysprint` WHERE rowid IN (";
+					$sql .="SELECT fk_scrum_user_story_sprint FROM `llx_scrumproject_scrumtask` WHERE rowid IN (";
+					$sql .="SELECT fk_element FROM `llx_advancedkanban_advkanbancard` WHERE rowid =". $advKanbanCard->id."))));";
+					$resql=$db->query($sql);
+					if ($resql) {
+						if ($db->num_rows($resql) > 0) {
+							$card = $db->fetch_object($resql);
+							$sql = "UPDATE ";
+							$sql .=$db->prefix()."llx_projet_task SET progress = ". 100;
+							$sql .= "WHERE rowid = ".$card->id;
+						}
+					}
+				}else
+				{
 					$this->error = $usKanbanCard->error;
 					$this->errors = $this->errors;
 					return -1;
@@ -1456,16 +1455,16 @@ class ScrumTask extends CommonObject
 
 		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
 			$sql = /** @lang MySQL */
-				"SELECT SUM(ptt.task_duration) sumTimeSpent 
-				FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "." 
-				JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "." 
+				"SELECT SUM(ptt.task_duration) sumTimeSpent
+				FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "."
+				JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "."
 				WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id)." ".$moreSql;
 		}
 		else {
 			$sql = /** @lang MySQL */
-				'SELECT SUM(ptt.element_duration) sumTimeSpent 
-				FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time pttl '.' 
-				JOIN '.MAIN_DB_PREFIX.'element_time ptt ON (ptt.rowid = pttl.fk_projet_task_time AND ptt.elementtype="task") '.' 
+				'SELECT SUM(ptt.element_duration) sumTimeSpent
+				FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time pttl '.'
+				JOIN '.MAIN_DB_PREFIX.'element_time ptt ON (ptt.rowid = pttl.fk_projet_task_time AND ptt.elementtype="task") '.'
 				WHERE pttl.fk_scrumproject_scrumtask = '.intval($this->id).' '.$moreSql;
 		}
 
