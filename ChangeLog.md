@@ -2,6 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+- NEW : Set progress to 100% for a Kanbancard when it is done *04/06/2024* - 2.9.0
 
 
 
