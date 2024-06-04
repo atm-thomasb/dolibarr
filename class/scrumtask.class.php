@@ -908,37 +908,37 @@ class ScrumTask extends CommonObject
 				$usKanbanCard->fetch($obj->cardId);
 				$usKanbanCard->fk_rank = $advKanbanCard->fk_rank;
 				$usKanbanCard->dropInKanbanList($user, $kanbanList);
-				if($usKanbanCard->shiftAllCardRankAfterRank()){
-					$sql = "SELECT pt.rowid as ptRowid";
-					$sql .= " FROM llx_projet_task pt";
-					$sql .= " JOIN llx_scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
-					$sql .= " JOIN llx_scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
-					$sql .= " JOIN llx_scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
-					$sql .= " JOIN llx_advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
-					$sql .= " WHERE akac.rowid = ". $advKanbanCard->id;
-					$resql=$db->query($sql);
-					if ($resql) {
-						if ($db->num_rows($resql) > 0) {
-							$card = $db->fetch_object($resql);
-							$sqlUpdate = "UPDATE ";
-							$sqlUpdate .=$db->prefix()."projet_task SET progress = 100 ";
-							$sqlUpdate .= "WHERE rowid = ".$card->ptRowid;
-							$resqlUpdate = $db->query($sqlUpdate);
-							if (!$resqlUpdate){
-								dol_syslog('erreur');
-							}
-						}
-					}
-				}else
-				{
+				if(!$usKanbanCard->shiftAllCardRankAfterRank()){
 					$this->error = $usKanbanCard->error;
 					$this->errors = $this->errors;
 					return -1;
+				}else{
+					if ($kanbanList->ref_code=='done') {
+						$sql = "SELECT pt.rowid as ptRowid";
+						$sql .= " FROM llx_projet_task pt";
+						$sql .= " JOIN llx_scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
+						$sql .= " JOIN llx_scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
+						$sql .= " JOIN llx_scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
+						$sql .= " JOIN llx_advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
+						$sql .= " WHERE akac.rowid = ". $advKanbanCard->id;
+						$resql=$db->query($sql);
+						if ($resql) {
+							if ($db->num_rows($resql) > 0) {
+								$card = $db->fetch_object($resql);
+								$sqlUpdate = "UPDATE ";
+								$sqlUpdate .= $db->prefix() . "projet_task SET progress = 100 ";
+								$sqlUpdate .= "WHERE rowid = " . $card->ptRowid;
+								$resqlUpdate = $db->query($sqlUpdate);
+								if (!$resqlUpdate) {
+									dol_syslog(__METHOD__.', sql UPDATE errors',$db->lasterror());
+								}
+							}
+						}
+					}
 				}
 			}
 
 		}
-
 		if($noUpdate){
 			return 0;
 		}
