@@ -909,18 +909,24 @@ class ScrumTask extends CommonObject
 				$usKanbanCard->fk_rank = $advKanbanCard->fk_rank;
 				$usKanbanCard->dropInKanbanList($user, $kanbanList);
 				if($usKanbanCard->shiftAllCardRankAfterRank()){
-					$sql = "SELECT * FROM llx_projet_task WHERE rowid IN (";
-					$sql .="SELECT fk_task FROM llx_scrumproject_scrumuserstory WHERE rowid IN (";
-					$sql .="SELECT fk_scrum_user_story FROM `llx_scrumproject_scrumuserstorysprint` WHERE rowid IN (";
-					$sql .="SELECT fk_scrum_user_story_sprint FROM `llx_scrumproject_scrumtask` WHERE rowid IN (";
-					$sql .="SELECT fk_element FROM `llx_advancedkanban_advkanbancard` WHERE rowid =". $advKanbanCard->id."))));";
+					$sql = "SELECT pt.rowid as ptRowid";
+					$sql .= " FROM llx_projet_task pt";
+					$sql .= " JOIN llx_scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
+					$sql .= " JOIN llx_scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
+					$sql .= " JOIN llx_scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
+					$sql .= " JOIN llx_advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
+					$sql .= " WHERE akac.rowid = ". $advKanbanCard->id;
 					$resql=$db->query($sql);
 					if ($resql) {
 						if ($db->num_rows($resql) > 0) {
 							$card = $db->fetch_object($resql);
-							$sql = "UPDATE ";
-							$sql .=$db->prefix()."llx_projet_task SET progress = ". 100;
-							$sql .= "WHERE rowid = ".$card->id;
+							$sqlUpdate = "UPDATE ";
+							$sqlUpdate .=$db->prefix()."projet_task SET progress = 100 ";
+							$sqlUpdate .= "WHERE rowid = ".$card->ptRowid;
+							$resqlUpdate = $db->query($sqlUpdate);
+							if (!$resqlUpdate){
+								dol_syslog('erreur');
+							}
 						}
 					}
 				}else
