@@ -882,7 +882,6 @@ class ScrumTask extends CommonObject
 			.' AND c.rowid != '.intval($advKanbanCard->id)
 		;
 
-
 		$obj = $this->db->getRow($sqlCount);
 		if($obj && intval($obj->nbFound) == 0){
 
@@ -912,22 +911,26 @@ class ScrumTask extends CommonObject
 					$this->error = $usKanbanCard->error;
 					$this->errors = $this->errors;
 					return -1;
-				}else{
+				} else{
 					if ($kanbanList->ref_code=='done') {
 						$sql = "SELECT pt.rowid as ptRowid";
-						$sql .= " FROM llx_projet_task pt";
-						$sql .= " JOIN llx_scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
-						$sql .= " JOIN llx_scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
-						$sql .= " JOIN llx_scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
-						$sql .= " JOIN llx_advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
+						$sql .= " FROM ".$db->prefix()."projet_task pt";
+						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
+						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
+						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
+						$sql .= " JOIN ".$db->prefix()."advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
 						$sql .= " WHERE akac.rowid = ". $advKanbanCard->id;
 						$resql=$db->query($sql);
 						if ($resql) {
 							if ($db->num_rows($resql) > 0) {
-								$card = $db->fetch_object($resql);
+								$obj = $db->fetch_object($resql);
+//								$task = new Task($db);
+//								$task->fetch(1);
+//								$task->progress = 100;
+//								$task->update($user);
 								$sqlUpdate = "UPDATE ";
 								$sqlUpdate .= $db->prefix() . "projet_task SET progress = 100 ";
-								$sqlUpdate .= "WHERE rowid = " . $card->ptRowid;
+								$sqlUpdate .= "WHERE rowid = " . $obj->ptRowid;
 								$resqlUpdate = $db->query($sqlUpdate);
 								if (!$resqlUpdate) {
 									dol_syslog(__METHOD__.', sql UPDATE errors',$db->lasterror());
