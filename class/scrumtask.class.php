@@ -924,10 +924,6 @@ class ScrumTask extends CommonObject
 						if ($resql) {
 							if ($db->num_rows($resql) > 0) {
 								$obj = $db->fetch_object($resql);
-//								$task = new Task($db);
-//								$task->fetch(1);
-//								$task->progress = 100;
-//								$task->update($user);
 								$sqlUpdate = "UPDATE ";
 								$sqlUpdate .= $db->prefix() . "projet_task SET progress = 100 ";
 								$sqlUpdate .= "WHERE rowid = " . $obj->ptRowid;
