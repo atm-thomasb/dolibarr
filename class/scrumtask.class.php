@@ -854,7 +854,8 @@ class ScrumTask extends CommonObject
 	public function dropInKanbanList(User $user, AdvKanbanCard $advKanbanCard, AdvKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
 	{
 
-		if($this->status != ScrumTask::STATUS_CANCELED){
+        global $db;
+        if($this->status != ScrumTask::STATUS_CANCELED){
 			$advKanbanCard->status = ScrumTask::STATUS_VALIDATED;
 			if($kanbanList->ref_code == 'backlog'){
 				$advKanbanCard->status = ScrumTask::STATUS_DRAFT;
@@ -902,7 +903,6 @@ class ScrumTask extends CommonObject
 
 			$obj = $this->db->getRow($sqlCount);
 			if($obj && $obj->cardId > 0){
-
 				$usKanbanCard = new AdvKanbanCard($this->db);
 				$usKanbanCard->fetch($obj->cardId);
 				$usKanbanCard->fk_rank = $advKanbanCard->fk_rank;
@@ -911,11 +911,33 @@ class ScrumTask extends CommonObject
 					$this->error = $usKanbanCard->error;
 					$this->errors = $this->errors;
 					return -1;
+				} else{
+					if ($kanbanList->ref_code=='done') {
+						$sql = "SELECT pt.rowid as ptRowid";
+						$sql .= " FROM ".$db->prefix()."projet_task pt";
+						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
+						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
+						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
+						$sql .= " JOIN ".$db->prefix()."advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
+						$sql .= " WHERE akac.rowid = ". $advKanbanCard->id;
+						$resql=$db->query($sql);
+						if ($resql) {
+							if ($db->num_rows($resql) > 0) {
+								$obj = $db->fetch_object($resql);
+								$sqlUpdate = "UPDATE ";
+								$sqlUpdate .= $db->prefix() . "projet_task SET progress = 100 ";
+								$sqlUpdate .= "WHERE rowid = " . $obj->ptRowid;
+								$resqlUpdate = $db->query($sqlUpdate);
+								if (!$resqlUpdate) {
+									dol_syslog(__METHOD__.', sql UPDATE errors',$db->lasterror());
+								}
+							}
+						}
+					}
 				}
 			}
 
 		}
-
 		if($noUpdate){
 			return 0;
 		}
@@ -1438,16 +1460,16 @@ class ScrumTask extends CommonObject
 
 		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
 			$sql = /** @lang MySQL */
-				"SELECT SUM(ptt.task_duration) sumTimeSpent 
-				FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "." 
-				JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "." 
+				"SELECT SUM(ptt.task_duration) sumTimeSpent
+				FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "."
+				JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "."
 				WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id)." ".$moreSql;
 		}
 		else {
 			$sql = /** @lang MySQL */
-				'SELECT SUM(ptt.element_duration) sumTimeSpent 
-				FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time pttl '.' 
-				JOIN '.MAIN_DB_PREFIX.'element_time ptt ON (ptt.rowid = pttl.fk_projet_task_time AND ptt.elementtype="task") '.' 
+				'SELECT SUM(ptt.element_duration) sumTimeSpent
+				FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time pttl '.'
+				JOIN '.MAIN_DB_PREFIX.'element_time ptt ON (ptt.rowid = pttl.fk_projet_task_time AND ptt.elementtype="task") '.'
 				WHERE pttl.fk_scrumproject_scrumtask = '.intval($this->id).' '.$moreSql;
 		}
 
