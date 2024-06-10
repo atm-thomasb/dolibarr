@@ -60,8 +60,6 @@ SP_USE_ACHIEVEMENTS_HELP = Ajoute quelques icônes de type achievement comme dan
 SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND = Interdire de découper le temps déjà consommé sur les tâches scrum du kanban : lors de la découpe, autoriser uniquement la création de tâches sur le temps restant disponible.
 
 SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE = Passer la tâche projet liée à l'US à 100%% lorsque toutes les US planifiées sont terminées
-
-
 RequireValidSplitData = Les données de découpe sont invalides
 
 #

@@ -911,7 +911,8 @@ class ScrumTask extends CommonObject
 					$this->error = $usKanbanCard->error;
 					$this->errors = $this->errors;
 					return -1;
-				} else{
+				}
+				else{
 					if ($kanbanList->ref_code == 'done') {
 						$sql = "SELECT ssu.complete_task_on_us_done, ssu.fk_task";
 						$sql .= " FROM " . $db->prefix() . "scrumproject_scrumuserstory ssu ";
@@ -930,9 +931,11 @@ class ScrumTask extends CommonObject
 							$shouldCompleteTask = false;
 							if ($usSpecificConfig == 'Yes') {
 								$shouldCompleteTask = true;
-							} elseif ($usSpecificConfig == 'No') {
+							}
+							elseif ($usSpecificConfig == 'No') {
 								$shouldCompleteTask = false;
-							} else {
+							}
+							else {
 								$shouldCompleteTask = $conf->global->SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE;
 							}
 							if ($shouldCompleteTask) {

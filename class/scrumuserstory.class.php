@@ -68,7 +68,6 @@ class ScrumUserStory extends CommonObject
 	 */
 	public $picto = 'scrumuserstory@scrumproject';
 
-
 	public $fk_user_po;
 
 	const STATUS_DRAFT = 0;
@@ -146,7 +145,6 @@ class ScrumUserStory extends CommonObject
 	public $import_key;
 	public $status;
 	public $complete_task_on_us_done="Default";
-
 	public $default_prod_calc = 'count';
 
 
@@ -259,7 +257,6 @@ class ScrumUserStory extends CommonObject
 
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
-
 		$object = new self($this->db);
 
 		$this->db->begin();
