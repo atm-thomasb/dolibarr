@@ -854,7 +854,7 @@ class ScrumTask extends CommonObject
 	public function dropInKanbanList(User $user, AdvKanbanCard $advKanbanCard, AdvKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
 	{
 
-        global $db;
+        global $db, $conf;
         if($this->status != ScrumTask::STATUS_CANCELED){
 			$advKanbanCard->status = ScrumTask::STATUS_VALIDATED;
 			if($kanbanList->ref_code == 'backlog'){
@@ -912,31 +912,52 @@ class ScrumTask extends CommonObject
 					$this->errors = $this->errors;
 					return -1;
 				} else{
-					if ($kanbanList->ref_code=='done') {
-						$sql = "SELECT pt.rowid as ptRowid";
-						$sql .= " FROM ".$db->prefix()."projet_task pt";
-						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
-						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
-						$sql .= " JOIN ".$db->prefix()."scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
-						$sql .= " JOIN ".$db->prefix()."advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
-						$sql .= " WHERE akac.rowid = ". $advKanbanCard->id;
-						$resql=$db->query($sql);
+					if ($kanbanList->ref_code == 'done') {
+						$sql = "SELECT ssu.complete_task_on_us_done, ssu.fk_task";
+						$sql .= " FROM " . $db->prefix() . "scrumproject_scrumuserstory ssu ";
+						$sql .= " JOIN " . $db->prefix() . "scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
+						$sql .= " JOIN " . $db->prefix() . "scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
+						$sql .= " JOIN " . $db->prefix() . "advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
+						$sql .= " WHERE akac.rowid = " . (int)$advKanbanCard->id;
+						$resql = $db->query($sql);
 						if ($resql) {
 							if ($db->num_rows($resql) > 0) {
 								$obj = $db->fetch_object($resql);
-								$sqlUpdate = "UPDATE ";
-								$sqlUpdate .= $db->prefix() . "projet_task SET progress = 100 ";
-								$sqlUpdate .= "WHERE rowid = " . $obj->ptRowid;
-								$resqlUpdate = $db->query($sqlUpdate);
-								if (!$resqlUpdate) {
-									dol_syslog(__METHOD__.', sql UPDATE errors',$db->lasterror());
+								$usSpecificConfig = $obj->complete_task_on_us_done;
+								$fkTask = $obj->fk_task;
+							}
+
+							$shouldCompleteTask = false;
+							if ($usSpecificConfig == 'Yes') {
+								$shouldCompleteTask = true;
+							} elseif ($usSpecificConfig == 'No') {
+								$shouldCompleteTask = false;
+							} else {
+								$shouldCompleteTask = $conf->global->SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE;
+							}
+							if ($shouldCompleteTask) {
+								$sql2 = "SELECT pt.rowid as ptRowid";
+								$sql2 .= " FROM " . $db->prefix() . "projet_task pt";
+								$sql2 .= " JOIN " . $db->prefix() . "scrumproject_scrumuserstory ssu ON pt.rowid = ssu.fk_task";
+								$sql2 .= " WHERE ssu.fk_task = " . (int)$fkTask;
+								$resql2 = $db->query($sql2);
+								if ($resql2) {
+									if ($db->num_rows($resql2) > 0) {
+										$obj = $db->fetch_object($resql2);
+										$sqlUpdate = "UPDATE ";
+										$sqlUpdate .= $db->prefix() . "projet_task SET progress = 100 ";
+										$sqlUpdate .= "WHERE rowid = " . $obj->ptRowid;
+										$resqlUpdate = $db->query($sqlUpdate);
+										if (!$resqlUpdate) {
+											dol_syslog(__METHOD__ . ', sql UPDATE errors', $db->lasterror());
+										}
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-
 		}
 		if($noUpdate){
 			return 0;

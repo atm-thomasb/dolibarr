@@ -33,6 +33,13 @@ SCRUMPROJECT_MYPARAM1Tooltip = My param 1 tooltip
 SCRUMPROJECT_MYPARAM2=My param 2
 SCRUMPROJECT_MYPARAM2Tooltip=My param 2 tooltip
 
+SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE = Set the project task linked to the US to 100% when all planned US are completed
+
+#
+# Class Page
+#
+CompleteTaskOnUsDone = Project task at 100%% once all US are completed.
+
 
 #
 # About page

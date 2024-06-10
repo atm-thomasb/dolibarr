@@ -68,6 +68,7 @@ class ScrumUserStory extends CommonObject
 	 */
 	public $picto = 'scrumuserstory@scrumproject';
 
+
 	public $fk_user_po;
 
 	const STATUS_DRAFT = 0;
@@ -129,6 +130,7 @@ class ScrumUserStory extends CommonObject
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2,),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
 		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>5, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', 1=>'Valid&eacute;', 2 => 'Planifié', 3 => 'Terminé', 9=>'Annul&eacute;'), 'validate'=>'1', 'default' => 0),
+		'complete_task_on_us_done' => array('type'=>'varchar(10)', 'label'=>'CompleteTaskOnUsDone', 'enabled'=>'1', 'position'=>1001, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('Default' =>'Default', 'Yes' =>'Yes', 'No' =>'No',), 'validate'=>'1', 'default' => '0'),
 	);
 	public $rowid;
 	public $fk_task;
@@ -143,6 +145,8 @@ class ScrumUserStory extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
+	public $complete_task_on_us_done="Default";
+
 	public $default_prod_calc = 'count';
 
 
@@ -252,6 +256,7 @@ class ScrumUserStory extends CommonObject
 	{
 		global $langs, $extrafields;
 		$error = 0;
+
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
 

@@ -206,6 +206,9 @@ $formSetup->newItem('SP_ENABLE_KANBAN')->setAsYesNo();
 // Ne pas permettre le split de tâche si le temps est consommé
 $formSetup->newItem('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND')->setAsYesNo();
 
+// Activer/désactiver la complétion automatique de la tâche projet liée à l'US lorsque toutes les US planifiées sont terminées
+$formSetup->newItem('SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE')->setAsYesNo();
+
 
 
 
