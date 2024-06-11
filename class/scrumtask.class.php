@@ -924,19 +924,19 @@ class ScrumTask extends CommonObject
 						if ($resql) {
 							if ($db->num_rows($resql) > 0) {
 								$obj = $db->fetch_object($resql);
-								$usSpecificConfig = $obj->complete_task_on_us_done;
 								$fkTask = $obj->fk_task;
 							}
 
-							$shouldCompleteTask = false;
-							if ($usSpecificConfig == 'Yes') {
-								$shouldCompleteTask = true;
-							}
-							elseif ($usSpecificConfig == 'No') {
-								$shouldCompleteTask = false;
-							}
-							else {
-								$shouldCompleteTask = $conf->global->SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE;
+							$shouldCompleteTask = getDolGlobalString('SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE');
+							if ($obj->complete_task_on_us_done != 0) {
+								if ($obj->complete_task_on_us_done == 1)
+								{
+									$shouldCompleteTaskByTask = true;
+								}
+								elseif ($obj->complete_task_on_us_done == 2) {
+									$shouldCompleteTaskByTask = false;
+								}
+								if ($shouldCompleteTask != $shouldCompleteTaskByTask) $shouldCompleteTask = $shouldCompleteTaskByTask;
 							}
 							if ($shouldCompleteTask) {
 								$sql2 = "SELECT pt.rowid as ptRowid";

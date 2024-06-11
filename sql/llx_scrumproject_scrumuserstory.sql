@@ -31,6 +31,6 @@ CREATE TABLE llx_scrumproject_scrumuserstory(
     last_main_doc varchar(255),
     import_key varchar(14),
 	status smallint NOT NULL,
-    complete_task_on_us_done SET('Default','Yes','No') NOT NULL DEFAULT 'Default'
+    complete_task_on_us_done tinyint NOT NULL DEFAULT 0
 
 ) ENGINE=innodb;
