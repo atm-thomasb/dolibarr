@@ -144,7 +144,7 @@ class ScrumUserStory extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
-	public $complete_task_on_us_done= 0;
+	public $complete_task_on_us_done = 0;
 	public $default_prod_calc = 'count';
 
 
