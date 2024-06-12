@@ -206,7 +206,8 @@ $formSetup->newItem('SP_ENABLE_KANBAN')->setAsYesNo();
 // Ne pas permettre le split de tâche si le temps est consommé
 $formSetup->newItem('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND')->setAsYesNo();
 
-
+// Activer la suprression de User Story Planifiées lorsqu'un kanban est delete
+$formSetup->newItem('SP_KANBAN_DISABLE_ENABLE_US_SPRINT')->setAsYesNo();
 
 
 

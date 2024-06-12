@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## Release 2.8
+- FIX : sprint user stories can't be removed when a kanban is removed - *12/06/2024* - 2.8.3
 - FIX : Scrumproject roles et affectation de task - *16/05/2024* - 2.8.2 
 - FIX : font-awesome icon missing - *03/04/2024* - 2.8.1  
 - NEW : Columns date start and end of sprint in sprint user list - *18/10/2023* - 2.8.0
