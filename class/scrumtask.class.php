@@ -914,12 +914,11 @@ class ScrumTask extends CommonObject
 				}
 				else {
 					if ($kanbanList->ref_code == 'done') {
-						$sql = "SELECT ssu.complete_task_on_us_done, ssu.fk_task, pt.rowid as ptRowid";
+						$sql = "SELECT ssu.complete_task_on_us_done, ssu.fk_task";
 						$sql .= " FROM " . $db->prefix() . "scrumproject_scrumuserstory ssu ";
 						$sql .= " JOIN " . $db->prefix() . "scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
 						$sql .= " JOIN " . $db->prefix() . "scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
 						$sql .= " JOIN " . $db->prefix() . "advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
-						$sql .= " JOIN " . $db->prefix() . "projet_task pt ON pt.rowid = ssu.fk_task";
 						$sql .= " WHERE akac.rowid = " . (int)$advKanbanCard->id;
 						$resql = $db->query($sql);
 						if ($resql) {
@@ -938,7 +937,7 @@ class ScrumTask extends CommonObject
 								}
 								if ($shouldCompleteTask) {
 									$task = new Task($db);
-									if ($task->fetch($obj->ptRowid)){
+									if ($task->fetch($obj->fk_task)){
 										$task->progress = 100;
 										$result = $task->update($user);
 										if ($result <= 0){
@@ -955,7 +954,7 @@ class ScrumTask extends CommonObject
 						}
 						else
 						{
-							dol_syslog(__METHOD__ . ', sql UPDATE errors', $db->lasterror());
+							dol_syslog(__METHOD__ . ', sql select errors', $db->lasterror());
 						}
 					}
 				}
