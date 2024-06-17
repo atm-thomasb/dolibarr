@@ -2,9 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+- FIX : V19 Compat : bad setup for fields *17/06/2024* - 2.10.0  
+  use new hook getElementProperties to define elements properties
 - NEW : Set progress to 100% for a Kanbancard when it is done - *10/06/2024* - 2.9.0
-
-
 
 ## Release 2.8
 - FIX : Scrumproject roles et affectation de task - *16/05/2024* - 2.8.2 
