@@ -438,4 +438,56 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			}
 		}
 	}
+
+
+	/**
+	 * @param $parameters
+	 * @param $object
+	 * @param $action
+	 * @param $hookmanager
+	 * @return void
+	 */
+	public function getElementProperties($parameters, &$object, &$action, $hookmanager){
+
+		if($parameters['elementType']=='scrumproject_scrumuserstorysprint'){
+
+			$this->results = array(
+				'module' => 'scrumproject',
+				'element' => 'scrumproject_scrumuserstorysprint',
+				'table_element' => 'scrumproject_scrumuserstorysprint',
+				'classpath' => 'scrumproject/class',
+				'classfile' => 'scrumuserstorysprint',
+				'classname' => 'ScrumUserStorySprint',
+			);
+
+			return 0;
+		}
+		elseif( $parameters['elementType']=='scrumproject_scrumuserstory' || $parameters['elementType']=='scrumuserstory'){
+
+			$this->results = array(
+				'module' => 'scrumproject',
+				'element' => 'scrumproject_scrumuserstory',
+				'table_element' => 'scrumproject_scrumuserstory',
+				'classpath' => 'scrumproject/class',
+				'classfile' => 'scrumuserstory',
+				'classname' => 'ScrumUserStory',
+			);
+
+			return 0;
+		}
+		elseif( $parameters['elementType']=='scrumproject_scrumsprint' || $parameters['elementType']=='scrumsprint'){
+
+			$this->results = array(
+				'module' => 'scrumproject',
+				'element' => 'scrumproject_scrumsprint',
+				'table_element' => 'scrumproject_scrumsprint',
+				'classpath' => 'scrumproject/class',
+				'classfile' => 'scrumsprint',
+				'classname' => 'ScrumSprint',
+			);
+
+			return 0;
+		}
+	}
+
 }
