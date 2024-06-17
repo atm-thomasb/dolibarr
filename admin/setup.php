@@ -207,7 +207,7 @@ $formSetup->newItem('SP_ENABLE_KANBAN')->setAsYesNo();
 $formSetup->newItem('SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND')->setAsYesNo();
 
 // Activer la suprression de User Story Planifiées lorsqu'un kanban est delete
-$formSetup->newItem('SP_KANBAN_DISABLE_ENABLE_US_SPRINT')->setAsYesNo();
+$formSetup->newItem('SP_KANBAN_US_CASCADE_ON_DELETE')->setAsYesNo();
 
 
 

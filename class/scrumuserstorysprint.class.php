@@ -607,7 +607,7 @@ class ScrumUserStorySprint extends CommonObject
 	public function onAdvKanbanCardDelete(AdvKanbanCard $scrumTask, User $user, $notrigger = false)
 	{
 		global $langs;
-		$shouldDeleteUsSprint = getDolGlobalString('SP_KANBAN_DISABLE_ENABLE_US_SPRINT');
+		$shouldDeleteUsSprint = getDolGlobalString('SP_KANBAN_US_CASCADE_ON_DELETE');
 		if ($shouldDeleteUsSprint){
 			if ($this->canBeDeleted()){
 				return $this->deleteCommon($user, $notrigger);

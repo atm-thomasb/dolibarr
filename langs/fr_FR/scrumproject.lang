@@ -58,7 +58,7 @@ SP_USE_ACHIEVEMENTS = Activer la gamification
 SP_USE_ACHIEVEMENTS_HELP = Ajoute quelques icônes de type achievement comme dans les jeux vidéos
 
 SP_KANBAN_DISABLE_SPLIT_TASK_OVERSPEND = Interdire de découper le temps déjà consommé sur les tâches scrum du kanban : lors de la découpe, autoriser uniquement la création de tâches sur le temps restant disponible.
-SP_KANBAN_DISABLE_ENABLE_US_SPRINT = Activer/Désactiver la suppression de User Story Planifiées lors de la suprression d'un kanaban
+SP_KANBAN_US_CASCADE_ON_DELETE = Activer/Désactiver la suppression de User Story Planifiées lors de la suprression d'un kanaban
 RequireValidSplitData = Les données de découpe sont invalides
 
 #
