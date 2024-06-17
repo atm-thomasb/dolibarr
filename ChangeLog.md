@@ -2,9 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+- FIX : V19 Compat : bad setup for fields *17/06/2024* - 2.10.0  
+  use new hook getElementProperties to define elements properties
 - NEW : Set progress to 100% for a Kanbancard when it is done - *10/06/2024* - 2.9.0
-
-
 
 ## Release 2.8
 - FIX : sprint user stories can't be removed when a kanban is removed - *12/06/2024* - 2.8.3
