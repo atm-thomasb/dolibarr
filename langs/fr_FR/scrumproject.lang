@@ -252,6 +252,8 @@ ReadScrumsprint = Voir les sprints
 WriteScrumsprint = Ajouter/Modifier les sprints
 DeleteScrumsprint = Supprimer les sprints
 
+ReadScrumProject = Voir les evenements agenda lié
+
 
 TotalTimePlanned = Temps temps planifié
 Planned = Planifié
