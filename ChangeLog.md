@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## Release 2.10
+
 - FIX : V19 Compat : bad setup for fields *17/06/2024* - 2.10.0  
   use new hook getElementProperties to define elements properties
 - NEW : Set progress to 100% for a Kanbancard when it is done - *10/06/2024* - 2.9.0
