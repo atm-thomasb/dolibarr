@@ -98,3 +98,13 @@ html[data-theme-color-scheme="dark"] .kanban-title-board__scrumtime:where(.qty-c
 .highlight-element .highlight-scrum-task::before{
 	content: "\f070";
 }
+
+
+
+
+@media (max-width: 1290px) {
+	#kanban-header-scrum-sprint-resume{
+		display: none;
+	}
+}
+

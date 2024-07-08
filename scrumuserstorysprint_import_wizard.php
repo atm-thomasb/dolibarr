@@ -305,8 +305,8 @@ if (empty($reshook))
 								$error = 0;
 
 								$scrumUserStorySprint = new ScrumUserStorySprint($db);
-								$scrumUserStorySprint->ref = $scrumUserStorySprint->fields['ref']['default'];
-								$scrumUserStorySprint->status = $scrumUserStorySprint->fields['status']['default'];
+//								$scrumUserStorySprint->ref = $scrumUserStorySprint->fields['ref']['default'];
+//								$scrumUserStorySprint->status = $scrumUserStorySprint->fields['status']['default'];
 								$scrumUserStorySprint->fk_user_creat = $user->id;
 								$scrumUserStorySprint->fk_scrum_user_story = $res;
 								$scrumUserStorySprint->fk_scrum_sprint = $fk_scrum_sprint;
