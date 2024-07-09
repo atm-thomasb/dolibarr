@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## Release 2.10
 
+- FIX : Type fk_tast retro compat - *08/07/2024* - 2.10.1
 - FIX : Mobile responsive display *08/07/2024* - 2.10.1
 - FIX : V19 Compat : bad setup for fields *17/06/2024* - 2.10.0  
   use new hook getElementProperties to define elements properties
