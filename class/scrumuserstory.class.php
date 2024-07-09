@@ -195,6 +195,11 @@ class ScrumUserStory extends CommonObject
 
 		$this->db = $db;
 
+
+		if (intval(DOL_VERSION)  <  19){
+			$this->fields['fk_task']['type'] = 'integer:task:projet/class/task.class.php:1';
+		}
+
 		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
