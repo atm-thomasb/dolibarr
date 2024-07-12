@@ -113,7 +113,9 @@ class modScrumProject extends DolibarrModules
 						'advkanbanview',
 						'scrumtaskcard',
 						'emailtemplates',
-						'advkanbandao'
+						'advkanbandao',
+					    'tasktimelist',
+					   'projecttasktime'
 					),
 			),
 			// Set this to 1 if features of module are opened to external users

@@ -154,7 +154,14 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 	 */
 	public function doActions($parameters, &$object, &$action, $hookmanager)
 	{
-		global $langs;
+
+		global $langs, $user;
+		$LinkedScrumTask = null;
+		$id = GETPOST('id', 'int');
+		$childids = GETPOST('childids', 'array');
+		$lineId = GETPOST('lineid', 'int');
+		$ref = GETPOST('ref', 'int');
+
 		$TContext = explode(':', $parameters['context']);
 
 		if (in_array('advkanbanview', $TContext))
@@ -165,7 +172,108 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			$confToJs['maxScrumTaskStepQty'] 				= getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 0);
 			$confToJs['maxScrumTaskMaxQty'] 				= getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0);
 
-//			$jsLangs = $parameters['jsLangs'];
+
+
+		}elseif (in_array('projecttasktime', $TContext) && $action == "updateline"){ // mise à jour du temps  depuis project/task/times.php
+
+			// on recupére l'id de la ligne  on va chercher l'id de la scrum task associée dans scrumproject_scrumtask_task_time
+			$sql = "select fk_scrumproject_scrumtask as fss FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time where fk_projet_task_time =" . (int)$lineId;
+			$resql = $this->db->query($sql);
+			if ($resql) {
+				$obj = $this->db->fetch_object($resql);
+				$LinkedScrumTask = $obj->fss ?? null;
+
+			}
+			// nous avons un lien pour cette saisie des temps sur une scrumtask
+			if (!is_null($LinkedScrumTask)){
+				// process de suppresison et création copiéé depuis scrumproject_scrumtask_task_time
+				$error = 0;
+
+				if (!GETPOST("new_durationhour") && !GETPOST("new_durationmin")) {
+					setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Duration")), null, 'errors');
+					$error++;
+				}
+
+				if (!$error) {
+					if (GETPOST('taskid', 'int') != $id) {        // GETPOST('taskid') is id of new task
+						$id_temp = GETPOST('taskid', 'int'); // should not overwrite $id
+
+
+						$object->fetchTimeSpent(GETPOST('lineid', 'int'));
+
+						$result = 0;
+						if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
+							$result = $object->delTimeSpent($user);
+						}
+
+						$object->fetch($id_temp, $ref);
+
+						$object->timespent_note = GETPOST("timespent_note_line", "alphanohtml");
+						$object->timespent_old_duration = GETPOST("old_duration", "int");
+						$object->timespent_duration = GETPOSTINT("new_durationhour") * 60 * 60; // We store duration in seconds
+						$object->timespent_duration += (GETPOSTINT("new_durationmin") ? GETPOSTINT('new_durationmin') : 0) * 60; // We store duration in seconds
+						if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0) {    // If hour was entered
+							$object->timespent_date = dol_mktime(GETPOST("timelinehour"), GETPOST("timelinemin"), 0, GETPOST("timelinemonth"), GETPOST("timelineday"), GETPOST("timelineyear"));
+							$object->timespent_withhour = 1;
+						} else {
+							$object->timespent_date = dol_mktime(12, 0, 0, GETPOST("timelinemonth"), GETPOST("timelineday"), GETPOST("timelineyear"));
+						}
+						$object->timespent_fk_user = GETPOST("userid_line", 'int');
+						$object->timespent_fk_product = GETPOST("fk_product", 'int');
+						$object->timespent_invoiceid = GETPOST("invoiceid", 'int');
+						$object->timespent_invoicelineid = GETPOST("invoicelineid", 'int');
+
+						$result = 0;
+						if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
+							$result = $object->addTimeSpent($user);
+
+							if ($result >= 0) {
+								// création du lien dans
+								$sql = "INSERT INTO " . MAIN_DB_PREFIX . "scrumproject_scrumtask_projet_task_time   (fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$LinkedScrumTask.")";
+								$resultInsert = $this->db->query($sql);
+								setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+								$action = '';
+								return 1;
+							} else {
+								setEventMessages($langs->trans($object->error), null, 'errors');
+								$error++;
+							}
+						}
+					} else {
+						/*$object->fetch($id, $ref);
+
+						$object->timespent_id = GETPOST("lineid", 'int');
+						$object->timespent_note = GETPOST("timespent_note_line", "alphanohtml");
+						$object->timespent_old_duration = GETPOST("old_duration", "int");
+						$object->timespent_duration = GETPOSTINT("new_durationhour") * 60 * 60; // We store duration in seconds
+						$object->timespent_duration += (GETPOSTINT("new_durationmin") ? GETPOSTINT('new_durationmin') : 0) * 60; // We store duration in seconds
+						if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0) {    // If hour was entered
+							$object->timespent_date = dol_mktime(GETPOST("timelinehour", 'int'), GETPOST("timelinemin", 'int'), 0, GETPOST("timelinemonth", 'int'), GETPOST("timelineday", 'int'), GETPOST("timelineyear", 'int'));
+							$object->timespent_withhour = 1;
+						} else {
+							$object->timespent_date = dol_mktime(12, 0, 0, GETPOST("timelinemonth", 'int'), GETPOST("timelineday", 'int'), GETPOST("timelineyear", 'int'));
+						}
+						$object->timespent_fk_user = GETPOST("userid_line", 'int');
+						$object->timespent_fk_product = GETPOST("fk_product", 'int');
+						$object->timespent_invoiceid = GETPOST("invoiceid", 'int');
+						$object->timespent_invoicelineid = GETPOST("invoicelineid", 'int');
+						$result = 0;
+
+						if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
+							$result = $object->updateTimeSpent($user);
+
+							if ($result >= 0) {
+								setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+							} else {
+								setEventMessages($langs->trans($object->error), null, 'errors');
+								$error++;
+							}
+						}*/
+					}
+				} else {
+					$action = '';
+				}
+			}
 
 		}
 
