@@ -107,7 +107,7 @@ class ScrumSprint extends CommonObject
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'comment'=>"Reference of object"),
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'fk_team' => array('type'=>'integer:UserGroup:user/class/usergroup.class.php', 'label'=>'SprintTeam', 'enabled'=>'1', 'position'=>20, 'notnull'=>1, 'visible'=>1, 'foreignkey'=>'usergroup.rowid',),
-		'fk_advkanban' => array('type'=>'integer:AdvKanban:advancedkanban/class/advkanban.class.php', 'label'=>'Kanban', 'enabled'=>'isModEnabled('advancedkanban')', 'position'=>20, 'notnull'=>0, 'visible'=>5, 'foreignkey'=>'advancedkanban_advkanban.rowid',),
+		'fk_advkanban' => array('type'=>'integer:AdvKanban:advancedkanban/class/advkanban.class.php', 'label'=>'Kanban', 'enabled'=>'isModEnabled("advancedkanban")', 'position'=>20, 'notnull'=>0, 'visible'=>5, 'foreignkey'=>'advancedkanban_advkanban.rowid',),
 		'label' => array('type'=>'varchar(255)', 'label'=>'SprintLabel', 'enabled'=>'1', 'position'=>30, 'notnull'=>0, 'visible'=>1, 'searchall'=>1, 'css'=>'minwidth300', 'showoncombobox'=>'1',),
 		'date_start' => array('type'=>'date', 'label'=>'DateStart', 'enabled'=>'1', 'position'=>35, 'notnull'=>1, 'visible'=>1,'showoncombobox'=>'1',),
 		'date_end' => array('type'=>'date', 'label'=>'DateEnd', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>1,'showoncombobox'=>'1',),

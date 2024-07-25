@@ -160,9 +160,9 @@ class modScrumProject extends DolibarrModules
 			'fr_FR:ParentCompany'=>'Maison mère ou revendeur'
 		)*/
 
-		if (!isset($conf->scrumproject) || !isset(isModEnabled('scrumproject'))) {
+		if (! isModEnabled('scrumproject')) {
 			$conf->scrumproject = new stdClass();
-			isModEnabled('scrumproject') = 0;
+			$conf->scrumproject->enabled = 0;
 		}
 
 		// Array to add new pages in new tabs
@@ -389,7 +389,7 @@ class modScrumProject extends DolibarrModules
             'langs'=>'scrumproject@scrumproject',
             'position'=>1100+$r,
             // Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-            'enabled'=>'isModEnabled('scrumproject')',
+            'enabled'=>'isModEnabled("scrumproject")',
             // Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
             'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'prefix' => '<span class="fa fa-running em092 pictofixedwidth scrum-project-left-menu-picto" style="color: #00384e;"></span>',
@@ -410,7 +410,7 @@ class modScrumProject extends DolibarrModules
             'langs'=>'scrumproject@scrumproject',
             'position'=>1100+$r,
             // Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-            'enabled'=>'isModEnabled('scrumproject')',
+            'enabled'=>'isModEnabled("scrumproject")',
             // Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
             'perms'=>'$user->hasRight("scrumproject","scrumsprint","write")',
             'target'=>'',
@@ -429,8 +429,8 @@ class modScrumProject extends DolibarrModules
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
-			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject')',
+			// Define condition to show or hide menu entry. Use 'isModEnabled("scrumproject")' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'isModEnabled("scrumproject")',
 			// Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'target'=>'',
@@ -449,8 +449,8 @@ class modScrumProject extends DolibarrModules
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
-			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject')',
+			// Define condition to show or hide menu entry. Use 'isModEnabled("scrumproject")' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'isModEnabled("scrumproject")',
 			// Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'target'=>'',
@@ -469,8 +469,8 @@ class modScrumProject extends DolibarrModules
 			// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
-			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumsprintlist\'',
+			// Define condition to show or hide menu entry. Use 'isModEnabled("scrumproject")' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'target'=>'',
@@ -490,7 +490,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumsprintlist\'',
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'target'=>'',
@@ -510,7 +510,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumsprintlist\'',
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'target'=>'',
@@ -530,7 +530,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumsprintlist\'',
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumsprintlist\'',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'target'=>'',
@@ -551,7 +551,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject')',
+			'enabled'=>'isModEnabled("scrumproject")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumsprint","read")',
 			'target'=>'',
@@ -576,7 +576,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject')',
+			'enabled'=>'isModEnabled("scrumproject")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstory","read")',
 			'prefix' => '<span class="fa fa-lightbulb em092 pictofixedwidth scrum-project-left-menu-picto" style="color: #cb4f24;"></span>',
@@ -597,7 +597,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject')',
+			'enabled'=>'isModEnabled("scrumproject")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstory","write")',
 			'target'=>'',
@@ -617,7 +617,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject')',
+			'enabled'=>'isModEnabled("scrumproject")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstory","read")',
 			'target'=>'',
@@ -638,7 +638,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject')',
+			'enabled'=>'isModEnabled("scrumproject")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstorysprint","read")',
 			'target'=>'',
@@ -659,7 +659,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumuserstorylist\'',
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumuserstorylist\'',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstory","read")',
 			'target'=>'',
@@ -679,7 +679,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumuserstorylist\'',
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumuserstorylist\'',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstory","read")',
 			'target'=>'',
@@ -699,7 +699,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumuserstorylist\'',
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumuserstorylist\'',
 			// Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstory","read")',
 			'target'=>'',
@@ -719,7 +719,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && $leftmenu==\'scrumuserstorylist\'',
+			'enabled'=>'isModEnabled("scrumproject") && $leftmenu==\'scrumuserstorylist\'',
 			// Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("scrumproject","scrumuserstory","read")',
 			'target'=>'',
@@ -871,7 +871,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && getDolGlobalInt("SP_ENABLE_KANBAN")',
+			'enabled'=>'isModEnabled("scrumproject") && getDolGlobalInt("SP_ENABLE_KANBAN")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("advancedkanban","advkanban","read")',
 			'prefix' => '<span class="fa fa-align-right icon-kanban em092 pictofixedwidth scrum-project-left-menu-picto" style="color: #00384e;"></span>',
@@ -892,7 +892,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('scrumproject') && getDolGlobalInt("SP_ENABLE_KANBAN")',
+			'enabled'=>'isModEnabled("scrumproject") && getDolGlobalInt("SP_ENABLE_KANBAN")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("advancedkanban","advkanban","read")',
 			'target'=>'',
@@ -913,7 +913,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('advancedkanban') && getDolGlobalInt("SP_ENABLE_KANBAN")',
+			'enabled'=>'isModEnabled("advancedkanban") && getDolGlobalInt("SP_ENABLE_KANBAN")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("advancedkanban","advkanban","read")',
 			'target'=>'',
@@ -933,7 +933,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('advancedkanban') && $leftmenu==\'scrumkanban\'  && getDolGlobalInt("SP_ENABLE_KANBAN")',
+			'enabled'=>'isModEnabled("advancedkanban") && $leftmenu==\'scrumkanban\'  && getDolGlobalInt("SP_ENABLE_KANBAN")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("advancedkanban","advkanban","read")',
 			'target'=>'',
@@ -953,7 +953,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('advancedkanban') && $leftmenu==\'scrumkanban\'  && getDolGlobalInt("SP_ENABLE_KANBAN")',
+			'enabled'=>'isModEnabled("advancedkanban") && $leftmenu==\'scrumkanban\'  && getDolGlobalInt("SP_ENABLE_KANBAN")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("advancedkanban","advkanban","read")',
 			'target'=>'',
@@ -973,7 +973,7 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('advancedkanban') && $leftmenu==\'scrumkanban\' && getDolGlobalInt("SP_ENABLE_KANBAN")',
+			'enabled'=>'isModEnabled("advancedkanban") && $leftmenu==\'scrumkanban\' && getDolGlobalInt("SP_ENABLE_KANBAN")',
 			// Use 'perms'=>'$user->hasRight("scrumproject","level1","level2")' if you want your menu with a permission rules
 			'perms'=>'$user->hasRight("advancedkanban","advkanban","read")',
 			'target'=>'',
@@ -995,9 +995,9 @@ class modScrumProject extends DolibarrModules
 			'langs'=>'scrumproject@scrumproject',
 			'position'=>1100+$r,
 			// Define condition to show or hide menu entry. Use 'isModEnabled('scrumproject')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'enabled'=>'isModEnabled('advancedkanban') && getDolGlobalInt("SP_ENABLE_KANBAN")',
+			'enabled'=>'isModEnabled("advancedkanban") && getDolGlobalInt("SP_ENABLE_KANBAN")',
 			// Use 'perms'=>'$user->hasRight('scrumproject', 'level1', 'level2')' if you want your menu with a permission rules
-			'perms'=>'$user->hasRight('categorie', 'lire')',
+			'perms'=>'$user->hasRight("categorie", "lire")',
 			'target'=>'',
 			// 0=Menu for internal users, 1=external users, 2=both
 			'user'=>0,
@@ -1090,10 +1090,10 @@ class modScrumProject extends DolibarrModules
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
-		$extrafields->addExtraField('scrumproject_availability', "ScrumProjectUserAvailability", 'double', 1000,  '24,8', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled('scrumproject')');
-		$extrafields->addExtraField('scrumproject_velocity_rate', "ScrumProjectUserVelocityRate", 'double', 1005,  '24,2', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled('scrumproject')');
-		$extrafields->addExtraField('scrumproject_role', "ScrumProjectUserRole", 'sellist', 1010, '32', 'user',      0, 0, '', array('options' => array("c_type_contact:libelle:code::active=1 AND element='scrumproject_scrumcard' AND source='internal'" => null)), 1, '', 1, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled('scrumproject')');
-		$extrafields->addExtraField('scrumproject_time_prefill', "scrumTimePrefillExtraFieldLabel", 'boolean', 1, '', 'categorie', 0, 0, '', '', 1, '', 3, 'scrumTimePrefillExtraFieldLabelHelp', '', '', 'scrumproject@scrumproject', 'isModEnabled('scrumproject')');
+		$extrafields->addExtraField('scrumproject_availability', "ScrumProjectUserAvailability", 'double', 1000,  '24,8', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled("scrumproject")');
+		$extrafields->addExtraField('scrumproject_velocity_rate', "ScrumProjectUserVelocityRate", 'double', 1005,  '24,2', 'user',   0, 0, '', '', 1, '', 1, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled("scrumproject")');
+		$extrafields->addExtraField('scrumproject_role', "ScrumProjectUserRole", 'sellist', 1010, '32', 'user',      0, 0, '', array('options' => array("c_type_contact:libelle:code::active=1 AND element='scrumproject_scrumcard' AND source='internal'" => null)), 1, '', 1, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled("scrumproject")');
+		$extrafields->addExtraField('scrumproject_time_prefill', "scrumTimePrefillExtraFieldLabel", 'boolean', 1, '', 'categorie', 0, 0, '', '', 1, '', 3, 'scrumTimePrefillExtraFieldLabelHelp', '', '', 'scrumproject@scrumproject', 'isModEnabled("scrumproject")');
 		//$result4=$extrafields->addExtraField('scrumproject_myattr4', "New Attr 4 label", 'select',  1,  3, 'thirdparty',   0, 1, '', array('options'=>array('code1'=>'Val1','code2'=>'Val2','code3'=>'Val3')), 1,'', 0, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled('scrumproject')');
 		//$result5=$extrafields->addExtraField('scrumproject_myattr5', "New Attr 5 label", 'text',    1, 10, 'user',         0, 0, '', '', 1, '', 0, 0, '', '', 'scrumproject@scrumproject', 'isModEnabled('scrumproject')');
 

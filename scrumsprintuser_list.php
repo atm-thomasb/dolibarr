@@ -224,7 +224,7 @@ $permissiontoadd = $user->hasRight('scrumproject','scrumsprintuser','write');
 $permissiontodelete = $user->hasRight('scrumproject','scrumsprintuser','delete');
 
 // Security check
-if (empty(isModEnabled('scrumproject'))) {
+if (! isModEnabled('scrumproject')) {
 	accessforbidden('Module not enabled');
 }
 
