@@ -131,7 +131,7 @@ $permissiontoadd = $user->hasRight('scrumproject','scrumuserstory','write'); // 
 //if ($user->socid > 0) $socid = $user->socid;
 //$isdraft = (($object->status == $object::STATUS_DRAFT) ? 1 : 0);
 //restrictedArea($user, $object->element, $object->id, $object->table_element, '', 'fk_soc', 'rowid', $isdraft);
-//if (empty($conf->scrumproject->enabled)) accessforbidden();
+//if (empty(isModEnabled('scrumproject'))) accessforbidden();
 //if (!$permissiontoread) accessforbidden();
 
 
@@ -181,7 +181,7 @@ if ($object->id) {
 	 // Thirdparty
 	 $morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '');
 	 // Project
-	 if (! empty($conf->projet->enabled))
+	 if (! empty(isModEnabled('projet')))
 	 {
 	 $langs->load("projects");
 	 $morehtmlref.='<br>'.$langs->trans('Project') . ' ';
@@ -233,9 +233,9 @@ if ($object->id) {
 	print dol_get_fiche_end();
 
 	$modulepart = 'scrumproject';
-	//$permissiontoadd = $user->rights->scrumproject->scrumuserstory->write;
+	//$permissiontoadd = $user->hasRight('scrumproject', 'scrumuserstory', 'write');
 	$permissiontoadd = 1;
-	//$permtoedit = $user->rights->scrumproject->scrumuserstory->write;
+	//$permtoedit = $user->hasRight('scrumproject', 'scrumuserstory', 'write');
 	$permtoedit = 1;
 	$param = '&id='.$object->id;
 

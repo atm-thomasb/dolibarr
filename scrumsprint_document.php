@@ -173,9 +173,9 @@ if ($object->id)
 	print dol_get_fiche_end();
 
 	$modulepart = 'scrumproject';
-	//$permission = $user->rights->scrumproject->scrumsprint->write;
+	//$permission = $user->hasRight('scrumproject', 'scrumsprint', 'write');
 	$permission = 1;
-	//$permtoedit = $user->rights->scrumproject->scrumsprint->write;
+	//$permtoedit = $user->hasRight('scrumproject', 'scrumsprint', 'write');
 	$permtoedit = 1;
 	$param = '&id='.$object->id;
 
