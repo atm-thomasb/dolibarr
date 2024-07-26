@@ -869,7 +869,7 @@ if ($id > 0 || !empty($ref)) {
 					}
 				} elseif ($totalarray['totaldurationfield'] == $i) {
 					print '<td class="right">'.convertSecondToTime($totalarray['totalduration'], 'allhourmin').'</td>';
-				} elseif ($totalarray['totalvaluefield'] == $i) {
+				} elseif (isset($totalarray['totalvaluefield']) && $totalarray['totalvaluefield'] == $i) {
 					print '<td class="right">'.price($totalarray['totalvalue']).'</td>';
 					//} elseif ($totalarray['totalvaluebilledfield'] == $i) { print '<td class="center">'.price($totalarray['totalvaluebilled']).'</td>';
 				} else {
