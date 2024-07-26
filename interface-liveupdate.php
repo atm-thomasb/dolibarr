@@ -49,7 +49,7 @@ $langs->loadLangs(array("scrumproject@scrumproject", "other", 'main'));
 $action = GETPOST('action');
 
 // Security check
-if (empty(isModEnabled('scrumproject'))) accessforbidden('Module not enabled');
+if (! isModEnabled('scrumproject')) accessforbidden('Module not enabled');
 
 
 // AJOUT DE LIGNE DANS LES DOCUMENTS
