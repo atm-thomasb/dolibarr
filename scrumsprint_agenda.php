@@ -154,7 +154,7 @@ if ($object->id > 0)
 	$help_url = '';
 	llxHeader('', $title, $help_url);
 
-	if (!empty($conf->notification->enabled)) $langs->load("mails");
+	if (isModEnabled('notification')) $langs->load("mails");
 	$head = scrumsprintPrepareHead($object);
 
 
@@ -205,7 +205,7 @@ if ($object->id > 0)
 
 	print '<div class="tabsAction">';
 
-	if (!empty($conf->agenda->enabled))
+	if (isModEnabled('agenda'))
 	{
 		if ($user->hasRight('agenda', 'myactions', 'create') || $user->hasRight('agenda', 'allactions', 'create'))
 		{
@@ -217,7 +217,7 @@ if ($object->id > 0)
 
 	print '</div>';
 
-	if (!empty($conf->agenda->enabled) && ($user->hasRight('agenda', 'myactions', 'read') || $user->hasRight('agenda', 'allactions', 'read')))
+	if (isModEnabled('agenda') && ($user->hasRight('agenda', 'myactions', 'read') || $user->hasRight('agenda', 'allactions', 'read')))
 	{
 		$param = '&id='.$object->id;
 		if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage='.urlencode($contextpage);

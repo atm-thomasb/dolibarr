@@ -54,7 +54,7 @@ $langs->loadLangs(array("scrumproject@scrumproject","advancedkanban@advancedkanb
 $action = GETPOST('action');
 
 // Security check
-if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
+if (! isModEnabled('scrumproject')) accessforbidden('Module not enabled');
 
 $jsonResponse = new ScrumProject\JsonResponse();
 
