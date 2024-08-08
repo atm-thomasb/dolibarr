@@ -228,7 +228,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 							$result = $object->addTimeSpent($user);
 
 							if ($result >= 0) {
-								// création du lien dans
+								// création du lien dans scrumproject_scrumtask_projet_task_time
 								$sql = "INSERT INTO " . MAIN_DB_PREFIX . "scrumproject_scrumtask_projet_task_time   (fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$LinkedScrumTask.")";
 								$resultInsert = $this->db->query($sql);
 								setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
