@@ -251,7 +251,8 @@ class ScrumSprint extends CommonObject
 				. ' INNER JOIN ' . MAIN_DB_PREFIX . 'user_extrafields as ue ON ugu.fk_user = ue.fk_object'
 				. ' WHERE ugu.fk_usergroup = ' .intval($this->fk_team)
 				. ' AND u.statut = 1'
-				. ' AND ue.scrumproject_role = "DEV"';
+				. ' AND ue.scrumproject_role = "DEV"'
+				. ' LIMIT 100';
 
 
 			$TUsers = $this->db->getRows($sql);
