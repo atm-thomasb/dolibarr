@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ## Release 2.11
-- NEW : COMPAT V20 - *26/07/2024* - 2.11
+- FIX : DA025407 - Retours compatibilité V20 - *22/08/2024* - 2.11.1 
+- NEW : COMPAT V20 - *26/07/2024* - 2.11.0
 
 ## Release 2.10
 - FIX : COMPAT V20 : Warnings correction - *04/07/2024* - 2.10.2

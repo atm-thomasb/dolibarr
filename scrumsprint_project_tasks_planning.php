@@ -912,26 +912,26 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 	$sqld =  /** @Lang SQL */
 		 ' SELECT usp.rowid id, usp.fk_scrum_sprint, sp.date_start , sp.date_end '
-		.' FROM '.MAIN_DB_PREFIX.$staticScrumUserStorySprint->table_element . ' usp '
-		.' JOIN '.MAIN_DB_PREFIX.$staticScrumSprint->table_element . ' sp ON (usp.fk_scrum_sprint = sp.rowid) '
+		.' FROM '.$db->prefix().$staticScrumUserStorySprint->table_element . ' usp '
+		.' JOIN '.$db->prefix().$staticScrumSprint->table_element . ' sp ON (usp.fk_scrum_sprint = sp.rowid) '
 		.' WHERE usp.fk_scrum_user_story = '.intval($obj->rowid);
 
-	$usPlanneds = $db->getRows($sqld);
+	$resqld = $db->query($sqld);
 
-	if($usPlanneds){
-		foreach ($usPlanneds as $usPlanned){
+	if($resqld){
+		while ($objd = $db->fetch_object($resqld)){
 			$errors = 0;
 			$errorMsg = '';
 
 			$scrumUserStorySprint = new ScrumUserStorySprint($db);
-			$res = $scrumUserStorySprint->fetch($usPlanned->id);
+			$res = $scrumUserStorySprint->fetch($objd->id);
 			if($res <= 0){
 				$errors++;
 				$errorMsg.= '';
 			}
 
 			$scrumSprint = new ScrumSprint($db);
-			$res = $scrumSprint->fetch($usPlanned->fk_scrum_sprint);
+			$res = $scrumSprint->fetch($objd->fk_scrum_sprint);
 			if($res <= 0){
 				$errors++;
 				$errorMsg.= '';
