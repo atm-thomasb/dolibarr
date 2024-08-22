@@ -165,7 +165,7 @@ $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $obje
 $sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
 $sql = preg_replace('/,\s*$/', '', $sql);
 
-$sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
+$sql .= " FROM ".$db->prefix().$object->table_element." as t";
 
 // Add table from hooks
 $parameters = array();
@@ -175,10 +175,9 @@ $sql .= $hookmanager->resPrint;
 
 $toselect = array_map('intval', $toselect);
 
-$sql .= " WHERE t.rowid IN( " . implode(',', $toselect). ') ';
+$sql .= " WHERE t.rowid IN (" . implode(',', $toselect). ') ';
 
 if ($object->ismultientitymanaged == 1) $sql .= " AND t.entity IN (".getEntity($object->element).")";
-
 
 // Add where from hooks
 $parameters = array();
@@ -194,9 +193,9 @@ $sql=preg_replace('/,\s*$/','', $sql);
 
 
 $sql .= $db->order($sortfield, $sortorder);
+$sql .= $db->plimit(count($toselect) + 1);
 
-$TQueryResults = $db->getRows($sql);
-
+$resql = $db->query($sql);
 
 
 
@@ -245,274 +244,274 @@ print '<table class="tagtable nobottomiftotal liste scrum-user-story-plan-wizard
 $i = 0;
 $totalarray = array();
 $colspan = 6;
-foreach ($TQueryResults as $obj)
-{
+
+if ($resql) {
+	while ($obj = $db->fetch_object($resql))
+	{
+		/**
+		 * @var ScrumUserStory $userStory
+		 */
+		$userStory = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $obj->id);
+		$userStory->getTotalTimeFromSprints();
 
 
-	/**
-	 * @var ScrumUserStory $userStory
-	 */
-	$userStory = scrumProjectGetObjectByElement('scrumproject_scrumuserstory', $obj->id);
-	$userStory->getTotalTimeFromSprints();
+		$project = $userStory->getProjectLinked();
 
 
-	$project = $userStory->getProjectLinked();
+		// Show here line of result
+		print '<tr class="oddeven  liste_titre --open" id="user-story-'.$userStory->id.'">';
+
+		print '<td class="nowrap" colspan="2">';
+
+		print '<span class="toggle-more-btn --open" title="'.dol_escape_htmltag($langs->trans('ShowDetails')).'" data-target="'. $userStory->id.'"><i class="fa fa-minus-square" ></i></span>';
+		print $userStory->getNomUrl(1).' : '.$userStory->label;
+
+		print '</td>';
+
+		$colKey = 'us_qty_planned';
+		print '<td class="col-us-qty-planned" >';
+		print $userStory->getPlannedBadge();
+		print '</td>';
+
+		print '<td>';
+		if($project){
+			print $project->getNomUrl(1). ' - '.$project->title;
+		}
+		print '</td>';
+
+		print '<td>';
+		if($project){
+			if(!empty($project->date_start)){
+				print dol_print_date($project->date_start);
+			}else{
+				print '?';
+			}
+
+			print ' '.$langs->trans('to').' ';
+
+			if(!empty($project->date_end)){
+				print dol_print_date($project->date_end);
+			}else{
+				print '?';
+			}
+
+		}
+		print '</td>';
+
+		print '<td class="col-action">';
+
+		print '</td>';
+
+		print '</tr>'."\n";
 
 
-	// Show here line of result
-	print '<tr class="oddeven  liste_titre --open" id="user-story-'.$userStory->id.'">';
 
-	print '<td class="nowrap" colspan="2">';
 
-	print '<span class="toggle-more-btn --open" title="'.dol_escape_htmltag($langs->trans('ShowDetails')).'" data-target="'. $userStory->id.'"><i class="fa fa-minus-square" ></i></span>';
-	print $userStory->getNomUrl(1).' : '.$userStory->label;
+		/**
+		 * LES TITRES
+		 */
 
-	print '</td>';
+		// Show here line of result
+		print '<tr class="oddeven toggle-line-display --open liste_titre" data-parent="'. $userStory->id.'">';
 
-	$colKey = 'us_qty_planned';
-	print '<td class="col-us-qty-planned" >';
-	print $userStory->getPlannedBadge();
-	print '</td>';
+		// ID
+		print '<th>';
+		print '#';
+		print '</th>';
 
-	print '<td>';
-	if($project){
-		print $project->getNomUrl(1). ' - '.$project->title;
-	}
-	print '</td>';
+		// Libelle
+		print '<th class="nowrap">';
+		print $langs->trans('label');
+		print '</th>';
 
-	print '<td>';
-	if($project){
-		if(!empty($project->date_start)){
-			print dol_print_date($project->date_start);
-		}else{
-			print '?';
+		print '<th class="col-qty-planned">';
+		print $langs->trans('QtyPlanned');
+		print '</th>';
+
+		print '<th class="col-scrumsprint">';
+		print $langs->trans('ScrumSprint');
+		print '</th>';
+
+		print '<th class="col-scrumsprint-qty-to-plan">';
+		print $langs->trans('QtySprintCanPlan');
+		print '</th>';
+
+
+		// Action column
+		print '<th class="nowrap center">';
+
+		print '</th>';
+
+		print '</tr>'."\n";
+
+
+		/** ******************** */
+		/** *** SHOW DETAILS *** */
+		/** ******************** */
+
+
+		$staticScrumUserStorySprint = new ScrumUserStorySprint($db);
+		$staticScrumSprint = new ScrumSprint($db);
+
+		$sql2 =  /** @Lang SQL */
+			' SELECT usp.rowid id, usp.fk_scrum_sprint, sp.date_start , sp.date_end '
+			.' FROM '.$db->prefix().$staticScrumUserStorySprint->table_element . ' usp '
+			.' JOIN '.$db->prefix().$staticScrumSprint->table_element . ' sp ON (usp.fk_scrum_sprint = sp.rowid) '
+			.' WHERE usp.fk_scrum_user_story = '.intval($userStory->id);
+
+		$resql2 = $db->query($sql2);
+
+		if($resql2){
+			while ($obj2 = $db->fetch_object($resql2)){
+				$errors = 0;
+				$errorMsg = '';
+
+				$scrumUserStorySprint = new ScrumUserStorySprint($db);
+				$res = $scrumUserStorySprint->fetch($obj2->id);
+				if($res <= 0){
+					$errors++;
+					$errorMsg.= '';
+				}
+
+				$scrumSprint = new ScrumSprint($db);
+				$res = $scrumSprint->fetch($obj2->fk_scrum_sprint);
+				if($res <= 0){
+					$errors++;
+					$errorMsg.= '';
+				}
+
+
+				if($errors){
+					print '<tr class="oddeven toggle-line-display --open" data-parent="'. $userStory->id.'">';
+					print '<td colspan="'.$colspan.'" class="opacitymedium">'.$langs->trans("Errors").' : '.$errorMsg.'</td>';
+					print '</tr>';
+					continue;
+				}
+
+				// Show here line of result
+				$sprintIsOpen = in_array(intval($scrumSprint->status), array(ScrumSprint::STATUS_DRAFT, ScrumSprint::STATUS_PENDING, ScrumSprint::STATUS_VALIDATED));
+				print '<tr class="oddeven toggle-line-display --open" data-sprint-closed="'.($sprintIsOpen?'0':'1').'" data-parent="'. $userStory->id.'" id="scrum-user-story-sprint-'.$scrumUserStorySprint->id.'"  >';
+
+
+				print '<td class="nowrap">';
+				print $scrumUserStorySprint->getNomUrl(1);
+				print '</td>';
+
+				$liveEdit = '';
+				if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
+					$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'label', 'scrumUserStorySprintPlanningWizardLiveUpdate');
+				}
+				print '<td '.$liveEdit.'>';
+				print $scrumUserStorySprint->showOutputFieldQuick('label');
+				print '</td>';
+
+
+
+				$liveEdit = '';
+				if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
+					$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'qty_planned', 'scrumUserStorySprintPlanningWizardLiveUpdate');
+				}
+				print '<td '.$liveEdit.' >';
+				print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
+				print '</td>';
+
+				print '<td class="col-scrumsprint">';
+				print $scrumSprint->getNomUrl(1);
+				print ' - <strong>'.$scrumSprint->label.'</strong>';
+				print '<div style="color: #666" ><span class="fa fa-calendar-check" ></span>&nbsp;<small>'.$scrumSprint->showOutputFieldQuick('date_start');
+				print ' '.$langs->trans('to');
+				print ' '.$scrumSprint->showOutputFieldQuick('date_end').'</small>';
+				print '</div>';
+				print '</td>';
+
+
+
+
+				print '<td class="col-scrumsprint-qty-to-plan" data-qty-available="'.$scrumSprint->getQtyAvailable().'" data-fk_sprint="'.$scrumSprint->id.'" >';
+				print $scrumSprint->getQtyAvailableBadge();
+				print '</td>';
+
+
+				// Action column
+				print '<td class="nowrap center">';
+
+
+				if($scrumUserStorySprint->canBeDeleted()){
+					print '<button '
+						.'class="btn-delete-us-planned ajax-action" '
+						.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStory')).'" '
+						.'data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" '
+						.'data-fk_scrum_user_story_sprint="'.$scrumUserStorySprint->id.'" '
+						.'><span class="fa fa-trash"></span></button>';
+				}
+				else{
+					print '<button '
+						.'class="ajax-action" '
+						.' disabled '
+						.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStoryDisabled')).'" '
+						.'><span class="fa fa-trash-o"></span></button>';
+				}
+
+				print '</td>';
+
+				print '</tr>'."\n";
+			}
+
+
+
+		}
+		else{
+
+			print '<tr class="oddeven toggle-line-display  --open no-record-found" data-parent="'. $userStory->id.'">';
+			print '<td colspan="'.($colspan-3).'" class="opacitymedium center">'.$langs->trans("NoRecordFound").'</td>';
+
+			// sprint
+			print '<td class="col-scrumsprint"></td>';
+
+			// sprint qty to plan';
+			print '<td class="col-scrumsprint-qty-to-plan"></td>';
+
+			print '<td class="nowrap center"></td>';
+
+			print '</tr>';
 		}
 
-		print ' '.$langs->trans('to').' ';
 
-		if(!empty($project->date_end)){
-			print dol_print_date($project->date_end);
-		}else{
-			print '?';
+		// Show here line of result
+		print '<tr class="oddeven toggle-line-display --open add-line-form" data-parent="'. $userStory->id.'" >';
+
+		// ID
+		print '<td class="nowrap">';
+		print '</td>';
+
+		// Libelle
+		print '<td class="nowrap">';
+		print '<input type="text" value="'.dol_escape_htmltag($userStory->label).'" name="label" placeholder="'.$langs->trans("label").'" />';
+		print '</td>';
+
+
+		// 'qty';
+		print '<td  >';
+
+		$qty = $userStory->qty - $userStory->totalTimeFromSprints->total_qty_planned;
+		if($qty<0){
+			$qty = 0;
 		}
 
-	}
-	print '</td>';
+		print '<input type="number" step="'.getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 'any').'" value="'.$qty.'" name="qty_planned" placeholder="'.$langs->trans("Qty").'" />';
+		print '</td>';
 
-	print '<td class="col-action">';
-
-	print '</td>';
-
-	print '</tr>'."\n";
-
-
-
-
-	/**
-	 * LES TITRES
-	 */
-
-	// Show here line of result
-	print '<tr class="oddeven toggle-line-display --open liste_titre" data-parent="'. $userStory->id.'">';
-
-	// ID
-	print '<th>';
-	print '#';
-	print '</th>';
-
-	// Libelle
-	print '<th class="nowrap">';
-	print $langs->trans('label');
-	print '</th>';
-
-	print '<th class="col-qty-planned">';
-	print $langs->trans('QtyPlanned');
-	print '</th>';
-
-	print '<th class="col-scrumsprint">';
-	print $langs->trans('ScrumSprint');
-	print '</th>';
-
-	print '<th class="col-scrumsprint-qty-to-plan">';
-	print $langs->trans('QtySprintCanPlan');
-	print '</th>';
-
-
-	// Action column
-	print '<th class="nowrap center">';
-
-	print '</th>';
-
-	print '</tr>'."\n";
-
-
-	/** ******************** */
-	/** *** SHOW DETAILS *** */
-	/** ******************** */
-
-
-	$staticScrumUserStorySprint = new ScrumUserStorySprint($db);
-	$staticScrumSprint = new ScrumSprint($db);
-
-	$sqld =  /** @Lang SQL */
-		' SELECT usp.rowid id, usp.fk_scrum_sprint, sp.date_start , sp.date_end '
-		.' FROM '.MAIN_DB_PREFIX.$staticScrumUserStorySprint->table_element . ' usp '
-		.' JOIN '.MAIN_DB_PREFIX.$staticScrumSprint->table_element . ' sp ON (usp.fk_scrum_sprint = sp.rowid) '
-		.' WHERE usp.fk_scrum_user_story = '.intval($userStory->id);
-
-	$usPlanneds = $db->getRows($sqld);
-
-	if($usPlanneds){
-		foreach ($usPlanneds as $usPlanned){
-			$errors = 0;
-			$errorMsg = '';
-
-			$scrumUserStorySprint = new ScrumUserStorySprint($db);
-			$res = $scrumUserStorySprint->fetch($usPlanned->id);
-			if($res <= 0){
-				$errors++;
-				$errorMsg.= '';
-			}
-
-			$scrumSprint = new ScrumSprint($db);
-			$res = $scrumSprint->fetch($usPlanned->fk_scrum_sprint);
-			if($res <= 0){
-				$errors++;
-				$errorMsg.= '';
-			}
-
-
-			if($errors){
-				print '<tr class="oddeven toggle-line-display --open" data-parent="'. $userStory->id.'">';
-				print '<td colspan="'.$colspan.'" class="opacitymedium">'.$langs->trans("Errors").' : '.$errorMsg.'</td>';
-				print '</tr>';
-				continue;
-			}
-
-			// Show here line of result
-			$sprintIsOpen = in_array(intval($scrumSprint->status), array(ScrumSprint::STATUS_DRAFT, ScrumSprint::STATUS_PENDING, ScrumSprint::STATUS_VALIDATED));
-			print '<tr class="oddeven toggle-line-display --open" data-sprint-closed="'.($sprintIsOpen?'0':'1').'" data-parent="'. $userStory->id.'" id="scrum-user-story-sprint-'.$scrumUserStorySprint->id.'"  >';
-
-
-			print '<td class="nowrap">';
-			print $scrumUserStorySprint->getNomUrl(1);
-			print '</td>';
-
-			$liveEdit = '';
-			if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
-				$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'label', 'scrumUserStorySprintPlanningWizardLiveUpdate');
-			}
-			print '<td '.$liveEdit.'>';
-			print $scrumUserStorySprint->showOutputFieldQuick('label');
-			print '</td>';
-
-
-
-			$liveEdit = '';
-			if($scrumUserStorySprint->statut == $scrumUserStorySprint::STATUS_DRAFT){
-				$liveEdit = scrumProjectGenLiveUpdateAttributes($scrumUserStorySprint->element, $scrumUserStorySprint->id, 'qty_planned', 'scrumUserStorySprintPlanningWizardLiveUpdate');
-			}
-			print '<td '.$liveEdit.' >';
-			print $scrumUserStorySprint->showOutputFieldQuick('qty_planned');
-			print '</td>';
-
-			print '<td class="col-scrumsprint">';
-			print $scrumSprint->getNomUrl(1);
-			print ' - <strong>'.$scrumSprint->label.'</strong>';
-			print '<div style="color: #666" ><span class="fa fa-calendar-check" ></span>&nbsp;<small>'.$scrumSprint->showOutputFieldQuick('date_start');
-			print ' '.$langs->trans('to');
-			print ' '.$scrumSprint->showOutputFieldQuick('date_end').'</small>';
-			print '</div>';
-			print '</td>';
-
-
-
-
-			print '<td class="col-scrumsprint-qty-to-plan" data-qty-available="'.$scrumSprint->getQtyAvailable().'" data-fk_sprint="'.$scrumSprint->id.'" >';
-			print $scrumSprint->getQtyAvailableBadge();
-			print '</td>';
-
-
-			// Action column
-			print '<td class="nowrap center">';
-
-
-			if($scrumUserStorySprint->canBeDeleted()){
-				print '<button '
-					.'class="btn-delete-us-planned ajax-action" '
-					.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStory')).'" '
-					.'data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" '
-					.'data-fk_scrum_user_story_sprint="'.$scrumUserStorySprint->id.'" '
-					.'><span class="fa fa-trash"></span></button>';
-			}
-			else{
-				print '<button '
-					.'class="ajax-action" '
-					.' disabled '
-					.'title="'.dol_escape_htmltag($langs->trans('DeletePlanToUserStoryDisabled')).'" '
-					.'><span class="fa fa-trash-o"></span></button>';
-			}
-
-			print '</td>';
-
-			print '</tr>'."\n";
-		}
-
-
-
-	}
-	else{
-
-		print '<tr class="oddeven toggle-line-display  --open no-record-found" data-parent="'. $userStory->id.'">';
-		print '<td colspan="'.($colspan-3).'" class="opacitymedium center">'.$langs->trans("NoRecordFound").'</td>';
 
 		// sprint
-		print '<td class="col-scrumsprint"></td>';
+		print '<td class="col-scrumsprint">';
+		print '<select class="minwidth300" name="fk_scrumsprint" data-fk-scrumuserstory="'. $userStory->id.'"  data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" ></select>';
+		print '</td>';
+
 
 		// sprint qty to plan';
-		print '<td class="col-scrumsprint-qty-to-plan"></td>';
+		print '<td class="col-scrumsprint-qty-to-plan">';
 
-		print '<td class="nowrap center"></td>';
-
-		print '</tr>';
-	}
-
-
-	// Show here line of result
-	print '<tr class="oddeven toggle-line-display --open add-line-form" data-parent="'. $userStory->id.'" >';
-
-	// ID
-	print '<td class="nowrap">';
-	print '</td>';
-
-	// Libelle
-	print '<td class="nowrap">';
-	print '<input type="text" value="'.dol_escape_htmltag($userStory->label).'" name="label" placeholder="'.$langs->trans("label").'" />';
-	print '</td>';
-
-
-	// 'qty';
-	print '<td  >';
-
-	$qty = $userStory->qty - $userStory->totalTimeFromSprints->total_qty_planned;
-	if($qty<0){
-		$qty = 0;
-	}
-
-	print '<input type="number" step="'.getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 'any').'" value="'.$qty.'" name="qty_planned" placeholder="'.$langs->trans("Qty").'" />';
-	print '</td>';
-
-
-	// sprint
-	print '<td class="col-scrumsprint">';
-	print '<select class="minwidth300" name="fk_scrumsprint" data-fk-scrumuserstory="'. $userStory->id.'"  data-interface-url="'.dol_buildpath('scrumproject/interface.php',1).'" ></select>';
-	print '</td>';
-
-
-	// sprint qty to plan';
-	print '<td class="col-scrumsprint-qty-to-plan">';
-
-	print '</td>';
+		print '</td>';
 
 
 
@@ -526,18 +525,20 @@ foreach ($TQueryResults as $obj)
 		.'><span class="fa fa-plus"></span></button>';
 	print '</td>';
 
-	print '</tr>'."\n";
+		print '</tr>'."\n";
 
 
-	/**
-	 * Line de separation
-	 */
-	print '<tr class="toggle-line-display  --open" data-parent="'. $userStory->id.'">';
-	print '<td colspan="'.$colspan.'" ></td>';
-	print '</tr>';
+		/**
+		 * Line de separation
+		 */
+		print '<tr class="toggle-line-display  --open" data-parent="'. $userStory->id.'">';
+		print '<td colspan="'.$colspan.'" ></td>';
+		print '</tr>';
 
-	$i++;
+		$i++;
+	}
 }
+
 
 
 

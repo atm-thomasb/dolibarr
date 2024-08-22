@@ -246,19 +246,17 @@ class ScrumSprint extends CommonObject
 		$res =  $this->createCommon($user, $notrigger);
 		if($res > 0){
 
-			$sql = ' SELECT ugu.fk_user  FROM ' . MAIN_DB_PREFIX .'usergroup_user as ugu'
-				. ' INNER JOIN ' . MAIN_DB_PREFIX . 'user as u ON ugu.fk_user = u.rowid'
-				. ' INNER JOIN ' . MAIN_DB_PREFIX . 'user_extrafields as ue ON ugu.fk_user = ue.fk_object'
+			$sql = ' SELECT ugu.fk_user  FROM ' . $this->db->prefix() .'usergroup_user as ugu'
+				. ' INNER JOIN ' . $this->db->prefix() . 'user as u ON ugu.fk_user = u.rowid'
+				. ' INNER JOIN ' . $this->db->prefix() . 'user_extrafields as ue ON ugu.fk_user = ue.fk_object'
 				. ' WHERE ugu.fk_usergroup = ' .intval($this->fk_team)
 				. ' AND u.statut = 1'
-				. ' AND ue.scrumproject_role = "DEV"'
-				. ' LIMIT 100';
+				. ' AND ue.scrumproject_role = "DEV"';
 
 
-			$TUsers = $this->db->getRows($sql);
-
-			if($TUsers !== false){
-				foreach ($TUsers as $obj){
+			$resql = $this->db->query($sql);
+			if($resql){
+				while ($obj = $this->db->fetch_object($resql)){
 
 					$targetUser = new User($this->db);
 					if($targetUser->fetch($obj->fk_user) > 0){
@@ -287,7 +285,7 @@ class ScrumSprint extends CommonObject
 			else{
 				setEventMessage($langs->trans('ScrumSprintUserSqlError'), 'errors');
 			}
-			if (empty($TUsers)){
+			if ($this->db->num_rows($resql) <= 0){
 				setEventMessage($langs->trans('ScrumSprintUserNoDevAssociate'), 'warning');
 			}
 		}
@@ -489,7 +487,7 @@ class ScrumSprint extends CommonObject
 
 		$sql = 'SELECT ';
 		$sql .= $this->getFieldList();
-		$sql .= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' as t';
+		$sql .= ' FROM '.$this->db->prefix().$this->table_element.' as t';
 		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) $sql .= ' WHERE t.entity IN ('.getEntity($this->table_element).')';
 		else $sql .= ' WHERE 1 = 1';
 		// Manage filter
@@ -779,7 +777,7 @@ class ScrumSprint extends CommonObject
 
 		if (!empty($num)) {
 			// Validate
-			$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element;
+			$sql = "UPDATE ".$this->db->prefix().$this->table_element;
 			$sql .= " SET ref = '".$this->db->escape($num)."',";
 			$sql .= " status = ".self::STATUS_VALIDATED;
 			if (!empty($this->fields['date_validation'])) $sql .= ", date_validation = '".$this->db->idate($now)."'";
@@ -812,7 +810,7 @@ class ScrumSprint extends CommonObject
 			if (preg_match('/^[\(]?PROV/i', $this->ref))
 			{
 				// Now we rename also files into index
-				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'scrumsprint/".$this->db->escape($this->newref)."'";
+				$sql = 'UPDATE '.$this->db->prefix()."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'scrumsprint/".$this->db->escape($this->newref)."'";
 				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'scrumsprint/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
 				$resql = $this->db->query($sql);
 				if (!$resql) { $error++; $this->error = $this->db->lasterror(); }
@@ -1057,7 +1055,7 @@ class ScrumSprint extends CommonObject
 	{
 		$sql = 'SELECT rowid, date_creation as datec, tms as datem,';
 		$sql .= ' fk_user_creat, fk_user_modif';
-		$sql .= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' as t';
+		$sql .= ' FROM '.$this->db->prefix().$this->table_element.' as t';
 		$sql .= ' WHERE t.rowid = '.$id;
 		$result = $this->db->query($sql);
 		if ($result)
@@ -1291,7 +1289,7 @@ class ScrumSprint extends CommonObject
 		if($this->status != self::STATUS_DRAFT) return 0;
 
 		$sql = /** @lang MySQL */ "SELECT SUM(qty_velocity) as qty_velocity "
-			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser"
+			." FROM ".$this->db->prefix()."scrumproject_scrumsprintuser"
 			." WHERE fk_scrum_sprint = ".intval($this->id);
 
 		$resql = $this->db->query($sql);
@@ -1322,7 +1320,7 @@ class ScrumSprint extends CommonObject
 	public function refreshQuantities(User $user, $update = false) {
 
 		$sql = /** @lang MySQL */ "SELECT SUM(qty_planned) as qty_planned, SUM(qty_done) as qty_done, SUM(qty_consumed) as qty_consumed "
-			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint"
+			." FROM ".$this->db->prefix()."scrumproject_scrumuserstorysprint"
 			." WHERE fk_scrum_sprint = ".intval($this->id);
 
 		$resql = $this->db->query($sql);
@@ -1369,7 +1367,7 @@ class ScrumSprint extends CommonObject
 				return '--';
 			}
 
-			$countObj = $this->db->getRow("SELECT SUM(qty_velocity) qty_velocity FROM ". MAIN_DB_PREFIX . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($this->id));
+			$countObj = $this->db->getRow("SELECT SUM(qty_velocity) qty_velocity FROM ". $this->db->prefix() . "scrumproject_scrumsprintuser WHERE fk_scrum_sprint = ".intval($this->id));
 			if($countObj){
 				if(round(floatval($countObj->qty_velocity),2) != round(floatval($this->qty_velocity),2)){
 					$tooltip = '<strong>' . $langs->trans('SumOfDeveloperAvailabilityIsDifferent') . '</strong></br>';
@@ -1398,7 +1396,7 @@ class ScrumSprint extends CommonObject
 	 */
 	public function calcTimeSpent(){
 
-		$sql = /** @lang MySQL */ "SELECT SUM(qty_consumed) sumTimeSpent FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint "
+		$sql = /** @lang MySQL */ "SELECT SUM(qty_consumed) sumTimeSpent FROM ".$this->db->prefix()."scrumproject_scrumuserstorysprint "
 			." WHERE fk_scrum_user_story = ".intval($this->id);
 
 		$obj = $this->db->getRow($sql);
@@ -1418,7 +1416,7 @@ class ScrumSprint extends CommonObject
 	public function updateTimeSpent(User $user, $notrigger = false){
 
 		$this->calcTimeSpent();
-		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
+		$sql = "UPDATE ".$this->db->prefix().$this->table_element." SET qty_consumed = '".$this->qty_consumed."' WHERE rowid=".((int) $this->id);
 		return $this->updateByQuery($user, $sql, 'SCRUMSPRINT_UPDATE_TIME_SPENT',  $notrigger);
 	}
 
@@ -1845,39 +1843,35 @@ class ScrumSprint extends CommonObject
 		// récupération des utilisateurs avec des temps saisis mais qui normalement ne font pas parties du sprint
 		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
 			$sql = /** @lang MySQL */
-				"SELECT ptt.fk_user  "." FROM ".MAIN_DB_PREFIX."projet_task_time ptt "
-				." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
-				." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
-				." JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
+				"SELECT ptt.fk_user  "." FROM ".$this->db->prefix()."projet_task_time ptt "
+				." JOIN ".$this->db->prefix()."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) "
+				." JOIN ".$this->db->prefix()."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) "
+				." JOIN ".$this->db->prefix()."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) "
 				." WHERE "." ptt.fk_user NOT IN (".implode(',', $excludedUsersIds).')'
 				." AND USsprint.fk_scrum_sprint = ".intval($this->id);
 		}
 		else {
 			$sql = /** @lang MySQL */
-			'SELECT ptt.fk_user  '.' FROM '.MAIN_DB_PREFIX.'element_time ptt '
-			.' JOIN '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid AND ptt.elementtype = "task") '
-			.' JOIN '.MAIN_DB_PREFIX.'scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) '
-			.' JOIN '.MAIN_DB_PREFIX.'scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) '
-			.' WHERE '.' ptt.fk_user NOT IN ('.implode(',', $excludedUsersIds).')'
-			.' AND USsprint.fk_scrum_sprint = '.intval($this->id);
+				'SELECT ptt.fk_user  '.' FROM '.$this->db->prefix().'element_time ptt '
+				.' JOIN '.$this->db->prefix().'scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid AND ptt.elementtype = "task") '
+				.' JOIN '.$this->db->prefix().'scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) '
+				.' JOIN '.$this->db->prefix().'scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) '
+				.' WHERE '.' ptt.fk_user NOT IN ('.implode(',', $excludedUsersIds).')'
+				.' AND USsprint.fk_scrum_sprint = '.intval($this->id);
 		}
 
-		$sqlObjList = $this->db->getRows($sql);
+		$resql = $this->db->query($sql);
 
-		if($sqlObjList === false){
+		if ($resql) {
+			$TUsersIds = array();
+			while ($obj = $this->db->fetch_object($resql)){
+				$TUsersIds[] = $obj->fk_user;
+			}
+			return $TUsersIds;
+		} else {
 			$this->error= $this->db->error();
 			return false;
 		}
-
-		$TUsersIds = array();
-
-		if($sqlObjList){
-			foreach ($sqlObjList as $objUsers){
-				$TUsersIds[] = $objUsers->fk_user;
-			}
-		}
-
-		return $TUsersIds;
 	}
 
 	/**
@@ -1888,26 +1882,20 @@ class ScrumSprint extends CommonObject
 		// Récupération de la liste des utilisateurs affectés au sprint
 		$sql = /** @lang MySQL */
 			"SELECT sUser.fk_user fk_user "
-			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumsprintuser sUser "
-			." WHERE sUser.fk_scrum_sprint = ".intval($this->id)
-		;
+			." FROM ".$this->db->prefix()."scrumproject_scrumsprintuser sUser "
+			." WHERE sUser.fk_scrum_sprint = ".intval($this->id);
 
-		$usersAffectedList = $this->db->getRows($sql);
-
-		if($usersAffectedList === false){
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			$TUsersIds = array();
+			while ($obj = $this->db->fetch_object($resql)){
+				$TUsersIds[] = $obj->fk_user;
+			}
+			return $TUsersIds;
+		} else {
 			$this->error= $this->db->error();
 			return false;
 		}
-
-		$TUsersIds = array();
-
-		if($usersAffectedList){
-			foreach ($usersAffectedList as $objUsers){
-				$TUsersIds[] = $objUsers->fk_user;
-			}
-		}
-
-		return $TUsersIds;
 	}
 
 
@@ -1924,10 +1912,10 @@ class ScrumSprint extends CommonObject
 		// TODO : changer les calculs et les baser sur le status des US et non les colonnes du kanban si les statuts des us refont leurs apparition
 
 		$sql = /** @lang MySQL */ "SELECT SUM(usp.qty_planned) sumPlanned "
-			." FROM ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint usp "
-			." JOIN ".MAIN_DB_PREFIX."advancedkanban_advkanbancard c ON (c.fk_element = usp.rowid AND c.element_type = 'scrumproject_scrumuserstorysprint' )"
+			." FROM ".$this->db->prefix()."scrumproject_scrumuserstorysprint usp "
+			." JOIN ".$this->db->prefix()."advancedkanban_advkanbancard c ON (c.fk_element = usp.rowid AND c.element_type = 'scrumproject_scrumuserstorysprint' )"
 			." WHERE  usp.fk_scrum_sprint = ".intval($this->id)
-			." AND  c.fk_advkanbanlist IN (SELECT l.rowid FROM ".MAIN_DB_PREFIX."advancedkanban_advkanbanlist l WHERE l.ref_code = '".$this->db->escape($ref_code)."')  ";
+			." AND  c.fk_advkanbanlist IN (SELECT l.rowid FROM ".$this->db->prefix()."advancedkanban_advkanbanlist l WHERE l.ref_code = '".$this->db->escape($ref_code)."')  ";
 
 		$obj = $this->db->getRow($sql);
 		if($obj){
@@ -1980,19 +1968,19 @@ class ScrumSprint extends CommonObject
 		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
 			$sql = /** @lang MySQL */
 				"SELECT DISTINCT USsprint.rowid USsprintId ".
-				" FROM ".MAIN_DB_PREFIX."projet_task_time ptt ".
-				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) ".
-				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) ".
-				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) ".
+				" FROM ".$this->db->prefix()."projet_task_time ptt ".
+				" JOIN ".$this->db->prefix()."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid) ".
+				" JOIN ".$this->db->prefix()."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) ".
+				" JOIN ".$this->db->prefix()."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) ".
 				" WHERE "." ptt.fk_user = ".$userId." AND USsprint.fk_scrum_sprint = ".intval($this->id);
 		}
 		else {
 				$sql = /** @lang MySQL */
 				"SELECT DISTINCT USsprint.rowid USsprintId ".
-				" FROM ".MAIN_DB_PREFIX."element_time ptt ".
-				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid AND ptt.elementtype = 'task') ".
-				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) ".
-				" JOIN ".MAIN_DB_PREFIX."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) ".
+				" FROM ".$this->db->prefix()."element_time ptt ".
+				" JOIN ".$this->db->prefix()."scrumproject_scrumtask_projet_task_time st_ptt ON(st_ptt.fk_projet_task_time = ptt.rowid AND ptt.elementtype = 'task') ".
+				" JOIN ".$this->db->prefix()."scrumproject_scrumtask st ON(st.rowid = st_ptt.fk_scrumproject_scrumtask) ".
+				" JOIN ".$this->db->prefix()."scrumproject_scrumuserstorysprint USsprint  ON(USsprint.rowid = st.fk_scrum_user_story_sprint) ".
 				" WHERE "." ptt.fk_user = ".$userId." AND USsprint.fk_scrum_sprint = ".intval($this->id);
 		}
 

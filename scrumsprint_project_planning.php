@@ -654,9 +654,7 @@ print '</tr>'."\n";
 // Detect if we need a fetch on each output line
 $needToFetchEachLine = 0;
 $firstCond = !empty($extrafields->attributes[$object->table_element]);
-$secondCond = is_array($extrafields->attributes[$object->table_element]['computed']);
-$thirdCond = count($extrafields->attributes[$object->table_element]['computed']) > 0;
-if ($firstCond && $secondCond && $thirdCond)
+if ($firstCond && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0)
 {
 	foreach ($extrafields->attributes[$object->table_element]['computed'] as $key => $val)
 	{

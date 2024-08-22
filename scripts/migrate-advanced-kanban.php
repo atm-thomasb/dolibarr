@@ -22,26 +22,25 @@ $errors = 0;
 $warnings = 0;
 
 // Recherche des lien dupliqué avec kanban et scrum
-$duplicateLink = $db->getRows(
-						'SELECT fk_scrum_sprint
-						FROM '.$db->prefix().'scrumproject_scrumkanban AS scp
-						GROUP BY fk_scrum_sprint
-						HAVING COUNT(id) >1'
-);
+$sql = 'SELECT fk_scrum_sprint';
+$sql.= 'FROM '.$db->prefix().'scrumproject_scrumkanban AS scp';
+$sql.= 'GROUP BY fk_scrum_sprint';
+$sql.= 'HAVING COUNT(id) >1';
+$resql = $db->query($sql);
 
-if(!empty($duplicateLink)){
+if($resql){
 	scp_log('DUPLICATE KANBAN LINK TU SPRINT :', 'error');
-	foreach ($duplicateLink as $obj){
-
-		$duplicate = $db->getRows(
-			'SELECT  ref, label
-						FROM '.$db->prefix().'scrumproject_scrumkanban AS scp
-						WHERE  fk_scrum_sprint = '.$obj->fk_scrum_sprint
-		);
-
-		foreach ($duplicate as $dObj){
-			scp_log('KANBAN '.$dObj->ref.' : '.$dObj->label, 'error');
+	while ($obj = $db->fetch_object($resql)){
+		$sql2 = 'SELECT  ref, label';
+		$sql2.= 'FROM '.$db->prefix().'scrumproject_scrumkanban AS scp';
+		$sql2.= 'WHERE  fk_scrum_sprint = '.$obj->fk_scrum_sprint;
+		$resql2 = $db->query($sql2);
+		if ($resql2) {
+			while ($obj2 = $db->fetch_object($resql2)) {
+				scp_log('KANBAN '.$obj2->ref.' : '.$obj2->label, 'error');
+			}
 		}
+
 	}
 
 	scp_log('YOU MUST CORRECT LINK TO HAVE ONLY ONE KANBAN FOR ONE SPRINT', 'error');

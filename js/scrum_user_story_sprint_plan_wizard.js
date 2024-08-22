@@ -55,6 +55,7 @@ jQuery(function ($) {
 					action: 'get-sprint-autocompletion',
 					fk_scrum_user_story : $(this).closest('tr[data-parent]').attr('data-parent'),
 					term: term.term,
+					token: uspWiz.newToken,
 				};
 			},
 			processResults: (response) => {
