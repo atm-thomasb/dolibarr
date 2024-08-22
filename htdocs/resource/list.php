@@ -25,7 +25,7 @@
 
 // Load Dolibarr environment
 require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT.'/resource/class/dolresource.class.php';
+require_once DOL_DOCUMENT_ROOT.'/resource/class/resource.class.php';
 
 // Load translation files required by the page
 $langs->loadLangs(array("resource", "companies", "other"));
@@ -48,7 +48,7 @@ $optioncss = GETPOST('optioncss', 'alpha');
 $contextpage = GETPOST('contextpage', 'aZ') ?GETPOST('contextpage', 'aZ') : 'resourcelist';
 
 // Initialize technical objects
-$object = new Dolresource($db);
+$object = new Resource($db);
 $extrafields = new ExtraFields($db);
 
 // fetch optionals attributes and labels
@@ -170,7 +170,7 @@ if ($search_type != '') {
 }
 
 // Including the previous script generate the correct SQL filter for all the extrafields
-// we are playing with the behaviour of the Dolresource::fetchAll() by generating a fake
+// we are playing with the behaviour of the Resource::fetchAll() by generating a fake
 // extrafields filter key to make it works
 $filter['ef.resource'] = $sql;
 
