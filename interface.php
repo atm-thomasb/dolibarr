@@ -63,11 +63,14 @@ $jsonResponse = new ScrumProject\JsonResponse();
 if ($action === 'get-sprint-autocompletion') {
 	$ignoreSprint = array();
 	$fk_scrum_user_story = GETPOSTINT('fk_scrum_user_story');
+	$TIgnoredSprints = array();
 	if($fk_scrum_user_story > 0){
-		$ignoreSprint = $db->getRows('SELECT fk_scrum_sprint FROM  '.MAIN_DB_PREFIX.'scrumproject_scrumuserstorysprint WHERE fk_scrum_user_story = '.intval($fk_scrum_user_story));
+		$sql = 'SELECT fk_scrum_sprint FROM  '.$db->prefix().'scrumproject_scrumuserstorysprint WHERE fk_scrum_user_story = '.intval($fk_scrum_user_story);
+		$resql = $db->query($sql);
+		if ($resql) $TIgnoredSprints = $db->fetch_array($resql);
 	}
 
-	_getAutocompletionForSprint($jsonResponse, GETPOST('term'), time(), $ignoreSprint);
+	_getAutocompletionForSprint($jsonResponse, GETPOST('term'), time(), $TIgnoredSprints);
 }
 elseif ($action === 'add-us-planned-to-sprint') {
 	_actionAddScrumUserStoryPlanned($jsonResponse);
@@ -141,33 +144,35 @@ function _getAutocompletionForSprint($jsonResponse, string $search, int $minDate
 		$sql.= ' LIMIT 10;';
 	}
 
-	$TRow = $db->getRows($sql);
-	if (!$TRow) {
+	$resql = $db->query($sql);
+	if ($resql) {
+		$jsonResponse->data = ['rows' => []];
+		while ($obj = $db->fetch_object($resql)) {
+
+			$sprint = new ScrumSprint($db);
+			$sprint->fetch($obj->id);
+
+			$item = new stdClass();
+			$item->id = $sprint->id;
+			$item->text = '';
+			if(!getDolGlobalString('SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH')){
+				$item->text.= $sprint->ref . ' ';
+			}
+			$item->text.= $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start, "%d/%m/%Y").' '.$langs->trans('to').' '.dol_print_date($sprint->date_end, "%d/%m/%Y");
+
+			$item->sprintQtyAvailable = $sprint->getQtyAvailable();
+			$item->html_sprintQtyAvailable = $sprint->getQtyAvailableBadge();
+
+
+			$jsonResponse->data['rows'][] = $item;
+		}
+		return true;
+	} else {
 		$jsonResponse->data = ['errors' => $db->lasterror(), 'sql' => $db->lastqueryerror()];
 		return false;
 	}
 
-	$jsonResponse->data = ['rows' => []];
-	foreach ($TRow as $obj) {
 
-		$sprint = new ScrumSprint($db);
-		$sprint->fetch($obj->id);
-
-		$item = new stdClass();
-		$item->id = $sprint->id;
-		$item->text = '';
-		if(!getDolGlobalString('SP_REMOVE_SPRINT_REF_IN_COMBO_SEARCH')){
-			$item->text.= $sprint->ref . ' ';
-		}
-		$item->text.= $sprint->label.' - '.$obj->GroupName.' - '.dol_print_date($sprint->date_start, "%d/%m/%Y").' '.$langs->trans('to').' '.dol_print_date($sprint->date_end, "%d/%m/%Y");
-
-		$item->sprintQtyAvailable = $sprint->getQtyAvailable();
-		$item->html_sprintQtyAvailable = $sprint->getQtyAvailableBadge();
-
-
-		$jsonResponse->data['rows'][] = $item;
-	}
-	return true;
 }
 
 
