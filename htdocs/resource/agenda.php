@@ -33,7 +33,7 @@ require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/resource.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/resource/class/dolresource.class.php';
+require_once DOL_DOCUMENT_ROOT.'/resource/class/resource.class.php';
 
 // Load translation files required by the page
 $langs->load('companies');
@@ -79,7 +79,7 @@ if (!$sortorder) {
 $extrafields = new ExtraFields($db);
 $hookmanager->initHooks(array('agendaresource'));
 
-$object = new DolResource($db);
+$object = new Resource($db);
 
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
@@ -167,7 +167,7 @@ if ($object->id > 0) {
 	print dol_get_fiche_end();
 
 	if (isModEnabled('agenda') && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
-		$param = '&id='.$object->id.'&socid='.$socid;
+		$param = '&id='.$object->id;
 		if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
 			$param .= '&contextpage='.urlencode($contextpage);
 		}
@@ -175,7 +175,7 @@ if ($object->id > 0) {
 			$param .= '&limit='.urlencode($limit);
 		}
 
-		print_barre_liste($langs->trans("ActionsOnResource"), 0, $_SERVER["PHP_SELF"], '', $sortfield, $sortorder, '', 0, -1, '', 0, $morehtmlcenter, '', 0, 1, 1);
+		print_barre_liste($langs->trans("ActionsOnResource"), 0, $_SERVER["PHP_SELF"], '', $sortfield, $sortorder, '', 0, -1, '', 0, '', '', 0, 1, 1);
 
 		// List of all actions
 		$filters = array();

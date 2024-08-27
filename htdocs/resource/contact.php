@@ -29,7 +29,7 @@
 
 // Load Dolibarr environment
 require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT.'/resource/class/dolresource.class.php';
+require_once DOL_DOCUMENT_ROOT.'/resource/class/resource.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/resource.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
@@ -41,7 +41,8 @@ $id = GETPOST('id', 'int');
 $ref = GETPOST('ref', 'alpha');
 $action = GETPOST('action', 'aZ09');
 
-$object = new DolResource($db);
+$object = new Resource($db);
+
 
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';     // Must be include, not include_once
@@ -127,6 +128,7 @@ if ($id > 0 || !empty($ref)) {
 
 	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
 
+	$object->loadTypeLabel();
 
 	print '<div class="fichecenter">';
 	print '<div class="underbanner clearboth"></div>';
