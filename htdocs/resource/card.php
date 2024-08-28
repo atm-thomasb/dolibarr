@@ -25,7 +25,7 @@
 // Load Dolibarr environment
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
-require_once DOL_DOCUMENT_ROOT.'/resource/class/resource.class.php';
+require_once DOL_DOCUMENT_ROOT.'/resource/class/dolresource.class.php';
 require_once DOL_DOCUMENT_ROOT.'/resource/class/html.formresource.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/resource.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
@@ -49,7 +49,7 @@ if ($user->socid > 0) {
 	accessforbidden();
 }
 
-$object = new Resource($db);
+$object = new DolResource($db);
 $extrafields = new ExtraFields($db);
 
 // fetch optionals attributes and labels
@@ -283,6 +283,7 @@ if ($action == 'create' || $object->fetch($id, $ref) > 0) {
 
 		dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
 
+		$object->loadTypeLabel();
 
 		print '<div class="fichecenter">';
 		print '<div class="underbanner clearboth"></div>';

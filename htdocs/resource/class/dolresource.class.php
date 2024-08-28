@@ -18,7 +18,7 @@
  */
 
 /**
- * \file        class/resource.class.php
+ * \file        class/dolresource.class.php
  * \ingroup     resource
  * \brief       This file is a CRUD class file for Resource (Create/Read/Update/Delete)
  */
@@ -31,7 +31,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 /**
  * Class for Resource
  */
-class Resource extends CommonObject
+class DolResource extends CommonObject
 {
 	/**
 	 * @var string 	ID of module.
@@ -112,10 +112,10 @@ class Resource extends CommonObject
 	public $fields = array(
 		"rowid" => array("type" => "integer", "label" => "TechnicalID", "enabled" => "1", 'position' => 1, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "index" => "1"),
 		"entity" => array("type" => "integer", "label" => "Entity", "enabled" => "1", 'position' => 2, 'notnull' => 1, "visible" => "0", "default" => "1", "index" => "1"),
-		"ref" => array("type" => "varchar(255)", "label" => "ResourceName", "enabled" => "1", 'position' => 20, 'notnull' => 1, "visible" => "1", "index" => "1", "validate" => "1"),
+		"ref" => array("type" => "varchar(255)", "label" => "ResourceFormLabel_ref", "enabled" => "1", 'position' => 20, 'notnull' => 1, "visible" => "1", "index" => "1", "validate" => "1"),
 		"description" => array("type" => "text", "label" => "Description", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1", "validate" => "1"),
-		"fk_code_type_resource" => array("type" => "sellist:c_type_resource:label", "label" => "ResourceType", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "1"),
-		"fk_country" => array("type" => "integer:ccountry:/core/class/country.class.php", "label" => "Country", "enabled" => "1", 'position' => 230, 'notnull' => 0, "visible" => "1"),
+		"fk_code_type_resource" => array("type" => "sellist:c_type_resource:label:code", "label" => "ResourceType", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "1"),
+		"fk_country" => array("type" => "integer:ccountry:/core/class/ccountry.class.php", "label" => "Country", "enabled" => "1", 'position' => 230, 'notnull' => 0, "visible" => "1"),
 		"datec" => array("type" => "datetime", "label" => "DateCreation", "enabled" => "1", 'position' => 130, 'notnull' => 0, "visible" => "-2"),
 		"date_valid" => array("type" => "datetime", "label" => "DateValid", "enabled" => "1", 'position' => 140, 'notnull' => 0, "visible" => "-2"),
 		"fk_user_author" => array("type" => "integer:User:user/class/user.class.php", "label" => "UserAuthor", "enabled" => "1", 'position' => 150, 'notnull' => 0, "visible" => "-2"),
