@@ -18,7 +18,7 @@
 
 use Luracast\Restler\RestException;
 
-require_once __DIR__ . '/resource.class.php';
+require_once __DIR__ . '/dolresource.class.php';
 
 /**
  * API class for mymodule myobject
@@ -29,12 +29,12 @@ require_once __DIR__ . '/resource.class.php';
 class ResourcesApi extends DolibarrApi
 {
 	/**
-	 * @var Resource $resource {@type Resource}
+	 * @var DolResource $resource {@type DolResource}
 	 */
 	/*
 	 * @var mixed TODO: set type
 	 */
-	public Resource $resource;
+	public DolResource $resource;
 
 	/**
 	 * Constructor
@@ -46,7 +46,7 @@ class ResourcesApi extends DolibarrApi
 	{
 		global $db;
 		$this->db = $db;
-		$this->resource = new Resource($this->db);
+		$this->resource = new DolResource($this->db);
 	}
 
 
@@ -106,7 +106,7 @@ class ResourcesApi extends DolibarrApi
 	public function index($sortfield = "t.rowid", $sortorder = 'ASC', $limit = 100, $page = 0, $sqlfilters = '', $properties = '')
 	{
 		$obj_ret = array();
-		$tmpobject = new Resource($this->db);
+		$tmpobject = new DolResource($this->db);
 
 		if (!DolibarrApiAccess::$user->hasRight('resource', 'read')) {
 			throw new RestException(403);
@@ -167,7 +167,7 @@ class ResourcesApi extends DolibarrApi
 			$num = $this->db->num_rows($result);
 			while ($i < $num) {
 				$obj = $this->db->fetch_object($result);
-				$tmp_object = new Resource($this->db);
+				$tmp_object = new DolResource($this->db);
 				if ($tmp_object->fetch($obj->rowid)) {
 					$obj_ret[] = $this->_filterObjectProperties($this->_cleanObjectDatas($tmp_object), $properties);
 				}
