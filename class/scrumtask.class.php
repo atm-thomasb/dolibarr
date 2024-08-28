@@ -199,12 +199,12 @@ class ScrumTask extends CommonObject
 		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
-		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
+		if (!isModEnabled('multicompany') && isset($this->fields['entity'])) {
 			$this->fields['entity']['enabled'] = 0;
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->scrumproject->scrumtask->read) {
+		/*if ($user->hasRight('scrumproject', 'scrumtask', 'read')) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
@@ -737,8 +737,8 @@ class ScrumTask extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumtask->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumtask->scrumtask_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumtask', 'write')))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumtask', 'scrumtask_advance')->validate))))
 		 {
 		 $this->error='NotEnoughPermissions';
 		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
@@ -854,7 +854,8 @@ class ScrumTask extends CommonObject
 	public function dropInKanbanList(User $user, AdvKanbanCard $advKanbanCard, AdvKanbanList $kanbanList, $noTrigger = false, $noUpdate = false)
 	{
 
-		if($this->status != ScrumTask::STATUS_CANCELED){
+        global $db, $conf;
+        if($this->status != ScrumTask::STATUS_CANCELED){
 			$advKanbanCard->status = ScrumTask::STATUS_VALIDATED;
 			if($kanbanList->ref_code == 'backlog'){
 				$advKanbanCard->status = ScrumTask::STATUS_DRAFT;
@@ -902,7 +903,6 @@ class ScrumTask extends CommonObject
 
 			$obj = $this->db->getRow($sqlCount);
 			if($obj && $obj->cardId > 0){
-
 				$usKanbanCard = new AdvKanbanCard($this->db);
 				$usKanbanCard->fetch($obj->cardId);
 				$usKanbanCard->fk_rank = $advKanbanCard->fk_rank;
@@ -912,10 +912,54 @@ class ScrumTask extends CommonObject
 					$this->errors = $this->errors;
 					return -1;
 				}
+				else {
+					if ($kanbanList->ref_code == 'done') {
+						$sql = "SELECT ssu.complete_task_on_us_done, ssu.fk_task";
+						$sql .= " FROM " . $db->prefix() . "scrumproject_scrumuserstory ssu ";
+						$sql .= " JOIN " . $db->prefix() . "scrumproject_scrumuserstorysprint ssus ON ssu.rowid = ssus.fk_scrum_user_story";
+						$sql .= " JOIN " . $db->prefix() . "scrumproject_scrumtask sst ON ssus.rowid = sst.fk_scrum_user_story_sprint";
+						$sql .= " JOIN " . $db->prefix() . "advancedkanban_advkanbancard akac ON sst.rowid = akac.fk_element";
+						$sql .= " WHERE akac.rowid = " . (int)$advKanbanCard->id;
+						$resql = $db->query($sql);
+						if ($resql) {
+							if ($db->num_rows($resql) > 0) {
+								$obj = $db->fetch_object($resql);
+								$fkTask = $obj->fk_task;
+
+								$shouldCompleteTask = getDolGlobalString('SP_KANBAN_COMPLETE_PROJECT_TASK_WHEN_ALL_US_DONE');
+								if ($obj->complete_task_on_us_done != 0) {
+									if ($obj->complete_task_on_us_done == 1) {
+										$shouldCompleteTaskByTask = true;
+									} elseif ($obj->complete_task_on_us_done == 2) {
+										$shouldCompleteTaskByTask = false;
+									}
+									if ($shouldCompleteTask != $shouldCompleteTaskByTask) $shouldCompleteTask = $shouldCompleteTaskByTask;
+								}
+								if ($shouldCompleteTask) {
+									$task = new Task($db);
+									if ($task->fetch($obj->fk_task)){
+										$task->progress = 100;
+										$result = $task->update($user);
+										if ($result <= 0){
+											dol_syslog(__METHOD__ . ', Task update errors', LOG_ERR);
+										}
+									}
+									else
+									{
+										dol_syslog(__METHOD__ . ', Task fetch errors', LOG_ERR);
+									}
+//
+								}
+							}
+						}
+						else
+						{
+							dol_syslog(__METHOD__ . ', sql select errors', $db->lasterror());
+						}
+					}
+				}
 			}
-
 		}
-
 		if($noUpdate){
 			return 0;
 		}
@@ -978,8 +1022,8 @@ class ScrumTask extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'write')))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumproject_advance', 'validate')))))
 		 {
 		 $this->error='Permission denied';
 		 return -1;
@@ -1002,8 +1046,8 @@ class ScrumTask extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'write')))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumproject_advance', 'validate')))))
 		 {
 		 $this->error='Permission denied';
 		 return -1;
@@ -1026,8 +1070,8 @@ class ScrumTask extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'write')))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumproject_advance', 'validate')))))
 		 {
 		 $this->error='Permission denied';
 		 return -1;
@@ -1438,16 +1482,16 @@ class ScrumTask extends CommonObject
 
 		if(version_compare(DOL_VERSION, '18.0.0', '<')) {
 			$sql = /** @lang MySQL */
-				"SELECT SUM(ptt.task_duration) sumTimeSpent 
-				FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "." 
-				JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "." 
+				"SELECT SUM(ptt.task_duration) sumTimeSpent
+				FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time pttl "."
+				JOIN ".MAIN_DB_PREFIX."projet_task_time ptt ON (ptt.rowid = pttl.fk_projet_task_time) "."
 				WHERE pttl.fk_scrumproject_scrumtask = ".intval($this->id)." ".$moreSql;
 		}
 		else {
 			$sql = /** @lang MySQL */
-				'SELECT SUM(ptt.element_duration) sumTimeSpent 
-				FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time pttl '.' 
-				JOIN '.MAIN_DB_PREFIX.'element_time ptt ON (ptt.rowid = pttl.fk_projet_task_time AND ptt.elementtype="task") '.' 
+				'SELECT SUM(ptt.element_duration) sumTimeSpent
+				FROM '.MAIN_DB_PREFIX.'scrumproject_scrumtask_projet_task_time pttl '.'
+				JOIN '.MAIN_DB_PREFIX.'element_time ptt ON (ptt.rowid = pttl.fk_projet_task_time AND ptt.elementtype="task") '.'
 				WHERE pttl.fk_scrumproject_scrumtask = '.intval($this->id).' '.$moreSql;
 		}
 
