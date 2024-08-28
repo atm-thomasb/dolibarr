@@ -380,3 +380,5 @@ CardScrumUserStoryFound = User stories scrum
 
 toggleHideClosedSprint = Cacher / Afficher les sprints terminés
 toggleHideClosedSprintHelp = Cacher / Afficher les sprints terminés
+ErrorCantSplitTimeAssociatedToScrumProjectHere = Error : il n'est pas possible de diviser un temps saisie avec scrumproject depuis cet écran
+FailFetchScrumTask = Echec chargement de la tache scrum
