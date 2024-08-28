@@ -58,3 +58,6 @@ scrumprojectScrumcard = Scrum Card
 scrumprojectScrumtask= Scrum task
 scrumprojectScrumuserstory=Scrum user story
 scrumprojectScrumuserstorysprint=Scrum user story sprint
+
+ErrorCantSplitTimeAssociatedToScrumProjectHere = Error can't split time associated to scrum project here
+FailFetchScrumTask = Fail to load scrum task
