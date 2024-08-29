@@ -179,12 +179,13 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 
 			// on récupére l'id de la ligne  on va chercher l'id de la scrum task associée dans scrumproject_scrumtask_task_time
 			$sql = "SELECT fk_scrumproject_scrumtask AS fss FROM ".$this->db->prefix()."scrumproject_scrumtask_projet_task_time WHERE fk_projet_task_time =" . (int)$lineId;
-
-			$obj = $this->db->getRow($sql);
-
+			$res = $this->db->query($sql);
+			if ($res) {
+				$obj = $this->fetch_object($res);
+			}
 			if($obj===false){
 				$this->errors[] = 'Error getting fk_scrumproject_scrumtask';
-				dolsyslog(getclass($this) . "::" . __METHOD__ . " fk_scrumproject_scrumtask", LOG_ERR);
+				dol_syslog(getclass($this) . "::" . __METHOD__ . " fk_scrumproject_scrumtask", LOG_ERR);
 				return -1;
 			}
 
@@ -195,7 +196,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			if($action == 'updatesplitline'){
 				// Error : il n'est pas possible de diviser un temps saisie avec scrumproject depuis cet écran
 				$this->errors[] = $langs->trans('ErrorCantSplitTimeAssociatedToScrumProjectHere');
-				dolsyslog(getclass($this) . "::" . __METHOD__ . " ErrorCantSplitTimeAssociatedToScrumProjectHere", LOG_ERR);
+				dol_syslog(getclass($this) . "::" . __METHOD__ . " ErrorCantSplitTimeAssociatedToScrumProjectHere", LOG_ERR);
 				return -1;
 			}
 
@@ -205,15 +206,16 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			$scrumTask = new ScrumTask($this->db);
 			if($scrumTask->fetch($LinkedScrumTaskId) <= 0){
 				$this->errors[] = $langs->trans('FailFetchScrumTask');
-				dolsyslog(getclass($this) . "::" . __METHOD__ . " FailFetchScrumTask", LOG_ERR);
+				dol_syslog(getclass($this) . "::" . __METHOD__ . " FailFetchScrumTask", LOG_ERR);
 				return -1;
 			}
 
 
 			// process de suppression et création copié depuis scrumproject_scrumtask_task_time
 
-			if (!GETPOST("new_durationhour") && !GETPOST("new_durationmin")) {
+			if (!GETPOST("new_durationhour", 'int') && !GETPOST("new_durationmin", 'int')) {
 				$this->errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Duration"));
+				dol_syslog(getclass($this) . "::" . __METHOD__ . " FailFetchScrumTask" . ' : '.$langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Duration")), LOG_ERR);
 				return -1;
 			}
 
@@ -253,11 +255,11 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 					if ($result >= 0) {
 
 						// création du lien dans
-						$sql = "INSERT INTO " . MAIN_DB_PREFIX . "scrumproject_scrumtask_projet_task_time   (fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$LinkedScrumTaskId.")";
+						$sql = "INSERT INTO " . $this->db->prefix() . "(fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$LinkedScrumTaskId.")";
 						$resultInsert = $this->db->query($sql);
 						if(!$resultInsert){
 							$this->errors[] = $langs->trans('FailInsertTimeSpent');
-							dolsyslog(getclass($this) . "::" . __METHOD__ . " FailInsertTimeSpent", LOG_ERR);
+							dol_syslog(getclass($this) . "::" . __METHOD__ . " FailInsertTimeSpent", LOG_ERR);
 							return -1;
 						}
 
@@ -270,7 +272,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 
 					} else {
 						$this->errors[] = $langs->trans($object->error);
-						dolsyslog(getclass($this) . "::" . __METHOD__ . " " .$langs->trans($object->error), LOG_ERR);
+						dol_syslog(getclass($this) . "::" . __METHOD__ . " " .$langs->trans($object->error), LOG_ERR);
 						$action = '';
 						return -1;
 					}
@@ -282,7 +284,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 				// TODO : cette partie du code n'a pas pu être testé, du coup on a bloqué l'action
 				//   on ne sais pas si ce n'est pas tout simplement du vieux code qui ne sert plus pour plus d'info voir JP qui à la base à traité le ticket
 				$this->errors[] = 'TimeLinkedToScrumProjectActionIsUnrecognizedCode001';
-				dolsyslog(getclass($this) . "::" . __METHOD__ . " TimeLinkedToScrumProjectActionIsUnrecognizedCode001", LOG_ERR);
+				dol_syslog(getclass($this) . "::" . __METHOD__ . " TimeLinkedToScrumProjectActionIsUnrecognizedCode001", LOG_ERR);
 				$action = '';
 				return -1;
 			}
