@@ -183,7 +183,7 @@ $permissiontoadd = $user->hasRight('scrumproject','scrumtask','write');
 $permissiontodelete = $user->hasRight('scrumproject','scrumtask','delete');
 
 // Security check
-if (empty($conf->scrumproject->enabled)) {
+if (! isModEnabled('scrumproject')) {
 	accessforbidden('Module not enabled');
 }
 
@@ -193,7 +193,7 @@ if ($user->socid > 0) accessforbidden();
 //$socid = 0; if ($user->socid > 0) $socid = $user->socid;
 //$isdraft = (($object->status == $object::STATUS_DRAFT) ? 1 : 0);
 //restrictedArea($user, $object->element, $object->id, $object->table_element, '', 'fk_soc', 'rowid', $isdraft);
-//if (empty($conf->scrumproject->enabled)) accessforbidden();
+//if (empty(isModEnabled('scrumproject'))) accessforbidden();
 //if (!$permissiontoread) accessforbidden();
 
 

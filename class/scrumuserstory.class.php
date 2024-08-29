@@ -116,7 +116,7 @@ class ScrumUserStory extends CommonObject
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>5, 'notnull'=>1,'noteditable'=>'1', 'default'=>'(PROV)', 'visible'=>1, 'index'=>1, 'searchall'=>1, 'showoncombobox'=>'1', 'validate'=>'1', 'comment'=>"Reference of object"),
-		'fk_task' => array('type'=>'integer:Task:projet/class/task.class.php:1', 'label'=>'Task', 'enabled'=>'1', 'position'=>10, 'notnull'=>-1, 'visible'=>-1,'noteditable'=>0,'index'=>1, 'validate'=>'1',),
+		'fk_task' => array('type'=>'integer:project_task:projet/class/task.class.php:1', 'label'=>'Task', 'enabled'=>'1', 'position'=>10, 'notnull'=>-1, 'visible'=>-1,'noteditable'=>0,'index'=>1, 'validate'=>'1',),
 		'fk_user_po' => array('type'=>'integer:User:user/class/user.class.php:1:(employee:=:1)', 'label'=>'UserPO', 'enabled'=>'1', 'position'=>15, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'foreignkey'=>'user.rowid',),
 		'default_prod_calc' => array('type'=>'varchar(10)', 'label'=>'DefaultProductivityCalcMod', 'enabled'=>'1', 'position'=>30, 'notnull'=>1, 'visible'=>-1, 'index'=>1, 'arrayofkeyval'=>array('count'=>'ProductivityCalcModCount','onlyspent'=>'ProductivityCalcModOnlySpent','notcount'=>'ProductivityCalcModNotCount',), 'validate'=>'1', 'default' => 'count'),
 		'business_value' => array('type'=>'integer', 'label'=>'BusinessValue', 'enabled'=>'1', 'position'=>52, 'showoncombobox'=>'0', 'notnull'=>1, 'visible'=>-1, 'default'=>'50', 'index'=>1, 'validate'=>'1',),
@@ -129,6 +129,7 @@ class ScrumUserStory extends CommonObject
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>511, 'notnull'=>-1, 'visible'=>-2,),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>1000, 'notnull'=>-1, 'visible'=>-2,),
 		'status' => array('type'=>'smallint', 'label'=>'Status', 'enabled'=>'1', 'position'=>1000, 'notnull'=>1, 'visible'=>5, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', 1=>'Valid&eacute;', 2 => 'Planifié', 3 => 'Terminé', 9=>'Annul&eacute;'), 'validate'=>'1', 'default' => 0),
+		'complete_task_on_us_done' => array('type'=>'tinyint', 'label'=>'CompleteTaskOnUsDone', 'enabled'=>'1', 'position'=>1001, 'notnull'=>1, 'visible'=>1, 'index'=>1,'arrayofkeyval'=>array(0 => 'Default', 1 => 'Yes', 2 => 'No'), 'validate'=>'1', 'default' => '0'),
 	);
 	public $rowid;
 	public $fk_task;
@@ -143,6 +144,7 @@ class ScrumUserStory extends CommonObject
 	public $fk_user_modif;
 	public $import_key;
 	public $status;
+	public $complete_task_on_us_done = 0;
 	public $default_prod_calc = 'count';
 
 
@@ -193,15 +195,20 @@ class ScrumUserStory extends CommonObject
 
 		$this->db = $db;
 
+
+		if (intval(DOL_VERSION)  <  19){
+			$this->fields['fk_task']['type'] = 'integer:task:projet/class/task.class.php:1';
+		}
+
 		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
-		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
+		if (!isModEnabled('multicompany') && isset($this->fields['entity'])) {
 			$this->fields['entity']['enabled'] = 0;
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->scrumproject->scrumuserstory->read) {
+		/*if ($user->hasRight('scrumproject', 'scrumuserstory', 'read')) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
@@ -253,8 +260,8 @@ class ScrumUserStory extends CommonObject
 		global $langs, $extrafields;
 		$error = 0;
 
-		dol_syslog(__METHOD__, LOG_DEBUG);
 
+		dol_syslog(__METHOD__, LOG_DEBUG);
 		$object = new self($this->db);
 
 		$this->db->begin();
@@ -515,8 +522,8 @@ class ScrumUserStory extends CommonObject
 		}
 
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstory->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumuserstory->scrumuserstory_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumuserstory', 'write')))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumuserstory', 'scrumuserstory_advance')->validate))))
 		 {
 		 $this->error='NotEnoughPermissions';
 		 dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
@@ -674,8 +681,8 @@ class ScrumUserStory extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'write')))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumproject_advance', 'validate')))))
 		 {
 		 $this->error='Permission denied';
 		 return -1;
@@ -698,8 +705,8 @@ class ScrumUserStory extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->write))
-		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->scrumproject->scrumproject_advance->validate))))
+		/*if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'write')))
+		 || (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->hasRight('scrumproject', 'scrumproject_advance', 'validate')))))
 		 {
 		 $this->error='Permission denied';
 		 return -1;

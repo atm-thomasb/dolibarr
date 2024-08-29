@@ -211,7 +211,7 @@ $permissiontoadd = $user->hasRight('scrumproject','scrumsprint','write');
 $permissiontodelete = $user->hasRight('scrumproject','scrumsprint','delete');
 
 // Security check
-if (empty($conf->scrumproject->enabled)) accessforbidden('Module not enabled');
+if (! isModEnabled('scrumproject')) accessforbidden('Module not enabled');
 $socid = 0;
 if ($user->socid > 0)	// Protection if external user
 {
@@ -305,8 +305,8 @@ if (empty($reshook))
 								$error = 0;
 
 								$scrumUserStorySprint = new ScrumUserStorySprint($db);
-								$scrumUserStorySprint->ref = $scrumUserStorySprint->fields['ref']['default'];
-								$scrumUserStorySprint->status = $scrumUserStorySprint->fields['status']['default'];
+//								$scrumUserStorySprint->ref = $scrumUserStorySprint->fields['ref']['default'];
+//								$scrumUserStorySprint->status = $scrumUserStorySprint->fields['status']['default'];
 								$scrumUserStorySprint->fk_user_creat = $user->id;
 								$scrumUserStorySprint->fk_scrum_user_story = $res;
 								$scrumUserStorySprint->fk_scrum_sprint = $fk_scrum_sprint;

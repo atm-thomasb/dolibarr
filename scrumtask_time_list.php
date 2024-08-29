@@ -154,7 +154,7 @@ if($userStorySprint->fetch($object->fk_scrum_user_story_sprint) <= 0 || $userSto
 //if ($user->socid > 0) $socid = $user->socid;
 //$isdraft = (($object->status == $object::STATUS_DRAFT) ? 1 : 0);
 //restrictedArea($user, $object->element, $object->id, $object->table_element, '', 'fk_soc', 'rowid', $isdraft);
-//if (empty($conf->scrumproject->enabled)) accessforbidden();
+//if (empty(isModEnabled('scrumproject'))) accessforbidden();
 //if (!$permissiontoread) accessforbidden();
 
 
@@ -388,7 +388,7 @@ if ($id > 0 || !empty($ref)) {
 		$arrayfields['author'] = array('label'=>$langs->trans("By"), 'checked'=>1);
 		$arrayfields['ptt.note'] = array('label'=>$langs->trans("Note"), 'checked'=>1);
 		$arrayfields['task_duration'] = array('label'=>$langs->trans("Duration"), 'checked'=>1);
-		$arrayfields['value'] = array('label'=>$langs->trans("Value"), 'checked'=>1, 'enabled'=>(empty($conf->salaries->enabled) ? 0 : 1));
+		$arrayfields['value'] = array('label'=>$langs->trans("Value"), 'checked'=>1, 'enabled'=>(! isModEnabled('salaries') ? 0 : 1));
 		$arrayfields['valuebilled'] = array('label'=>$langs->trans("Billed"), 'checked'=>1, 'enabled'=>(((getDolGlobalString('PROJECT_HIDE_TASKS') || !getDolGlobalString('PROJECT_BILL_TIME_SPENT')) ? 0 : 1) && $projectstatic->usage_bill_time));
 		// Extra fields
 		include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
@@ -869,7 +869,7 @@ if ($id > 0 || !empty($ref)) {
 					}
 				} elseif ($totalarray['totaldurationfield'] == $i) {
 					print '<td class="right">'.convertSecondToTime($totalarray['totalduration'], 'allhourmin').'</td>';
-				} elseif ($totalarray['totalvaluefield'] == $i) {
+				} elseif (isset($totalarray['totalvaluefield']) && $totalarray['totalvaluefield'] == $i) {
 					print '<td class="right">'.price($totalarray['totalvalue']).'</td>';
 					//} elseif ($totalarray['totalvaluebilledfield'] == $i) { print '<td class="center">'.price($totalarray['totalvaluebilled']).'</td>';
 				} else {

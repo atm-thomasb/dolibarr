@@ -27,6 +27,7 @@
  * Class ActionsScrumProject
  */
 require_once __DIR__.'/../backport/v19/core/class/commonhookactions.class.php';
+require_once __DIR__.'/scrumtask.class.php';
 
 class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 {
@@ -150,17 +151,18 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 	 * @param Object &$object Object to use hooks on
 	 * @param string &$action Action code on calling page ('create', 'edit', 'view', 'add', 'update', 'delete'...)
 	 * @param object $hookmanager class instance
-	 * @return void
+	 * @return int
 	 */
 	public function doActions($parameters, &$object, &$action, $hookmanager)
 	{
 
 		global $langs, $user;
-		$LinkedScrumTask = null;
+		$LinkedScrumTaskId = null;
 		$id = GETPOST('id', 'int');
 		$childids = GETPOST('childids', 'array');
 		$lineId = GETPOST('lineid', 'int');
 		$ref = GETPOST('ref', 'int');
+		$cancel = GETPOST('cancel', 'alpha');
 
 		$TContext = explode(':', $parameters['context']);
 
@@ -172,109 +174,118 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			$confToJs['maxScrumTaskStepQty'] 				= getDolGlobalString('SP_MAX_SCRUM_TASK_STEP_QTY', 0);
 			$confToJs['maxScrumTaskMaxQty'] 				= getDolGlobalString('SP_MAX_SCRUM_TASK_MAX_QTY', 0);
 
+		}elseif (in_array('projecttasktime', $TContext) && in_array($action, ['updatesplitline', 'updateline']) && !$cancel && $user->hasRight('projet', 'lire') ){ // mise à jour du temps  depuis project/task/times.php
+			/** @var Task $object */
 
+			// on récupére l'id de la ligne  on va chercher l'id de la scrum task associée dans scrumproject_scrumtask_task_time
+			$sql = "SELECT fk_scrumproject_scrumtask AS fss FROM ".$this->db->prefix()."scrumproject_scrumtask_projet_task_time WHERE fk_projet_task_time =" . (int)$lineId;
 
-		}elseif (in_array('projecttasktime', $TContext) && $action == "updateline"){ // mise à jour du temps  depuis project/task/times.php
+			$obj = $this->db->getRow($sql);
 
-			// on recupére l'id de la ligne  on va chercher l'id de la scrum task associée dans scrumproject_scrumtask_task_time
-			$sql = "select fk_scrumproject_scrumtask as fss FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time where fk_projet_task_time =" . (int)$lineId;
-			$resql = $this->db->query($sql);
-			if ($resql) {
-				$obj = $this->db->fetch_object($resql);
-				$LinkedScrumTask = $obj->fss ?? null;
-
+			if($obj===false){
+				$this->errors[] = 'Error getting fk_scrumproject_scrumtask';
+				dolsyslog(getclass($this) . "::" . __METHOD__ . " fk_scrumproject_scrumtask", LOG_ERR);
+				return -1;
 			}
+
+			if (!$obj) {
+				return 0;
+			}
+
+			if($action == 'updatesplitline'){
+				// Error : il n'est pas possible de diviser un temps saisie avec scrumproject depuis cet écran
+				$this->errors[] = $langs->trans('ErrorCantSplitTimeAssociatedToScrumProjectHere');
+				dolsyslog(getclass($this) . "::" . __METHOD__ . " ErrorCantSplitTimeAssociatedToScrumProjectHere", LOG_ERR);
+				return -1;
+			}
+
 			// nous avons un lien pour cette saisie des temps sur une scrumtask
-			if (!is_null($LinkedScrumTask)){
-				// process de suppresison et création copiéé depuis scrumproject_scrumtask_task_time
-				$error = 0;
+			$LinkedScrumTaskId = $obj->fss;
 
-				if (!GETPOST("new_durationhour") && !GETPOST("new_durationmin")) {
-					setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Duration")), null, 'errors');
-					$error++;
-				}
-
-				if (!$error) {
-					if (GETPOST('taskid', 'int') != $id) {        // GETPOST('taskid') is id of new task
-						$id_temp = GETPOST('taskid', 'int'); // should not overwrite $id
-
-
-						$object->fetchTimeSpent(GETPOST('lineid', 'int'));
-
-						$result = 0;
-						if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
-							$result = $object->delTimeSpent($user);
-						}
-
-						$object->fetch($id_temp, $ref);
-
-						$object->timespent_note = GETPOST("timespent_note_line", "alphanohtml");
-						$object->timespent_old_duration = GETPOST("old_duration", "int");
-						$object->timespent_duration = GETPOSTINT("new_durationhour") * 60 * 60; // We store duration in seconds
-						$object->timespent_duration += (GETPOSTINT("new_durationmin") ? GETPOSTINT('new_durationmin') : 0) * 60; // We store duration in seconds
-						if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0) {    // If hour was entered
-							$object->timespent_date = dol_mktime(GETPOST("timelinehour"), GETPOST("timelinemin"), 0, GETPOST("timelinemonth"), GETPOST("timelineday"), GETPOST("timelineyear"));
-							$object->timespent_withhour = 1;
-						} else {
-							$object->timespent_date = dol_mktime(12, 0, 0, GETPOST("timelinemonth"), GETPOST("timelineday"), GETPOST("timelineyear"));
-						}
-						$object->timespent_fk_user = GETPOST("userid_line", 'int');
-						$object->timespent_fk_product = GETPOST("fk_product", 'int');
-						$object->timespent_invoiceid = GETPOST("invoiceid", 'int');
-						$object->timespent_invoicelineid = GETPOST("invoicelineid", 'int');
-
-						$result = 0;
-						if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
-							$result = $object->addTimeSpent($user);
-
-							if ($result >= 0) {
-								// création du lien dans scrumproject_scrumtask_projet_task_time
-								$sql = "INSERT INTO " . MAIN_DB_PREFIX . "scrumproject_scrumtask_projet_task_time   (fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$LinkedScrumTask.")";
-								$resultInsert = $this->db->query($sql);
-								setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
-								$action = '';
-								return 1;
-							} else {
-								setEventMessages($langs->trans($object->error), null, 'errors');
-								$error++;
-							}
-						}
-					} else {
-						/*$object->fetch($id, $ref);
-
-						$object->timespent_id = GETPOST("lineid", 'int');
-						$object->timespent_note = GETPOST("timespent_note_line", "alphanohtml");
-						$object->timespent_old_duration = GETPOST("old_duration", "int");
-						$object->timespent_duration = GETPOSTINT("new_durationhour") * 60 * 60; // We store duration in seconds
-						$object->timespent_duration += (GETPOSTINT("new_durationmin") ? GETPOSTINT('new_durationmin') : 0) * 60; // We store duration in seconds
-						if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0) {    // If hour was entered
-							$object->timespent_date = dol_mktime(GETPOST("timelinehour", 'int'), GETPOST("timelinemin", 'int'), 0, GETPOST("timelinemonth", 'int'), GETPOST("timelineday", 'int'), GETPOST("timelineyear", 'int'));
-							$object->timespent_withhour = 1;
-						} else {
-							$object->timespent_date = dol_mktime(12, 0, 0, GETPOST("timelinemonth", 'int'), GETPOST("timelineday", 'int'), GETPOST("timelineyear", 'int'));
-						}
-						$object->timespent_fk_user = GETPOST("userid_line", 'int');
-						$object->timespent_fk_product = GETPOST("fk_product", 'int');
-						$object->timespent_invoiceid = GETPOST("invoiceid", 'int');
-						$object->timespent_invoicelineid = GETPOST("invoicelineid", 'int');
-						$result = 0;
-
-						if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
-							$result = $object->updateTimeSpent($user);
-
-							if ($result >= 0) {
-								setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
-							} else {
-								setEventMessages($langs->trans($object->error), null, 'errors');
-								$error++;
-							}
-						}*/
-					}
-				} else {
-					$action = '';
-				}
+			$scrumTask = new ScrumTask($this->db);
+			if($scrumTask->fetch($LinkedScrumTaskId) <= 0){
+				$this->errors[] = $langs->trans('FailFetchScrumTask');
+				dolsyslog(getclass($this) . "::" . __METHOD__ . " FailFetchScrumTask", LOG_ERR);
+				return -1;
 			}
 
+
+			// process de suppression et création copié depuis scrumproject_scrumtask_task_time
+
+			if (!GETPOST("new_durationhour") && !GETPOST("new_durationmin")) {
+				$this->errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Duration"));
+				return -1;
+			}
+
+			if (GETPOST('taskid', 'int') != $id) {        // GETPOST('taskid') is id of new task
+				$id_temp = GETPOST('taskid', 'int'); // should not overwrite $id
+
+				$object->fetchTimeSpent(GETPOST('lineid', 'int'));
+
+				$linkWasDeleted = false; // In somme cases Dolibarr delete data to recreate it
+				$result = 0;
+				if (in_array($object->timespent_fk_user, $childids) || $user->hasRight('projet', 'all', 'creer')) {
+					$result = $object->delTimeSpent($user);
+					$linkWasDeleted = true;
+				}
+
+				$object->fetch($id_temp, $ref);
+
+				$object->timespent_note = GETPOST("timespent_note_line", "alphanohtml");
+				$object->timespent_old_duration = GETPOST("old_duration", "int");
+				$object->timespent_duration = GETPOSTINT("new_durationhour") * 60 * 60; // We store duration in seconds
+				$object->timespent_duration += (GETPOSTINT("new_durationmin") ? GETPOSTINT('new_durationmin') : 0) * 60; // We store duration in seconds
+				if (GETPOST("timelinehour") != '' && GETPOST("timelinehour") >= 0) {    // If hour was entered
+					$object->timespent_date = dol_mktime(GETPOST("timelinehour"), GETPOST("timelinemin"), 0, GETPOST("timelinemonth"), GETPOST("timelineday"), GETPOST("timelineyear"));
+					$object->timespent_withhour = 1;
+				} else {
+					$object->timespent_date = dol_mktime(12, 0, 0, GETPOST("timelinemonth"), GETPOST("timelineday"), GETPOST("timelineyear"));
+				}
+				$object->timespent_fk_user = GETPOST("userid_line", 'int');
+				$object->timespent_fk_product = GETPOST("fk_product", 'int');
+				$object->timespent_invoiceid = GETPOST("invoiceid", 'int');
+				$object->timespent_invoicelineid = GETPOST("invoicelineid", 'int');
+
+				$result = 0;
+				if ($linkWasDeleted) {
+					$result = $object->addTimeSpent($user);
+
+					if ($result >= 0) {
+
+						// création du lien dans
+						$sql = "INSERT INTO " . MAIN_DB_PREFIX . "scrumproject_scrumtask_projet_task_time   (fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$LinkedScrumTaskId.")";
+						$resultInsert = $this->db->query($sql);
+						if(!$resultInsert){
+							$this->errors[] = $langs->trans('FailInsertTimeSpent');
+							dolsyslog(getclass($this) . "::" . __METHOD__ . " FailInsertTimeSpent", LOG_ERR);
+							return -1;
+						}
+
+						// IMPORTANT : reste la mise à jours de tous les temps scrums
+						$scrumTask->updateTimeSpent($user);
+						setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+
+						$action = '';
+						return 1;
+
+					} else {
+						$this->errors[] = $langs->trans($object->error);
+						dolsyslog(getclass($this) . "::" . __METHOD__ . " " .$langs->trans($object->error), LOG_ERR);
+						$action = '';
+						return -1;
+					}
+				}
+
+				$action = '';
+				return 1;
+			} else {
+				// TODO : cette partie du code n'a pas pu être testé, du coup on a bloqué l'action
+				//   on ne sais pas si ce n'est pas tout simplement du vieux code qui ne sert plus pour plus d'info voir JP qui à la base à traité le ticket
+				$this->errors[] = 'TimeLinkedToScrumProjectActionIsUnrecognizedCode001';
+				dolsyslog(getclass($this) . "::" . __METHOD__ . " TimeLinkedToScrumProjectActionIsUnrecognizedCode001", LOG_ERR);
+				$action = '';
+				return -1;
+			}
 		}
 
 		return 0;
@@ -546,4 +557,56 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			}
 		}
 	}
+
+
+	/**
+	 * @param $parameters
+	 * @param $object
+	 * @param $action
+	 * @param $hookmanager
+	 * @return void
+	 */
+	public function getElementProperties($parameters, &$object, &$action, $hookmanager){
+
+		if($parameters['elementType']=='scrumproject_scrumuserstorysprint'){
+
+			$this->results = array(
+				'module' => 'scrumproject',
+				'element' => 'scrumproject_scrumuserstorysprint',
+				'table_element' => 'scrumproject_scrumuserstorysprint',
+				'classpath' => 'scrumproject/class',
+				'classfile' => 'scrumuserstorysprint',
+				'classname' => 'ScrumUserStorySprint',
+			);
+
+			return 0;
+		}
+		elseif( $parameters['elementType']=='scrumproject_scrumuserstory' || $parameters['elementType']=='scrumuserstory'){
+
+			$this->results = array(
+				'module' => 'scrumproject',
+				'element' => 'scrumproject_scrumuserstory',
+				'table_element' => 'scrumproject_scrumuserstory',
+				'classpath' => 'scrumproject/class',
+				'classfile' => 'scrumuserstory',
+				'classname' => 'ScrumUserStory',
+			);
+
+			return 0;
+		}
+		elseif( $parameters['elementType']=='scrumproject_scrumsprint' || $parameters['elementType']=='scrumsprint'){
+
+			$this->results = array(
+				'module' => 'scrumproject',
+				'element' => 'scrumproject_scrumsprint',
+				'table_element' => 'scrumproject_scrumsprint',
+				'classpath' => 'scrumproject/class',
+				'classfile' => 'scrumsprint',
+				'classname' => 'ScrumSprint',
+			);
+
+			return 0;
+		}
+	}
+
 }
