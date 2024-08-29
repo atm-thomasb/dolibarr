@@ -178,7 +178,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			/** @var Task $object */
 
 			// on récupére l'id de la ligne  on va chercher l'id de la scrum task associée dans scrumproject_scrumtask_task_time
-			$sql = "SELECT fk_scrumproject_scrumtask AS fss FROM ".MAIN_DB_PREFIX."scrumproject_scrumtask_projet_task_time WHERE fk_projet_task_time =" . (int)$lineId;
+			$sql = "SELECT fk_scrumproject_scrumtask AS fss FROM ".$this->db->prefix()."scrumproject_scrumtask_projet_task_time WHERE fk_projet_task_time =" . (int)$lineId;
 
 			$obj = $this->db->getRow($sql);
 
