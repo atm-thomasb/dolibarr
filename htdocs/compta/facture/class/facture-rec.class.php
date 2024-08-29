@@ -1019,16 +1019,28 @@ class FactureRec extends CommonInvoice
 			$sql .= ", ".price2num($multicurrency_total_ttc, 'CT');
 			$sql .= ")";
 
-			dol_syslog(get_class($this)."::addline", LOG_DEBUG);
-			if ($this->db->query($sql)) {
-				$lineId = $this->db->last_insert_id(MAIN_DB_PREFIX."facturedet_rec");
-				$this->id = $facid;
-				$this->update_price(1);
-				return $lineId;
-			} else {
-				$this->error = $this->db->lasterror();
-				return -1;
-			}
+            dol_syslog(get_class($this) . "::addline", LOG_DEBUG);
+            if ($this->db->query($sql)) {
+                $lineId = $this->db->last_insert_id(MAIN_DB_PREFIX . "facturedet_rec");
+                $this->id = $facid;
+                $this->update_price(1);
+
+                /**
+                 * Backported from contract
+                 */
+                $factureRecLine = new FactureLigneRec($this->db);
+                $factureRecLine->array_options = $array_options;
+                $factureRecLine->id = $lineId;
+                $result = $factureRecLine->insertExtraFields();
+                if ($result < 0) {
+                    $this->error[] = $factureRecLine->error;
+                }
+
+                return $lineId;
+            } else {
+                $this->error = $this->db->lasterror();
+                return -1;
+            }
 		}
 	}
 
