@@ -3670,7 +3670,7 @@ class ContratLigne extends CommonObjectLine
 	 *  @param		bool		$notrigger	Disable triggers
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	public function delete(User $user, bool $notrigger = false)
+	public function delete(User $user, bool $notrigger = false): int
 	{
 		$error = 0;
 
