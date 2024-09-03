@@ -157,7 +157,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 	{
 
 		global $langs, $user;
-		$LinkedScrumTaskId = null;
+		$fk_linkedScrumTaskId = null;
 		$id = GETPOST('id', 'int');
 		$childids = GETPOST('childids', 'array');
 		$lineId = GETPOST('lineid', 'int');
@@ -201,10 +201,10 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			}
 
 			// nous avons un lien pour cette saisie des temps sur une scrumtask
-			$LinkedScrumTaskId = $obj->fss;
+			$fk_linkedScrumTaskId = $obj->fss;
 
 			$scrumTask = new ScrumTask($this->db);
-			if($scrumTask->fetch($LinkedScrumTaskId) <= 0){
+			if($scrumTask->fetch($fk_linkedScrumTaskId) <= 0){
 				$this->errors[] = $langs->trans('FailFetchScrumTask');
 				dol_syslog(getclass($this) . "::" . __METHOD__ . " FailFetchScrumTask", LOG_ERR);
 				return -1;
@@ -255,7 +255,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 					if ($result >= 0) {
 
 						// création du lien dans
-						$sql = "INSERT INTO " . $this->db->prefix() . "(fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$LinkedScrumTaskId.")";
+						$sql = "INSERT INTO " . $this->db->prefix() . "(fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$fk_linkedScrumTaskId.")";
 						$resultInsert = $this->db->query($sql);
 						if(!$resultInsert){
 							$this->errors[] = $langs->trans('FailInsertTimeSpent');
