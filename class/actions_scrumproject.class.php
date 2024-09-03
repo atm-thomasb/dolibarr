@@ -184,7 +184,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 				$obj = $this->fetch_object($res);
 			}
 			if($obj===false){
-				$this->errors[] = 'Error getting fk_scrumproject_scrumtask';
+				$this->errors[] = $langs->trans('ErrorGettingFkScrumprojectScrumtask');
 				dol_syslog(getclass($this) . "::" . __METHOD__ . " fk_scrumproject_scrumtask", LOG_ERR);
 				return -1;
 			}

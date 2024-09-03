@@ -66,3 +66,4 @@ scrumprojectScrumuserstorysprint=Scrum user story sprint
 
 ErrorCantSplitTimeAssociatedToScrumProjectHere = Error can't split time associated to scrum project here
 FailFetchScrumTask = Fail to load scrum task
+ErrorGettingFkScrumprojectScrumtask=Error getting fk_scrumproject_scrumtask
