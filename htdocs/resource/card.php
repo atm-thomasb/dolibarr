@@ -183,6 +183,8 @@ if (empty($reshook)) {
 			setEventMessages($object->error, $object->errors, 'errors');
 		}
 	}
+
+	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
 }
 
 
