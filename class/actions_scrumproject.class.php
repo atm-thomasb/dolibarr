@@ -181,7 +181,7 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 			$sql = "SELECT fk_scrumproject_scrumtask AS fss FROM ".$this->db->prefix()."scrumproject_scrumtask_projet_task_time WHERE fk_projet_task_time =" . (int)$lineId;
 			$res = $this->db->query($sql);
 			if ($res) {
-				$obj = $this->fetch_object($res);
+				$obj = $this->db->fetch_object($res);
 			}
 			if($obj===false){
 				$this->errors[] = $langs->trans('ErrorGettingFkScrumprojectScrumtask');
