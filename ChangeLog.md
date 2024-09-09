@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 
 
 ## Release 2.11
-
+- FIX : error fetch_object - *09/09/2024* - 2.11.3  
 - FIX : DA025077 Update time spent fail link is deleted (need reload module) - *28/08/2024* - 2.11.2
 - FIX : DA025407 - Retours compatibilité V20 - *22/08/2024* - 2.11.1 
 - NEW : COMPAT V20 - *26/07/2024* - 2.11.0
