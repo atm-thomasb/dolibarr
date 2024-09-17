@@ -257,9 +257,10 @@ class ActionsScrumProject extends scrumproject\RetroCompatCommonHookActions
 						// création du lien dans
 						$sql = "INSERT INTO " . $this->db->prefix() . "(fk_projet_task_time, fk_scrumproject_scrumtask ) VALUES (".$result.", ".$fk_linkedScrumTaskId.")";
 						$resultInsert = $this->db->query($sql);
-						if(!$resultInsert){
-							$this->errors[] = $langs->trans('FailInsertTimeSpent');
-							dol_syslog(getclass($this) . "::" . __METHOD__ . " FailInsertTimeSpent", LOG_ERR);
+
+                        if(!$resultInsert){
+							$this->errors[] = $langs->trans("FailInsertTimeSpent");
+							dol_syslog(get_class($this) . "::" . __METHOD__ . " FailInsertTimeSpent", LOG_ERR);
 							return -1;
 						}
 
